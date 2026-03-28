@@ -97,31 +97,28 @@ The prompt also explicitly instructs Gemini to:
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.5 — 2026-03-28
+- **Icon Redesign**: Replaced white-washed emoji book icon (📖) with a custom SVG book icon in vivid purple with glow effect. / 白飛びしていた絵文字アイコンを、紫色のSVGアイコン（グロウエフェクト付き）に差し替え。
+- **Critical Layout Fix**: Fixed output box background not covering full text content by adding `flex-shrink: 0`. Added bottom margin to prevent text sticking to screen edge. / 出力テキストが枠からはみ出す致命的バグを `flex-shrink: 0` で修正。下余白も追加。
+- **Long-Form Mode Enhancement**: Removed placeholder text from master prompt template. Added direct instruction for receiving LLM to write full chapter text. Added "【完】/【続く】" end markers for all output modes. / 長編マスタープロンプトの雛形テンプレートを直接的な執筆命令に書き換え。全モードに終了マーカーを追加。
+- **Deploy Fix**: Corrected GitHub Pages source from `main` branch to `gh-pages` branch, resolving the issue where presets were not displayed on the deployed site. / GitHub Pagesの配信元を `main` から `gh-pages` に修正し、デプロイ先でプリセットが表示されない問題を解消。
+
 ### v2.4.4 — 2026-03-28
 - **Cleanup**: Removed remaining Claude residues in documentation. / ドキュメントに残存していたClaudeの記述残骸を完全に削除。
 - **UI Logic**: Fixed long novel prompt logic so that the prompt string is directly displayed in the main output panel. / 長編小説モードにおいてAPI通信を挟まず直接OUTPUTへプロンプトを出力するロジックに修正。
 - **UI Tweaks**: Added smart display control to hide the yellow alert banner outside of active generation windows. Removed right-aligned unnecessary prompt pane. / 黄色の警告表示をAPI通信中のみ表示されるよう変更・不要な右側パネルを削除。
-- **Bilingual Support**: Translated core sections (API Key guide, System mechanics, Tech stack) into combined Japanese/English blocks. / 一部主要セクション（API取得手順、Anti-Repetitionの仕組み、技術スタック等）を英語・日本語併記へ統一。
 
 ### v2.4.3 — 2026-03-28
 - **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
 - **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
-- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / コードおよびドキュメント内の意図しないClaude APIへの言及を完全に排除し、Gemini専用として再構築。
-- **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
+- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / Claude APIへの言及を完全に排除し、Gemini専用として再構築。
 
 ### v2.4.2 — 2026-03-28
-- Long novel generation prompt fixes for API token limits / 長編小説生成時のAPIトークン上限対策（プロット文字数制限）
-- UI hint enhancements for Character NPC generation / キャラクター「1人設定」時の挙動に関するUIヒント追加
-- Adjusted standard length preset to 4000 chars / 安全出力文字数の上限値を4000字に修正
+- Long novel generation prompt fixes / 長編小説生成時のプロンプト修正
+- UI hint enhancements / UIヒント追加
 
 ### v1.0.0 — 2026-03-27
 - Initial release / 初回リリース
-- 4-panel manga plot mode / 4コマネタモード
-- Short fiction mode / 短編小説モード
-- Full random generation / 全ランダム生成
-- Multi-axis randomization for all settings / 全項目個別ランダム対応
-- Character cards with per-field randomization / キャラカード（性格・役割個別ランダム）
-- API key input with validation / APIキー入力欄（バリデーション付き）
 
 ---
 
