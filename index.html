@@ -235,9 +235,35 @@
 
     <!-- 📺 Output Display -->
     <article class="output-panel">
+      <!-- 📡 System Dashboard -->
+      <div class="sys-dashboard">
+        <div class="sys-dash-header">
+          <span class="sys-title">📡 SYSTEM DASHBOARD</span>
+          <span class="sys-status standby" id="sys-status-text">STANDBY</span>
+        </div>
+        <div class="sys-stats">
+          <div class="stat-box">
+            <span class="stat-label">MODEL</span>
+            <span class="stat-value" id="stat-model">Claude 3.5 Sonnet</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">MODE</span>
+            <span class="stat-value" id="stat-mode">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">CHAR COUNT</span>
+            <span class="stat-value" id="stat-chars">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">GEN TIME</span>
+            <span class="stat-value" id="stat-time">0.00s</span>
+          </div>
+        </div>
+      </div>
+
       <div class="output-header">
         <div class="output-title">OUTPUT</div>
-        <div id="char-counter" class="char-counter"></div>
+        <!-- 削除: 旧 char-counter (ダッシュボードに統合) -->
         <div class="output-actions">
           <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
           <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>

@@ -29,16 +29,18 @@ Claude APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 
 ## 🚀 Quick Start / クイックスタート
 
-### Browser / ブラウザで使う
+### Web Browser / ブラウザで使う（推奨）
 
-1. Download `index.html`  
-   `index.html` をダウンロード
-2. Open in any browser  
-   ブラウザで開く
-3. Enter your Claude API key at the top  
-   上部のAPIキー欄に入力して「保存」
-4. Click **ストーリー生成** or **🎲 全てランダムで生成**  
-   生成ボタンを押す
+1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス / Open the web app
+2. 上部のAPIキー欄にClaudeのAPIキーを入力して「保存」 / Enter your Claude API key at the top
+3. 「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す / Click generate buttons
+
+### Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
+
+1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
+2. フォルダ内の `run.bat` をダブルクリックする / Double-click `run.bat`
+3. 依存ライブラリが自動インストールされ、ブラウザが起動します。 / Node.js dependencies are automatically installed and the app launches.
+*(※実行には[Node.js](https://nodejs.org/)のインストールが必要です / Requires Node.js installed)*
 
 ### Deploy to GitHub Pages / GitHub Pagesでデプロイ
 

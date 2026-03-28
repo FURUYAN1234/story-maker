@@ -1,5 +1,5 @@
 /* ============================================================
-   style.css — Story Maker v2.3.6
+   style.css — Story Maker v2.4.3
    ============================================================ */
 .settings-panel.generating{opacity:.6;pointer-events:none;filter:grayscale(.5);cursor:wait}
 .settings-panel.generating *{cursor:wait!important}
@@ -53,6 +53,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .settings-panel{background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;position:sticky;top:0;height:calc(100vh - 120px);transition:opacity 0.3s ease, filter 0.3s ease}
 .settings-panel.disabled-panel{opacity:0.4;pointer-events:none;filter:grayscale(80%)}
 .output-panel{padding:24px;display:flex;flex-direction:column;gap:16px}
+
+/* System Dashboard */
+.sys-dashboard{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.sys-dash-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px}
+.sys-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.sys-status{font-size:11px;font-weight:800;padding:4px 10px;border-radius:14px;text-transform:uppercase;letter-spacing:.06em;border:1px solid transparent;transition:var(--transition)}
+.sys-status.standby{color:var(--text3);border-color:var(--border2);background:rgba(255,255,255,.03)}
+.sys-status.processing{color:var(--claude);border-color:rgba(217,119,87,.3);background:var(--claude-glow);animation:pulse-dash 1.5s infinite}
+.sys-status.complete{color:var(--success);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.1)}
+.sys-status.error{color:var(--danger);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.1)}
+@keyframes pulse-dash{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+.sys-stats{display:flex;gap:16px;flex-wrap:wrap}
+.stat-box{display:flex;flex-direction:column;gap:2px;flex:1;min-width:100px;background:var(--surface);padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border2)}
+.stat-label{font-size:10px;color:var(--text3);font-family:monospace;letter-spacing:.05em}
+.stat-value{font-size:15px;color:var(--accent2);font-weight:800;font-family:'SF Mono','Cascadia Code',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Panel Actions */
 .panel-top-actions{display:flex;gap:8px}
