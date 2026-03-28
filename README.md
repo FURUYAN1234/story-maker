@@ -3,9 +3,9 @@
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
 
-A web application that generates high-variety stories (4-panel manga plots or short fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
+A web application that generates high-variety stories (4-panel manga plots or fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
 
-Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・短編小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
 
 ---
 
