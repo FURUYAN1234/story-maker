@@ -97,6 +97,9 @@ The prompt also explicitly instructs Gemini to:
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.6 — 2026-03-29
+- **UI Bugfix**: Added missing `autocomplete="off"` to custom input fields (Theme, Era, Ending Type) to prevent browser default auto-complete history from covering the UI as speech bubble-like popups. / 一部のカスタム入力欄（テーマ・時代設定・オチの型）でブラウザの自動補完履歴がフキダシのように被って表示されるバグを修正。
+
 ### v2.4.5 — 2026-03-28
 - **Icon Redesign**: Replaced white-washed emoji book icon (📖) with a custom SVG book icon in vivid purple with glow effect. / 白飛びしていた絵文字アイコンを、紫色のSVGアイコン（グロウエフェクト付き）に差し替え。
 - **Critical Layout Fix**: Fixed output box background not covering full text content by adding `flex-shrink: 0`. Added bottom margin to prevent text sticking to screen edge. / 出力テキストが枠からはみ出す致命的バグを `flex-shrink: 0` で修正。下余白も追加。

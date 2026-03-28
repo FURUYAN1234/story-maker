@@ -1,5 +1,5 @@
 /* ============================================================
-   style.css — Story Maker v2.4.5
+   style.css — Story Maker v2.4.6
    ============================================================ */
 .settings-panel.generating{opacity:.6;pointer-events:none;filter:grayscale(.5);cursor:wait}
 .settings-panel.generating *{cursor:wait!important}
