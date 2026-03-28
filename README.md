@@ -3,9 +3,9 @@
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
 
-A single-file web application that generates high-variety stories (4-panel manga plots or short fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
+A web application that generates high-variety stories (4-panel manga plots or short fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
 
-Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・短編小説）を生成するシングルファイルWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・短編小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
 
 ---
 
@@ -89,7 +89,7 @@ The prompt also explicitly instructs Gemini to:
 
 ## 💻 Tech Stack / 技術スタック
 
-- **Vanilla HTML/CSS/JS** — Zero dependencies, single file / 依存関係なし・単一ファイル構成
+- **Vite + Vanilla HTML/CSS/JS** — Lightweight frontend / 軽量フロントエンド構成
 - **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash` / Geminiモデルを主軸に構築
 - **Deployment** — GitHub Pages (static hosting) / GitHub Pages（静的ホスティングによるデプロイ）
 
@@ -107,7 +107,6 @@ The prompt also explicitly instructs Gemini to:
 - **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
 - **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
 - **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / コードおよびドキュメント内の意図しないClaude APIへの言及を完全に排除し、Gemini専用として再構築。
-- **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
 - **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
 
 ### v2.4.2 — 2026-03-28
