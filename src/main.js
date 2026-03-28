@@ -575,20 +575,7 @@ async function generate() {
   const settings = gatherSettings();
   const { prompt, tags } = buildPrompt(settings);
   
-  // 長編の場合はAPIによる本文生成を行わず、構築したプロンプトを出力して終了する
-  if (settings.mode === 'long' || settings.modeCustom === '長編') {
-    out.className = 'output-box text-selectable';
-    out.textContent = prompt;
-    ctr.textContent = `${prompt.length.toLocaleString()} 字`;
-    tagRow.innerHTML = `<span class="tag tag-model">RAW PROMPT</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
-    $('btn-copy').classList.remove('hidden');
-    $('btn-download').classList.remove('hidden');
-    $('settings').classList.remove('generating');
-    btn.disabled = false;
-    btn.textContent = 'ストーリー生成';
-    return;
-  }
-  
+
   out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
   if (alertEl) alertEl.style.display = 'flex';
   
@@ -606,9 +593,12 @@ async function generate() {
     const lines = text.split('\n');
     let title = '';
     let body = text;
+    // 長編のプロンプト出力など、マークダウンブロックで囲まれた場合のクリーンアップ
+    body = body.replace(/^```(markdown)?\s*/i, '').replace(/\s*```$/, '');
+    
     if (lines[0] && /^タイトル[:：]\s*/.test(lines[0])) {
       title = lines[0].replace(/^タイトル[:：]\s*/, '').trim();
-      body = lines.slice(1).join('\n').trim();
+      body = body.replace(/^タイトル[:：].*\n\n?/, ''); // title部分をbodyから除去
     }
     state.lastTitle = title;
     out.className = 'output-box text-selectable';
