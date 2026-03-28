@@ -566,22 +566,35 @@ async function generate() {
   const key = state.apiKey;
   if (!key) { alert('APIキーを保存してください'); $('apikey').focus(); return; }
   const btn = $('btn-generate'), out = $('output'), tagRow = $('tag-row'), ctr = $('char-counter');
-  const codeOut = $('prompt-output');
-  if (codeOut) codeOut.textContent = '生成準備中...';
   
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>構築中...';
   $('settings').classList.add('generating');
-  out.textContent = 'プロンプトを作成しています...';
+  const alertEl = $('global-alert');
   
   const settings = gatherSettings();
   const { prompt, tags } = buildPrompt(settings);
-  if (codeOut) codeOut.textContent = prompt; // 右側パネルにプロンプトを表示
+  
+  // 長編の場合はAPIによる本文生成を行わず、構築したプロンプトを出力して終了する
+  if (settings.mode === 'long' || settings.modeCustom === '長編') {
+    out.className = 'output-box text-selectable';
+    out.textContent = prompt;
+    ctr.textContent = `${prompt.length.toLocaleString()} 字`;
+    tagRow.innerHTML = `<span class="tag tag-model">RAW PROMPT</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    $('btn-copy').classList.remove('hidden');
+    $('btn-download').classList.remove('hidden');
+    $('settings').classList.remove('generating');
+    btn.disabled = false;
+    btn.textContent = 'ストーリー生成';
+    return;
+  }
+  
+  out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
+  if (alertEl) alertEl.style.display = 'flex';
   
   try {
     const model = GEMINI_MODELS[0].value;
     btn.innerHTML = '<span class="spinner"></span>Geminiに送信中...';
-    out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
     
     const onFb = (m) => {
       out.textContent = `フォールバック中: ${m}...`;
@@ -610,7 +623,8 @@ async function generate() {
   } catch (err) {
     out.className = 'output-box empty';
     out.innerHTML = `<div class="error-msg">エラー: ${esc(err.message)}</div>`;
-    if (codeOut) codeOut.textContent = `エラー発生:\n${err.message}`;
+  } finally {
+    if (alertEl) alertEl.style.display = 'none';
   }
   
   $('settings').classList.remove('generating');

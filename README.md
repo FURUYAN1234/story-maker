@@ -57,47 +57,57 @@ cd story-maker
 
 ## 🔑 Getting a Gemini API Key / Gemini APIキーの取得
 
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Sign in with your Google Account
-3. Click "Create API Key"
-4. Copy the generated key
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) にアクセスする
+2. Sign in with your Google Account / Googleアカウントでログインする
+3. Click "Create API Key" / 「Create API Key」ボタンをクリックする
+4. Copy the generated key / 生成されたAPIキーをコピーする
 
 > Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
+> 料金は従量課金制（または無料枠）です。通常、1回の物語生成で約1,000〜1,500トークンを消費します。
 
 ---
 
 ## 🎛️ How the Anti-Repetition System Works / 反復防止システムの仕組み
 
 The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes:
+基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。このアプリでは、複数の独立した軸を通じてエントロピーを注入します。
 
 ```
 Output = f(Character × Theme × Genre × Era × Ending × Perspective)
 ```
 
 Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable.
+各軸は独立してランダム化が可能です。組み合わせの空間が非常に広範であるため、全く同じ出力が生成されることは統計的にほぼ起こり得ません。
 
-The prompt also explicitly instructs Claude to:
-- Avoid the most predictable development for the genre
-- Connect the theme in an indirect, unexpected way
-- Use each character's personality to generate unique reactions
+The prompt also explicitly instructs Gemini to:
+さらに、システムプロンプトからGeminiに対して以下の明確な指示を出しています：
+- Avoid the most predictable development for the genre (ジャンルにおける最もありきたりな展開を避ける)
+- Connect the theme in an indirect, unexpected way (テーマを間接的かつ予期せぬ形で結びつける)
+- Use each character's personality to generate unique reactions (登場人物それぞれの性格を活かし、ユニークな反応を生み出す)
 
 ---
 
 ## 💻 Tech Stack / 技術スタック
 
-- **Vanilla HTML/CSS/JS** — Zero dependencies, single file
-- **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash`
-- **Deployment** — GitHub Pages (static hosting)
+- **Vanilla HTML/CSS/JS** — Zero dependencies, single file / 依存関係なし・単一ファイル構成
+- **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash` / Geminiモデルを主軸に構築
+- **Deployment** — GitHub Pages (static hosting) / GitHub Pages（静的ホスティングによるデプロイ）
 
 ---
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.4 — 2026-03-28
+- **Cleanup**: Removed remaining Claude residues in documentation. / ドキュメントに残存していたClaudeの記述残骸を完全に削除。
+- **UI Logic**: Fixed long novel prompt logic so that the prompt string is directly displayed in the main output panel. / 長編小説モードにおいてAPI通信を挟まず直接OUTPUTへプロンプトを出力するロジックに修正。
+- **UI Tweaks**: Added smart display control to hide the yellow alert banner outside of active generation windows. Removed right-aligned unnecessary prompt pane. / 黄色の警告表示をAPI通信中のみ表示されるよう変更・不要な右側パネルを削除。
+- **Bilingual Support**: Translated core sections (API Key guide, System mechanics, Tech stack) into combined Japanese/English blocks. / 一部主要セクション（API取得手順、Anti-Repetitionの仕組み、技術スタック等）を英語・日本語併記へ統一。
+
 ### v2.4.3 — 2026-03-28
 - **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
-- **Code Panel**: Added a right-hand code/prompt inspection pane (Code右側欄) for developers and advanced users to view raw system prompts.
 - **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
-- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models.
+- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / コードおよびドキュメント内の意図しないClaude APIへの言及を完全に排除し、Gemini専用として再構築。
+- **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
 - **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
 
 ### v2.4.2 — 2026-03-28

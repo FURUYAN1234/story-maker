@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v2.4.3</title>
+  <title>Story Maker v2.4.4</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
   </div>
 
   <!-- 黄色の警告表示 -->
-  <div class="global-alert-yellow" id="global-alert">
+  <div class="global-alert-yellow" id="global-alert" style="display: none;">
     ⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数十秒〜1分程度かかる場合があります。結果が表示されるまでお待ちください。
   </div>
 
@@ -262,11 +262,6 @@
       </div>
     </article>
 
-    <!-- 📜 Code/Prompt Panel (右側欄) -->
-    <aside class="code-panel" id="code-panel">
-      <div class="code-header">RAW PROMPT / SYSTEM</div>
-      <pre><code id="prompt-output" class="empty">待機中...</code></pre>
-    </aside>
   </main>
 
   <script type="module" src="./src/main.js"></script>
