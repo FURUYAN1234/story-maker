@@ -1,411 +1,263 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Story Maker — AI物語メーカー</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f7f6f3;--surface:#ffffff;--surface2:#f0efe9;
-  --border:#e0ddd5;--border2:#c8c5bc;
-  --text:#1a1917;--text2:#6b6860;--text3:#9b9890;
-  --radius:10px;--radius-sm:6px;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
-
-/* API Key Banner */
-#keybanner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-#keybanner.ok{background:#e8f5e9;border-color:#a5d6a7}
-#keybanner label{font-size:12px;font-weight:600;color:#5d4037;white-space:nowrap}
-#keybanner.ok label{color:#2e7d32}
-#apikey{flex:1;min-width:200px;padding:6px 10px;border:1px solid #ffe082;border-radius:var(--radius-sm);font-size:13px;font-family:monospace;background:var(--surface)}
-#keybanner.ok #apikey{border-color:#a5d6a7}
-#keysave{padding:6px 14px;background:#1a1917;color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
-#keystatus{font-size:11px;color:#5d4037}
-#keybanner.ok #keystatus{color:#2e7d32}
-
-/* Header */
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
-.header h1{font-size:15px;font-weight:700;letter-spacing:-.02em}
-.version{font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:2px 10px;font-family:monospace}
-
-/* Layout */
-.wrap{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 90px)}
-.lp{background:var(--surface);border-right:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;position:sticky;top:0;height:calc(100vh - 90px)}
-.rp{padding:24px;display:flex;flex-direction:column;gap:16px}
-
-/* Form elements */
-.sl{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
-.rb{font-size:11px;padding:2px 9px;border:1px dashed var(--border2);border-radius:12px;background:none;color:var(--text2);cursor:pointer;font-family:inherit}
-.rb:hover{background:var(--surface2);color:var(--text)}
-.tabs{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)}
-.tab{flex:1;padding:7px 4px;background:none;border:none;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;transition:.12s}
-.tab.on{background:var(--surface);color:var(--text);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{padding:4px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;transition:.12s}
-.chip:hover{border-color:var(--border2);color:var(--text)}
-.chip.on{border-color:var(--text);background:var(--text);color:var(--surface);font-weight:600}
-.rchip{border-style:dashed}
-.rchip.on{border-style:solid}
-.cc{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
-.cc-row{display:flex;gap:5px;align-items:center}
-.cc-row select{flex:1;min-width:0}
-input,select{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:.12s}
-input:focus,select:focus{border-color:var(--border2)}
-.sep{height:1px;background:var(--border)}
-.allrnd{width:100%;padding:11px;background:none;border:2px dashed var(--border2);border-radius:var(--radius);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.12s}
-.allrnd:hover{background:var(--surface2);border-color:var(--text)}
-.genbt{background:var(--text);color:var(--surface);border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;transition:.12s}
-.genbt:hover{opacity:.8}
-.genbt:disabled{opacity:.35;cursor:not-allowed}
-
-/* Output */
-.out-header{display:flex;align-items:center;justify-content:space-between}
-.out-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
-.tagrow{display:flex;flex-wrap:wrap;gap:5px}
-.tag{font-size:11px;padding:3px 10px;border-radius:12px;background:var(--surface);border:1px solid var(--border);color:var(--text2)}
-.obx{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;font-size:15px;line-height:2;white-space:pre-wrap;min-height:440px;font-family:'Hiragino Mincho ProN','Yu Mincho',Georgia,serif}
-.obx.empty{color:var(--text3);font-size:13px;font-family:inherit;line-height:1.8}
-.cpbt{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text2);cursor:pointer;font-family:inherit}
-.cpbt:hover{background:var(--surface2)}
-
-/* Spinner */
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-@media(max-width:700px){.wrap{grid-template-columns:1fr}.lp{position:static;height:auto}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Maker v2.4.2</title>
+  <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
-<!-- API Key Banner -->
-<div id="keybanner">
-  <label>🔑 Claude API Key</label>
-  <input type="password" id="apikey" placeholder="sk-ant-api03-..." autocomplete="off">
-  <button id="keysave" onclick="saveKey()">保存</button>
-  <span id="keystatus">APIキーを入力してください（ページ内のみ保持、外部送信なし）</span>
-</div>
+  <!-- 🚀 Header / Control Bar (API Settings) -->
+  <header class="title-bar">
+    <h1><span class="icon">📖</span> Story Maker <span class="title-version">v2.4.2</span> <span class="title-sub">— AI物語メーカー</span></h1>
+  </header>
 
-<!-- Header -->
-<div class="header">
-  <h1>📖 Story Maker — AI物語メーカー</h1>
-  <span class="version" id="versionBadge">v1.0.0</span>
-</div>
-
-<div class="wrap">
-<div class="lp">
-
-  <button class="allrnd" onclick="allRandom()">🎲 全てランダムで生成</button>
-  <div class="sep"></div>
-
-  <div>
-    <div class="sl">出力モード</div>
-    <div class="chips" id="mc">
-      <div class="chip on" data-v="4koma" onclick="pkChip(this,'mc',function(v){selMode=v;})">4コマネタ</div>
-      <div class="chip" data-v="story" onclick="pkChip(this,'mc',function(v){selMode=v;})">短編小説</div>
-      <div class="chip rchip" data-v="__rand__" onclick="pkChip(this,'mc',function(v){selMode=v;})">🎲 ランダム</div>
+  <div id="banner" class="banner">
+    <div class="banner-row">
+      <div class="banner-label">Gemini API</div>
+      <div class="api-input-group">
+        <input type="password" id="apikey" placeholder="Gemini APIキーを入力...">
+        <button id="key-save" class="btn-primary">保存</button>
+        <button id="key-edit" class="btn-outline hidden">編集</button>
+      </div>
+    </div>
+    <div class="api-notice">
+      ⚠️ APIキーはブラウザのメモリ内のみに保持されます。ページを閉じると消去されます。外部送信・保存は一切行いません。
     </div>
   </div>
 
-  <div>
-    <div class="sl">テーマ / シード</div>
-    <div class="tabs" style="margin-bottom:7px">
-      <button class="tab on" id="tbm" onclick="stm('manual')">手入力</button>
-      <button class="tab" id="tbr" onclick="stm('rand')">🎲 ランダム</button>
-    </div>
-    <div id="am"><input type="text" id="ti" placeholder="ニュースや出来事を入力…"></div>
-    <div id="ar" style="display:none;font-size:12px;color:var(--text2);background:var(--surface2);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:9px;line-height:1.6">生成時にAIがランダムなテーマを自動構成します</div>
-  </div>
+  <main class="main-wrap">
+    <!-- ⚙️ Settings Sidebar -->
+    <aside class="settings-panel" id="settings">
+      
+      <div class="panel-top-actions">
+        <button class="btn-all-random" id="btn-all-random">
+          <span class="icon">🎲</span> 全設定ランダム & 即生成
+        </button>
+        <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️</button>
+        <button class="btn-util" id="btn-reload" title="再読み込み">🔄</button>
+      </div>
 
-  <div>
-    <div class="sl">登場人物
-      <span style="display:flex;gap:4px">
-        <button class="rb" onclick="rndAllChars()">🎲 全員</button>
-        <button id="addb" onclick="ac()" style="font-size:11px;padding:2px 9px;border:1px solid var(--border);border-radius:12px;background:none;cursor:pointer;font-family:inherit">＋ 追加</button>
-      </span>
-    </div>
-    <div id="ca"></div>
-  </div>
+      <div class="divider"></div>
 
-  <div class="sep"></div>
+      <!-- 📝 出力モード -->
+      <section class="s-section" id="section-mode">
+        <div class="s-label">
+          <span>📄 出力モード</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-mode">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="mode" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="mode-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="mode-custom" placeholder="プリセットにない形式を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="mode-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="mode-custom-rnd">🎲 生成</button>
+        </div>
+        <div class="charcount-option">
+          <label><input type="checkbox" id="charcount-check"> 文字数を指定する（どの形式にも適用）</label>
+          <div id="charcount-wrap" class="hidden">
+            <input type="number" id="char-count" value="2000" step="500" min="500" max="6000">
+            <span>文字程度</span>
+            <p id="charcount-hint" class="hint-text text-muted">※直接生成で途切れない安全な文字数は約6,000字です</p>
+          </div>
+        </div>
+      </section>
 
-  <div>
-    <div class="sl">ジャンル</div>
-    <div class="chips" id="gc">
-      <div class="chip on" data-v="コメディ" onclick="pkChip(this,'gc',function(v){selGenre=v;})">コメディ</div>
-      <div class="chip" data-v="シュール" onclick="pkChip(this,'gc',function(v){selGenre=v;})">シュール</div>
-      <div class="chip" data-v="ホラー" onclick="pkChip(this,'gc',function(v){selGenre=v;})">ホラー</div>
-      <div class="chip" data-v="SF" onclick="pkChip(this,'gc',function(v){selGenre=v;})">SF</div>
-      <div class="chip" data-v="ラブコメ" onclick="pkChip(this,'gc',function(v){selGenre=v;})">ラブコメ</div>
-      <div class="chip" data-v="ミステリー" onclick="pkChip(this,'gc',function(v){selGenre=v;})">ミステリー</div>
-      <div class="chip" data-v="日常系" onclick="pkChip(this,'gc',function(v){selGenre=v;})">日常系</div>
-      <div class="chip" data-v="感動系" onclick="pkChip(this,'gc',function(v){selGenre=v;})">感動系</div>
-      <div class="chip rchip" data-v="__rand__" onclick="pkChip(this,'gc',function(v){selGenre=v;})">🎲 ランダム</div>
-    </div>
-  </div>
+      <!-- 💡 テーマ / シード -->
+      <section class="s-section" id="section-theme">
+        <div class="s-label">
+          <span>💡 テーマ / シード</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-theme">🎲 ランダム</button>
+            <button class="btn-rnd" id="btn-today-news" title="今日のニュースキーワードを取得">🌐 ニュース</button>
+            <button class="btn-section-clear" data-section="theme" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="theme-cat-chips"></div>
+        <div class="chips chips-sub" id="theme-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="theme-custom" placeholder="プリセットにないテーマを入力">
+          <button class="custom-clear-btn hidden" id="theme-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="theme-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-  <div>
-    <div class="sl">時代設定</div>
-    <select id="ts">
-      <option>現代</option>
-      <option>近未来（2050年頃）</option>
-      <option>遠未来（宇宙時代）</option>
-      <option>江戸時代</option>
-      <option>明治・大正時代</option>
-      <option>戦後昭和</option>
-      <option>中世ファンタジー世界</option>
-      <option>AIが人類を超えた世界</option>
-      <option value="__rand__">🎲 ランダム</option>
-    </select>
-  </div>
+      <!-- 👥 登場人物 -->
+      <section class="s-section" id="section-chars">
+        <div class="s-label">
+          <span>👥 登場人物</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-chars-content" title="現在の人数を維持して、全キャラの名前・役割・性格・メモをランダム化">🎲 内容ランダム</button>
+            <button class="btn-rnd" id="btn-rand-chars-all" title="人数(1~3名)もランダムに決定し、全キャラの内容もランダム化">🎲 人数＋内容ランダム</button>
+            <button class="btn-section-clear" data-section="chars" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="char-controls-row">
+          <button id="btn-add-char" class="btn-util">＋</button>
+          <span class="char-count-display" id="char-count-display">0</span>
+          <button id="btn-remove-char" class="btn-util">−</button>
+          <span class="char-unit">人</span>
+        </div>
+        <div id="char-list" class="char-cards"></div>
+        <p class="section-hint">-/+ で人数調整。0人ならAIが自動設定。</p>
+      </section>
 
-  <div>
-    <div class="sl">オチの型</div>
-    <div class="chips" id="ec">
-      <div class="chip on" data-v="どんでん返し" onclick="pkChip(this,'ec',function(v){selEnding=v;})">どんでん返し</div>
-      <div class="chip" data-v="じわじわ笑い" onclick="pkChip(this,'ec',function(v){selEnding=v;})">じわじわ笑い</div>
-      <div class="chip" data-v="シュールで終わる" onclick="pkChip(this,'ec',function(v){selEnding=v;})">シュールで終わる</div>
-      <div class="chip" data-v="感動オチ" onclick="pkChip(this,'ec',function(v){selEnding=v;})">感動オチ</div>
-      <div class="chip" data-v="バッドエンド" onclick="pkChip(this,'ec',function(v){selEnding=v;})">バッドエンド</div>
-      <div class="chip" data-v="オープンエンド" onclick="pkChip(this,'ec',function(v){selEnding=v;})">オープンエンド</div>
-      <div class="chip rchip" data-v="__rand__" onclick="pkChip(this,'ec',function(v){selEnding=v;})">🎲 ランダム</div>
-    </div>
-  </div>
+      <!-- 🗺️ ジャンル -->
+      <section class="s-section" id="section-genre">
+        <div class="s-label">
+          <span>🗺️ ジャンル</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-genre">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="genre" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="genre-cat-chips"></div>
+        <div class="chips chips-sub" id="genre-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="genre-custom" placeholder="プリセットにないジャンルを入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="genre-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="genre-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-  <div>
-    <div class="sl">語り口</div>
-    <select id="ps">
-      <option>三人称・客観</option>
-      <option>一人称（主人公視点）</option>
-      <option>群像劇（複数視点）</option>
-      <option>傍観者の独白</option>
-      <option>日記形式</option>
-      <option value="__rand__">🎲 ランダム</option>
-    </select>
-  </div>
+      <!-- 🌍 世界観・雰囲気 (NEW) -->
+      <section class="s-section" id="section-worldview">
+        <div class="s-label">
+          <span>🌍 世界観・雰囲気</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-worldview">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="worldview" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="worldview-cat-chips"></div>
+        <div class="chips chips-sub" id="worldview-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="worldview-custom" placeholder="プリセットにない世界観を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="worldview-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="worldview-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-  <button class="genbt" id="gb" onclick="gen()">ストーリー生成</button>
+      <!-- 🎯 ターゲット層 (NEW) -->
+      <section class="s-section" id="section-target">
+        <div class="s-label">
+          <span>🎯 ターゲット層</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-target">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="target" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="target-cat-chips"></div>
+        <div class="chips chips-sub" id="target-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="target-custom" placeholder="プリセットにないターゲットを入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="target-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="target-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-</div>
+      <!-- 🕰️ 時代設定 -->
+      <section class="s-section" id="section-era">
+        <div class="s-label">
+          <span>🕰️ 時代設定</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-era">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="era" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="era-cat-chips"></div>
+        <div class="chips chips-sub" id="era-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="era-custom" placeholder="プリセットにない時代設定を入力">
+          <button class="custom-clear-btn hidden" id="era-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="era-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-<div class="rp">
-  <div class="out-header">
-    <span class="out-title">Output</span>
-    <button class="cpbt" id="cb" onclick="cp()" style="display:none">コピー</button>
-  </div>
-  <div class="tagrow" id="tagrow"></div>
-  <div class="obx empty" id="ob">APIキーを入力し、設定を選んで「ストーリー生成」を押してください
+      <!-- 🏁 オチの型 -->
+      <section class="s-section" id="section-ending">
+        <div class="s-label">
+          <span>🏁 オチの型</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-ending">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="ending" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="ending-cat-chips"></div>
+        <div class="chips chips-sub" id="ending-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="ending-custom" placeholder="プリセットにないオチの型を入力">
+          <button class="custom-clear-btn hidden" id="ending-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="ending-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-🎲 全てランダムで生成 を押すと全設定を自動選択して即生成します</div>
-</div>
-</div>
+      <!-- 🎙️ 語り口 -->
+      <section class="s-section" id="section-narr">
+        <div class="s-label">
+          <span>🎙️ 語り口</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-narr">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="narr" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="narr-cat-chips"></div>
+        <div class="chips chips-sub" id="narr-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="narr-custom" placeholder="プリセットにない語り口を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="narr-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="narr-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
 
-<script>
-var APP_VERSION = '1.0.0';
-document.getElementById('versionBadge').textContent = 'v' + APP_VERSION;
+      <!-- 📎 補足メモ -->
+      <section class="s-section" id="section-supplement">
+        <div class="s-label">
+          <span>📎 補足メモ</span>
+          <div class="s-label-actions">
+            <button class="btn-section-clear" data-section="supplement" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="custom-textarea-wrap">
+          <textarea id="supplement" class="custom-textarea" placeholder="例：「最後に主人公が笑う場面を入れて」「方言を使って」"></textarea>
+          <button class="custom-clear-btn hidden" id="supplement-clear">✕</button>
+        </div>
+      </section>
 
-var selMode='4koma', tmode='manual', selGenre='コメディ', selEnding='どんでん返し';
-var chars=[], cid=0;
-var apiKey='';
+      <!-- 🎬 Generate Button -->
+      <div class="generate-wrap">
+        <button class="btn-generate" id="btn-generate">ストーリー生成</button>
+      </div>
+    </aside>
 
-var GENRE=['コメディ','シュール','ホラー','SF','ラブコメ','ミステリー','日常系','感動系'];
-var ENDING=['どんでん返し','じわじわ笑い','シュールで終わる','感動オチ','バッドエンド','オープンエンド'];
-var MODES=['4koma','story'];
-var TIME=['現代','近未来（2050年頃）','遠未来（宇宙時代）','江戸時代','明治・大正時代','戦後昭和','中世ファンタジー世界','AIが人類を超えた世界'];
-var PERSP=['三人称・客観','一人称（主人公視点）','群像劇（複数視点）','傍観者の独白','日記形式'];
-var PR=['真面目で几帳面','お調子者','クールで無口','ポジティブで天然','毒舌で皮肉屋','小心者','頑固で負けず嫌い','マイペースで独特な感性'];
-var RL=['主人公','相棒','ライバル','メンター','ボケ役','ツッコミ役','傍観者','謎の人物'];
-var TH=['AIが突然「もう働きたくない」と言い出した','月面でコンビニがオープンした初日','猫が人間語を話せると公式認定された','コーヒーが日本全国から一斉に消えた','タイムカプセルを開けたら未来からの警告が入っていた','AIロボットが労働組合を結成した','老人ホームでeスポーツ世界大会が開催された','政府が昼寝を義務化する法律を可決した','宇宙人が来たが話したい相手が猫だった','人類が絶滅危惧種に指定された','AIが芥川賞を受賞した','スーパーのレジ係AIが哲学者になった','近所の公園が突然異次元につながった','冷蔵庫が家族の記憶を保存し始めた','町内会がAIに乗っ取られた'];
-var TH_MOD=['ただし誰も信じない。','でも全員が別の理由で気にしていない。','しかし主人公だけが真剣に悩んでいる。','そして誰も得をしない。'];
-var TH_ADJ=['しかも舞台は廃墟の図書館。','ただし物語は全て回想。','そして実は全員が夢の中にいる。'];
+    <!-- 📺 Output Display -->
+    <article class="output-panel">
+      <div class="output-header">
+        <div class="output-title">OUTPUT</div>
+        <div id="char-counter" class="char-counter"></div>
+        <div class="output-actions">
+          <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
+          <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>
+        </div>
+      </div>
+      <div id="tag-row" class="tag-row"></div>
+      <div id="output" class="output-box empty text-selectable">
+        <div class="guide">
+          <h3>はじめ方</h3>
+          <ol>
+            <li>上部の Gemini API キーを入力して保存</li>
+            <li>左の設定パネルで出力モード・テーマ等を選択</li>
+            <li>「ストーリー生成」を押す</li>
+            <li>「🎲 全設定ランダム & 即生成」で全自動も可能</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+  </main>
 
-function saveKey(){
-  var v=document.getElementById('apikey').value.trim();
-  if(!v){alert('APIキーを入力してください');return;}
-  if(!v.startsWith('sk-ant-')){alert('Claude APIキーは sk-ant- で始まります');return;}
-  apiKey=v;
-  var b=document.getElementById('keybanner');
-  b.className='ok';
-  document.getElementById('keystatus').textContent='✓ APIキー設定済み（このページを閉じるまで保持）';
-}
-
-function rnd(a){return a[Math.floor(Math.random()*a.length)];}
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function eq(s){return(s||'').replace(/"/g,'&quot;');}
-
-function pkChip(el,cid,setter){
-  document.querySelectorAll('#'+cid+' .chip').forEach(function(c){c.classList.remove('on');});
-  el.classList.add('on');
-  setter(el.dataset.v);
-}
-
-function stm(m){
-  tmode=m;
-  document.getElementById('tbm').className='tab'+(m==='manual'?' on':'');
-  document.getElementById('tbr').className='tab'+(m==='rand'?' on':'');
-  document.getElementById('am').style.display=m==='manual'?'':'none';
-  document.getElementById('ar').style.display=m==='rand'?'block':'none';
-}
-
-function rndFromChips(containerId,pool,setter){
-  var v=rnd(pool);
-  document.querySelectorAll('#'+containerId+' .chip').forEach(function(c){
-    c.classList.remove('on');
-    if(c.dataset.v===v)c.classList.add('on');
-  });
-  setter(v);
-}
-
-function rndSelect(id,pool){
-  var sel=document.getElementById(id);
-  var v=rnd(pool);
-  for(var i=0;i<sel.options.length;i++){
-    if(sel.options[i].value===v||sel.options[i].text.indexOf(v)===0){sel.selectedIndex=i;return;}
-  }
-}
-
-function ac(){
-  if(chars.length>=4)return;
-  chars.push({id:cid++,n:'',p:rnd(PR),r:RL[chars.length]||rnd(RL)});
-  rc();
-}
-function dc(id){chars=chars.filter(function(c){return c.id!==id;});rc();}
-function up(id,f,v){var c=chars.find(function(x){return x.id===id;});if(c)c[f]=v;}
-function rndField(id,f,pool){var c=chars.find(function(x){return x.id===id;});if(c){c[f]=rnd(pool);rc();}}
-function rndAllChars(){
-  chars=[];
-  var n=Math.floor(Math.random()*3)+1;
-  for(var i=0;i<n;i++)chars.push({id:cid++,n:'',p:rnd(PR),r:RL[i]||rnd(RL)});
-  rc();
-}
-
-function rc(){
-  var html='';
-  for(var i=0;i<chars.length;i++){
-    var c=chars[i];
-    var po=PR.map(function(p){return '<option'+(c.p===p?' selected':'')+'>'+p+'</option>';}).join('');
-    var ro=RL.map(function(r){return '<option'+(c.r===r?' selected':'')+'>'+r+'</option>';}).join('');
-    html+='<div class="cc">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
-    html+='<span style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em">CHAR '+(i+1)+'</span>';
-    html+='<button onclick="dc('+c.id+')" style="font-size:11px;padding:2px 7px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;font-family:inherit;color:var(--text2)">✕</button>';
-    html+='</div>';
-    html+='<input type="text" placeholder="名前（任意）" value="'+eq(c.n)+'" oninput="up('+c.id+',\'n\',this.value)">';
-    html+='<div class="cc-row"><select onchange="up('+c.id+',\'p\',this.value)">'+po+'</select><button class="rb" onclick="rndField('+c.id+',\'p\',PR)">🎲</button></div>';
-    html+='<div class="cc-row"><select onchange="up('+c.id+',\'r\',this.value)">'+ro+'</select><button class="rb" onclick="rndField('+c.id+',\'r\',RL)">🎲</button></div>';
-    html+='</div>';
-  }
-  document.getElementById('ca').innerHTML=html;
-  document.getElementById('addb').style.display=chars.length>=4?'none':'';
-}
-
-function resolveMode(){return selMode==='__rand__'?rnd(MODES):selMode;}
-function resolveGenre(){return selGenre==='__rand__'?rnd(GENRE):selGenre;}
-function resolveEnding(){return selEnding==='__rand__'?rnd(ENDING):selEnding;}
-function resolveTime(){var v=document.getElementById('ts').value;return v==='__rand__'?rnd(TIME):v;}
-function resolvePersp(){var v=document.getElementById('ps').value;return v==='__rand__'?rnd(PERSP):v;}
-function resolveTheme(){
-  if(tmode==='rand'){
-    var base=rnd(TH);
-    var m=Math.random()<0.55?' '+rnd(TH_MOD):'';
-    var a=Math.random()<0.35?' '+rnd(TH_ADJ):'';
-    return base+m+a;
-  }
-  return document.getElementById('ti').value||'AIと人間が共存する現代の日常';
-}
-function resolveChars(){
-  if(chars.length===0)return'・未設定（AIが自由に2〜3人個性的なキャラを設定すること）';
-  var s='';
-  for(var i=0;i<chars.length;i++){
-    var c=chars[i];
-    s+='・'+(c.n||'キャラ'+(i+1))+'（'+c.r+'）: '+c.p+'\n';
-  }
-  return s;
-}
-
-function buildPrompt(){
-  var m=resolveMode(),g=resolveGenre(),e=resolveEnding(),t=resolveTime(),p=resolvePersp();
-  var th=resolveTheme(),cd=resolveChars();
-  var fmt=m==='4koma'
-    ?'【出力形式：4コマ漫画ネタ】\n【起】1コマ目：状況設定\n【承】2コマ目：展開\n【転】3コマ目：クライマックス\n【結】4コマ目：「'+e+'」型のオチ\n【セリフ案】各キャラの代表セリフ（カギ括弧付き）\n【ト書き】絵として重要なシーン指定'
-    :'【出力形式：短編小説】\n語り口：'+p+'で800〜1200字。「'+e+'」型で締めること。';
-  var prompt='創作の天才として「似たり寄ったりにならない」物語を生成してください。\n\n【基本設定】\nジャンル: '+g+'\n時代: '+t+'\nテーマ: '+th+'\n\n【登場人物】\n'+cd+'\n【反復防止ルール（最重要）】\n1. 最も予測可能な展開を意識的に回避する\n2. テーマを間接的かつ意外な形で絡める\n3. キャラは設定された性格から生まれる固有の反応をする\n4. よくある「'+g+'らしい展開」の逆を意識する\n5. 「'+e+'」型だが使い古された表現は禁止\n\n'+fmt;
-  return {prompt:prompt,tags:[g,t,e,m==='4koma'?'4コマネタ':'短編小説']};
-}
-
-async function gen(){
-  if(!apiKey){
-    alert('先にAPIキーを入力して「保存」してください');
-    document.getElementById('apikey').focus();
-    return;
-  }
-  var btn=document.getElementById('gb');
-  var ob=document.getElementById('ob');
-  var cb=document.getElementById('cb');
-  var tagrow=document.getElementById('tagrow');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span>生成中…';
-  cb.style.display='none';
-  ob.className='obx';
-  ob.textContent='生成中…';
-  tagrow.innerHTML='';
-
-  var built=buildPrompt();
-
-  try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        messages:[{role:'user',content:built.prompt}]
-      })
-    });
-    if(!resp.ok){
-      var et=await resp.text();
-      throw new Error('HTTP '+resp.status+' — '+et.slice(0,200));
-    }
-    var data=await resp.json();
-    var txt=(data.content&&data.content[0]&&data.content[0].text)||'（レスポンスなし）';
-    ob.textContent=txt;
-    tagrow.innerHTML=built.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('');
-    cb.style.display='';
-  }catch(err){
-    ob.className='obx empty';
-    ob.textContent='エラー: '+err.message+'\n\nAPIキーが正しいか確認してください。';
-  }
-  btn.disabled=false;
-  btn.textContent='ストーリー生成';
-}
-
-function allRandom(){
-  rndFromChips('mc',MODES,function(v){selMode=v;});
-  stm('rand');
-  rndFromChips('gc',GENRE,function(v){selGenre=v;});
-  rndFromChips('ec',ENDING,function(v){selEnding=v;});
-  rndSelect('ts',TIME);
-  rndSelect('ps',PERSP);
-  rndAllChars();
-  gen();
-}
-
-function cp(){
-  var t=document.getElementById('ob').textContent;
-  navigator.clipboard.writeText(t).then(function(){
-    var b=document.getElementById('cb');
-    b.textContent='コピー完了';
-    setTimeout(function(){b.textContent='コピー';},2000);
-  });
-}
-
-rc();
-</script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>

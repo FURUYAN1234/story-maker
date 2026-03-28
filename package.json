@@ -1,0 +1,15 @@
+{
+  "name": "story-maker",
+  "private": true,
+  "version": "2.4.2",
+  "description": "AI Story Maker - Gemini & Claude API対応 多軸ランダム物語生成ツール",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

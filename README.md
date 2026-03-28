@@ -91,6 +91,11 @@ The prompt also explicitly instructs Claude to:
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.2 — 2026-03-28
+- Long novel generation prompt fixes for API token limits / 長編小説生成時のAPIトークン上限対策（プロット文字数制限）
+- UI hint enhancements for Character NPC generation / キャラクター「1人設定」時の挙動に関するUIヒント追加
+- Adjusted standard length preset to 4000 chars / 安全出力文字数の上限値を4000字に修正
+
 ### v1.0.0 — 2026-03-27
 - Initial release / 初回リリース
 - 4-panel manga plot mode / 4コマネタモード
