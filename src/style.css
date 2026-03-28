@@ -1,5 +1,5 @@
 /* ============================================================
-   style.css — Story Maker v2.4.3
+   style.css — Story Maker v2.4.5
    ============================================================ */
 .settings-panel.generating{opacity:.6;pointer-events:none;filter:grayscale(.5);cursor:wait}
 .settings-panel.generating *{cursor:wait!important}
@@ -26,7 +26,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* Title */
 .title-bar{position:relative;z-index:1;display:flex;align-items:baseline;gap:10px;padding:18px 24px 16px;background:linear-gradient(180deg,var(--surface2),var(--surface));border-bottom:1px solid var(--border)}
-.title-bar h1{font-size:28px;font-weight:900;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:flex;align-items:baseline;gap:10px}
+.title-bar h1{font-size:28px;font-weight:900;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:flex;align-items:center;gap:10px}
+.logo-icon{flex-shrink:0;filter:drop-shadow(0 0 6px rgba(139,108,255,.5))}
 .title-version{font-size:15px;background:none;-webkit-text-fill-color:var(--accent);font-family:monospace;font-weight:800}
 .title-sub{font-size:15px;color:var(--text2);font-weight:600}
 
