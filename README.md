@@ -13,7 +13,7 @@ Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 
 - **Multi-axis randomization** — Genre, era, ending style, narrative perspective, and characters can each be randomized independently or all at once
 - **Anti-repetition prompt engine** — Explicitly instructs the AI to avoid predictable story structures
-- **Two output modes** — 4-panel manga plot (起承転結 + dialogue) or short fiction (800–1200 chars)
+- **Multiple Output Modes** — Supports 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), flash fiction (~1,000 chars), short stories (~3,000 chars), novellas (~4,000 chars), and full-length novels (~100,000 chars via prompt generation).
 - **Random theme seeding** — Combines base event + modifier + adjunct for unpredictable story seeds
 - **One-shot full random** — Single button randomizes all axes and generates immediately
 
