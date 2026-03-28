@@ -565,29 +565,22 @@ function gatherSettings() {
 async function generate() {
   const key = state.apiKey;
   if (!key) { alert('APIキーを保存してください'); $('apikey').focus(); return; }
-  const btn = $('btn-generate'), out = $('output'), tagRow = $('tag-row'), ctr = $('stat-chars');
-  
-  const sysStatus = $('sys-status-text');
-  sysStatus.className = 'sys-status processing';
-  sysStatus.textContent = 'PROCESSING...';
-  
-  let modeName = MODES.find(m => m.id === state.mode)?.label || state.mode;
-  $('stat-mode').textContent = modeName;
-  $('stat-model').textContent = 'Claude 3.5 Sonnet'; // or dynamic based on config
-  $('stat-time').textContent = 'Running...';
+  const btn = $('btn-generate'), out = $('output'), tagRow = $('tag-row'), ctr = $('char-counter');
+  const codeOut = $('prompt-output');
+  if (codeOut) codeOut.textContent = '生成準備中...';
   
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>構築中...';
   $('settings').classList.add('generating');
   out.textContent = 'プロンプトを作成しています...';
   
-  const startTime = performance.now();
   const settings = gatherSettings();
   const { prompt, tags } = buildPrompt(settings);
+  if (codeOut) codeOut.textContent = prompt; // 右側パネルにプロンプトを表示
   
   try {
-    const model = CLAUDE_MODELS[0].value;
-    btn.innerHTML = '<span class="spinner"></span>Claudeに送信中...';
+    const model = GEMINI_MODELS[0].value;
+    btn.innerHTML = '<span class="spinner"></span>Geminiに送信中...';
     out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
     
     const onFb = (m) => {
@@ -609,23 +602,15 @@ async function generate() {
     out.textContent = (title ? '【' + title + '】\n\n' : '') + body;
     ctr.textContent = `${out.textContent.length.toLocaleString()} 字`;
     
-    const ml = CLAUDE_MODELS.find(m => m.value === usedModel)?.label || usedModel;
-    $('stat-model').textContent = ml;
-    tagRow.innerHTML = `<span class="tag tag-claude">Claude</span><span class="tag tag-model">${esc(ml)}</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    const ml = GEMINI_MODELS.find(m => m.value === usedModel)?.label || usedModel;
+    tagRow.innerHTML = `<span class="tag tag-gemini">Gemini</span><span class="tag tag-model">${esc(ml)}</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
     $('btn-copy').classList.remove('hidden');
     $('btn-download').classList.remove('hidden');
-    
-    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-    $('stat-time').textContent = `${elapsed}s`;
-    sysStatus.className = 'sys-status complete';
-    sysStatus.textContent = 'COMPLETE';
     
   } catch (err) {
     out.className = 'output-box empty';
     out.innerHTML = `<div class="error-msg">エラー: ${esc(err.message)}</div>`;
-    sysStatus.className = 'sys-status error';
-    sysStatus.textContent = 'ERROR';
-    $('stat-time').textContent = 'Failed';
+    if (codeOut) codeOut.textContent = `エラー発生:\n${err.message}`;
   }
   
   $('settings').classList.remove('generating');

@@ -3,9 +3,9 @@
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
 
-A single-file web application that generates high-variety stories (4-panel manga plots or short fiction) using the Claude API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
+A single-file web application that generates high-variety stories (4-panel manga plots or short fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
 
-Claude APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・短編小説）を生成するシングルファイルWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・短編小説）を生成するシングルファイルWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
 
 ---
 
@@ -32,13 +32,13 @@ Claude APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 ### Web Browser / ブラウザで使う（推奨）
 
 1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス / Open the web app
-2. 上部のAPIキー欄にClaudeのAPIキーを入力して「保存」 / Enter your Claude API key at the top
+2. 上部のAPIキー欄にGeminiのAPIキーを入力して「保存」 / Enter your Gemini API key at the top
 3. 「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す / Click generate buttons
 
 ### Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
 
 1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
-2. フォルダ内の `run.bat` をダブルクリックする / Double-click `run.bat`
+2. フォルダ内の `start_Story_app.bat` をダブルクリックする / Double-click `start_Story_app.bat`
 3. 依存ライブラリが自動インストールされ、ブラウザが起動します。 / Node.js dependencies are automatically installed and the app launches.
 *(※実行には[Node.js](https://nodejs.org/)のインストールが必要です / Requires Node.js installed)*
 
@@ -50,19 +50,19 @@ cd story-maker
 # Push to main branch, then enable GitHub Pages in repo Settings
 ```
 
-> **Note:** The API key is held in memory only and never sent anywhere except the official Anthropic API endpoint.  
-> **注:** APIキーはメモリ内のみで保持され、Anthropic公式エンドポイント以外には送信されません。
+> **Note:** The API key is held in memory only and never sent anywhere except the official Google Gemini API endpoint.  
+> **注:** APIキーはメモリ内のみで保持され、Google Gemini公式エンドポイント以外には送信されません。
 
 ---
 
-## 🔑 Getting a Claude API Key / Claude APIキーの取得
+## 🔑 Getting a Gemini API Key / Gemini APIキーの取得
 
-1. Go to [https://console.anthropic.com/](https://console.anthropic.com/)
-2. Sign up or log in
-3. Navigate to **API Keys** → **Create Key**
-4. Copy the key (starts with `sk-ant-`)
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google Account
+3. Click "Create API Key"
+4. Copy the generated key
 
-> Billing is pay-per-use. Story generation typically uses ~1,000–1,500 tokens per request (~$0.003–0.005 USD per story with claude-sonnet).
+> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
 
 ---
 
@@ -86,12 +86,19 @@ The prompt also explicitly instructs Claude to:
 ## 💻 Tech Stack / 技術スタック
 
 - **Vanilla HTML/CSS/JS** — Zero dependencies, single file
-- **Claude API** — `claude-sonnet-4-20250514`
+- **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash`
 - **Deployment** — GitHub Pages (static hosting)
 
 ---
 
 ## 📝 Changelog / 変更履歴
+
+### v2.4.3 — 2026-03-28
+- **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
+- **Code Panel**: Added a right-hand code/prompt inspection pane (Code右側欄) for developers and advanced users to view raw system prompts.
+- **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
+- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models.
+- **Files Management**: Renamed `run.bat` to `start_Story_app.bat` for clarity.
 
 ### v2.4.2 — 2026-03-28
 - Long novel generation prompt fixes for API token limits / 長編小説生成時のAPIトークン上限対策（プロット文字数制限）
