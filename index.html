@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Maker v2.4.5</title>
+  <script type="module" crossorigin src="./assets/index-ROU_-1pE.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D9uc8jnn.css">
+</head>
+<body>
+
+  <!-- 🚀 Header / Control Bar (API Settings) -->
+  <header class="title-bar">
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v2.4.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
+  </header>
+
+  <div id="banner" class="banner">
+    <div class="banner-row">
+      <div class="banner-label">Gemini API</div>
+      <div class="api-input-group">
+        <input type="password" id="apikey" placeholder="Gemini APIキーを入力...">
+        <button id="key-save" class="btn-primary">保存</button>
+        <button id="key-edit" class="btn-outline hidden">編集</button>
+      </div>
+    </div>
+    <div class="api-notice">
+      ⚠️ APIキーはブラウザのメモリ内のみに保持されます。ページを閉じると消去されます。外部送信・保存は一切行いません。
+    </div>
+  </div>
+
+  <!-- 黄色の警告表示 -->
+  <div class="global-alert-yellow" id="global-alert" style="display: none;">
+    ⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数十秒〜1分程度かかる場合があります。結果が表示されるまでお待ちください。
+  </div>
+
+  <main class="main-wrap">
+    <!-- ⚙️ Settings Sidebar -->
+    <aside class="settings-panel" id="settings">
+      
+      <div class="panel-top-actions">
+        <button class="btn-all-random" id="btn-all-random">
+          <span class="icon">🎲</span> 全設定ランダム & 即生成
+        </button>
+        <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️</button>
+        <button class="btn-util" id="btn-reload" title="再読み込み">🔄</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 📝 出力モード -->
+      <section class="s-section" id="section-mode">
+        <div class="s-label">
+          <span>📄 出力モード</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-mode">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="mode" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="mode-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="mode-custom" placeholder="プリセットにない形式を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="mode-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="mode-custom-rnd">🎲 生成</button>
+        </div>
+        <div class="charcount-option">
+          <label><input type="checkbox" id="charcount-check"> 文字数を指定する（どの形式にも適用）</label>
+          <div id="charcount-wrap" class="hidden">
+            <input type="number" id="char-count" value="2000" step="500" min="500" max="6000">
+            <span>文字程度</span>
+            <p id="charcount-hint" class="hint-text text-muted">※直接生成で途切れない安全な文字数は約6,000字です</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 💡 テーマ / シード -->
+      <section class="s-section" id="section-theme">
+        <div class="s-label">
+          <span>💡 テーマ / シード</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-theme">🎲 ランダム</button>
+            <button class="btn-rnd" id="btn-today-news" title="今日のニュースキーワードを取得">🌐 ニュース</button>
+            <button class="btn-section-clear" data-section="theme" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="theme-cat-chips"></div>
+        <div class="chips chips-sub" id="theme-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="theme-custom" placeholder="プリセットにないテーマを入力">
+          <button class="custom-clear-btn hidden" id="theme-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="theme-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 👥 登場人物 -->
+      <section class="s-section" id="section-chars">
+        <div class="s-label">
+          <span>👥 登場人物</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-chars-content" title="現在の人数を維持して、全キャラの名前・役割・性格・メモをランダム化">🎲 内容ランダム</button>
+            <button class="btn-rnd" id="btn-rand-chars-all" title="人数(1~3名)もランダムに決定し、全キャラの内容もランダム化">🎲 人数＋内容ランダム</button>
+            <button class="btn-section-clear" data-section="chars" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="char-controls-row">
+          <button id="btn-add-char" class="btn-util">＋</button>
+          <span class="char-count-display" id="char-count-display">0</span>
+          <button id="btn-remove-char" class="btn-util">−</button>
+          <span class="char-unit">人</span>
+        </div>
+        <div id="char-list" class="char-cards"></div>
+        <p class="section-hint">-/+ で人数調整。0人ならAIが自動設定。</p>
+      </section>
+
+      <!-- 🗺️ ジャンル -->
+      <section class="s-section" id="section-genre">
+        <div class="s-label">
+          <span>🗺️ ジャンル</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-genre">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="genre" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="genre-cat-chips"></div>
+        <div class="chips chips-sub" id="genre-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="genre-custom" placeholder="プリセットにないジャンルを入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="genre-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="genre-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 🌍 世界観・雰囲気 (NEW) -->
+      <section class="s-section" id="section-worldview">
+        <div class="s-label">
+          <span>🌍 世界観・雰囲気</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-worldview">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="worldview" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="worldview-cat-chips"></div>
+        <div class="chips chips-sub" id="worldview-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="worldview-custom" placeholder="プリセットにない世界観を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="worldview-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="worldview-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 🎯 ターゲット層 (NEW) -->
+      <section class="s-section" id="section-target">
+        <div class="s-label">
+          <span>🎯 ターゲット層</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-target">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="target" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="target-cat-chips"></div>
+        <div class="chips chips-sub" id="target-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="target-custom" placeholder="プリセットにないターゲットを入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="target-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="target-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 🕰️ 時代設定 -->
+      <section class="s-section" id="section-era">
+        <div class="s-label">
+          <span>🕰️ 時代設定</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-era">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="era" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="era-cat-chips"></div>
+        <div class="chips chips-sub" id="era-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="era-custom" placeholder="プリセットにない時代設定を入力">
+          <button class="custom-clear-btn hidden" id="era-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="era-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 🏁 オチの型 -->
+      <section class="s-section" id="section-ending">
+        <div class="s-label">
+          <span>🏁 オチの型</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-ending">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="ending" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="ending-cat-chips"></div>
+        <div class="chips chips-sub" id="ending-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="ending-custom" placeholder="プリセットにないオチの型を入力">
+          <button class="custom-clear-btn hidden" id="ending-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="ending-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 🎙️ 語り口 -->
+      <section class="s-section" id="section-narr">
+        <div class="s-label">
+          <span>🎙️ 語り口</span>
+          <div class="s-label-actions">
+            <button class="btn-rnd" id="btn-rand-narr">🎲 ランダム</button>
+            <button class="btn-section-clear" data-section="narr" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="chips" id="narr-cat-chips"></div>
+        <div class="chips chips-sub" id="narr-sub-chips"></div>
+        <div class="custom-input-wrap">
+          <input type="text" class="custom-input" id="narr-custom" placeholder="プリセットにない語り口を入力" autocomplete="off">
+          <button class="custom-clear-btn hidden" id="narr-custom-clear">✕</button>
+          <button class="custom-rnd-btn" id="narr-custom-rnd">🎲 生成</button>
+        </div>
+      </section>
+
+      <!-- 📎 補足メモ -->
+      <section class="s-section" id="section-supplement">
+        <div class="s-label">
+          <span>📎 補足メモ</span>
+          <div class="s-label-actions">
+            <button class="btn-section-clear" data-section="supplement" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="custom-textarea-wrap">
+          <textarea id="supplement" class="custom-textarea" placeholder="例：「最後に主人公が笑う場面を入れて」「方言を使って」"></textarea>
+          <button class="custom-clear-btn hidden" id="supplement-clear">✕</button>
+        </div>
+      </section>
+
+      <!-- 🎬 Generate Button -->
+      <div class="generate-wrap">
+        <button class="btn-generate" id="btn-generate">ストーリー生成</button>
+      </div>
+    </aside>
+
+    <!-- 📺 Output Display -->
+    <article class="output-panel">
+      <div class="output-header">
+        <div class="output-title">OUTPUT</div>
+        <div id="char-counter" class="char-counter">0 字</div>
+        <div class="output-actions">
+          <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
+          <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>
+        </div>
+      </div>
+      <div id="tag-row" class="tag-row"></div>
+      <div id="output" class="output-box empty text-selectable">
+        <div class="guide">
+          <h3>はじめ方</h3>
+          <ol>
+            <li>上部の Gemini API キーを入力して保存</li>
+            <li>左の設定パネルで出力モード・テーマ等を選択</li>
+            <li>「ストーリー生成」を押す</li>
+            <li>「🎲 全設定ランダム & 即生成」で全自動も可能</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+</body>
+</html>
