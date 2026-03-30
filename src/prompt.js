@@ -1,9 +1,14 @@
 // ============================================================
-// prompt.js — プロンプト構築ロジック v2.4: 長編設計対応・性別一貫性対応
+// prompt.js — プロンプト構築ロジック v2.5: 全カテゴリ文体ガイド対応
 // ============================================================
 import {
   THEME_RANDOM_BASE, THEME_MODIFIERS, THEME_ADJUNCTS,
 } from './data.js';
+import {
+  GENRE_STYLE_GUIDES, ENDING_STYLE_GUIDES,
+  WORLDVIEW_STYLE_GUIDES, TARGET_STYLE_GUIDES,
+  NARR_STYLE_GUIDES, lookupGuide,
+} from './styleGuides.js';
 
 const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
 
@@ -71,6 +76,19 @@ export function buildPrompt(s) {
   const eraRule = (era && !['現代', 'ランダム', ''].includes(era))
     ? '\n\n【時代考証ルール（厳守）】\n・時代設定「' + era + '」の語彙・風俗・技術水準を厳守すること。\n・その時代に存在しない概念・道具・言い回しを使わないこと（例：大正時代に「スマホ」、江戸時代に「電話」等）。\n・登場人物の詳細メモに時代不適合な現代表現があっても、時代に即した表現に自動で読み替えること（例：「スポーツマン体型」→「鍛え抜かれた体躯」）。\n・ただし、タイムスリップ等の時代錯誤がテーマ・世界観で意図されている場合はこの限りではない。'
     : '';
+
+  // 全カテゴリ文体ガイド検索・注入
+  const genreGuide = lookupGuide(genre, GENRE_STYLE_GUIDES);
+  const endingGuide = lookupGuide(ending, ENDING_STYLE_GUIDES);
+  const worldviewGuide = lookupGuide(worldview, WORLDVIEW_STYLE_GUIDES);
+  const targetGuide = lookupGuide(target, TARGET_STYLE_GUIDES);
+  const narrGuide = lookupGuide(narr, NARR_STYLE_GUIDES);
+  let allCategoryGuides = '';
+  if (genreGuide) allCategoryGuides += `\n\n【ジャンル文体指定：${genre}】\n${genreGuide}`;
+  if (endingGuide) allCategoryGuides += `\n\n【結末演出指定：${ending}】\n${endingGuide}`;
+  if (worldviewGuide) allCategoryGuides += `\n\n【世界観演出指定：${worldview}】\n${worldviewGuide}`;
+  if (targetGuide) allCategoryGuides += `\n\n【ターゲット層文体指定：${target}】\n${targetGuide}`;
+  if (narrGuide) allCategoryGuides += `\n\n【語り口指定：${narr}】\n${narrGuide}`;
 
   // プロンプト本文
   let prompt = '';
@@ -181,7 +199,7 @@ ${charDesc}
 4. 設定の必然性：物語に登場する特殊な要素（歴史的題材・SF設定・ファンタジー要素など）は、主人公の個人的背景や物語の核心テーマと必ず接続させること。「なぜこの設定なのか」が読者に伝わる因果関係を構築すること。
 5. Show, Don't Tell：世界観やSF設定の説明を、キャラクターの台詞や主人公の内面独白による長い解説で済ませることを禁止する。「私はすべてを理解した」と宣言して設定を列挙する手法も同様に禁止。特に「一人のキャラクターが真相や設定を一度にまとめて語る」構成（老人・証人・導師などの説明役が全てを明かすパターン）を厳禁とする。情報は複数の断片（物証・回想・異なるキャラの証言・環境描写など）として段階的に開示し、読者が自ら点と点を繋いで真相に辿り着く構成にすること。
 6. 別れと関係性の重み：物語中で重要な関係にあるキャラクターとの別離や決別のシーンでは、その関係に見合った感情的重みを描写すること。一言で切り捨てるような別れは禁止。短くても、相手への感情（感謝・申し訳なさ・名残惜しさなど）が伝わる描写を入れること。
-7. 文体の緩急：物語全体を通じて同じトーン・テンポで書き続けないこと。主人公の心理状態の変化に応じて、文体自体にも変化を持たせること（例：焦燥時は短文の連続、回想時はゆったりとした長文、決断時は力強い断言調など）。特に物語の最大の衝撃・転換点（真相の判明、裏切りの発覚、喪失の瞬間など）では、「息を飲んだ」の一文で処理せず、主人公の思考の断片化・身体反応・時間感覚の歪みなどを通じて、読者にも衝撃を追体験させること。${eraRule}${styleGuide}${fmt}${supplement}
+7. 文体の緩急：物語全体を通じて同じトーン・テンポで書き続けないこと。主人公の心理状態の変化に応じて、文体自体にも変化を持たせること（例：焦燥時は短文の連続、回想時はゆったりとした長文、決断時は力強い断言調など）。特に物語の最大の衝撃・転換点（真相の判明、裏切りの発覚、喪失の瞬間など）では、「息を飲んだ」の一文で処理せず、主人公の思考の断片化・身体反応・時間感覚の歪みなどを通じて、読者にも衝撃を追体験させること。${eraRule}${styleGuide}${allCategoryGuides}${fmt}${supplement}
 
 【出力形式】
 ※ 禁止：タイトルに「」や【】などの装飾記号はAI側で付与せず、テキストのみで出力すること。
