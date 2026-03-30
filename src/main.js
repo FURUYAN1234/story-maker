@@ -591,15 +591,25 @@ async function generate() {
     const { text, usedModel } = await callGemini(key, model, prompt, onFb);
     
     btn.innerHTML = '<span class="spinner"></span>解析中...';
-    const lines = text.split('\n');
-    let title = '';
     let body = text;
     // 長編のプロンプト出力など、マークダウンブロックで囲まれた場合のクリーンアップ
     body = body.replace(/^```(markdown)?\s*/i, '').replace(/\s*```$/, '');
     
-    if (lines[0] && /^タイトル[:：]\s*/.test(lines[0])) {
-      title = lines[0].replace(/^タイトル[:：]\s*/, '').trim();
-      body = body.replace(/^タイトル[:：].*\n\n?/, ''); // title部分をbodyから除去
+    // タイトル抽出の強化：必ず【】で囲む
+    let title = '';
+    const bodyLines = body.split('\n');
+    if (bodyLines[0] && /^タイトル[:：]\s*/.test(bodyLines[0])) {
+      // 「タイトル:」形式の行を検出
+      title = bodyLines[0].replace(/^タイトル[:：]\s*/, '').trim();
+      body = body.replace(/^タイトル[:：].*\n\n?/, '');
+    } else if (bodyLines[0] && bodyLines[0].trim().length > 0 && bodyLines[0].trim().length <= 60) {
+      // 1行目が短い場合はタイトルとみなす（60文字以下）
+      title = bodyLines[0].trim();
+      body = bodyLines.slice(1).join('\n').replace(/^\n+/, '');
+    }
+    // タイトルから既存の装飾記号を除去してから【】で囲む
+    if (title) {
+      title = title.replace(/^[【\[「『《〈]+/, '').replace(/[】\]」』》〉]+$/, '').trim();
     }
     state.lastTitle = title;
     out.className = 'output-box text-selectable';
