@@ -102,6 +102,16 @@ The prompt also explicitly instructs Gemini to:
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.9 — 2026-03-31
+- **Narrative Structure Rules**: Added 7-rule "Foreshadowing & Composition Rules" to the prompt engine, dramatically improving story quality. / プロンプトエンジンに7項目の「伏線・構成ルール（厳守）」を追加し、生成される物語の品質を劇的に向上。
+  - **Foreshadowing**: Elements important in the second half must be hinted at in the first half. / 後半で重要な要素は前半で必ず暗示。
+  - **Character Function**: All characters must have a narrative role; passive bystanders are prohibited. / 全キャラに物語的機能を義務付け、傍観者キャラ禁止。
+  - **Ending Conviction**: Protagonists must show clear will/action; acceptance requires prior resistance. / 結末で主人公の明確な意志表示を要求、受容前の抵抗描写を必須化。
+  - **Setting Necessity**: Special elements must connect to protagonist's personal background. / 特殊設定は主人公の個人的背景と接続必須。
+  - **Show Don't Tell**: Prohibits info-dump via dialogue, monologue, or single "explainer" characters. / 台詞・独白・説明役キャラによる設定の一括説明を禁止。
+  - **Farewell Weight**: Meaningful partings must carry emotional weight. / 別離シーンに感情的重みの描写を要求。
+  - **Tonal Variation**: Writing style must shift with protagonist's emotional state; shock scenes require immersive body/mind description. / 心理状態に応じた文体変化と衝撃シーンの追体験描写を要求。
+
 ### v2.4.8 — 2026-03-30
 - **Maintenance Release**: Version bump and redeployment for stable release packaging. / 安定版リリースパッケージング用のバージョン更新と再デプロイ。
 
