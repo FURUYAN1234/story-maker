@@ -102,6 +102,9 @@ The prompt also explicitly instructs Gemini to:
 
 ## 📝 Changelog / 変更履歴
 
+### v2.4.8 — 2026-03-30
+- **Maintenance Release**: Version bump and redeployment for stable release packaging. / 安定版リリースパッケージング用のバージョン更新と再デプロイ。
+
 ### v2.4.7 — 2026-03-30
 - **Mode-Specific Style Guide**: Added unique tone/writing-style instructions for all 14 output modes (4-panel, essay, poem, etc.) to eliminate the "everything sounds the same" problem. / 全14出力モードに個別の文体・トーン指示を追加し、どのモードでも似たような厨二病的文章になる問題を解消。
 - **Era Consistency Rules**: AI now auto-corrects anachronistic expressions when historical era settings are selected (e.g., no "smartphone" in Taisho era). / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルールを追加。
