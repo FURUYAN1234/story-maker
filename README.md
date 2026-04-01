@@ -226,7 +226,10 @@ Users must not engage in the following:
 Reproducing or closely imitating existing written works such as novels, scripts, articles, or story content
 
 特定の作家・作品の文体、語り口、プロット構造、キャラクター構成を識別可能なレベルで再現する行為  
-  Replicating the writing style, narrative voice, plot structure, or character composition of a specific author or work in a recognizable manner
+Replicating the writing style, narrative voice, plot structure, or character composition of a specific author or work in a recognizable manner
+
+既存作品のストーリー展開、設定、プロットを言い換え・変形して再利用する行為  
+Reusing or paraphrasing existing storylines, settings, or plots from copyrighted works
   
 #### (2) 権利侵害コンテンツの利用 / Use of Infringing Content
 - 第三者の著作権、商標権、肖像権、パブリシティ権等を侵害するコンテンツの生成、公開、販売、共有  
