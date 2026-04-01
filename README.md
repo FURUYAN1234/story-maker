@@ -225,6 +225,9 @@ Users must not engage in the following:
 既存の小説、脚本、記事、漫画原作、その他文章コンテンツを実質的に再現・模倣する行為
 Reproducing or closely imitating existing written works such as novels, scripts, articles, or story content
 
+- 特定の作家・作品の文体、語り口、プロット構造、キャラクター構成を識別可能なレベルで再現する行為  
+  Replicating the writing style, narrative voice, plot structure, or character composition of a specific author or work in a recognizable manner
+  
 #### (2) 権利侵害コンテンツの利用 / Use of Infringing Content
 - 第三者の著作権、商標権、肖像権、パブリシティ権等を侵害するコンテンツの生成、公開、販売、共有  
 - 既存IPに類似したコンテンツの無断商用利用  
