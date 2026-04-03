@@ -3,24 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v2.6.0</title>
+  <title>Story Maker v2.7.0</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v2.6.0</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v2.7.0</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
     <div class="banner-row">
       <div class="banner-label">Gemini API</div>
-      <div class="api-input-group">
-        <input type="password" id="apikey" placeholder="Gemini APIキーを入力...">
-        <button id="key-save" class="btn-primary">保存</button>
-        <button id="key-edit" class="btn-outline hidden">編集</button>
-      </div>
+      <input type="password" id="apikey" placeholder="Gemini APIキーを入力...">
+      <button id="key-save">保存</button>
+      <button id="key-edit" class="hidden">編集</button>
     </div>
     <div class="api-notice">
       ⚠️ APIキーはブラウザのメモリ内のみに保持されます。ページを閉じると消去されます。外部送信・保存は一切行いません。
@@ -38,10 +36,15 @@
       
       <div class="panel-top-actions">
         <button class="btn-all-random" id="btn-all-random">
-          <span class="icon">🎲</span> 全設定ランダム & 即生成
+          <span class="icon">🎲</span> 全項目ランダム
         </button>
         <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️</button>
         <button class="btn-util" id="btn-reload" title="再読み込み">🔄</button>
+      </div>
+
+      <!-- 🎬 Generate Button（メインアクション・最上部配置） -->
+      <div class="generate-wrap">
+        <button class="btn-generate" id="btn-generate">ストーリー生成</button>
       </div>
 
       <div class="divider"></div>
@@ -64,7 +67,7 @@
         <div class="charcount-option">
           <label><input type="checkbox" id="charcount-check"> 文字数を指定する（どの形式にも適用）</label>
           <div id="charcount-wrap" class="hidden">
-            <input type="number" id="char-count" value="2000" step="500" min="500" max="6000">
+            <input type="number" id="char-count" value="2000" step="500" min="500" max="6000" title="目標文字数">
             <span>文字程度</span>
             <p id="charcount-hint" class="hint-text text-muted">※直接生成で途切れない安全な文字数は約6,000字です</p>
           </div>
@@ -106,8 +109,28 @@
           <button id="btn-remove-char" class="btn-util">−</button>
           <span class="char-unit">人</span>
         </div>
+
+        <!-- キャラクターシート画像取り込みゾーン -->
+        <div class="ci-dropzone" id="ci-dropzone">
+          <div class="ci-dropzone-icon">📷</div>
+          <div class="ci-dropzone-text">
+            <strong>キャラクターシート画像をドロップ</strong>
+            <span>または クリックして画像を選択（複数枚OK）</span>
+          </div>
+          <div class="ci-dropzone-hint">PNG / JPG / WEBP 対応 ・ AIが自動認識して登録</div>
+          <div class="ci-spinner hidden" id="ci-spinner">
+            <span class="spinner"></span> 画像を解析中...
+          </div>
+        </div>
+        <input type="file" id="ci-file-input" accept="image/*" multiple class="hidden">
+        <div class="ci-status hidden" id="ci-status"></div>
+
         <div id="char-list" class="char-cards"></div>
-        <p class="section-hint">-/+ で人数調整。0人ならAIが自動設定。</p>
+        <p class="char-section-hint">
+          📷 <strong>キャラシートがある場合</strong> → 上のエリアに画像をドロップ（複数枚OK）<br>
+          ✍️ <strong>手動設定の場合</strong> → ＋/− で人数を追加して各項目を入力・メニュー選択<br>
+          🎲 <strong>おまかせの場合</strong> → 0人のまま生成、または「人数＋内容ランダム」で自動生成
+        </p>
       </section>
 
       <!-- 🗺️ ジャンル -->
@@ -232,10 +255,7 @@
         </div>
       </section>
 
-      <!-- 🎬 Generate Button -->
-      <div class="generate-wrap">
-        <button class="btn-generate" id="btn-generate">ストーリー生成</button>
-      </div>
+      <!-- 生成ボタンは上部に移動済み -->
     </aside>
 
     <!-- 📺 Output Display -->
@@ -256,7 +276,7 @@
             <li>上部の Gemini API キーを入力して保存</li>
             <li>左の設定パネルで出力モード・テーマ等を選択</li>
             <li>「ストーリー生成」を押す</li>
-            <li>「🎲 全設定ランダム & 即生成」で全自動も可能</li>
+            <li>「🎲 全項目ランダム」で一括ランダム設定も可能</li>
           </ol>
         </div>
       </div>

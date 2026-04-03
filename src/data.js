@@ -2,16 +2,18 @@
 // data.js — Story Maker v2.4.4
 // ============================================================
 
+// テキスト生成用モデルリスト（NBP v2.26 TEXT_MODEL_IDS 準拠）
 export const GEMINI_MODELS = [
-  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
   { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
+  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+  { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
   { value: 'gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash-Lite (Preview)' }
 ];
 
 export const MODES = [
   { value: '4koma', label: '4コマ漫画風' },
+  { value: '4koma_scenario', label: 'AI 4koma シナリオ連携（STEP2）' },
   { value: 'short_short', label: 'ショート(〜1000字)' },
   { value: 'novel', label: '短編小説(〜3000字)' },
   { value: 'medium', label: '中編小説(〜4000字)' },

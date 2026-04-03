@@ -19,6 +19,7 @@ import {
 } from './data.js';
 import { callGemini } from './api.js';
 import { buildPrompt, generateRandomTheme } from './prompt.js';
+import { initCharImport } from './charImport.js';
 import { version as APP_VERSION } from '../package.json';
 
 const $ = id => document.getElementById(id);
@@ -654,8 +655,6 @@ async function allRandom() {
   updateClear('supplement-clear', '');
   
   $('settings').scrollTo({ top: 0, behavior: 'smooth' });
-  await new Promise(r => setTimeout(r, 800));
-  generate();
 }
 
 function resetAll() {
@@ -798,6 +797,9 @@ function init() {
   $('btn-rand-chars-all').addEventListener('click', randomizeCharCountAndContent);
 
   renderChars();
+
+  // キャラクターシート画像取り込み初期化
+  initCharImport(state, renderChars, () => state.apiKey);
 }
 
 document.addEventListener('DOMContentLoaded', init);
