@@ -579,7 +579,10 @@ async function generate() {
   
 
   out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
-  if (alertEl) alertEl.style.display = 'flex';
+  if (alertEl) {
+    alertEl.innerHTML = '⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数十秒〜1分程度かかる場合があります。結果が表示されるまでお待ちください。';
+    alertEl.style.display = 'flex';
+  }
   
   try {
     const model = GEMINI_MODELS[0].value;
