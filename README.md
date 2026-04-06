@@ -103,7 +103,7 @@ The prompt also explicitly instructs Gemini to:
 ## 統 Changelog / 螟画峩螻･豁ｴ
 
 ### v2.8.0 窶・2026-04-06
-- **Foreshadowing Settings Adjustment**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 莨冗ｷ壹Ν繝ｼ繝ｫ縺ｮ繝｢繝ｼ繝牙挨繝・ぅ繧｢蛻ｶ繧貞ｰ主・縲ら黄隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ隕∵ｱゅ＠縲・撼迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ遖∵ｭ｢縺吶ｋ縺ｨ縺・≧遏帷崟繧定ｧ｣豸医・
+- **Foreshadowing Tier System**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 莨冗ｷ壹Ν繝ｼ繝ｫ縺ｮ繝｢繝ｼ繝牙挨繝・ぅ繧｢蛻ｶ繧貞ｰ主・縲ら黄隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ隕∵ｱゅ＠縲・撼迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ遖∵ｭ｢縺吶ｋ縺ｨ縺・≧遏帷崟繧定ｧ｣豸医・
   - **Tier 1 (Full)**: Narrative modes (`novel`, `medium`, `short_short`, `scenario`, `manga`, `documentary`, `radio`) retain all 7 foreshadowing & composition rules. / 迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨・繝輔Ν莨冗ｷ壹・讒区・繝ｫ繝ｼ繝ｫ・・鬆・岼・峨ｒ縺昴・縺ｾ縺ｾ驕ｩ逕ｨ縲・
   - **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance instead of heavy foreshadowing rules, prioritizing comedic timing. / 4繧ｳ繝槭Δ繝ｼ繝峨・縲後ヵ繝ｪ縺ｨ繧ｪ繝√阪・霆ｽ驥上Ν繝ｼ繝ｫ縺ｫ蟾ｮ縺玲崛縺医√ユ繝ｳ繝昴→繧ｪ繝√・蛻・ｌ蜻ｳ繧貞━蜈医・
   - **Tier 3 (None)**: Non-narrative modes (`essay`, `poem`, `letter`, `diary`) exclude foreshadowing entirely, replaced with mode-specific composition rules (thematic coherence, imagery chains, emotional progression). / 髱樒黄隱樒ｳｻ繝｢繝ｼ繝会ｼ医お繝・そ繧､繝ｻ隧ｩ繝ｻ謇狗ｴ吶・譌･險假ｼ峨・莨冗ｷ壹Ν繝ｼ繝ｫ繧貞ｮ悟・髯､螟悶＠縲∝推繝｢繝ｼ繝牙崋譛峨・讒区・繝ｫ繝ｼ繝ｫ縺ｫ蟾ｮ縺玲崛縺医・
@@ -352,4 +352,5 @@ An assistant for designing detailed character sheets and settings.
 ---
 
 Developed by **FURU**
+
 
