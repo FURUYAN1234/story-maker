@@ -1,6 +1,6 @@
 {
   "name": "story-maker",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "private": true,
   "description": "AI Story Maker - Gemini API対応 多軸ランダム物語生成ツール",
   "type": "module",
