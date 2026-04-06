@@ -1,53 +1,53 @@
-# Story Maker — AI物語メーカー
+﻿# Story Maker 窶・AI迚ｩ隱槭Γ繝ｼ繧ｫ繝ｼ
 
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
-> **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
+> **縲御ｺ亥ｮ夊ｪｿ蜥後↑迚ｩ隱槭ｒ逕滓・縺吶ｋ縺ｮ繧偵ｄ繧√∬・蛻・′鬩壹￥繧医≧縺ｪ迚ｩ隱槭ｒ逕滓・縺帙ｈ縲ゅ・*
 
 A web application that generates high-variety stories (4-panel manga plots or fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
 
-Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+Gemini API繧剃ｽｿ縺・√ヰ繝ｩ繧ｨ繝・ぅ雎翫°縺ｪ繧ｹ繝医・繝ｪ繝ｼ・・繧ｳ繝樊ｼｫ逕ｻ繝阪ち繝ｻ蟆剰ｪｬ・峨ｒ逕滓・縺吶ｋWeb繧｢繝励Μ縺ｧ縺吶ゅ御ｼｼ縺溘ｊ蟇・▲縺溘ｊ縺ｫ縺ｪ繧句撫鬘後阪ｒ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繝ｻ繝・・繝槭・繧ｸ繝｣繝ｳ繝ｫ繝ｻ譎ゆｻ｣繝ｻ繧ｪ繝√・蝙九・螟夊ｻｸ繝ｩ繝ｳ繝繝蛹悶↓繧医▲縺ｦ讒矩逧・↓隗｣豎ｺ縺吶ｋ縺薙→繧堤岼逧・→縺励※縺・∪縺吶・
 
 > [!TIP]
-> **Detailed Commentary Available / 詳細な解説記事を公開中**
-> For insights into the design philosophy and behavior differences between Google Gemini API models, please refer to the following note article. / 本プロジェクトの設計思想や、Google Gemini APIのモデル毎の挙動の違いについては、以下のnote記事で詳しく解説しています。
-> [Story Maker — AI物語メーカー　AI特有の似たり寄ったりのストーリーにならないシステム / A system designed to break away from repetitive, generic AI-generated plots. (note / Japanese content)](https://note.com/happy_duck780/n/nd3d972922868)
+> **Detailed Commentary Available / 隧ｳ邏ｰ縺ｪ隗｣隱ｬ險倅ｺ九ｒ蜈ｬ髢倶ｸｭ**
+> For insights into the design philosophy and behavior differences between Google Gemini API models, please refer to the following note article. / 譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・險ｭ險域晄Φ繧・；oogle Gemini API縺ｮ繝｢繝・Ν豈弱・謖吝虚縺ｮ驕輔＞縺ｫ縺､縺・※縺ｯ縲∽ｻ･荳九・note險倅ｺ九〒隧ｳ縺励￥隗｣隱ｬ縺励※縺・∪縺吶・
+> [Story Maker 窶・AI迚ｩ隱槭Γ繝ｼ繧ｫ繝ｼ縲AI迚ｹ譛峨・莨ｼ縺溘ｊ蟇・▲縺溘ｊ縺ｮ繧ｹ繝医・繝ｪ繝ｼ縺ｫ縺ｪ繧峨↑縺・す繧ｹ繝・Β / A system designed to break away from repetitive, generic AI-generated plots. (note / Japanese content)](https://note.com/happy_duck780/n/nd3d972922868)
 
 ---
 
-## ✨ Features / 機能
+## 笨ｨ Features / 讖溯・
 
-- **Multi-axis randomization** — Genre, era, ending style, narrative perspective, and characters can each be randomized independently or all at once
-- **Anti-repetition prompt engine** — Explicitly instructs the AI to avoid predictable story structures
-- **Multiple Output Modes** — Supports 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), flash fiction (~1,000 chars), short stories (~3,000 chars), novellas (~4,000 chars), and full-length novels (~100,000 chars via prompt generation).
-- **Random theme seeding** — Combines base event + modifier + adjunct for unpredictable story seeds
-- **One-shot full random** — Single button randomizes all axes and generates immediately
-
----
-
-- **多軸ランダム化** — ジャンル・時代・オチの型・語り口・キャラを各個または一括でランダム設定
-- **反復防止プロンプトエンジン** — 予定調和な展開を構造的に回避するよう明示的に指示
-- **複数の出力モード** — 4コマ漫画ネタ（起承転結＋セリフ案）またはショート（〜1000字）、短編小説（〜3000字）、中編小説（〜4000字）、長編小説（〜10万字/プロンプト生成）など
-- **ランダムテーマシード** — 基本イベント＋修飾語＋状況語を確率的に組み合わせ
-- **全ランダム一発生成** — 1ボタンで全項目をランダム設定して即生成
+- **Multi-axis randomization** 窶・Genre, era, ending style, narrative perspective, and characters can each be randomized independently or all at once
+- **Anti-repetition prompt engine** 窶・Explicitly instructs the AI to avoid predictable story structures
+- **Multiple Output Modes** 窶・Supports 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), flash fiction (~1,000 chars), short stories (~3,000 chars), novellas (~4,000 chars), and full-length novels (~100,000 chars via prompt generation).
+- **Random theme seeding** 窶・Combines base event + modifier + adjunct for unpredictable story seeds
+- **One-shot full random** 窶・Single button randomizes all axes and generates immediately
 
 ---
 
-## 🚀 Quick Start / クイックスタート
+- **螟夊ｻｸ繝ｩ繝ｳ繝繝蛹・* 窶・繧ｸ繝｣繝ｳ繝ｫ繝ｻ譎ゆｻ｣繝ｻ繧ｪ繝√・蝙九・隱槭ｊ蜿｣繝ｻ繧ｭ繝｣繝ｩ繧貞推蛟九∪縺溘・荳諡ｬ縺ｧ繝ｩ繝ｳ繝繝險ｭ螳・
+- **蜿榊ｾｩ髦ｲ豁｢繝励Ο繝ｳ繝励ヨ繧ｨ繝ｳ繧ｸ繝ｳ** 窶・莠亥ｮ夊ｪｿ蜥後↑螻暮幕繧呈ｧ矩逧・↓蝗樣∩縺吶ｋ繧医≧譏守､ｺ逧・↓謖・､ｺ
+- **隍・焚縺ｮ蜃ｺ蜉帙Δ繝ｼ繝・* 窶・4繧ｳ繝樊ｼｫ逕ｻ繝阪ち・郁ｵｷ謇ｿ霆｢邨撰ｼ九そ繝ｪ繝墓｡茨ｼ峨∪縺溘・繧ｷ繝ｧ繝ｼ繝茨ｼ医・000蟄暦ｼ峨∫洒邱ｨ蟆剰ｪｬ・医・000蟄暦ｼ峨∽ｸｭ邱ｨ蟆剰ｪｬ・医・000蟄暦ｼ峨・聞邱ｨ蟆剰ｪｬ・医・0荳・ｭ・繝励Ο繝ｳ繝励ヨ逕滓・・峨↑縺ｩ
+- **繝ｩ繝ｳ繝繝繝・・繝槭す繝ｼ繝・* 窶・蝓ｺ譛ｬ繧､繝吶Φ繝茨ｼ倶ｿｮ鬟ｾ隱橸ｼ狗憾豕∬ｪ槭ｒ遒ｺ邇・噪縺ｫ邨・∩蜷医ｏ縺・
+- **蜈ｨ繝ｩ繝ｳ繝繝荳逋ｺ逕滓・** 窶・1繝懊ち繝ｳ縺ｧ蜈ｨ鬆・岼繧偵Λ繝ｳ繝繝險ｭ螳壹＠縺ｦ蜊ｳ逕滓・
 
-### Web Browser / ブラウザで使う（推奨）
+---
 
-1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス / Open the web app
-2. 上部のAPIキー欄にGeminiのAPIキーを入力して「保存」 / Enter your Gemini API key at the top
-3. 「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す / Click generate buttons
+## 噫 Quick Start / 繧ｯ繧､繝・け繧ｹ繧ｿ繝ｼ繝・
 
-### Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
+### Web Browser / 繝悶Λ繧ｦ繧ｶ縺ｧ菴ｿ縺・ｼ域耳螂ｨ・・
 
-1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
-2. フォルダ内の `start_Story_app.bat` をダブルクリックする / Double-click `start_Story_app.bat`
-3. 依存ライブラリが自動インストールされ、ブラウザが起動します。 / Node.js dependencies are automatically installed and the app launches.
-*(※実行には[Node.js](https://nodejs.org/)のインストールが必要です / Requires Node.js installed)*
+1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) 縺ｫ繧｢繧ｯ繧ｻ繧ｹ / Open the web app
+2. 荳企Κ縺ｮAPI繧ｭ繝ｼ谺・↓Gemini縺ｮAPI繧ｭ繝ｼ繧貞・蜉帙＠縺ｦ縲御ｿ晏ｭ倥・/ Enter your Gemini API key at the top
+3. 縲交沁ｲ 蜈ｨ縺ｦ繝ｩ繝ｳ繝繝縺ｧ逕滓・縲阪∪縺溘・縲後せ繝医・繝ｪ繝ｼ逕滓・縲阪・繧ｿ繝ｳ繧呈款縺・/ Click generate buttons
 
-### Deploy to GitHub Pages / GitHub Pagesでデプロイ
+### Run Locally (Windows) / 繝ｭ繝ｼ繧ｫ繝ｫ螳溯｡檎沿・・IP繝繧ｦ繝ｳ繝ｭ繝ｼ繝画凾・・
+
+1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) 縺九ｉZIP繝輔ぃ繧､繝ｫ繧偵ム繧ｦ繝ｳ繝ｭ繝ｼ繝峨＠縲∝ｱ暮幕縺吶ｋ / Unzip the downloaded folder
+2. 繝輔か繝ｫ繝蜀・・ `start_Story_app.bat` 繧偵ム繝悶Ν繧ｯ繝ｪ繝・け縺吶ｋ / Double-click `start_Story_app.bat`
+3. 萓晏ｭ倥Λ繧､繝悶Λ繝ｪ縺瑚・蜍輔う繝ｳ繧ｹ繝医・繝ｫ縺輔ｌ縲√ヶ繝ｩ繧ｦ繧ｶ縺瑚ｵｷ蜍輔＠縺ｾ縺吶・/ Node.js dependencies are automatically installed and the app launches.
+*(窶ｻ螳溯｡後↓縺ｯ[Node.js](https://nodejs.org/)縺ｮ繧､繝ｳ繧ｹ繝医・繝ｫ縺悟ｿ・ｦ√〒縺・/ Requires Node.js installed)*
+
+### Deploy to GitHub Pages / GitHub Pages縺ｧ繝・・繝ｭ繧､
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/story-maker
@@ -56,299 +56,300 @@ cd story-maker
 ```
 
 > **Note:** The API key is held in memory only and never sent anywhere except the official Google Gemini API endpoint.  
-> **注:** APIキーはメモリ内のみで保持され、Google Gemini公式エンドポイント以外には送信されません。
+> **豕ｨ:** API繧ｭ繝ｼ縺ｯ繝｡繝｢繝ｪ蜀・・縺ｿ縺ｧ菫晄戟縺輔ｌ縲；oogle Gemini蜈ｬ蠑上お繝ｳ繝峨・繧､繝ｳ繝井ｻ･螟悶↓縺ｯ騾∽ｿ｡縺輔ｌ縺ｾ縺帙ｓ縲・
 
 ---
 
-## 🔑 Getting a Gemini API Key / Gemini APIキーの取得
+## 泊 Getting a Gemini API Key / Gemini API繧ｭ繝ｼ縺ｮ蜿門ｾ・
 
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) にアクセスする
-2. Sign in with your Google Account / Googleアカウントでログインする
-3. Click "Create API Key" / 「Create API Key」ボタンをクリックする
-4. Copy the generated key / 生成されたAPIキーをコピーする
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) 縺ｫ繧｢繧ｯ繧ｻ繧ｹ縺吶ｋ
+2. Sign in with your Google Account / Google繧｢繧ｫ繧ｦ繝ｳ繝医〒繝ｭ繧ｰ繧､繝ｳ縺吶ｋ
+3. Click "Create API Key" / 縲靴reate API Key縲阪・繧ｿ繝ｳ繧偵け繝ｪ繝・け縺吶ｋ
+4. Copy the generated key / 逕滓・縺輔ｌ縺蘗PI繧ｭ繝ｼ繧偵さ繝斐・縺吶ｋ
 
-> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
-> 料金は従量課金制（または無料枠）です。通常、1回の物語生成で約1,000〜1,500トークンを消費します。
+> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000窶・,500 tokens per request.
+> 譁咎≡縺ｯ蠕馴㍼隱ｲ驥大宛・医∪縺溘・辟｡譁呎棧・峨〒縺吶る壼ｸｸ縲・蝗槭・迚ｩ隱樒函謌舌〒邏・,000縲・,500繝医・繧ｯ繝ｳ繧呈ｶ郁ｲｻ縺励∪縺吶・
 
 ---
 
-## 🎛️ How the Anti-Repetition System Works / 反復防止システムの仕組み
+## 寺・・How the Anti-Repetition System Works / 蜿榊ｾｩ髦ｲ豁｢繧ｷ繧ｹ繝・Β縺ｮ莉慕ｵ・∩
 
 The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes:
-基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。このアプリでは、複数の独立した軸を通じてエントロピーを注入します。
+蝓ｺ譛ｬ縺ｨ縺ｪ繧玖・∴譁ｹ・哂I縺ｮ蜃ｺ蜉帙・縲∝・蜉帙・繧ｨ繝ｳ繝医Ο繝斐・・井ｸ咲｢ｺ螳滓ｧ・峨′菴弱＞縺ｨ縲悟ｹｳ蝮・噪縲阪↑迚ｩ隱槭↓蜿取據縺励′縺｡縺ｧ縺吶ゅ％縺ｮ繧｢繝励Μ縺ｧ縺ｯ縲∬､・焚縺ｮ迢ｬ遶九＠縺溯ｻｸ繧帝壹§縺ｦ繧ｨ繝ｳ繝医Ο繝斐・繧呈ｳｨ蜈･縺励∪縺吶・
 
 ```
-Output = f(Character × Theme × Genre × Era × Ending × Perspective)
+Output = f(Character ﾃ・Theme ﾃ・Genre ﾃ・Era ﾃ・Ending ﾃ・Perspective)
 ```
 
 Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable.
-各軸は独立してランダム化が可能です。組み合わせの空間が非常に広範であるため、全く同じ出力が生成されることは統計的にほぼ起こり得ません。
+蜷・ｻｸ縺ｯ迢ｬ遶九＠縺ｦ繝ｩ繝ｳ繝繝蛹悶′蜿ｯ閭ｽ縺ｧ縺吶らｵ・∩蜷医ｏ縺帙・遨ｺ髢薙′髱槫ｸｸ縺ｫ蠎・ｯ・〒縺ゅｋ縺溘ａ縲∝・縺丞酔縺伜・蜉帙′逕滓・縺輔ｌ繧九％縺ｨ縺ｯ邨ｱ險育噪縺ｫ縺ｻ縺ｼ襍ｷ縺薙ｊ蠕励∪縺帙ｓ縲・
 
 The prompt also explicitly instructs Gemini to:
-さらに、システムプロンプトからGeminiに対して以下の明確な指示を出しています：
-- Avoid the most predictable development for the genre (ジャンルにおける最もありきたりな展開を避ける)
-- Connect the theme in an indirect, unexpected way (テーマを間接的かつ予期せぬ形で結びつける)
-- Use each character's personality to generate unique reactions (登場人物それぞれの性格を活かし、ユニークな反応を生み出す)
+縺輔ｉ縺ｫ縲√す繧ｹ繝・Β繝励Ο繝ｳ繝励ヨ縺九ｉGemini縺ｫ蟇ｾ縺励※莉･荳九・譏守｢ｺ縺ｪ謖・､ｺ繧貞・縺励※縺・∪縺呻ｼ・
+- Avoid the most predictable development for the genre (繧ｸ繝｣繝ｳ繝ｫ縺ｫ縺翫￠繧区怙繧ゅ≠繧翫″縺溘ｊ縺ｪ螻暮幕繧帝∩縺代ｋ)
+- Connect the theme in an indirect, unexpected way (繝・・繝槭ｒ髢捺磁逧・°縺､莠域悄縺帙〓蠖｢縺ｧ邨舌・縺､縺代ｋ)
+- Use each character's personality to generate unique reactions (逋ｻ蝣ｴ莠ｺ迚ｩ縺昴ｌ縺槭ｌ縺ｮ諤ｧ譬ｼ繧呈ｴｻ縺九＠縲√Θ繝九・繧ｯ縺ｪ蜿榊ｿ懊ｒ逕溘∩蜃ｺ縺・
 
 ---
 
-## 💻 Tech Stack / 技術スタック
+## 捗 Tech Stack / 謚陦薙せ繧ｿ繝・け
 
-- **Vite + Vanilla HTML/CSS/JS** — Lightweight frontend / 軽量フロントエンド構成
-- **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash` / Geminiモデルを主軸に構築
-- **Deployment** — GitHub Pages (static hosting) / GitHub Pages（静的ホスティングによるデプロイ）
+- **Vite + Vanilla HTML/CSS/JS** 窶・Lightweight frontend / 霆ｽ驥上ヵ繝ｭ繝ｳ繝医お繝ｳ繝画ｧ区・
+- **Gemini API** 窶・`gemini-1.5-pro` / `gemini-1.5-flash` / Gemini繝｢繝・Ν繧剃ｸｻ霆ｸ縺ｫ讒狗ｯ・
+- **Deployment** 窶・GitHub Pages (static hosting) / GitHub Pages・磯撕逧・・繧ｹ繝・ぅ繝ｳ繧ｰ縺ｫ繧医ｋ繝・・繝ｭ繧､・・
 
 ---
 
-## 📝 Changelog / 変更履歴
+## 統 Changelog / 螟画峩螻･豁ｴ
 
-### v2.8.0 — 2026-04-06
-- **Foreshadowing Tier System**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 伏線ルールのモード別ティア制を導入。物語系モードが伏線を要求し、非物語系モードが伏線を禁止するという矛盾を解消。
-  - **Tier 1 (Full)**: Narrative modes (`novel`, `medium`, `short_short`, `scenario`, `manga`, `documentary`, `radio`) retain all 7 foreshadowing & composition rules. / 物語系モードはフル伏線・構成ルール（7項目）をそのまま適用。
-  - **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance instead of heavy foreshadowing rules, prioritizing comedic timing. / 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポとオチの切れ味を優先。
-  - **Tier 3 (None)**: Non-narrative modes (`essay`, `poem`, `letter`, `diary`) exclude foreshadowing entirely, replaced with mode-specific composition rules (thematic coherence, imagery chains, emotional progression). / 非物語系モード（エッセイ・詩・手紙・日記）は伏線ルールを完全除外し、各モード固有の構成ルールに差し替え。
+### v2.8.0 窶・2026-04-06
+- **Foreshadowing Settings Adjustment**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 莨冗ｷ壹Ν繝ｼ繝ｫ縺ｮ繝｢繝ｼ繝牙挨繝・ぅ繧｢蛻ｶ繧貞ｰ主・縲ら黄隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ隕∵ｱゅ＠縲・撼迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨′莨冗ｷ壹ｒ遖∵ｭ｢縺吶ｋ縺ｨ縺・≧遏帷崟繧定ｧ｣豸医・
+  - **Tier 1 (Full)**: Narrative modes (`novel`, `medium`, `short_short`, `scenario`, `manga`, `documentary`, `radio`) retain all 7 foreshadowing & composition rules. / 迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨・繝輔Ν莨冗ｷ壹・讒区・繝ｫ繝ｼ繝ｫ・・鬆・岼・峨ｒ縺昴・縺ｾ縺ｾ驕ｩ逕ｨ縲・
+  - **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance instead of heavy foreshadowing rules, prioritizing comedic timing. / 4繧ｳ繝槭Δ繝ｼ繝峨・縲後ヵ繝ｪ縺ｨ繧ｪ繝√阪・霆ｽ驥上Ν繝ｼ繝ｫ縺ｫ蟾ｮ縺玲崛縺医√ユ繝ｳ繝昴→繧ｪ繝√・蛻・ｌ蜻ｳ繧貞━蜈医・
+  - **Tier 3 (None)**: Non-narrative modes (`essay`, `poem`, `letter`, `diary`) exclude foreshadowing entirely, replaced with mode-specific composition rules (thematic coherence, imagery chains, emotional progression). / 髱樒黄隱樒ｳｻ繝｢繝ｼ繝会ｼ医お繝・そ繧､繝ｻ隧ｩ繝ｻ謇狗ｴ吶・譌･險假ｼ峨・莨冗ｷ壹Ν繝ｼ繝ｫ繧貞ｮ悟・髯､螟悶＠縲∝推繝｢繝ｼ繝牙崋譛峨・讒区・繝ｫ繝ｼ繝ｫ縺ｫ蟾ｮ縺玲崛縺医・
 
-### v2.7.1 — 2026-04-05
-- **Bugfix: Stale Alert Message**: Fixed a bug where the global alert bar displayed "画像認識中" (image recognition in progress) when clicking the story generation button after importing character sheet images. The shared `global-alert` element's innerHTML was not reset before re-display during story generation. / キャラクターシート画像を取り込んだ後にストーリー生成ボタンを押すと、「画像認識中」の古いメッセージが表示されるバグを修正。共有の`global-alert`要素のinnerHTMLがストーリー生成時にリセットされていなかった問題を解消。
+### v2.7.1 窶・2026-04-05
+- **Bugfix: Stale Alert Message**: Fixed a bug where the global alert bar displayed "逕ｻ蜒剰ｪ崎ｭ倅ｸｭ" (image recognition in progress) when clicking the story generation button after importing character sheet images. The shared `global-alert` element's innerHTML was not reset before re-display during story generation. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝育判蜒上ｒ蜿悶ｊ霎ｼ繧薙□蠕後↓繧ｹ繝医・繝ｪ繝ｼ逕滓・繝懊ち繝ｳ繧呈款縺吶→縲√檎判蜒剰ｪ崎ｭ倅ｸｭ縲阪・蜿､縺・Γ繝・そ繝ｼ繧ｸ縺瑚｡ｨ遉ｺ縺輔ｌ繧九ヰ繧ｰ繧剃ｿｮ豁｣縲ょ・譛峨・`global-alert`隕∫ｴ縺ｮinnerHTML縺後せ繝医・繝ｪ繝ｼ逕滓・譎ゅ↓繝ｪ繧ｻ繝・ヨ縺輔ｌ縺ｦ縺・↑縺九▲縺溷撫鬘後ｒ隗｣豸医・
 
-### v2.7.0 — 2026-04-03
-- **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / キャラクターシート画像をドロップゾーンにドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理・進捗表示に対応。
-- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
-- **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
-- **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
-- **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
-- **Model Priority Update**: Image recognition models follow Nano Banana Pro v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをNBP v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
+### v2.7.0 窶・2026-04-03
+- **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝育判蜒上ｒ繝峨Ο繝・・繧ｾ繝ｼ繝ｳ縺ｫ繝峨Λ繝・げ・・ラ繝ｭ繝・・縺吶ｋ縺縺代〒縲；emini Vision API縺瑚・蜍戊ｪ崎ｭ倥＠縺ｦ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ諠・ｱ繧呈歓蜃ｺ縲り､・焚譫壼酔譎ょ・逅・・騾ｲ謐苓｡ｨ遉ｺ縺ｫ蟇ｾ蠢懊・
+- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma 繧ｷ繝翫Μ繧ｪ騾｣謳ｺ・・TEP2・峨Δ繝ｼ繝峨ｒ霑ｽ蜉縲・ano Banana Pro縺ｮSTEP2蜈･蜉帶ｬ・↓縺昴・縺ｾ縺ｾ雋ｼ繧贋ｻ倥￠蜿ｯ閭ｽ縺ｪ繝輔か繝ｼ繝槭ャ繝医〒蜃ｺ蜉帙・
+- **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / 繝峨Ο繝・・繧ｾ繝ｼ繝ｳ縺瑚､・焚逕ｻ蜒上・蜷梧凾繝峨Ο繝・・縺ｫ蟇ｾ蠢懊る・ｬ｡蜃ｦ逅・＠縲∝・繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧堤ｵｱ蜷医＠縺ｦ繧ｮ繝｣繝ｩ繝ｪ繝ｼ莉倥″繝｢繝ｼ繝繝ｫ縺ｧ陦ｨ遉ｺ縲・
+- **UI Improvements**: Moved "繧ｹ繝医・繝ｪ繝ｼ逕滓・" button to top of settings panel (below "蜈ｨ鬆・岼繝ｩ繝ｳ繝繝"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 逕滓・繝懊ち繝ｳ繧偵ヱ繝阪Ν譛荳企Κ縺ｫ遘ｻ蜍輔ゅく繝｣繝ｩ繧ｯ繧ｿ繝ｼ蜈･蜉帙・3繝代ち繝ｼ繝ｳ譯亥・繧定ｿｽ蜉縲・PI蜈･蜉帶ｬ・・讓ｪ莨ｸ縺ｳ蝠城｡後ｒ菫ｮ豁｣縲・
+- **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝郁ｪ崎ｭ倅ｸｭ縺ｫ繧ｰ繝ｭ繝ｼ繝舌Ν繧｢繝ｩ繝ｼ繝医ヰ繝ｼ繧定｡ｨ遉ｺ縺励√せ繝医・繝ｪ繝ｼ逕滓・譎ゅ→蜷檎ｭ峨・UX繧貞ｮ溽樟縲・
+- **Model Priority Update**: Image recognition models follow Nano Banana Pro v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 逕ｻ蜒剰ｪ崎ｭ倥Δ繝・Ν繧誰BP v2.26貅匁侠縺ｮ蜆ｪ蜈磯・ｽ阪↓譖ｴ譁ｰ縲ゅユ繧ｭ繧ｹ繝育函謌舌Δ繝・Ν繧Ｈemini-3-flash-preview繧呈怙蜆ｪ蜈医↓螟画峩縲・
 
-### v2.6.0 — 2026-03-31
-- **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "シュールギャグ", "どんでん返し") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 全カテゴリ×全サブプリセットに対応するAI文体ガイドエンジンを追加。従来はプリセット選択がラベル名としてしかプロンプトに渡されず、AIに無視されがちだった問題を解消。
-  - **Genre (ジャンル)**: 7 categories + 50 sub-presets with specific tone/style rules (e.g., "シュールギャグ" → prohibit serious inner conflict, require escalating nonsense with deadpan delivery). / 7大カテゴリ＋50サブプリセットに文体ルール付与。
-  - **Ending (オチの型)**: 6 categories + 25 sub-presets with structural direction (e.g., "どんでん返し" → require 3+ foreshadowing elements). / 6大カテゴリ＋25サブの結末演出指示。
-  - **Worldview (世界観)**: 7 categories + 40 sub-presets with atmosphere/setting guides. / 7大カテゴリ＋40サブの舞台描写指示。
-  - **Target (ターゲット層)**: 5 categories + 25 sub-presets with language-level adjustments. / 5大カテゴリ＋25サブの文体レベル指定。
-  - **Narration (語り口)**: 3 categories + 15 sub-presets with perspective rules. / 3大カテゴリ＋15サブの語り方指定。
-- **New File**: `src/styleGuides.js` — Centralized style guide data (~250 entries). / 文体ガイドデータを専用ファイルに分離。
+### v2.6.0 窶・2026-03-31
+- **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "繧ｷ繝･繝ｼ繝ｫ繧ｮ繝｣繧ｰ", "縺ｩ繧薙〒繧楢ｿ斐＠") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 蜈ｨ繧ｫ繝・ざ繝ｪﾃ怜・繧ｵ繝悶・繝ｪ繧ｻ繝・ヨ縺ｫ蟇ｾ蠢懊☆繧帰I譁・ｽ薙ぎ繧､繝峨お繝ｳ繧ｸ繝ｳ繧定ｿｽ蜉縲ょｾ捺擂縺ｯ繝励Μ繧ｻ繝・ヨ驕ｸ謚槭′繝ｩ繝吶Ν蜷阪→縺励※縺励°繝励Ο繝ｳ繝励ヨ縺ｫ貂｡縺輔ｌ縺壹、I縺ｫ辟｡隕悶＆繧後′縺｡縺縺｣縺溷撫鬘後ｒ隗｣豸医・
+  - **Genre (繧ｸ繝｣繝ｳ繝ｫ)**: 7 categories + 50 sub-presets with specific tone/style rules (e.g., "繧ｷ繝･繝ｼ繝ｫ繧ｮ繝｣繧ｰ" 竊・prohibit serious inner conflict, require escalating nonsense with deadpan delivery). / 7螟ｧ繧ｫ繝・ざ繝ｪ・・0繧ｵ繝悶・繝ｪ繧ｻ繝・ヨ縺ｫ譁・ｽ薙Ν繝ｼ繝ｫ莉倅ｸ弱・
+  - **Ending (繧ｪ繝√・蝙・**: 6 categories + 25 sub-presets with structural direction (e.g., "縺ｩ繧薙〒繧楢ｿ斐＠" 竊・require 3+ foreshadowing elements). / 6螟ｧ繧ｫ繝・ざ繝ｪ・・5繧ｵ繝悶・邨先忰貍泌・謖・､ｺ縲・
+  - **Worldview (荳也阜隕ｳ)**: 7 categories + 40 sub-presets with atmosphere/setting guides. / 7螟ｧ繧ｫ繝・ざ繝ｪ・・0繧ｵ繝悶・闊槫床謠丞・謖・､ｺ縲・
+  - **Target (繧ｿ繝ｼ繧ｲ繝・ヨ螻､)**: 5 categories + 25 sub-presets with language-level adjustments. / 5螟ｧ繧ｫ繝・ざ繝ｪ・・5繧ｵ繝悶・譁・ｽ薙Ξ繝吶Ν謖・ｮ壹・
+  - **Narration (隱槭ｊ蜿｣)**: 3 categories + 15 sub-presets with perspective rules. / 3螟ｧ繧ｫ繝・ざ繝ｪ・・5繧ｵ繝悶・隱槭ｊ譁ｹ謖・ｮ壹・
+- **New File**: `src/styleGuides.js` 窶・Centralized style guide data (~250 entries). / 譁・ｽ薙ぎ繧､繝峨ョ繝ｼ繧ｿ繧貞ｰら畑繝輔ぃ繧､繝ｫ縺ｫ蛻・屬縲・
 
-### v2.5.0 — 2026-03-31
-- **Title Bracket Enforcement**: Enhanced title parsing to always wrap story titles in 【】 brackets. AI output is now sanitized of existing decorations before JS-side bracketing, ensuring consistent formatting regardless of AI behavior. / タイトルの【】付与を厳格化。AI出力から既存の装飾記号を除去した上でJS側で必ず【】を付与するよう強化。AIの出力形式に依存せず常に一貫したフォーマットを保証。
-- **Output Panel Scroll**: Added `max-height` and `overflow-y: auto` to the output box, enabling in-frame scrolling for long stories. The OUTPUT header (title, character count, copy/download buttons) remains always visible. / OUTPUT欄に`max-height`と枠内スクロールを追加。長文でもヘッダー（タイトル・字数・コピー/保存ボタン）が常に表示される設計に変更。
+### v2.5.0 窶・2026-03-31
+- **Title Bracket Enforcement**: Enhanced title parsing to always wrap story titles in 縲舌・brackets. AI output is now sanitized of existing decorations before JS-side bracketing, ensuring consistent formatting regardless of AI behavior. / 繧ｿ繧､繝医Ν縺ｮ縲舌台ｻ倅ｸ弱ｒ蜴ｳ譬ｼ蛹悶・I蜃ｺ蜉帙°繧画里蟄倥・陬・｣ｾ險伜捷繧帝勁蜴ｻ縺励◆荳翫〒JS蛛ｴ縺ｧ蠢・★縲舌代ｒ莉倅ｸ弱☆繧九ｈ縺・ｼｷ蛹悶・I縺ｮ蜃ｺ蜉帛ｽ｢蠑上↓萓晏ｭ倥○縺壼ｸｸ縺ｫ荳雋ｫ縺励◆繝輔か繝ｼ繝槭ャ繝医ｒ菫晁ｨｼ縲・
+- **Output Panel Scroll**: Added `max-height` and `overflow-y: auto` to the output box, enabling in-frame scrolling for long stories. The OUTPUT header (title, character count, copy/download buttons) remains always visible. / OUTPUT谺・↓`max-height`縺ｨ譫蜀・せ繧ｯ繝ｭ繝ｼ繝ｫ繧定ｿｽ蜉縲る聞譁・〒繧ゅ・繝・ム繝ｼ・医ち繧､繝医Ν繝ｻ蟄玲焚繝ｻ繧ｳ繝斐・/菫晏ｭ倥・繧ｿ繝ｳ・峨′蟶ｸ縺ｫ陦ｨ遉ｺ縺輔ｌ繧玖ｨｭ險医↓螟画峩縲・
 
-### v2.4.9 — 2026-03-31
-- **Narrative Structure Rules**: Added 7-rule "Foreshadowing & Composition Rules" to the prompt engine, dramatically improving story quality. / プロンプトエンジンに7項目の「伏線・構成ルール（厳守）」を追加し、生成される物語の品質を劇的に向上。
-  - **Foreshadowing**: Elements important in the second half must be hinted at in the first half. / 後半で重要な要素は前半で必ず暗示。
-  - **Character Function**: All characters must have a narrative role; passive bystanders are prohibited. / 全キャラに物語的機能を義務付け、傍観者キャラ禁止。
-  - **Ending Conviction**: Protagonists must show clear will/action; acceptance requires prior resistance. / 結末で主人公の明確な意志表示を要求、受容前の抵抗描写を必須化。
-  - **Setting Necessity**: Special elements must connect to protagonist's personal background. / 特殊設定は主人公の個人的背景と接続必須。
-  - **Show Don't Tell**: Prohibits info-dump via dialogue, monologue, or single "explainer" characters. / 台詞・独白・説明役キャラによる設定の一括説明を禁止。
-  - **Farewell Weight**: Meaningful partings must carry emotional weight. / 別離シーンに感情的重みの描写を要求。
-  - **Tonal Variation**: Writing style must shift with protagonist's emotional state; shock scenes require immersive body/mind description. / 心理状態に応じた文体変化と衝撃シーンの追体験描写を要求。
+### v2.4.9 窶・2026-03-31
+- **Narrative Structure Rules**: Added 7-rule "Foreshadowing & Composition Rules" to the prompt engine, dramatically improving story quality. / 繝励Ο繝ｳ繝励ヨ繧ｨ繝ｳ繧ｸ繝ｳ縺ｫ7鬆・岼縺ｮ縲御ｼ冗ｷ壹・讒区・繝ｫ繝ｼ繝ｫ・亥宍螳茨ｼ峨阪ｒ霑ｽ蜉縺励∫函謌舌＆繧後ｋ迚ｩ隱槭・蜩∬ｳｪ繧貞括逧・↓蜷台ｸ翫・
+  - **Foreshadowing**: Elements important in the second half must be hinted at in the first half. / 蠕悟濠縺ｧ驥崎ｦ√↑隕∫ｴ縺ｯ蜑榊濠縺ｧ蠢・★證礼､ｺ縲・
+  - **Character Function**: All characters must have a narrative role; passive bystanders are prohibited. / 蜈ｨ繧ｭ繝｣繝ｩ縺ｫ迚ｩ隱樒噪讖溯・繧堤ｾｩ蜍吩ｻ倥￠縲∝ｍ隕ｳ閠・く繝｣繝ｩ遖∵ｭ｢縲・
+  - **Ending Conviction**: Protagonists must show clear will/action; acceptance requires prior resistance. / 邨先忰縺ｧ荳ｻ莠ｺ蜈ｬ縺ｮ譏守｢ｺ縺ｪ諢丞ｿ苓｡ｨ遉ｺ繧定ｦ∵ｱゅ∝女螳ｹ蜑阪・謚ｵ謚玲緒蜀吶ｒ蠢・亥喧縲・
+  - **Setting Necessity**: Special elements must connect to protagonist's personal background. / 迚ｹ谿願ｨｭ螳壹・荳ｻ莠ｺ蜈ｬ縺ｮ蛟倶ｺｺ逧・レ譎ｯ縺ｨ謗･邯壼ｿ・医・
+  - **Show Don't Tell**: Prohibits info-dump via dialogue, monologue, or single "explainer" characters. / 蜿ｰ隧槭・迢ｬ逋ｽ繝ｻ隱ｬ譏主ｽｹ繧ｭ繝｣繝ｩ縺ｫ繧医ｋ險ｭ螳壹・荳諡ｬ隱ｬ譏弱ｒ遖∵ｭ｢縲・
+  - **Farewell Weight**: Meaningful partings must carry emotional weight. / 蛻･髮｢繧ｷ繝ｼ繝ｳ縺ｫ諢滓ュ逧・㍾縺ｿ縺ｮ謠丞・繧定ｦ∵ｱゅ・
+  - **Tonal Variation**: Writing style must shift with protagonist's emotional state; shock scenes require immersive body/mind description. / 蠢・炊迥ｶ諷九↓蠢懊§縺滓枚菴灘､牙喧縺ｨ陦晄茶繧ｷ繝ｼ繝ｳ縺ｮ霑ｽ菴馴ｨ捺緒蜀吶ｒ隕∵ｱゅ・
 
-### v2.4.8 — 2026-03-30
-- **Maintenance Release**: Version bump and redeployment for stable release packaging. / 安定版リリースパッケージング用のバージョン更新と再デプロイ。
+### v2.4.8 窶・2026-03-30
+- **Maintenance Release**: Version bump and redeployment for stable release packaging. / 螳牙ｮ夂沿繝ｪ繝ｪ繝ｼ繧ｹ繝代ャ繧ｱ繝ｼ繧ｸ繝ｳ繧ｰ逕ｨ縺ｮ繝舌・繧ｸ繝ｧ繝ｳ譖ｴ譁ｰ縺ｨ蜀阪ョ繝励Ο繧､縲・
 
-### v2.4.7 — 2026-03-30
-- **Mode-Specific Style Guide**: Added unique tone/writing-style instructions for all 14 output modes (4-panel, essay, poem, etc.) to eliminate the "everything sounds the same" problem. / 全14出力モードに個別の文体・トーン指示を追加し、どのモードでも似たような厨二病的文章になる問題を解消。
-- **Era Consistency Rules**: AI now auto-corrects anachronistic expressions when historical era settings are selected (e.g., no "smartphone" in Taisho era). / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルールを追加。
-- **Preset Data Expansion**: Doubled character name pools (M/F: 10→20), detail memos (7→15), roles (10→18), personalities (10→18), and all ORIGINALS lists (5-8→12-14) to reduce repetitive randomization. / キャラ名・詳細メモ・役割・性格・各ランダム生成プールを大幅拡充し、ランダム生成時のワンパターン化を解消。
-- **Bugfix: Random Mode Field**: Fixed the output mode custom field being empty when using "All Random & Generate". / 全ランダム生成時に出力モード欄が空欄になるバグを修正。
-- **Random Character Count**: Increased max random character count from 3 to 4. / ランダム生成時の最大人数を3人→4人に変更。
-- **Output Footer**: Added "Generated by Super FURU AI Story vX.Y.Z" credit line after story endings. / 生成結果の末尾にクレジットフッターを自動表示。
+### v2.4.7 窶・2026-03-30
+- **Mode-Specific Style Guide**: Added unique tone/writing-style instructions for all 14 output modes (4-panel, essay, poem, etc.) to eliminate the "everything sounds the same" problem. / 蜈ｨ14蜃ｺ蜉帙Δ繝ｼ繝峨↓蛟句挨縺ｮ譁・ｽ薙・繝医・繝ｳ謖・､ｺ繧定ｿｽ蜉縺励√←縺ｮ繝｢繝ｼ繝峨〒繧ゆｼｼ縺溘ｈ縺・↑蜴ｨ莠檎羅逧・枚遶縺ｫ縺ｪ繧句撫鬘後ｒ隗｣豸医・
+- **Era Consistency Rules**: AI now auto-corrects anachronistic expressions when historical era settings are selected (e.g., no "smartphone" in Taisho era). / 髱樒樟莉｣縺ｮ譎ゆｻ｣險ｭ螳壽凾縺ｫAI縺梧凾莉｣縺ｫ縺昴＄繧上↑縺・ｪ槫ｽ吶ｒ閾ｪ蜍輔〒隱ｭ縺ｿ譖ｿ縺医ｋ繝ｫ繝ｼ繝ｫ繧定ｿｽ蜉縲・
+- **Preset Data Expansion**: Doubled character name pools (M/F: 10竊・0), detail memos (7竊・5), roles (10竊・8), personalities (10竊・8), and all ORIGINALS lists (5-8竊・2-14) to reduce repetitive randomization. / 繧ｭ繝｣繝ｩ蜷阪・隧ｳ邏ｰ繝｡繝｢繝ｻ蠖ｹ蜑ｲ繝ｻ諤ｧ譬ｼ繝ｻ蜷・Λ繝ｳ繝繝逕滓・繝励・繝ｫ繧貞､ｧ蟷・僑蜈・＠縲√Λ繝ｳ繝繝逕滓・譎ゅ・繝ｯ繝ｳ繝代ち繝ｼ繝ｳ蛹悶ｒ隗｣豸医・
+- **Bugfix: Random Mode Field**: Fixed the output mode custom field being empty when using "All Random & Generate". / 蜈ｨ繝ｩ繝ｳ繝繝逕滓・譎ゅ↓蜃ｺ蜉帙Δ繝ｼ繝画ｬ・′遨ｺ谺・↓縺ｪ繧九ヰ繧ｰ繧剃ｿｮ豁｣縲・
+- **Random Character Count**: Increased max random character count from 3 to 4. / 繝ｩ繝ｳ繝繝逕滓・譎ゅ・譛螟ｧ莠ｺ謨ｰ繧・莠ｺ竊・莠ｺ縺ｫ螟画峩縲・
+- **Output Footer**: Added "Generated by Super FURU AI Story vX.Y.Z" credit line after story endings. / 逕滓・邨先棡縺ｮ譛ｫ蟆ｾ縺ｫ繧ｯ繝ｬ繧ｸ繝・ヨ繝輔ャ繧ｿ繝ｼ繧定・蜍戊｡ｨ遉ｺ縲・
 
-### v2.4.6 — 2026-03-29
-- **UI Bugfix**: Added missing `autocomplete="off"` to custom input fields (Theme, Era, Ending Type) to prevent browser default auto-complete history from covering the UI as speech bubble-like popups. / 一部のカスタム入力欄（テーマ・時代設定・オチの型）でブラウザの自動補完履歴がフキダシのように被って表示されるバグを修正。
+### v2.4.6 窶・2026-03-29
+- **UI Bugfix**: Added missing `autocomplete="off"` to custom input fields (Theme, Era, Ending Type) to prevent browser default auto-complete history from covering the UI as speech bubble-like popups. / 荳驛ｨ縺ｮ繧ｫ繧ｹ繧ｿ繝蜈･蜉帶ｬ・ｼ医ユ繝ｼ繝槭・譎ゆｻ｣險ｭ螳壹・繧ｪ繝√・蝙具ｼ峨〒繝悶Λ繧ｦ繧ｶ縺ｮ閾ｪ蜍戊｣懷ｮ悟ｱ･豁ｴ縺後ヵ繧ｭ繝繧ｷ縺ｮ繧医≧縺ｫ陲ｫ縺｣縺ｦ陦ｨ遉ｺ縺輔ｌ繧九ヰ繧ｰ繧剃ｿｮ豁｣縲・
 
-### v2.4.5 — 2026-03-28
-- **Icon Redesign**: Replaced white-washed emoji book icon (📖) with a custom SVG book icon in vivid purple with glow effect. / 白飛びしていた絵文字アイコンを、紫色のSVGアイコン（グロウエフェクト付き）に差し替え。
-- **Critical Layout Fix**: Fixed output box background not covering full text content by adding `flex-shrink: 0`. Added bottom margin to prevent text sticking to screen edge. / 出力テキストが枠からはみ出す致命的バグを `flex-shrink: 0` で修正。下余白も追加。
-- **Long-Form Mode Enhancement**: Removed placeholder text from master prompt template. Added direct instruction for receiving LLM to write full chapter text. Added "【完】/【続く】" end markers for all output modes. / 長編マスタープロンプトの雛形テンプレートを直接的な執筆命令に書き換え。全モードに終了マーカーを追加。
-- **Deploy Fix**: Corrected GitHub Pages source from `main` branch to `gh-pages` branch, resolving the issue where presets were not displayed on the deployed site. / GitHub Pagesの配信元を `main` から `gh-pages` に修正し、デプロイ先でプリセットが表示されない問題を解消。
+### v2.4.5 窶・2026-03-28
+- **Icon Redesign**: Replaced white-washed emoji book icon (当) with a custom SVG book icon in vivid purple with glow effect. / 逋ｽ鬟帙・縺励※縺・◆邨ｵ譁・ｭ励い繧､繧ｳ繝ｳ繧偵∫ｴｫ濶ｲ縺ｮSVG繧｢繧､繧ｳ繝ｳ・医げ繝ｭ繧ｦ繧ｨ繝輔ぉ繧ｯ繝井ｻ倥″・峨↓蟾ｮ縺玲崛縺医・
+- **Critical Layout Fix**: Fixed output box background not covering full text content by adding `flex-shrink: 0`. Added bottom margin to prevent text sticking to screen edge. / 蜃ｺ蜉帙ユ繧ｭ繧ｹ繝医′譫縺九ｉ縺ｯ縺ｿ蜃ｺ縺呵・蜻ｽ逧・ヰ繧ｰ繧・`flex-shrink: 0` 縺ｧ菫ｮ豁｣縲ゆｸ倶ｽ咏區繧りｿｽ蜉縲・
+- **Long-Form Mode Enhancement**: Removed placeholder text from master prompt template. Added direct instruction for receiving LLM to write full chapter text. Added "縲仙ｮ後・縲千ｶ壹￥縲・ end markers for all output modes. / 髟ｷ邱ｨ繝槭せ繧ｿ繝ｼ繝励Ο繝ｳ繝励ヨ縺ｮ髮帛ｽ｢繝・Φ繝励Ξ繝ｼ繝医ｒ逶ｴ謗･逧・↑蝓ｷ遲・多莉､縺ｫ譖ｸ縺肴鋤縺医ょ・繝｢繝ｼ繝峨↓邨ゆｺ・・繝ｼ繧ｫ繝ｼ繧定ｿｽ蜉縲・
+- **Deploy Fix**: Corrected GitHub Pages source from `main` branch to `gh-pages` branch, resolving the issue where presets were not displayed on the deployed site. / GitHub Pages縺ｮ驟堺ｿ｡蜈・ｒ `main` 縺九ｉ `gh-pages` 縺ｫ菫ｮ豁｣縺励√ョ繝励Ο繧､蜈医〒繝励Μ繧ｻ繝・ヨ縺瑚｡ｨ遉ｺ縺輔ｌ縺ｪ縺・撫鬘後ｒ隗｣豸医・
 
-### v2.4.4 — 2026-03-28
-- **Cleanup**: Removed remaining Claude residues in documentation. / ドキュメントに残存していたClaudeの記述残骸を完全に削除。
-- **UI Logic**: Fixed long novel prompt logic so that the prompt string is directly displayed in the main output panel. / 長編小説モードにおいてAPI通信を挟まず直接OUTPUTへプロンプトを出力するロジックに修正。
-- **UI Tweaks**: Added smart display control to hide the yellow alert banner outside of active generation windows. Removed right-aligned unnecessary prompt pane. / 黄色の警告表示をAPI通信中のみ表示されるよう変更・不要な右側パネルを削除。
+### v2.4.4 窶・2026-03-28
+- **Cleanup**: Removed remaining Claude residues in documentation. / 繝峨く繝･繝｡繝ｳ繝医↓谿句ｭ倥＠縺ｦ縺・◆Claude縺ｮ險倩ｿｰ谿矩ｪｸ繧貞ｮ悟・縺ｫ蜑企勁縲・
+- **UI Logic**: Fixed long novel prompt logic so that the prompt string is directly displayed in the main output panel. / 髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝峨↓縺翫＞縺ｦAPI騾壻ｿ｡繧呈検縺ｾ縺夂峩謗･OUTPUT縺ｸ繝励Ο繝ｳ繝励ヨ繧貞・蜉帙☆繧九Ο繧ｸ繝・け縺ｫ菫ｮ豁｣縲・
+- **UI Tweaks**: Added smart display control to hide the yellow alert banner outside of active generation windows. Removed right-aligned unnecessary prompt pane. / 鮟・牡縺ｮ隴ｦ蜻願｡ｨ遉ｺ繧但PI騾壻ｿ｡荳ｭ縺ｮ縺ｿ陦ｨ遉ｺ縺輔ｌ繧九ｈ縺・､画峩繝ｻ荳崎ｦ√↑蜿ｳ蛛ｴ繝代ロ繝ｫ繧貞炎髯､縲・
 
-### v2.4.3 — 2026-03-28
+### v2.4.3 窶・2026-03-28
 - **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
-- **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
-- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / Claude APIへの言及を完全に排除し、Gemini専用として再構築。
+- **Alert Notifications**: Added a global yellow alert banner (鮟・牡縺ｮ隴ｦ蜻願｡ｨ遉ｺ) to clarify wait times during API communication.
+- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / Claude API縺ｸ縺ｮ險蜿翫ｒ螳悟・縺ｫ謗帝勁縺励；emini蟆ら畑縺ｨ縺励※蜀肴ｧ狗ｯ峨・
 
-### v2.4.2 — 2026-03-28
-- Long novel generation prompt fixes / 長編小説生成時のプロンプト修正
-- UI hint enhancements / UIヒント追加
+### v2.4.2 窶・2026-03-28
+- Long novel generation prompt fixes / 髟ｷ邱ｨ蟆剰ｪｬ逕滓・譎ゅ・繝励Ο繝ｳ繝励ヨ菫ｮ豁｣
+- UI hint enhancements / UI繝偵Φ繝郁ｿｽ蜉
 
-### v1.0.0 — 2026-03-27
-- Initial release / 初回リリース
+### v1.0.0 窶・2026-03-27
+- Initial release / 蛻晏屓繝ｪ繝ｪ繝ｼ繧ｹ
 
 ---
 
-## ⚖️ Compliance & Legal Stance / 法的遵守について
+## 笞厄ｸ・Compliance & Legal Stance / 豕慕噪驕ｵ螳医↓縺､縺・※
 
 **Japanese Copyright Law (Article 30-4)**
 This project is developed in full compliance with Article 30-4 of the Japanese Copyright Act, which allows for the exploitation of copyrighted works for information analysis and technological development of AI.
-本プロジェクトは、日本の著作権法第30条の4（情報解析目的等での利用）に基づき、技術検証および情報解析を目的として開発されており、法的に適正な範囲内で公開されています。
+譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲∵律譛ｬ縺ｮ闡嶺ｽ懈ｨｩ豕慕ｬｬ30譚｡縺ｮ4・域ュ蝣ｱ隗｣譫千岼逧・ｭ峨〒縺ｮ蛻ｩ逕ｨ・峨↓蝓ｺ縺･縺阪∵橿陦捺､懆ｨｼ縺翫ｈ縺ｳ諠・ｱ隗｣譫舌ｒ逶ｮ逧・→縺励※髢狗匱縺輔ｌ縺ｦ縺翫ｊ縲∵ｳ慕噪縺ｫ驕ｩ豁｣縺ｪ遽・峇蜀・〒蜈ｬ髢九＆繧後※縺・∪縺吶・
 
 **Official API Usage**
 All generations are performed through the official Google Gemini API. This system adheres strictly to Google's "Generative AI Forbidden Use Policy" and Terms of Service.
-本システムはGoogle公式のGemini APIを介して動作しており、Googleが定める「生成AI禁止事項」および利用規約を厳格に遵守しています。
+譛ｬ繧ｷ繧ｹ繝・Β縺ｯGoogle蜈ｬ蠑上・Gemini API繧剃ｻ九＠縺ｦ蜍穂ｽ懊＠縺ｦ縺翫ｊ縲；oogle縺悟ｮ壹ａ繧九檎函謌植I遖∵ｭ｢莠矩・阪♀繧医・蛻ｩ逕ｨ隕冗ｴ・ｒ蜴ｳ譬ｼ縺ｫ驕ｵ螳医＠縺ｦ縺・∪縺吶・
 
 **Autonomous & Deterministic Text Generation**
 Unlike simple prompt wrappers, this system uses a deterministic middleware pipeline (Multi-Axis Randomization and Anti-Repetition Prompt Engine). It does not aim to plagiarize specific existing novels or stories. It generates original narrative structures based on high-dimensional semantic control.
-単なるプロンプトのラッパーツールとは異なり、本システムは「多軸ランダム化」および「反復防止プロンプトエンジン」という決定論的なミドルウェアパイプラインを使用しています。既存の特定の小説や物語の盗用を目的としたものではなく、高次元の意味的制御に基づきオリジナルの物語構造を自律的に生成します。
+蜊倥↑繧九・繝ｭ繝ｳ繝励ヨ縺ｮ繝ｩ繝・ヱ繝ｼ繝・・繝ｫ縺ｨ縺ｯ逡ｰ縺ｪ繧翫∵悽繧ｷ繧ｹ繝・Β縺ｯ縲悟､夊ｻｸ繝ｩ繝ｳ繝繝蛹悶阪♀繧医・縲悟渚蠕ｩ髦ｲ豁｢繝励Ο繝ｳ繝励ヨ繧ｨ繝ｳ繧ｸ繝ｳ縲阪→縺・≧豎ｺ螳夊ｫ也噪縺ｪ繝溘ラ繝ｫ繧ｦ繧ｧ繧｢繝代う繝励Λ繧､繝ｳ繧剃ｽｿ逕ｨ縺励※縺・∪縺吶よ里蟄倥・迚ｹ螳壹・蟆剰ｪｬ繧・黄隱槭・逶礼畑繧堤岼逧・→縺励◆繧ゅ・縺ｧ縺ｯ縺ｪ縺上・ｫ俶ｬ｡蜈・・諢丞袖逧・宛蠕｡縺ｫ蝓ｺ縺･縺阪が繝ｪ繧ｸ繝翫Ν縺ｮ迚ｩ隱樊ｧ矩繧定・蠕狗噪縺ｫ逕滓・縺励∪縺吶・
 
 **No-Profit & Research Focus**
 The core logic (Prompts/Protocols) is released under CC BY-NC-SA 4.0. Any commercial misuse by third parties is strictly prohibited. This project exists solely for the advancement of LLM control technology and the democratization of creative writing tools.
-核心的なロジックはCC BY-NC-SA 4.0（非営利）の下で公開されています。第三者による悪質な商用利用はライセンス違反となります。本プロジェクトは、LLM制御技術の発展と、執筆活動の民主化を目的とした研究成果です。
+譬ｸ蠢・噪縺ｪ繝ｭ繧ｸ繝・け縺ｯCC BY-NC-SA 4.0・磯撼蝟ｶ蛻ｩ・峨・荳九〒蜈ｬ髢九＆繧後※縺・∪縺吶らｬｬ荳芽・↓繧医ｋ謔ｪ雉ｪ縺ｪ蝠・畑蛻ｩ逕ｨ縺ｯ繝ｩ繧､繧ｻ繝ｳ繧ｹ驕募渚縺ｨ縺ｪ繧翫∪縺吶よ悽繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲´LM蛻ｶ蠕｡謚陦薙・逋ｺ螻輔→縲∝濤遲・ｴｻ蜍輔・豌台ｸｻ蛹悶ｒ逶ｮ逧・→縺励◆遐皮ｩｶ謌先棡縺ｧ縺吶・
 
 ---
 
-## ⚖️ License & Rights / ライセンス・権利関係
+## 笞厄ｸ・License & Rights / 繝ｩ繧､繧ｻ繝ｳ繧ｹ繝ｻ讓ｩ蛻ｩ髢｢菫・
 
 This project uses a hybrid license to balance technology sharing and intellectual property protection.
-技術の共有と創作の保護を両立するため、以下のハイブリッドライセンスを採用しています。
+謚陦薙・蜈ｱ譛峨→蜑ｵ菴懊・菫晁ｭｷ繧剃ｸ｡遶九☆繧九◆繧√∽ｻ･荳九・繝上う繝悶Μ繝・ラ繝ｩ繧､繧ｻ繝ｳ繧ｹ繧呈治逕ｨ縺励※縺・∪縺吶・
 
 * **Source Code**: [MIT License](https://opensource.org/licenses/MIT)
-  Applies to software logic and implementation code. / ソフトウェアの動作ロジックや実装コードに適用。
+  Applies to software logic and implementation code. / 繧ｽ繝輔ヨ繧ｦ繧ｧ繧｢縺ｮ蜍穂ｽ懊Ο繧ｸ繝・け繧・ｮ溯｣・さ繝ｼ繝峨↓驕ｩ逕ｨ縲・
 * **Logic & Prompts**: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)
-  Applies to original design philosophy, multi-axis randomization arrays, and anti-repetition structures. / 設計思想、多軸ランダム化の配列、および反復防止プロンプト構造に適用。
+  Applies to original design philosophy, multi-axis randomization arrays, and anti-repetition structures. / 險ｭ險域晄Φ縲∝､夊ｻｸ繝ｩ繝ｳ繝繝蛹悶・驟榊・縲√♀繧医・蜿榊ｾｩ髦ｲ豁｢繝励Ο繝ｳ繝励ヨ讒矩縺ｫ驕ｩ逕ｨ縲・
 
-* **Output Ownership / 生成物の帰属**:
+* **Output Ownership / 逕滓・迚ｩ縺ｮ蟶ｰ螻・*:
   The CC SA (ShareAlike) requirement **does not apply** to texts generated by this system. Rights belong to the user.
-  本システムで生成されたテキスト（物語・プロット）に上記CCライセンスの継承義務は適用されません。権利はユーザーに帰属します。
+  譛ｬ繧ｷ繧ｹ繝・Β縺ｧ逕滓・縺輔ｌ縺溘ユ繧ｭ繧ｹ繝茨ｼ育黄隱槭・繝励Ο繝・ヨ・峨↓荳願ｨ呂C繝ｩ繧､繧ｻ繝ｳ繧ｹ縺ｮ邯呎価鄒ｩ蜍吶・驕ｩ逕ｨ縺輔ｌ縺ｾ縺帙ｓ縲よｨｩ蛻ｩ縺ｯ繝ｦ繝ｼ繧ｶ繝ｼ縺ｫ蟶ｰ螻槭＠縺ｾ縺吶・
 
-**Commercial Use and Paid Seminars / 商用利用・有料セミナーについて**
+**Commercial Use and Paid Seminars / 蝠・畑蛻ｩ逕ｨ繝ｻ譛画侭繧ｻ繝溘リ繝ｼ縺ｫ縺､縺・※**
 Usage of this system (including prompts and logic) in high-priced information products, paid seminars, or any "get-rich-quick" schemes is strictly prohibited under the CC BY-NC-SA 4.0 license.
-本システム（プロンプトおよびロジックを含む）を、高額な情報商材、有料セミナー、または「副業・稼げる」等の謳い文句を伴うビジネスに無断で使用することは、CC BY-NC-SA 4.0ライセンスに基づき、固く禁じます。
+譛ｬ繧ｷ繧ｹ繝・Β・医・繝ｭ繝ｳ繝励ヨ縺翫ｈ縺ｳ繝ｭ繧ｸ繝・け繧貞性繧・峨ｒ縲・ｫ倬｡阪↑諠・ｱ蝠・攝縲∵怏譁吶そ繝溘リ繝ｼ縲√∪縺溘・縲悟憶讌ｭ繝ｻ遞ｼ縺偵ｋ縲咲ｭ峨・隰ｳ縺・枚蜿･繧剃ｼｴ縺・ン繧ｸ繝阪せ縺ｫ辟｡譁ｭ縺ｧ菴ｿ逕ｨ縺吶ｋ縺薙→縺ｯ縲，C BY-NC-SA 4.0繝ｩ繧､繧ｻ繝ｳ繧ｹ縺ｫ蝓ｺ縺･縺阪∝崋縺冗ｦ√§縺ｾ縺吶・
 
 Any commercial or educational use involving fees requires explicit prior written consent from the developer (FURU).
-有料の教育目的や商用利用を検討される場合は、必ず事前に開発者（FURU）の書面による承諾を得てください。
+譛画侭縺ｮ謨呵ご逶ｮ逧・ｄ蝠・畑蛻ｩ逕ｨ繧呈､懆ｨ弱＆繧後ｋ蝣ｴ蜷医・縲∝ｿ・★莠句燕縺ｫ髢狗匱閠・ｼ・URU・峨・譖ｸ髱｢縺ｫ繧医ｋ謇ｿ隲ｾ繧貞ｾ励※縺上□縺輔＞縲・
 
 ---
 
-## 利用規約 / Terms of Use
+## 蛻ｩ逕ｨ隕冗ｴ・/ Terms of Use
 
-### 1. 目的 / Purpose
+### 1. 逶ｮ逧・/ Purpose
 
-本ツールは創作支援を目的としたものであり、既存の著作物、ブランド、キャラクター、または特定の作家・作品の再現や代替を目的とした利用は想定していません。  
+譛ｬ繝・・繝ｫ縺ｯ蜑ｵ菴懈髪謠ｴ繧堤岼逧・→縺励◆繧ゅ・縺ｧ縺ゅｊ縲∵里蟄倥・闡嶺ｽ懃黄縲√ヶ繝ｩ繝ｳ繝峨√く繝｣繝ｩ繧ｯ繧ｿ繝ｼ縲√∪縺溘・迚ｹ螳壹・菴懷ｮｶ繝ｻ菴懷刀縺ｮ蜀咲樟繧・ｻ｣譖ｿ繧堤岼逧・→縺励◆蛻ｩ逕ｨ縺ｯ諠ｳ螳壹＠縺ｦ縺・∪縺帙ｓ縲・ 
 This tool is intended for creative assistance and is not designed to reproduce, substitute, or replicate existing copyrighted works, brands, characters, or specific creators.
 
 ---
 
-### 2. 生成コンテンツに関する禁止事項 / Prohibited Uses
+### 2. 逕滓・繧ｳ繝ｳ繝・Φ繝・↓髢｢縺吶ｋ遖∵ｭ｢莠矩・/ Prohibited Uses
 
-ユーザーは、本ツールを使用して以下の行為を行ってはなりません。  
+繝ｦ繝ｼ繧ｶ繝ｼ縺ｯ縲∵悽繝・・繝ｫ繧剃ｽｿ逕ｨ縺励※莉･荳九・陦檎ぜ繧定｡後▲縺ｦ縺ｯ縺ｪ繧翫∪縺帙ｓ縲・ 
 Users must not engage in the following:
 
-#### (1) 著作権・知的財産権侵害 / Intellectual Property Infringement
-既存の小説、脚本、記事、漫画原作、その他文章コンテンツを実質的に再現・模倣する行為
+#### (1) 闡嶺ｽ懈ｨｩ繝ｻ遏･逧・ｲ｡逕｣讓ｩ萓ｵ螳ｳ / Intellectual Property Infringement
+譌｢蟄倥・蟆剰ｪｬ縲∬・譛ｬ縲∬ｨ倅ｺ九∵ｼｫ逕ｻ蜴滉ｽ懊√◎縺ｮ莉匁枚遶繧ｳ繝ｳ繝・Φ繝・ｒ螳溯ｳｪ逧・↓蜀咲樟繝ｻ讓｡蛟｣縺吶ｋ陦檎ぜ
 Reproducing or closely imitating existing written works such as novels, scripts, articles, or story content
 
-特定の作家・作品の文体、語り口、プロット構造、キャラクター構成を識別可能なレベルで再現する行為  
+迚ｹ螳壹・菴懷ｮｶ繝ｻ菴懷刀縺ｮ譁・ｽ薙∬ｪ槭ｊ蜿｣縲√・繝ｭ繝・ヨ讒矩縲√く繝｣繝ｩ繧ｯ繧ｿ繝ｼ讒区・繧定ｭ伜挨蜿ｯ閭ｽ縺ｪ繝ｬ繝吶Ν縺ｧ蜀咲樟縺吶ｋ陦檎ぜ  
 Replicating the writing style, narrative voice, plot structure, or character composition of a specific author or work in a recognizable manner
 
-既存作品のストーリー展開、設定、プロットを言い換え・変形して再利用する行為  
+譌｢蟄倅ｽ懷刀縺ｮ繧ｹ繝医・繝ｪ繝ｼ螻暮幕縲∬ｨｭ螳壹√・繝ｭ繝・ヨ繧定ｨ縺・鋤縺医・螟牙ｽ｢縺励※蜀榊茜逕ｨ縺吶ｋ陦檎ぜ  
 Reusing or paraphrasing existing storylines, settings, or plots from copyrighted works
   
-#### (2) 権利侵害コンテンツの利用 / Use of Infringing Content
-- 第三者の著作権、商標権、肖像権、パブリシティ権等を侵害するコンテンツの生成、公開、販売、共有  
-- 既存IPに類似したコンテンツの無断商用利用  
+#### (2) 讓ｩ蛻ｩ萓ｵ螳ｳ繧ｳ繝ｳ繝・Φ繝・・蛻ｩ逕ｨ / Use of Infringing Content
+- 隨ｬ荳芽・・闡嶺ｽ懈ｨｩ縲∝膚讓呎ｨｩ縲∬ｖ蜒乗ｨｩ縲√ヱ繝悶Μ繧ｷ繝・ぅ讓ｩ遲峨ｒ萓ｵ螳ｳ縺吶ｋ繧ｳ繝ｳ繝・Φ繝・・逕滓・縲∝・髢九∬ｲｩ螢ｲ縲∝・譛・ 
+- 譌｢蟄露P縺ｫ鬘樔ｼｼ縺励◆繧ｳ繝ｳ繝・Φ繝・・辟｡譁ｭ蝠・畑蛻ｩ逕ｨ  
 
 Generating, distributing, or monetizing infringing or derivative content without permission.
 
-#### (3) 入力データの不正利用 / Misuse of Input Data
-- ユーザーは、入力する画像・テキスト等について、適法な権利または使用許諾を有することを保証するものとします  
-- 権利を有しない第三者コンテンツを入力として使用する行為  
+#### (3) 蜈･蜉帙ョ繝ｼ繧ｿ縺ｮ荳肴ｭ｣蛻ｩ逕ｨ / Misuse of Input Data
+- 繝ｦ繝ｼ繧ｶ繝ｼ縺ｯ縲∝・蜉帙☆繧狗判蜒上・繝・く繧ｹ繝育ｭ峨↓縺､縺・※縲・←豕輔↑讓ｩ蛻ｩ縺ｾ縺溘・菴ｿ逕ｨ險ｱ隲ｾ繧呈怏縺吶ｋ縺薙→繧剃ｿ晁ｨｼ縺吶ｋ繧ゅ・縺ｨ縺励∪縺・ 
+- 讓ｩ蛻ｩ繧呈怏縺励↑縺・ｬｬ荳芽・さ繝ｳ繝・Φ繝・ｒ蜈･蜉帙→縺励※菴ｿ逕ｨ縺吶ｋ陦檎ぜ  
 
 Users must have legal rights to all input data.
 
-#### (4) 不正利用の助長 / Facilitation of Misuse
-- 権利侵害を目的としたプロンプト、テンプレート、ワークフローの作成・共有  
-- 他者に侵害行為を促す行為  
+#### (4) 荳肴ｭ｣蛻ｩ逕ｨ縺ｮ蜉ｩ髟ｷ / Facilitation of Misuse
+- 讓ｩ蛻ｩ萓ｵ螳ｳ繧堤岼逧・→縺励◆繝励Ο繝ｳ繝励ヨ縲√ユ繝ｳ繝励Ξ繝ｼ繝医√Ρ繝ｼ繧ｯ繝輔Ο繝ｼ縺ｮ菴懈・繝ｻ蜈ｱ譛・ 
+- 莉冶・↓萓ｵ螳ｳ陦檎ぜ繧剃ｿ・☆陦檎ぜ  
 
 Creating or sharing tools intended for infringement.
 
-#### (5) 法令違反・不正行為 / Illegal Activities
-- 適用される法令に違反する行為  
-- 詐欺、不正行為、または有害な目的での利用  
+#### (5) 豕穂ｻ､驕募渚繝ｻ荳肴ｭ｣陦檎ぜ / Illegal Activities
+- 驕ｩ逕ｨ縺輔ｌ繧区ｳ穂ｻ､縺ｫ驕募渚縺吶ｋ陦檎ぜ  
+- 隧先ｬｺ縲∽ｸ肴ｭ｣陦檎ぜ縲√∪縺溘・譛牙ｮｳ縺ｪ逶ｮ逧・〒縺ｮ蛻ｩ逕ｨ  
 
 Any illegal or harmful use.
 
 ---
 
-### 3. 生成物の責任および権利 / Responsibility & Ownership
+### 3. 逕滓・迚ｩ縺ｮ雋ｬ莉ｻ縺翫ｈ縺ｳ讓ｩ蛻ｩ / Responsibility & Ownership
 
-生成されたコンテンツの内容および利用に関するすべての責任はユーザーに帰属します。  
+逕滓・縺輔ｌ縺溘さ繝ｳ繝・Φ繝・・蜀・ｮｹ縺翫ｈ縺ｳ蛻ｩ逕ｨ縺ｫ髢｢縺吶ｋ縺吶∋縺ｦ縺ｮ雋ｬ莉ｻ縺ｯ繝ｦ繝ｼ繧ｶ繝ｼ縺ｫ蟶ｰ螻槭＠縺ｾ縺吶・ 
 The user bears full responsibility for generated content.
 
-本ツールの利用によって生成されたコンテンツについて、開発者は著作権その他の権利を主張しませんが、その適法性・利用可能性を保証するものではありません。  
+譛ｬ繝・・繝ｫ縺ｮ蛻ｩ逕ｨ縺ｫ繧医▲縺ｦ逕滓・縺輔ｌ縺溘さ繝ｳ繝・Φ繝・↓縺､縺・※縲・幕逋ｺ閠・・闡嶺ｽ懈ｨｩ縺昴・莉悶・讓ｩ蛻ｩ繧剃ｸｻ蠑ｵ縺励∪縺帙ｓ縺後√◎縺ｮ驕ｩ豕墓ｧ繝ｻ蛻ｩ逕ｨ蜿ｯ閭ｽ諤ｧ繧剃ｿ晁ｨｼ縺吶ｋ繧ゅ・縺ｧ縺ｯ縺ゅｊ縺ｾ縺帙ｓ縲・ 
 The developer does not claim ownership of generated content but does not guarantee its legality or usability.
 
 ---
 
-### 4. 免責事項 / Disclaimer
+### 4. 蜈崎ｲｬ莠矩・/ Disclaimer
 
-本ツールは「現状有姿（AS IS）」で提供され、明示または黙示を問わず、いかなる保証も行いません。  
+譛ｬ繝・・繝ｫ縺ｯ縲檎樟迥ｶ譛牙ｧｿ・・S IS・峨阪〒謠蝉ｾ帙＆繧後∵・遉ｺ縺ｾ縺溘・鮟咏､ｺ繧貞撫繧上★縲√＞縺九↑繧倶ｿ晁ｨｼ繧り｡後＞縺ｾ縺帙ｓ縲・ 
 This tool is provided "as is" without any warranties.
 
-開発者は、本ツールの利用または生成コンテンツに起因するいかなる損害についても責任を負いません。  
+髢狗匱閠・・縲∵悽繝・・繝ｫ縺ｮ蛻ｩ逕ｨ縺ｾ縺溘・逕滓・繧ｳ繝ｳ繝・Φ繝・↓襍ｷ蝗縺吶ｋ縺・°縺ｪ繧区錐螳ｳ縺ｫ縺､縺・※繧りｲｬ莉ｻ繧定ｲ縺・∪縺帙ｓ縲・ 
 The developer shall not be liable for any damages arising from use.
 
 ---
 
-### 5. 権利侵害への対応 / Infringement & Takedown
+### 5. 讓ｩ蛻ｩ萓ｵ螳ｳ縺ｸ縺ｮ蟇ｾ蠢・/ Infringement & Takedown
 
-権利侵害の申し立てがあった場合、開発者は独自の判断により以下の対応を行う場合があります。  
+讓ｩ蛻ｩ萓ｵ螳ｳ縺ｮ逕ｳ縺礼ｫ九※縺後≠縺｣縺溷ｴ蜷医・幕逋ｺ閠・・迢ｬ閾ｪ縺ｮ蛻､譁ｭ縺ｫ繧医ｊ莉･荳九・蟇ｾ蠢懊ｒ陦後≧蝣ｴ蜷医′縺ゅｊ縺ｾ縺吶・ 
 Upon receiving a valid claim, the developer may:
 
-- 該当コンテンツの削除要請または削除  
-- 利用の制限または禁止  
-- リポジトリの公開停止等の措置  
+- 隧ｲ蠖薙さ繝ｳ繝・Φ繝・・蜑企勁隕∬ｫ九∪縺溘・蜑企勁  
+- 蛻ｩ逕ｨ縺ｮ蛻ｶ髯舌∪縺溘・遖∵ｭ｢  
+- 繝ｪ繝昴ず繝医Μ縺ｮ蜈ｬ髢句●豁｢遲峨・謗ｪ鄂ｮ  
 
 Remove content, restrict usage, or take necessary actions.
 
 ---
 
-### 6. 規約の変更 / Changes
+### 6. 隕冗ｴ・・螟画峩 / Changes
 
-本規約は予告なく変更される場合があります。  
+譛ｬ隕冗ｴ・・莠亥相縺ｪ縺丞､画峩縺輔ｌ繧句ｴ蜷医′縺ゅｊ縺ｾ縺吶・ 
 These terms may be updated without notice.
 
 ---
 
-### 7. 準拠法 / Governing Law
+### 7. 貅匁侠豕・/ Governing Law
 
-本規約は日本法に準拠します。  
+譛ｬ隕冗ｴ・・譌･譛ｬ豕輔↓貅匁侠縺励∪縺吶・ 
 These terms are governed by the laws of Japan.
 
 ---
 
-## AI Manga Creative Suite / AIまんが制作エコシステム
+## AI Manga Creative Suite / AI縺ｾ繧薙′蛻ｶ菴懊お繧ｳ繧ｷ繧ｹ繝・Β
 
 This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
-本プロジェクトは、AIを活用した漫画・ストーリー制作を支援する統合エコシステムの一部です。
+譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲、I繧呈ｴｻ逕ｨ縺励◆貍ｫ逕ｻ繝ｻ繧ｹ繝医・繝ｪ繝ｼ蛻ｶ菴懊ｒ謾ｯ謠ｴ縺吶ｋ邨ｱ蜷医お繧ｳ繧ｷ繧ｹ繝・Β縺ｮ荳驛ｨ縺ｧ縺吶・
 
-### Ecosystem Components / 構成システム
+### Ecosystem Components / 讒区・繧ｷ繧ｹ繝・Β
 
 #### 1. Nano Banana 2 Powered Super AI 4-koma System
 A system specialized in creating 4-panel manga with AI.
-AIを活用した4コマ漫画制作に特化したシステムです。
-- [Explanation / 解説](https://note.com/happy_duck780/n/ndf063558c1f5)
-- [Demo / デモ](https://furuyan1234.github.io/nano-banana-pro/)
-- [Code / コード](https://github.com/FURUYAN1234/nano-banana-pro)
+AI繧呈ｴｻ逕ｨ縺励◆4繧ｳ繝樊ｼｫ逕ｻ蛻ｶ菴懊↓迚ｹ蛹悶＠縺溘す繧ｹ繝・Β縺ｧ縺吶・
+- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/ndf063558c1f5)
+- [Demo / 繝・Δ](https://furuyan1234.github.io/nano-banana-pro/)
+- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/nano-banana-pro)
 
 #### 2. AI Story Maker
 A tool for generating creative stories and plots using AI.
-AIを用いてクリエイティブなストーリーやプロットを生成するツールです。
-- [Explanation / 解説](https://note.com/happy_duck780/n/nd3d972922868)
-- [Demo / デモ](https://furuyan1234.github.io/story-maker/)
-- [Code / コード](https://github.com/FURUYAN1234/story-maker)
+AI繧堤畑縺・※繧ｯ繝ｪ繧ｨ繧､繝・ぅ繝悶↑繧ｹ繝医・繝ｪ繝ｼ繧・・繝ｭ繝・ヨ繧堤函謌舌☆繧九ヤ繝ｼ繝ｫ縺ｧ縺吶・
+- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/nd3d972922868)
+- [Demo / 繝・Δ](https://furuyan1234.github.io/story-maker/)
+- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/story-maker)
 
 #### 3. AI Character Sheet Maker
 An assistant for designing detailed character sheets and settings.
-詳細なキャラクターシートや設定をデザインするための支援ツールです。
-- [Explanation / 解説](https://note.com/happy_duck780/n/neccbebd7d957)
-- [Demo / デモ](https://furuyan1234.github.io/character-sheet-maker/)
-- [Code / コード](https://github.com/FURUYAN1234/character-sheet-maker)
+隧ｳ邏ｰ縺ｪ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝医ｄ險ｭ螳壹ｒ繝・じ繧､繝ｳ縺吶ｋ縺溘ａ縺ｮ謾ｯ謠ｴ繝・・繝ｫ縺ｧ縺吶・
+- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/neccbebd7d957)
+- [Demo / 繝・Δ](https://furuyan1234.github.io/character-sheet-maker/)
+- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/character-sheet-maker)
 
 ---
 
 Developed by **FURU**
+
