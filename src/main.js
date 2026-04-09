@@ -657,7 +657,7 @@ async function allRandom() {
   $('supplement').value = '';
   updateClear('supplement-clear', '');
   
-  $('settings').scrollTo({ top: 0, behavior: 'smooth' });
+  $('panel-scroll').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function resetAll() {
@@ -705,7 +705,7 @@ function resetAll() {
   $('btn-copy').classList.add('hidden');
   $('btn-download').classList.add('hidden');
   
-  $('settings').scrollTo({ top: 0, behavior: 'smooth' });
+  $('panel-scroll').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================================

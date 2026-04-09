@@ -50,7 +50,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* Layout */
 .main-wrap{position:relative;z-index:1;display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 120px)}
-.settings-panel{background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;position:sticky;top:0;height:calc(100vh - 120px);transition:opacity 0.3s ease, filter 0.3s ease}
+.settings-panel{background:var(--surface);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;overflow:hidden;position:sticky;top:0;height:calc(100vh - 120px);transition:opacity 0.3s ease, filter 0.3s ease}
+/* 固定ヘッダー（スクロールしない） */
+.panel-fixed-top{flex-shrink:0;padding:16px 18px 12px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--border);background:var(--surface);z-index:2}
+/* スクロール領域 */
+.panel-scroll{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .settings-panel.disabled-panel{opacity:0.4;pointer-events:none;filter:grayscale(80%)}
 .output-panel{min-width:0;padding:24px;display:flex;flex-direction:column;gap:16px;height:calc(100vh - 120px);overflow-y:auto}
 
@@ -214,7 +218,8 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 
 @media(max-width:900px){
   .main-wrap{grid-template-columns:1fr}
-  .settings-panel{position:static;height:auto}
+  .settings-panel{position:static;height:auto;overflow:visible}
+  .panel-scroll{overflow-y:visible}
   .banner-row{flex-direction:column;align-items:stretch}
   .title-bar{flex-wrap:wrap;gap:6px 10px}
   .title-bar h1{font-size:22px}
