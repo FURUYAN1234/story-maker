@@ -206,11 +206,6 @@ function setupModalEvents(characters, onRegister) {
   document.getElementById('ci-modal-close').addEventListener('click', () => modal.remove());
   document.getElementById('ci-btn-cancel').addEventListener('click', () => modal.remove());
 
-  // オーバーレイクリックで閉じる
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
-  });
-
   // 登録ボタン
   document.getElementById('ci-btn-register').addEventListener('click', () => {
     const result = [];
