@@ -1,4 +1,6 @@
-# Story Maker — AI物語メーカー
+Source: https://raw.githubusercontent.com/FURUYAN1234/story-maker/main/README.md
+
+---
 
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
@@ -13,8 +15,6 @@ Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 > [Story Maker — AI物語メーカー　AI特有の似たり寄ったりのストーリーにならないシステム / A system designed to break away from repetitive, generic AI-generated plots. (note / Japanese content)](https://note.com/happy_duck780/n/nd3d972922868)
 
 ---
-
-## ✨ Features / 機能
 
 - **Multi-axis randomization** — Genre, era, ending style, narrative perspective, and characters can each be randomized independently or all at once
 - **Anti-repetition prompt engine** — Explicitly instructs the AI to avoid predictable story structures
@@ -32,23 +32,18 @@ Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 
 ---
 
-## 🚀 Quick Start / クイックスタート
-
 ### Web Browser / ブラウザで使う（推奨）
-
 1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス / Open the web app
 2. 上部のAPIキー欄にGeminiのAPIキーを入力して「保存」 / Enter your Gemini API key at the top
 3. 「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す / Click generate buttons
 
 ### Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
-
 1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
 2. フォルダ内の `start_Story_app.bat` をダブルクリックする / Double-click `start_Story_app.bat`
 3. 依存ライブラリが自動インストールされ、ブラウザが起動します。 / Node.js dependencies are automatically installed and the app launches.
 *(※実行には[Node.js](https://nodejs.org/)のインストールが必要です / Requires Node.js installed)*
 
 ### Deploy to GitHub Pages / GitHub Pagesでデプロイ
-
 ```bash
 git clone https://github.com/YOUR_USERNAME/story-maker
 cd story-maker
@@ -61,7 +56,6 @@ cd story-maker
 ---
 
 ## 🔑 Getting a Gemini API Key / Gemini APIキーの取得
-
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) にアクセスする
 2. Sign in with your Google Account / Googleアカウントでログインする
 3. Click "Create API Key" / 「Create API Key」ボタンをクリックする
@@ -73,7 +67,6 @@ cd story-maker
 ---
 
 ## 🎛️ How the Anti-Repetition System Works / 反復防止システムの仕組み
-
 The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes:
 基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。このアプリでは、複数の独立した軸を通じてエントロピーを注入します。
 
@@ -93,14 +86,11 @@ The prompt also explicitly instructs Gemini to:
 ---
 
 ## 💻 Tech Stack / 技術スタック
-
 - **Vite + Vanilla HTML/CSS/JS** — Lightweight frontend / 軽量フロントエンド構成
 - **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash` / Geminiモデルを主軸に構築
 - **Deployment** — GitHub Pages (static hosting) / GitHub Pages（静的ホスティングによるデプロイ）
 
 ---
-
-## 📝 Changelog / 変更履歴
 
 ### v2.8.2 — 2026-04-09
 - **Bugfix: Modal Overlay Click**: Fixed an issue where clicking the background overlay of the character recognition result modal would accidentally close it, causing data loss. The modal now only closes via the close/cancel buttons. / キャラクター認識結果モーダルの背景（オーバーレイ）をクリックすると意図せず閉じてしまう問題を修正。閉じるボタンまたはキャンセルボタンでのみ閉じるように改善し、データ消失を防止。
@@ -188,7 +178,6 @@ The prompt also explicitly instructs Gemini to:
 ---
 
 ## ⚖️ Compliance & Legal Stance / 法的遵守について
-
 **Japanese Copyright Law (Article 30-4)**
 This project is developed in full compliance with Article 30-4 of the Japanese Copyright Act, which allows for the exploitation of copyrighted works for information analysis and technological development of AI.
 本プロジェクトは、日本の著作権法第30条の4（情報解析目的等での利用）に基づき、技術検証および情報解析を目的として開発されており、法的に適正な範囲内で公開されています。
@@ -208,7 +197,6 @@ The core logic (Prompts/Protocols) is released under CC BY-NC-SA 4.0. Any commer
 ---
 
 ## ⚖️ License & Rights / ライセンス・権利関係
-
 This project uses a hybrid license to balance technology sharing and intellectual property protection.
 技術の共有と創作の保護を両立するため、以下のハイブリッドライセンスを採用しています。
 
@@ -230,17 +218,13 @@ Any commercial or educational use involving fees requires explicit prior written
 
 ---
 
-## 利用規約 / Terms of Use
-
 ### 1. 目的 / Purpose
-
 本ツールは創作支援を目的としたものであり、既存の著作物、ブランド、キャラクター、または特定の作家・作品の再現や代替を目的とした利用は想定していません。  
 This tool is intended for creative assistance and is not designed to reproduce, substitute, or replicate existing copyrighted works, brands, characters, or specific creators.
 
 ---
 
 ### 2. 生成コンテンツに関する禁止事項 / Prohibited Uses
-
 ユーザーは、本ツールを使用して以下の行為を行ってはなりません。  
 Users must not engage in the following:
 
@@ -253,7 +237,7 @@ Replicating the writing style, narrative voice, plot structure, or character com
 
 既存作品のストーリー展開、設定、プロットを言い換え・変形して再利用する行為  
 Reusing or paraphrasing existing storylines, settings, or plots from copyrighted works
-  
+
 #### (2) 権利侵害コンテンツの利用 / Use of Infringing Content
 - 第三者の著作権、商標権、肖像権、パブリシティ権等を侵害するコンテンツの生成、公開、販売、共有  
 - 既存IPに類似したコンテンツの無断商用利用  
@@ -281,7 +265,6 @@ Any illegal or harmful use.
 ---
 
 ### 3. 生成物の責任および権利 / Responsibility & Ownership
-
 生成されたコンテンツの内容および利用に関するすべての責任はユーザーに帰属します。  
 The user bears full responsibility for generated content.
 
@@ -291,7 +274,6 @@ The developer does not claim ownership of generated content but does not guarant
 ---
 
 ### 4. 免責事項 / Disclaimer
-
 本ツールは「現状有姿（AS IS）」で提供され、明示または黙示を問わず、いかなる保証も行いません。  
 This tool is provided "as is" without any warranties.
 
@@ -301,7 +283,6 @@ The developer shall not be liable for any damages arising from use.
 ---
 
 ### 5. 権利侵害への対応 / Infringement & Takedown
-
 権利侵害の申し立てがあった場合、開発者は独自の判断により以下の対応を行う場合があります。  
 Upon receiving a valid claim, the developer may:
 
@@ -314,25 +295,19 @@ Remove content, restrict usage, or take necessary actions.
 ---
 
 ### 6. 規約の変更 / Changes
-
 本規約は予告なく変更される場合があります。  
 These terms may be updated without notice.
 
 ---
 
 ### 7. 準拠法 / Governing Law
-
 本規約は日本法に準拠します。  
 These terms are governed by the laws of Japan.
 
 ---
 
-## AI Manga Creative Suite / AIまんが制作エコシステム
-
 This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
 本プロジェクトは、AIを活用した漫画・ストーリー制作を支援する統合エコシステムの一部です。
-
-### Ecosystem Components / 構成システム
 
 #### 1. Nano Banana 2 Powered Super AI 4-koma System
 A system specialized in creating 4-panel manga with AI.
@@ -365,3 +340,4 @@ AIを使って漫画を10言語に翻訳するツールです。
 ---
 
 Developed by **FURU**
+
