@@ -24,7 +24,7 @@ The core insight: AI outputs converge toward "average" stories when inputs have 
 - **Character Sheet OCR Import / キャラクターシート自動認識**: Drag & drop character sheet images onto the drop zone to auto-extract character data via Gemini Vision API. Supports multiple images. / キャラクターシート画像をドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理に対応。
 - **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
 - **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
-- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System のSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
 
 ---
 
@@ -208,7 +208,7 @@ These terms are governed by the laws of Japan.
 This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
 本プロジェクトは、AIを活用した漫画・ストーリー制作を支援する統合エコシステムの一部です。
 
-#### 1. Nano Banana 2 Powered Super AI 4-koma System
+#### 1. Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System
 A system specialized in creating 4-panel manga with AI.
 AIを活用した4コマ漫画制作に特化したシステムです。
 - [Explanation / 解説](https://note.com/happy_duck780/n/ndf063558c1f5)
@@ -257,7 +257,7 @@ AIを使って漫画を10言語に翻訳するツールです。
 
 ### v2.7.0 — 2026-04-03
 - **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / キャラクターシート画像をドロップゾーンにドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理・進捗表示に対応。
-- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma SystemのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
 - **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
 - **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
 - **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
