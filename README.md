@@ -1,13 +1,10 @@
-Source: https://raw.githubusercontent.com/FURUYAN1234/story-maker/main/README.md
-
----
+# AI Story Maker - Multi-Axis Entropy Injection System
 
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
-
-A web application that generates high-variety stories (4-panel manga plots or fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
-
-Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+>
+> A web application that generates high-variety stories (4-panel manga plots or fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
+> Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
 
 > [!TIP]
 > **Detailed Commentary Available / 詳細な解説記事を公開中**
@@ -16,164 +13,69 @@ Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネ
 
 ---
 
-- **Multi-axis randomization** — Genre, era, ending style, narrative perspective, and characters can each be randomized independently or all at once
-- **Anti-repetition prompt engine** — Explicitly instructs the AI to avoid predictable story structures
-- **Multiple Output Modes** — Supports 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), flash fiction (~1,000 chars), short stories (~3,000 chars), novellas (~4,000 chars), and full-length novels (~100,000 chars via prompt generation).
-- **Random theme seeding** — Combines base event + modifier + adjunct for unpredictable story seeds
-- **One-shot full random** — Single button randomizes all axes and generates immediately
+## 💡 Concept: Breaking Away from Predictable AI Stories / コンセプト：AI特有の「予定調和」からの脱却
+The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes, generating narratives that are statistically improbable to repeat.
+基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。本システムは、単純なプロンプトのラッパーツールとは異なり、決定論的なミドルウェアパイプライン（多軸ランダム化と反復防止プロンプトエンジン）を用いることで、既存の特定作品の模倣・盗用ではなく、高次元の意味的制御に基づきオリジナルの物語構造を自律的に生成します。
 
 ---
 
-- **多軸ランダム化** — ジャンル・時代・オチの型・語り口・キャラを各個または一括でランダム設定
-- **反復防止プロンプトエンジン** — 予定調和な展開を構造的に回避するよう明示的に指示
-- **複数の出力モード** — 4コマ漫画ネタ（起承転結＋セリフ案）またはショート（〜1000字）、短編小説（〜3000字）、中編小説（〜4000字）、長編小説（〜10万字/プロンプト生成）など
-- **ランダムテーマシード** — 基本イベント＋修飾語＋状況語を確率的に組み合わせ
-- **全ランダム一発生成** — 1ボタンで全項目をランダム設定して即生成
+## 🚀 Core Features / 主要機能
+- **Multiple Output Modes / 複数の出力モード**: Supports 14 distinct modes including 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), short stories (~3,000 chars), novellas (~4,000 chars), full-length novels (~100,000 chars via prompt generation), scenarios, essays, and poems. / 4コマ漫画ネタ（起承転結＋セリフ案）、短編・中編小説、プロンプト生成による長編小説（〜10万字）、エッセイ、詩など、14種の出力モードに対応。
+- **Character Sheet OCR Import / キャラクターシート自動認識**: Drag & drop character sheet images onto the drop zone to auto-extract character data via Gemini Vision API. Supports multiple images. / キャラクターシート画像をドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理に対応。
+- **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
+- **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
+- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
 
 ---
 
-### Web Browser / ブラウザで使う（推奨）
-1. [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス / Open the web app
-2. 上部のAPIキー欄にGeminiのAPIキーを入力して「保存」 / Enter your Gemini API key at the top
-3. 「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す / Click generate buttons
+## 🏗️ Unique Architecture Highlights / 固有アーキテクチャ・技術的要点
+This system acts as a sophisticated prompt engineering compiler. It leverages multi-layered constraints to force the LLM into producing highly creative outcomes.
+本システムは高度なプロンプトエンジニアリング・コンパイラとして機能します。LLMに対して多層的な制約を課すことで、強制的に独創性の高い結果を引き出します。
 
-### Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
+* **Multi-Axis Randomization / 多軸ランダム化**: 
+  `Output = f(Character × Theme × Genre × Era × Ending × Perspective)`
+  Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable. / キャラ×テーマ×ジャンル×時代×オチ×語り口を独立計算し、組み合わせの爆発によりハルシネーションではなく「意味のある多様性」を生み出す設計。
+* **Anti-Repetition Engine / 反復防止プロンプトエンジン**: Explicitly instructs Gemini to avoid the most predictable development for the genre, connect the theme in an indirect/unexpected way, and use each character's personality to generate unique reactions. / ありきたりな展開を構造的に回避するよう、「ジャンルの王道展開の回避」「テーマの間接的接続」などをAIに明示的に指示。
+* **Foreshadowing Tier System / 伏線ルールのモード別ティア制**: Dynamically switches prompt constraints based on the narrative mode. / 出力モードによってプロンプトの制約レベルを動的に切り替える仕組み。
+  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 7 foreshadowing & composition rules. / 物語系モードはフル伏線・構成ルール（7項目）をそのまま適用。
+  * **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance, prioritizing comedic timing. / 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポを優先。
+  * **Tier 3 (None)**: Non-narrative modes (essay, poem, letter, diary) exclude foreshadowing entirely, replaced with mode-specific composition rules. / 非物語系モードは伏線ルールを完全除外。
+* **Full-Category Style Guide Engine / 全カテゴリ対応・文体ガイドエンジン**: Centralized style guide data (~250 entries). Instead of passing preset selections (e.g., "Surreal Gag") as mere labels, the system injects specific, actionable writing instructions into the prompt. / 単なるラベル名渡しではなく、250以上の詳細な執筆ルール（文体・構成指示等）をプロンプトに注入するエンジン。
+* **7-Rule Narrative Structure / 7つの伏線・構成厳守ルール**: Strict guidelines including "Show Don't Tell" (no info-dumping characters), narrative function requirements for all characters, and explicit protagonist conviction at the ending to prevent shallow AI narratives. / 「説明役の禁止(Show Don't Tell)」「結末での主人公の意志表示」など、AI特有の薄っぺらい物語を防ぐための強力な制約。
+* **Era Consistency Rules / 時代設定の整合性ルール**: AI auto-corrects anachronistic expressions when historical era settings are selected. / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルール。
+
+---
+
+## 💻 Tech Stack / 技術スタック
+- **Frontend**: Vite + Vanilla HTML/CSS/JS (Lightweight frontend / 軽量フロントエンド構成)
+- **LLM/VFM**: Google Gemini API (`gemini-3-flash-preview`, `gemini-1.5-pro`, `gemini-1.5-flash`, plus `gemini-2.5-pro` for vision/OCR tasks)
+- **Deployment**: GitHub Pages (static hosting / 静的ホスティングによるデプロイ)
+
+---
+
+## 🌍 Cloud / Browser (Deploy)
+1. **Access**: Open the deployed web app / [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス
+2. **Get API Key**: Obtain a Gemini API key at [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) でGemini APIキーを取得
+3. **Run**: Enter your Gemini API key at the top and click generate buttons / 上部のAPIキー欄に入力して「保存」後、「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す
+
+> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
+> 料金は従量課金制（または無料枠）です。通常、1回の物語生成で約1,000〜1,500トークンを消費します。
+>
+> **Note:** The API key is held in memory only and never sent anywhere except the official Google Gemini API endpoint.  
+> **注:** APIキーはメモリ内のみで保持され、Google Gemini公式エンドポイント以外には送信されません。
+
+### 💻 Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
 1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
 2. フォルダ内の `start_Story_app.bat` をダブルクリックする / Double-click `start_Story_app.bat`
 3. 依存ライブラリが自動インストールされ、ブラウザが起動します。 / Node.js dependencies are automatically installed and the app launches.
 *(※実行には[Node.js](https://nodejs.org/)のインストールが必要です / Requires Node.js installed)*
 
-### Deploy to GitHub Pages / GitHub Pagesでデプロイ
+### 🚀 Deploy to GitHub Pages / GitHub Pagesでデプロイ
 ```bash
 git clone https://github.com/YOUR_USERNAME/story-maker
 cd story-maker
 # Push to main branch, then enable GitHub Pages in repo Settings
 ```
-
-> **Note:** The API key is held in memory only and never sent anywhere except the official Google Gemini API endpoint.  
-> **注:** APIキーはメモリ内のみで保持され、Google Gemini公式エンドポイント以外には送信されません。
-
----
-
-## 🔑 Getting a Gemini API Key / Gemini APIキーの取得
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) にアクセスする
-2. Sign in with your Google Account / Googleアカウントでログインする
-3. Click "Create API Key" / 「Create API Key」ボタンをクリックする
-4. Copy the generated key / 生成されたAPIキーをコピーする
-
-> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
-> 料金は従量課金制（または無料枠）です。通常、1回の物語生成で約1,000〜1,500トークンを消費します。
-
----
-
-## 🎛️ How the Anti-Repetition System Works / 反復防止システムの仕組み
-The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes:
-基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。このアプリでは、複数の独立した軸を通じてエントロピーを注入します。
-
-```
-Output = f(Character × Theme × Genre × Era × Ending × Perspective)
-```
-
-Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable.
-各軸は独立してランダム化が可能です。組み合わせの空間が非常に広範であるため、全く同じ出力が生成されることは統計的にほぼ起こり得ません。
-
-The prompt also explicitly instructs Gemini to:
-さらに、システムプロンプトからGeminiに対して以下の明確な指示を出しています：
-- Avoid the most predictable development for the genre (ジャンルにおける最もありきたりな展開を避ける)
-- Connect the theme in an indirect, unexpected way (テーマを間接的かつ予期せぬ形で結びつける)
-- Use each character's personality to generate unique reactions (登場人物それぞれの性格を活かし、ユニークな反応を生み出す)
-
----
-
-## 💻 Tech Stack / 技術スタック
-- **Vite + Vanilla HTML/CSS/JS** — Lightweight frontend / 軽量フロントエンド構成
-- **Gemini API** — `gemini-1.5-pro` / `gemini-1.5-flash` / Geminiモデルを主軸に構築
-- **Deployment** — GitHub Pages (static hosting) / GitHub Pages（静的ホスティングによるデプロイ）
-
----
-
-### v2.8.2 — 2026-04-09
-- **Bugfix: Modal Overlay Click**: Fixed an issue where clicking the background overlay of the character recognition result modal would accidentally close it, causing data loss. The modal now only closes via the close/cancel buttons. / キャラクター認識結果モーダルの背景（オーバーレイ）をクリックすると意図せず閉じてしまう問題を修正。閉じるボタンまたはキャンセルボタンでのみ閉じるように改善し、データ消失を防止。
-
-### v2.8.1 — 2026-04-09
-- **Sticky Panel Header**: Fixed the "ストーリー生成" (Generate Story) button and "全項目ランダム" (All Random) button at the top of the left settings panel. The setting sections below now scroll independently while the action buttons remain always visible. / 左パネルの「ストーリー生成」ボタンと「全項目ランダム」ボタンを上部に固定表示化。設定セクション群のみが独立スクロールし、アクションボタンが常に見える状態に改善。
-
-### v2.8.0 — 2026-04-06
-- **Foreshadowing Tier System**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 伏線ルールのモード別ティア制を導入。物語系モードが伏線を要求し、非物語系モードが伏線を禁止するという矛盾を解消。
-  - **Tier 1 (Full)**: Narrative modes (`novel`, `medium`, `short_short`, `scenario`, `manga`, `documentary`, `radio`) retain all 7 foreshadowing & composition rules. / 物語系モードはフル伏線・構成ルール（7項目）をそのまま適用。
-  - **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance instead of heavy foreshadowing rules, prioritizing comedic timing. / 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポとオチの切れ味を優先。
-  - **Tier 3 (None)**: Non-narrative modes (`essay`, `poem`, `letter`, `diary`) exclude foreshadowing entirely, replaced with mode-specific composition rules (thematic coherence, imagery chains, emotional progression). / 非物語系モード（エッセイ・詩・手紙・日記）は伏線ルールを完全除外し、各モード固有の構成ルールに差し替え。
-
-### v2.7.1 — 2026-04-05
-- **Bugfix: Stale Alert Message**: Fixed a bug where the global alert bar displayed "画像認識中" (image recognition in progress) when clicking the story generation button after importing character sheet images. The shared `global-alert` element's innerHTML was not reset before re-display during story generation. / キャラクターシート画像を取り込んだ後にストーリー生成ボタンを押すと、「画像認識中」の古いメッセージが表示されるバグを修正。共有の`global-alert`要素のinnerHTMLがストーリー生成時にリセットされていなかった問題を解消。
-
-### v2.7.0 — 2026-04-03
-- **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / キャラクターシート画像をドロップゾーンにドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理・進捗表示に対応。
-- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
-- **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
-- **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
-- **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
-- **Model Priority Update**: Image recognition models follow Nano Banana Pro v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをNBP v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
-
-### v2.6.0 — 2026-03-31
-- **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "シュールギャグ", "どんでん返し") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 全カテゴリ×全サブプリセットに対応するAI文体ガイドエンジンを追加。従来はプリセット選択がラベル名としてしかプロンプトに渡されず、AIに無視されがちだった問題を解消。
-  - **Genre (ジャンル)**: 7 categories + 50 sub-presets with specific tone/style rules (e.g., "シュールギャグ" → prohibit serious inner conflict, require escalating nonsense with deadpan delivery). / 7大カテゴリ＋50サブプリセットに文体ルール付与。
-  - **Ending (オチの型)**: 6 categories + 25 sub-presets with structural direction (e.g., "どんでん返し" → require 3+ foreshadowing elements). / 6大カテゴリ＋25サブの結末演出指示。
-  - **Worldview (世界観)**: 7 categories + 40 sub-presets with atmosphere/setting guides. / 7大カテゴリ＋40サブの舞台描写指示。
-  - **Target (ターゲット層)**: 5 categories + 25 sub-presets with language-level adjustments. / 5大カテゴリ＋25サブの文体レベル指定。
-  - **Narration (語り口)**: 3 categories + 15 sub-presets with perspective rules. / 3大カテゴリ＋15サブの語り方指定。
-- **New File**: `src/styleGuides.js` — Centralized style guide data (~250 entries). / 文体ガイドデータを専用ファイルに分離。
-
-### v2.5.0 — 2026-03-31
-- **Title Bracket Enforcement**: Enhanced title parsing to always wrap story titles in 【】 brackets. AI output is now sanitized of existing decorations before JS-side bracketing, ensuring consistent formatting regardless of AI behavior. / タイトルの【】付与を厳格化。AI出力から既存の装飾記号を除去した上でJS側で必ず【】を付与するよう強化。AIの出力形式に依存せず常に一貫したフォーマットを保証。
-- **Output Panel Scroll**: Added `max-height` and `overflow-y: auto` to the output box, enabling in-frame scrolling for long stories. The OUTPUT header (title, character count, copy/download buttons) remains always visible. / OUTPUT欄に`max-height`と枠内スクロールを追加。長文でもヘッダー（タイトル・字数・コピー/保存ボタン）が常に表示される設計に変更。
-
-### v2.4.9 — 2026-03-31
-- **Narrative Structure Rules**: Added 7-rule "Foreshadowing & Composition Rules" to the prompt engine, dramatically improving story quality. / プロンプトエンジンに7項目の「伏線・構成ルール（厳守）」を追加し、生成される物語の品質を劇的に向上。
-  - **Foreshadowing**: Elements important in the second half must be hinted at in the first half. / 後半で重要な要素は前半で必ず暗示。
-  - **Character Function**: All characters must have a narrative role; passive bystanders are prohibited. / 全キャラに物語的機能を義務付け、傍観者キャラ禁止。
-  - **Ending Conviction**: Protagonists must show clear will/action; acceptance requires prior resistance. / 結末で主人公の明確な意志表示を要求、受容前の抵抗描写を必須化。
-  - **Setting Necessity**: Special elements must connect to protagonist's personal background. / 特殊設定は主人公の個人的背景と接続必須。
-  - **Show Don't Tell**: Prohibits info-dump via dialogue, monologue, or single "explainer" characters. / 台詞・独白・説明役キャラによる設定の一括説明を禁止。
-  - **Farewell Weight**: Meaningful partings must carry emotional weight. / 別離シーンに感情的重みの描写を要求。
-  - **Tonal Variation**: Writing style must shift with protagonist's emotional state; shock scenes require immersive body/mind description. / 心理状態に応じた文体変化と衝撃シーンの追体験描写を要求。
-
-### v2.4.8 — 2026-03-30
-- **Maintenance Release**: Version bump and redeployment for stable release packaging. / 安定版リリースパッケージング用のバージョン更新と再デプロイ。
-
-### v2.4.7 — 2026-03-30
-- **Mode-Specific Style Guide**: Added unique tone/writing-style instructions for all 14 output modes (4-panel, essay, poem, etc.) to eliminate the "everything sounds the same" problem. / 全14出力モードに個別の文体・トーン指示を追加し、どのモードでも似たような厨二病的文章になる問題を解消。
-- **Era Consistency Rules**: AI now auto-corrects anachronistic expressions when historical era settings are selected (e.g., no "smartphone" in Taisho era). / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルールを追加。
-- **Preset Data Expansion**: Doubled character name pools (M/F: 10→20), detail memos (7→15), roles (10→18), personalities (10→18), and all ORIGINALS lists (5-8→12-14) to reduce repetitive randomization. / キャラ名・詳細メモ・役割・性格・各ランダム生成プールを大幅拡充し、ランダム生成時のワンパターン化を解消。
-- **Bugfix: Random Mode Field**: Fixed the output mode custom field being empty when using "All Random & Generate". / 全ランダム生成時に出力モード欄が空欄になるバグを修正。
-- **Random Character Count**: Increased max random character count from 3 to 4. / ランダム生成時の最大人数を3人→4人に変更。
-- **Output Footer**: Added "Generated by Super FURU AI Story vX.Y.Z" credit line after story endings. / 生成結果の末尾にクレジットフッターを自動表示。
-
-### v2.4.6 — 2026-03-29
-- **UI Bugfix**: Added missing `autocomplete="off"` to custom input fields (Theme, Era, Ending Type) to prevent browser default auto-complete history from covering the UI as speech bubble-like popups. / 一部のカスタム入力欄（テーマ・時代設定・オチの型）でブラウザの自動補完履歴がフキダシのように被って表示されるバグを修正。
-
-### v2.4.5 — 2026-03-28
-- **Icon Redesign**: Replaced white-washed emoji book icon (📖) with a custom SVG book icon in vivid purple with glow effect. / 白飛びしていた絵文字アイコンを、紫色のSVGアイコン（グロウエフェクト付き）に差し替え。
-- **Critical Layout Fix**: Fixed output box background not covering full text content by adding `flex-shrink: 0`. Added bottom margin to prevent text sticking to screen edge. / 出力テキストが枠からはみ出す致命的バグを `flex-shrink: 0` で修正。下余白も追加。
-- **Long-Form Mode Enhancement**: Removed placeholder text from master prompt template. Added direct instruction for receiving LLM to write full chapter text. Added "【完】/【続く】" end markers for all output modes. / 長編マスタープロンプトの雛形テンプレートを直接的な執筆命令に書き換え。全モードに終了マーカーを追加。
-- **Deploy Fix**: Corrected GitHub Pages source from `main` branch to `gh-pages` branch, resolving the issue where presets were not displayed on the deployed site. / GitHub Pagesの配信元を `main` から `gh-pages` に修正し、デプロイ先でプリセットが表示されない問題を解消。
-
-### v2.4.4 — 2026-03-28
-- **Cleanup**: Removed remaining Claude residues in documentation. / ドキュメントに残存していたClaudeの記述残骸を完全に削除。
-- **UI Logic**: Fixed long novel prompt logic so that the prompt string is directly displayed in the main output panel. / 長編小説モードにおいてAPI通信を挟まず直接OUTPUTへプロンプトを出力するロジックに修正。
-- **UI Tweaks**: Added smart display control to hide the yellow alert banner outside of active generation windows. Removed right-aligned unnecessary prompt pane. / 黄色の警告表示をAPI通信中のみ表示されるよう変更・不要な右側パネルを削除。
-
-### v2.4.3 — 2026-03-28
-- **UI & Layout Revamp**: Removed the experimental System Dashboard from `index.html` and `main.js`.
-- **Alert Notifications**: Added a global yellow alert banner (黄色の警告表示) to clarify wait times during API communication.
-- **Model Reversion**: Fully scrubbed all unintended Claude API references, cementing the application on Gemini models. / Claude APIへの言及を完全に排除し、Gemini専用として再構築。
-
-### v2.4.2 — 2026-03-28
-- Long novel generation prompt fixes / 長編小説生成時のプロンプト修正
-- UI hint enhancements / UIヒント追加
-
-### v1.0.0 — 2026-03-27
-- Initial release / 初回リリース
 
 ---
 
@@ -185,10 +87,6 @@ This project is developed in full compliance with Article 30-4 of the Japanese C
 **Official API Usage**
 All generations are performed through the official Google Gemini API. This system adheres strictly to Google's "Generative AI Forbidden Use Policy" and Terms of Service.
 本システムはGoogle公式のGemini APIを介して動作しており、Googleが定める「生成AI禁止事項」および利用規約を厳格に遵守しています。
-
-**Autonomous & Deterministic Text Generation**
-Unlike simple prompt wrappers, this system uses a deterministic middleware pipeline (Multi-Axis Randomization and Anti-Repetition Prompt Engine). It does not aim to plagiarize specific existing novels or stories. It generates original narrative structures based on high-dimensional semantic control.
-単なるプロンプトのラッパーツールとは異なり、本システムは「多軸ランダム化」および「反復防止プロンプトエンジン」という決定論的なミドルウェアパイプラインを使用しています。既存の特定の小説や物語の盗用を目的としたものではなく、高次元の意味的制御に基づきオリジナルの物語構造を自律的に生成します。
 
 **No-Profit & Research Focus**
 The core logic (Prompts/Protocols) is released under CC BY-NC-SA 4.0. Any commercial misuse by third parties is strictly prohibited. This project exists solely for the advancement of LLM control technology and the democratization of creative writing tools.
@@ -306,6 +204,7 @@ These terms are governed by the laws of Japan.
 
 ---
 
+## 🔗 Integrated Ecosystem / 統合エコシステム
 This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
 本プロジェクトは、AIを活用した漫画・ストーリー制作を支援する統合エコシステムの一部です。
 
@@ -339,5 +238,45 @@ AIを使って漫画を10言語に翻訳するツールです。
 
 ---
 
-Developed by **FURU**
+## 📝 Changelog / 更新履歴
 
+### v2.8.2 — 2026-04-09
+- **Bugfix: Modal Overlay Click**: Fixed an issue where clicking the background overlay of the character recognition result modal would accidentally close it, causing data loss. The modal now only closes via the close/cancel buttons. / キャラクター認識結果モーダルの背景（オーバーレイ）をクリックすると意図せず閉じてしまう問題を修正。閉じるボタンまたはキャンセルボタンでのみ閉じるように改善し、データ消失を防止。
+
+### v2.8.1 — 2026-04-09
+- **Sticky Panel Header**: Fixed the "ストーリー生成" (Generate Story) button and "全項目ランダム" (All Random) button at the top of the left settings panel. The setting sections below now scroll independently while the action buttons remain always visible. / 左パネルの「ストーリー生成」ボタンと「全項目ランダム」ボタンを上部に固定表示化。設定セクション群のみが独立スクロールし、アクションボタンが常に見える状態に改善。
+
+### v2.8.0 — 2026-04-06
+- **Foreshadowing Tier System**: Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it. / 伏線ルールのモード別ティア制を導入。物語系モードが伏線を要求し、非物語系モードが伏線を禁止するという矛盾を解消。
+  - **Tier 1 (Full)**: Narrative modes (`novel`, `medium`, `short_short`, `scenario`, `manga`, `documentary`, `radio`) retain all 7 foreshadowing & composition rules. / 物語系モードはフル伏線・構成ルール（7項目）をそのまま適用。
+  - **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance instead of heavy foreshadowing rules, prioritizing comedic timing. / 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポとオチの切れ味を優先。
+  - **Tier 3 (None)**: Non-narrative modes (`essay`, `poem`, `letter`, `diary`) exclude foreshadowing entirely, replaced with mode-specific composition rules (thematic coherence, imagery chains, emotional progression). / 非物語系モード（エッセイ・詩・手紙・日記）は伏線ルールを完全除外し、各モード固有の構成ルールに差し替え。
+
+### v2.7.1 — 2026-04-05
+- **Bugfix: Stale Alert Message**: Fixed a bug where the global alert bar displayed "画像認識中" (image recognition in progress) when clicking the story generation button after importing character sheet images. The shared `global-alert` element's innerHTML was not reset before re-display during story generation. / キャラクターシート画像を取り込んだ後にストーリー生成ボタンを押すと、「画像認識中」の古いメッセージが表示されるバグを修正。共有の`global-alert`要素のinnerHTMLがストーリー生成時にリセットされていなかった問題を解消。
+
+### v2.7.0 — 2026-04-03
+- **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / キャラクターシート画像をドロップゾーンにドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理・進捗表示に対応。
+- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana Pro STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana ProのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
+- **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
+- **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
+- **Model Priority Update**: Image recognition models follow Nano Banana Pro v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをNBP v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
+
+### v2.6.0 — 2026-03-31
+- **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "シュールギャグ", "どんでん返し") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 全カテゴリ×全サブプリセットに対応するAI文体ガイドエンジンを追加。従来はプリセット選択がラベル名としてしかプロンプトに渡されず、AIに無視されがちだった問題を解消。
+  - **Genre (ジャンル)**: 7 categories + 50 sub-presets with specific tone/style rules (e.g., "シュールギャグ" → prohibit serious inner conflict, require escalating nonsense with deadpan delivery). / 7大カテゴリ＋50サブプリセットに文体ルール付与。
+  - **Ending (オチの型)**: 6 categories + 25 sub-presets with structural direction (e.g., "どんでん返し" → require 3+ foreshadowing elements). / 6大カテゴリ＋25サブの結末演出指示。
+  - **Worldview (世界観)**: 7 categories + 40 sub-presets with atmosphere/setting guides. / 7大カテゴリ＋40サブの舞台描写指示。
+  - **Target (ターゲット層)**: 5 categories + 25 sub-presets with language-level adjustments. / 5大カテゴリ＋25サブの文体レベル指定。
+  - **Narration (語り口)**: 3 categories + 15 sub-presets with perspective rules. / 3大カテゴリ＋15サブの語り方指定。
+- **New File**: `src/styleGuides.js` — Centralized style guide data (~250 entries). / 文体ガイドデータを専用ファイルに分離。
+
+### v2.5.0 — 2026-03-31
+- **Title Bracket Enforcement**: Enhanced title parsing to always wrap story titles in 【】 brackets. AI output is now sanitized of existing decorations before JS-side bracketing, ensuring consistent formatting regardless of AI behavior. / タイトルの【】付与を厳格化。AI出力から既存の装飾記号を除去した上でJS側で必ず【】を付与するよう強化。AIの出力形式に依存せず常に一貫したフォーマットを保証。
+- **Output Panel Scroll**: Added `max-height` and `overflow-y: auto` to the output box, enabling in-frame scrolling for long stories. The OUTPUT header (title, character count, copy/download buttons) remains always visible. / OUTPUT欄に`max-height`と枠内スクロールを追加。長文でもヘッダー（タイトル・字数・コピー/保存ボタン）が常に表示される設計に変更。
+
+
+---
+
+Developed by **FURU**
