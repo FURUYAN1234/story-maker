@@ -2,3 +2,8 @@ node_modules/
 dist/
 .vite/
 *.local
+
+AGENTS.codex-local-before-antigravity-pull.md
+docs/codex_pc_sync.md
+docs/onedrive_conflicts_20260417/
+
