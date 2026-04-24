@@ -55,5 +55,25 @@ English body text describing all changes
 日本語の本文（全変更点を記載）
 ```
 
-### Phase 8: 最終報告
-14. 全手順の結果をまとめてユーザーに報告する
+### Phase 8: ローカル環境更新 (`C:\story-maker-main`)
+14. 一時フォルダ作成 & GitHub Release から ZIP をダウンロード
+    ```powershell
+    $tmp = "C:\temp_sm_deploy"
+    New-Item -ItemType Directory -Path $tmp -Force
+    gh release download vX.Y.Z --archive zip -D $tmp
+    ```
+15. 解凍 → 古いフォルダ削除 → 深い方のフォルダをコピー
+    ```powershell
+    Expand-Archive -Path "$tmp\*.zip" -DestinationPath "$tmp\extracted" -Force
+    Remove-Item -Recurse -Force "C:\story-maker-main" -ErrorAction SilentlyContinue
+    $inner = (Get-ChildItem "$tmp\extracted" -Directory)[0].FullName
+    Copy-Item -Path $inner -Destination "C:\story-maker-main" -Recurse
+    ```
+16. 一時ファイル削除 & コピー成功確認
+    ```powershell
+    Remove-Item -Recurse -Force $tmp
+    Test-Path "C:\story-maker-main\package.json"  # True なら成功
+    ```
+
+### Phase 9: 最終報告
+17. 全手順の結果をまとめてユーザーに報告する
