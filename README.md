@@ -47,6 +47,92 @@ This system acts as a sophisticated prompt engineering compiler. It leverages mu
 
 ---
 
+## 🧠 v2.9 Narrative Engineering Methods / v2.9 物語構造メソッド解説
+
+> These methods were originally developed for comedy manga (4-panel gag) generation in [Nano Banana Pro](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres — because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
+> これらのメソッドは元々 [Nano Banana Pro](https://github.com/FURUYAN1234/nano-banana-pro) でギャグ漫画（4コマ）生成用に開発されました。分析の結果、その核心は**全ジャンルに適用可能な普遍的物語技法**であることが判明しました。笑い・恐怖・感動・驚きは全て同じ構造的原理、すなわち**「読者の期待（E）と実際の展開（R）の落差」**から生まれるためです。
+
+### 1. Emotion Gap Design / 感情落差設計
+
+The fundamental principle: **all emotional impact = Gap between Expected (E) and Reality (R).**
+The direction of the gap determines the emotion:
+
+基本原理：**あらゆる感情的インパクト ＝ 予想（E）と現実（R）のギャップ**。
+ギャップの方向が感情の種類を決める：
+
+| Gap Direction / 落差の方向 | Emotion / 感情 | Example / 例 |
+|:---|:---|:---|
+| More absurd than expected / 予想よりおかしい | Laughter / 笑い | Comedy, Gag / コメディ |
+| More terrifying than expected / 予想より怖い | Fear / 恐怖 | Horror, Suspense / ホラー |
+| More heartbreaking than expected / 予想より切ない | Emotion / 感動 | Drama, Romance / ドラマ・恋愛 |
+| More shocking than expected / 予想より衝撃的 | Surprise / 驚き | Mystery, Plot twist / ミステリー |
+
+The system provides **6 gap techniques** for the AI to consciously select and combine:
+AIが意識的に選択・組み合わせる**6種の落差技法**を提供：
+
+1. **Substitution / 置換**: Reinterpret an event in a completely different context / ある事象を全く異なる文脈で再解釈させる
+2. **Exaggeration / 誇張**: Amplify emotions and scale beyond the reader's imagination / 感情・規模を読者の想像を超えるレベルまで増幅
+3. **Reversal / 逆転**: Flip character positions, abilities, or relationships without warning / 人物の立場・能力・関係性を予告なく反転
+4. **Absurdity / 不条理**: Insert logically inexplicable elements for shock / 論理的に説明のつかない要素で衝撃を与える
+5. **Tension & Release / 緊張と緩和**: Place intentional calm before maximum impact / クライマックス直前に意図的な静寂を挟む
+6. **Normalcy Return / 常識の提示**: Place one sane perspective amid chaos to highlight abnormality / 異常の中に正気の視点を置いて異常さを際立たせる
+
+### 2. Motif Recurrence / モチーフの回帰
+
+Inspired by the comedy technique "Tendon" (天丼 — repeating the same gag pattern with variations until it explodes), generalized for all genres.
+コメディ技法「天丼」（同じギャグパターンを変奏しながら繰り返し爆発させる手法）を全ジャンルに一般化。
+
+**Rule**: A symbolic element (item, phrase, scenery, action) must appear **at least twice** in different contexts. The 1st mention is casual; the 2nd+ carries evolved meaning. The recurring motif must connect directly to the emotional climax.
+**ルール**：象徴的要素（アイテム・言葉・風景・行為）を**最低2回**、異なる文脈で登場させる。1回目は何気ない言及、2回目以降は意味が変化・深化。回帰するモチーフは結末の感情的ピークと直接接続させる。
+
+| In Comedy / コメディでは | In Other Genres / 他ジャンルでは |
+|:---|:---|
+| Same gag pattern → variation → explosion / 同じボケの変奏→爆発 | Chekhov's Gun, thematic echo, escalating pattern / チェーホフの銃、テーマの反復深化 |
+
+### 3. Emotion Curve Design / 感情曲線設計
+
+A 4-phase framework for designing the emotional arc of an entire story:
+物語全体の感情曲線を設計する4フェーズ構成：
+
+```
+Setup → Deviation → Build-up → Payoff
+導入  →   逸脱   →   増幅   →  回収
+```
+
+| Phase | Role / 役割 |
+|:---|:---|
+| **Setup** (導入) | Set reader expectations. Don't surprise yet. Place 1st motif here. / 読者の期待値を設定。まだ驚かせない。モチーフの1回目をここに |
+| **Deviation** (逸脱) | First gap from expectations: "This isn't what I thought..." / 期待からの最初のズレ：「想像と違う…」 |
+| **Build-up** (増幅) | Accelerate deviation, push emotional tension to the limit. Place motif variation here. / 逸脱を加速、感情的緊張を極限に。モチーフの変奏をここに |
+| **Payoff** (回収) | Emotional peak + landing. All foreshadowing and motifs gain meaning here. / 感情のピーク＋着地。全伏線・モチーフがここで意味を持つ |
+
+### 4. Tone Variation System / 文体緩急の3系統
+
+To prevent monotonous writing, 3 concrete tone registers are defined with a **prohibition of same-tone streaks exceeding 3 paragraphs**:
+文体の単調化を防ぐため、3種の具体的トーン系統を定義し、**同系統の3段落以上連続を禁止**：
+
+| Register / 系統 | Style / 文体 | Use For / 適用場面 |
+|:---|:---|:---|
+| **High-energy / 高熱量** | Short sentences, abrupt endings, rapid-fire / 短文連続・体言止め・畳みかけ | Action, confession, decision / 追跡・告白・決断 |
+| **Quiet-serene / 静謐** | Long sentences, gentle rhythm, white space / 長文・穏やかなリズム・余白 | Flashback, parting, eerie silence / 回想・別れ・不気味な静寂 |
+| **Cold-analytical / 冷徹** | Dry declarative, emotion-stripped objectivity / 乾いた断言調・客観描写 | Deduction, analysis, philosophy / 推理・分析・哲学的独白 |
+
+### 5. Quality Gate / 品質ゲート
+
+An AI self-verification checklist executed **before** output. If any check fails, the AI must revise before delivering. The checklist itself is never shown in the output.
+AIが出力**前**に実行する自己検証チェックリスト。不合格項目があればAI自身が修正してから出力する。チェックリスト自体は出力に含まれない。
+
+| Check / チェック項目 | What It Prevents / 防止する問題 |
+|:---|:---|
+| Setup-Payoff structure / 伏線→回収構造 | Deus ex machina endings / 唐突な新設定で解決する結末 |
+| Emotion gap sufficiency / 感情落差の十分性 | "Slightly surprising" instead of "completely unexpected" / 「ちょっと意外」止まりの展開 |
+| Motif recurrence / モチーフの回帰 | Disconnected, one-off symbols / 使い捨ての象徴 |
+| Ending pattern diversity / 結末パターン多様性 | Same structure every time / 毎回同じ構造の結末 |
+| Tone variation / 文体の緩急 | Monotonous writing style / 単調な文体 |
+| Character narrative function / キャラの物語的機能 | Bystander characters / 傍観者だけの登場人物 |
+
+---
+
 ## 💻 Tech Stack / 技術スタック
 - **Frontend**: Vite + Vanilla HTML/CSS/JS (Lightweight frontend / 軽量フロントエンド構成)
 - **LLM/VFM**: Google Gemini API (`gemini-3-flash-preview`, `gemini-1.5-pro`, `gemini-1.5-flash`, plus `gemini-2.5-pro` for vision/OCR tasks)
