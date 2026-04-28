@@ -37,11 +37,12 @@ This system acts as a sophisticated prompt engineering compiler. It leverages mu
   Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable. / キャラ×テーマ×ジャンル×時代×オチ×語り口を独立計算し、組み合わせの爆発によりハルシネーションではなく「意味のある多様性」を生み出す設計。
 * **Anti-Repetition Engine / 反復防止プロンプトエンジン**: Explicitly instructs Gemini to avoid the most predictable development for the genre, connect the theme in an indirect/unexpected way, and use each character's personality to generate unique reactions. / ありきたりな展開を構造的に回避するよう、「ジャンルの王道展開の回避」「テーマの間接的接続」などをAIに明示的に指示。
 * **Foreshadowing Tier System / 伏線ルールのモード別ティア制**: Dynamically switches prompt constraints based on the narrative mode. / 出力モードによってプロンプトの制約レベルを動的に切り替える仕組み。
-  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 7 foreshadowing & composition rules. / 物語系モードはフル伏線・構成ルール（7項目）をそのまま適用。
-  * **Tier 2 (Light)**: `4koma` mode uses lightweight "setup & punchline" guidance, prioritizing comedic timing. / 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポを優先。
+  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 10 rules including Emotion Gap Design, Motif Recurrence, and Emotion Curve Design. / 物語系モードは、感情落差設計（6種のズレ技法）・モチーフ回帰・感情曲線設計を含む10の構成・感情設計ルールを適用。
+  * **Tier 2 (Comedy)**: `4koma` mode uses the optimized Comedy Structure Method, integrating the generalized 6-gap techniques and tone variations to ensure high-impact punchlines. / 4コマモードは、一般化された6種のズレ技法とトーン調整を統合したコメディ構造メソッドを適用し、パンチラインのインパクトを最大化。
   * **Tier 3 (None)**: Non-narrative modes (essay, poem, letter, diary) exclude foreshadowing entirely, replaced with mode-specific composition rules. / 非物語系モードは伏線ルールを完全除外。
 * **Full-Category Style Guide Engine / 全カテゴリ対応・文体ガイドエンジン**: Centralized style guide data (~250 entries). Instead of passing preset selections (e.g., "Surreal Gag") as mere labels, the system injects specific, actionable writing instructions into the prompt. / 単なるラベル名渡しではなく、250以上の詳細な執筆ルール（文体・構成指示等）をプロンプトに注入するエンジン。
-* **7-Rule Narrative Structure / 7つの伏線・構成厳守ルール**: Strict guidelines including "Show Don't Tell" (no info-dumping characters), narrative function requirements for all characters, and explicit protagonist conviction at the ending to prevent shallow AI narratives. / 「説明役の禁止(Show Don't Tell)」「結末での主人公の意志表示」など、AI特有の薄っぺらい物語を防ぐための強力な制約。
+* **10-Rule Narrative Structure / 10の伏線・構成・感情設計ルール**: Strict guidelines including "Show Don't Tell", protagonist conviction at endings, Emotion Gap Design (6 gap techniques), Motif Recurrence (symbolic element callbacks), and Emotion Curve Design (Setup→Deviation→Build-up→Payoff). / 「Show Don't Tell」「結末での主人公の意志表示」に加え、感情落差設計（6種の落差技法）・モチーフ回帰・感情曲線設計を追加。
+* **Quality Gate / 品質ゲート**: AI self-verification checklist executed before output (6 checks including Setup-Payoff structure, emotion gap sufficiency, motif recurrence, ending pattern diversity, tone variation, and character narrative function). / AIが出力前に自己検証する6項目のチェックリスト。
 * **Era Consistency Rules / 時代設定の整合性ルール**: AI auto-corrects anachronistic expressions when historical era settings are selected. / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルール。
 
 ---
@@ -239,6 +240,15 @@ AIを使って漫画を10言語に翻訳するツールです。
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v2.9.0 — 2026-04-28
+- **Emotion Gap Design (All Genres)**: Ported and generalized the "Gap Technique" comedy structure methodology from Nano Banana Pro into a universal narrative technique applicable to ALL genres. 6 techniques (Substitution, Exaggeration, Reversal, Absurdity, Tension-Release, Normalcy Return) now guide AI story generation across comedy, horror, romance, suspense, action, and drama. / Nano Banana Proの「ズレ技法」を全ジャンル対応の普遍的物語構造技法として移植・一般化。6種の落差技法がコメディ・ホラー・恋愛・サスペンス等全ジャンルの物語生成を強化。
+- **Motif Recurrence System**: Introduced symbolic element callback rules requiring motifs to appear at least twice in different contexts, with meaning evolution connected to the emotional climax. / モチーフ回帰システムを導入。象徴的要素が異なる文脈で最低2回登場し、意味が深化しながら結末の感情的ピークに接続する構成。
+- **Emotion Curve Design**: Added 4-phase narrative structure framework (Setup→Deviation→Build-up→Payoff) for intentional emotional arc design across all narrative modes. / 感情曲線設計（4フェーズ構成）を全物語系モードに導入。
+- **Tone Variation System**: Defined 3 concrete tone registers (High-energy / Quiet-serene / Cold-analytical) with prohibition of same-tone streaks exceeding 3 paragraphs. / 文体緩急の3系統定義（高熱量/静謐/冷徹）と同系統の3段落以上連続禁止。
+- **Quality Gate**: Added AI self-verification checklist (6 items) executed before output generation. Checks Setup-Payoff structure, emotion gap sufficiency, motif recurrence, ending pattern diversity, tone variation, and character narrative function. / AIが出力前に実行する品質ゲート（6項目の自己検証チェックリスト）を導入。
+- **Comedy Structure Method (4koma)**: Full port of Nano Banana Pro comedy methodology to 4koma mode: 6 gap techniques, 4-panel composition mapping (Setup→Gag→Build→Punchline), 6 punchline variety patterns, 3 tone variations, and recommended techniques (Callback, Nori-Tsukkomi, Stacking). / 4コマモードにNBPコメディ構造メソッドを完全移植。
+- **Genre Style Guide Enhancement**: Enhanced ALL 7 major genre guides and 8 comedy sub-genre guides with specific gap technique recommendations, motif usage patterns, and tone preferences per genre. / 全ジャンル（7大カテゴリ）とコメディ系8サブジャンルの文体ガイドを強化。
 
 ### v2.8.2 — 2026-04-09
 - **Bugfix: Modal Overlay Click**: Fixed an issue where clicking the background overlay of the character recognition result modal would accidentally close it, causing data loss. The modal now only closes via the close/cancel buttons. / キャラクター認識結果モーダルの背景（オーバーレイ）をクリックすると意図せず閉じてしまう問題を修正。閉じるボタンまたはキャンセルボタンでのみ閉じるように改善し、データ消失を防止。
