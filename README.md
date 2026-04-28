@@ -49,8 +49,8 @@ This system acts as a sophisticated prompt engineering compiler. It leverages mu
 
 ## 🧠 v2.9 Narrative Engineering Methods / v2.9 物語構造メソッド解説
 
-> These methods were originally developed for comedy manga (4-panel gag) generation in [Nano Banana Pro](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres — because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
-> これらのメソッドは元々 [Nano Banana Pro](https://github.com/FURUYAN1234/nano-banana-pro) でギャグ漫画（4コマ）生成用に開発されました。分析の結果、その核心は**全ジャンルに適用可能な普遍的物語技法**であることが判明しました。笑い・恐怖・感動・驚きは全て同じ構造的原理、すなわち**「読者の期待（E）と実際の展開（R）の落差」**から生まれるためです。
+> These methods were originally developed for comedy manga (4-panel gag) generation in [Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres — because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
+> これらのメソッドは元々 [Nano Banana 2 and ChatGPT image 2.0 Powered Super AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro) でギャグ漫画（4コマ）生成用に開発されました。分析の結果、その核心は**全ジャンルに適用可能な普遍的物語技法**であることが判明しました。笑い・恐怖・感動・驚きは全て同じ構造的原理、すなわち**「読者の期待（E）と実際の展開（R）の落差」**から生まれるためです。
 
 ### 1. Emotion Gap Design / 感情落差設計
 
