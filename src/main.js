@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v2.4.0
+// main.js — v2.9.2
 // ============================================================
 import './style.css';
 import {
@@ -318,6 +318,7 @@ function renderChars() {
   
   const rolesDatalist = `<datalist id="roles-list">${ROLES.map(r => `<option value="${r}"></option>`).join('')}</datalist>`;
   const personalitiesDatalist = `<datalist id="personalities-list">${PERSONALITIES.map(p => `<option value="${p}"></option>`).join('')}</datalist>`;
+  const sexDatalist = `<datalist id="sex-list"><option value="男性"></option><option value="女性"></option><option value="無性"></option><option value="回答無し"></option></datalist>`;
 
   list.innerHTML = state.characters.map((c, i) => `
     <div class="char-card shadow-sm">
@@ -337,6 +338,17 @@ function renderChars() {
         <div class="btn-group">
           <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="name" title="今すぐ名前の案を出す">🎲</button>
           <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="name" title="消去">🗑️</button>
+        </div>
+      </div>
+
+      <label class="char-field-label">性別（空欄でAIお任せ / 🎲 今すぐ生成 / 手入力・選択可）</label>
+      <div class="char-field-row">
+        <div class="input-wrap">
+          <input type="text" class="char-sel" list="sex-list" data-idx="${i}" data-key="sex" value="${esc(c.sex)}" placeholder="例：男性、女性、無性（空欄でAIお任せ）">
+        </div>
+        <div class="btn-group">
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="sex" title="今すぐ性別の案を出す">🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="sex" title="消去">🗑️</button>
         </div>
       </div>
 
@@ -362,10 +374,10 @@ function renderChars() {
         </div>
       </div>
 
-      <label class="char-field-label">詳細メモ（空欄ならAIが文脈に合わせ補完 / 🎲 今すぐ案を生成 / ⚡ 性別変更時は名前も自動調整）</label>
+      <label class="char-field-label">詳細メモ（空欄ならAIが文脈に合わせ補完 / 🎲 今すぐ案を生成）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <textarea class="char-memo" data-idx="${i}" placeholder="例：男性, 短髪, 眼鏡（性別を変えると名前も自動調整）">${esc(c.note)}</textarea>
+          <textarea class="char-memo" data-idx="${i}" placeholder="例：短髪, 眼鏡, いつも黒い服を着ている">${esc(c.note)}</textarea>
         </div>
         <div class="btn-group">
           <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="note" title="今すぐ詳細メモの案を出す">🎲</button>
@@ -373,12 +385,12 @@ function renderChars() {
         </div>
       </div>
     </div>
-  `).join('') + rolesDatalist + personalitiesDatalist + `
+  `).join('') + rolesDatalist + personalitiesDatalist + sexDatalist + `
     <div class="char-section-hint">
         💡 <strong>ヒント・使い方:</strong><br>
         ・各項目は<strong>「手入力」</strong>、<strong>「リスト選択」</strong>、<strong>「🎲で今すぐ生成」</strong>のどれでも可能です。<br>
         ・空欄のまま生成すると、AIが物語の文脈に最適な設定を<strong>自動的に補完</strong>します。<br>
-        ・<strong>性別同期</strong>：詳細メモの性別（男性/女性）を変えると名前が自動で微調整されます。逆に名前を変えるとメモの性別も連動します。<br>
+        ・<strong>性別同期</strong>：性別（男性/女性）を変えると名前が自動で微調整されます。逆に名前を変えると性別も連動します。<br>
         ・<strong>1人のみ指定時</strong>：AIが主人公と認識し、勝手に相棒や敵など他の人物を登場させます。もし「絶対に他の人物を登場させない（一人芝居）」にしたい場合は、下部の補足メモ欄にその旨を記載してください。
     </div>
   `;
@@ -389,11 +401,14 @@ function renderChars() {
     state.characters[idx].name = e.target.value;
     syncGender(idx, 'name');
   }));
-  list.querySelectorAll('.char-sel').forEach(el => el.addEventListener('input', e => state.characters[e.target.dataset.idx][e.target.dataset.key] = e.target.value));
+  list.querySelectorAll('.char-sel').forEach(el => el.addEventListener('input', e => {
+    const idx = parseInt(e.target.dataset.idx);
+    state.characters[idx][e.target.dataset.key] = e.target.value;
+    if (e.target.dataset.key === 'sex') syncGender(idx, 'sex');
+  }));
   list.querySelectorAll('.char-memo').forEach(el => el.addEventListener('input', e => {
     const idx = parseInt(e.target.dataset.idx);
     state.characters[idx].note = e.target.value;
-    syncGender(idx, 'note');
   }));
   
   list.querySelectorAll('.btn-field-rnd').forEach(el => el.addEventListener('click', e => randomizeCharField(parseInt(el.dataset.idx), el.dataset.key)));
@@ -402,7 +417,7 @@ function renderChars() {
   list.querySelectorAll('.btn-char-del').forEach(el => el.addEventListener('click', e => deleteChar(parseInt(el.dataset.idx))));
 }
 function addChar() {
-  state.characters.push({ name: '', role: '', personality: '', note: '' });
+  state.characters.push({ name: '', role: '', personality: '', sex: '', note: '' });
   renderChars();
 }
 function deleteChar(idx) {
@@ -415,11 +430,16 @@ function removeLastChar() {
 }
 function randomizeCharField(idx, key) {
   const c = state.characters[idx];
-  const gender = detectGenderFromMemo(c.note) || detectGenderFromName(c.name) || (Math.random() < 0.5 ? 'M' : 'F');
+  const gender = detectGenderFromSex(c.sex) || detectGenderFromName(c.name) || (Math.random() < 0.5 ? 'M' : 'F');
 
   if (key === 'name') {
     const list = gender === 'M' ? GIVEN_NAMES_M : (gender === 'F' ? GIVEN_NAMES_F : GIVEN_NAMES_U);
     c.name = rnd(SURNAMES) + rnd(list);
+  }
+  if (key === 'sex') {
+    c.sex = rnd(['男性', '女性', '無性', '回答無し']);
+    syncGender(idx, 'sex');
+    return; // syncGender calls renderChars
   }
   if (key === 'role') c.role = rnd(ROLES);
   if (key === 'personality') c.personality = rnd(PERSONALITIES);
@@ -442,6 +462,7 @@ function randomizeChar(idx) {
     name: rnd(SURNAMES) + rnd(nameList),
     role: rnd(ROLES),
     personality: rnd(PERSONALITIES),
+    sex: gender === 'M' ? '男性' : '女性',
     note: rnd(detailList)
   };
   renderChars();
@@ -459,10 +480,10 @@ function detectGenderFromName(name) {
   return null;
 }
 
-function detectGenderFromMemo(memo) {
-  if (!memo) return null;
-  if (memo.includes('男性') || memo.includes('男,')) return 'M';
-  if (memo.includes('女性') || memo.includes('女,')) return 'F';
+function detectGenderFromSex(sexStr) {
+  if (!sexStr) return null;
+  if (sexStr.includes('男性') || sexStr.includes('男,')) return 'M';
+  if (sexStr.includes('女性') || sexStr.includes('女,')) return 'F';
   return null;
 }
 
@@ -470,23 +491,13 @@ function syncGender(idx, triggerField) {
   const c = state.characters[idx];
   if (triggerField === 'name') {
     const g = detectGenderFromName(c.name);
-    const currentG = detectGenderFromMemo(c.note);
+    const currentG = detectGenderFromSex(c.sex);
     if (g && g !== currentG) {
-      const prefix = g === 'M' ? '男性' : '女性';
-      if (!c.note) {
-        c.note = rnd(g === 'M' ? DETAILS_M : DETAILS_F);
-      } else {
-        // 性別表記を置換または先頭に付与
-        if (currentG) {
-          c.note = c.note.replace(/^(男性|女性)/, prefix);
-        } else {
-          c.note = prefix + ', ' + c.note;
-        }
-      }
+      c.sex = g === 'M' ? '男性' : '女性';
       renderChars();
     }
-  } else if (triggerField === 'note') {
-    const g = detectGenderFromMemo(c.note);
+  } else if (triggerField === 'sex') {
+    const g = detectGenderFromSex(c.sex);
     const currentG = detectGenderFromName(c.name);
     if (g && g !== currentG) {
       const list = g === 'M' ? GIVEN_NAMES_M : GIVEN_NAMES_F;
@@ -504,7 +515,7 @@ function randomizeCharCountAndContent() {
   const count = Math.floor(Math.random() * 4) + 1; // 1 to 4
   state.characters = [];
   for (let i = 0; i < count; i++) {
-    state.characters.push({ name: '', role: '', personality: '', note: '' });
+    state.characters.push({ name: '', role: '', personality: '', sex: '', note: '' });
     randomizeChar(i);
   }
 }

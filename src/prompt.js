@@ -33,9 +33,10 @@ export function buildPrompt(s) {
     charDesc = s.characters.map((c, i) => {
       const name = c.name || `(AI命名:キャラ${i + 1})`;
       const role = c.role || '未定';
+      const sexInfo = c.sex ? `性別:${c.sex}, ` : '';
       const personality = c.personality || '未定';
       const detail = c.note ? ` [${c.note}]` : '';
-      return `${i + 1}. ${name} (${role}) — 性格:${personality}${detail}`;
+      return `${i + 1}. ${name} (${role}) — ${sexInfo}性格:${personality}${detail}`;
     }).join('\n');
   }
 

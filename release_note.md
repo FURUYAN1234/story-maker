@@ -1,11 +1,7 @@
-- Introduced a 3-tier foreshadowing rule system to resolve contradictions where narrative modes demanded foreshadowing while non-narrative modes prohibited it.
-  - Tier 1 (Full): Narrative modes retain all 7 foreshadowing & composition rules.
-  - Tier 2 (Light): 4koma mode uses lightweight "setup & punchline" guidance, prioritizing comedic timing.
-  - Tier 3 (None): Non-narrative modes (essay, poem, letter, diary) exclude foreshadowing entirely, replaced with mode-specific composition rules.
+v2.9.1 Security Audit & Cleanup / セキュリティ監査と不要ファイルの削除
+
+Performed pre-deployment security audit (confirmed no hardcoded credentials and zero `localStorage` API key leakage). Removed obsolete development artifacts (`diff.txt`, `gitlog.txt`, `pkg_log.txt`) from root.
 
 ---
 
-- 伏線ルールのモード別ティア制を導入。物語系モードが伏線を要求し、非物語系モードが伏線を禁止するという矛盾を解消。
-  - 物語系モード（novel, medium, short_short, scenario, manga, documentary, radio）はフル伏線・構成ルール（7項目）をそのまま適用。
-  - 4コマモードは「フリとオチ」の軽量ルールに差し替え、テンポとオチの切れ味を優先。
-  - 非物語系モード（エッセイ・詩・手紙・日記）は伏線ルールを完全除外し、各モード固有の構成ルール（テーマの一貫性、イメージの連鎖、感情の推移など）に差し替え。
+デプロイ前セキュリティ監査を実施（ハードコードなし、localStorageへのAPIキー漏洩ゼロを確認）。ルートディレクトリから不要な開発時一時ファイル群を削除しクリーンアップしました。
