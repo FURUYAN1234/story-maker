@@ -33,27 +33,14 @@ description: Story Makerのデプロイ一気通貫ワークフロー。「デ�
 8. 60秒待機する
 9. `git show origin/gh-pages:index.html | Select-String "title"` でリモートのバージョンを確認する
 
-### Phase 6: Zip ダウンロード確認
-10. GitHub Releases ページの Zip ダウンロードURL (`https://github.com/FURUYAN1234/story-maker/archive/refs/tags/vX.Y.Z.zip`) にアクセスして確認する
+### Phase 6: タグ付け & リリース作成
+10. `git tag vX.Y.Z` でタグを作成する
+11. `git push origin vX.Y.Z` でタグをプッシュする
+12. 英語・日本語併記のリリースノートを作成し、`gh release create vX.Y.Z --title "..." -F release_note_temp.md` でGitHub Releaseを作成する。作成後は一時ファイルを削除する。
 
-### Phase 7: タグ付け & リリースノート作成
-11. `git tag vX.Y.Z` でタグを作成する
-12. `git push origin vX.Y.Z` でタグをプッシュする
-13. リリースノートのタイトルと本文を以下のフォーマットで生成し、コードブロックとして出力する：
-
-**タイトル形式:**
-```
-English Title / 日本語タイトル
-```
-
-**本文形式:**
-```
-English body text describing all changes
-
----
-
-日本語の本文（全変更点を記載）
-```
+### Phase 7: Zip ダウンロード検証
+13. GitHub Releasesに正しく公開されたか、`gh release view vX.Y.Z` で確認する。
+14. ブラウザツールを用いてZIPのURLにアクセスすると処理が固まるため、**絶対にブラウザツールでZIPを開かない**こと。代わりに `curl -I https://github.com/FURUYAN1234/story-maker/archive/refs/tags/vX.Y.Z.zip` を実行し、HTTPステータスを確認してダウンロード可能であることを検証する。
 
 ### Phase 8: ローカル環境更新 (`C:\story-maker-main`)
 14. 一時フォルダ作成 & GitHub Release から ZIP をダウンロード

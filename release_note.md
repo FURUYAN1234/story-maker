@@ -1,14 +1,11 @@
-﻿## AI Narrative Logic Refinement / AI小説固有の課題解決構造の統合
+## Story Maker v2.9.8 Release
 
-* **15-Beat Structure / 15ビート構造の導入**
-  Expanded the emotional curve framework into a comprehensive 15-beat structure for long-form narrative consistency.
-  感情曲線の設計を、脚本術に基づく15ビート構造へと拡張。中長編においてもダレない構成を実現。
-* **G.M.C. Scene Dynamics / シーンごとの駆動力（GMC）徹底**
-  Every scene must now define the character's Goal, Motivation, and Conflict.
-  すべてのシーンに「目的・動機・葛藤（GMC）」を設定し、目的のない会話や停滞を物理的に排除。
-* **Physicality (Show, Don't Tell) / 五感を通じた身体性表現の義務化**
-  Banned direct emotion words (e.g., "I was sad") in favor of physical responses and sensory details.
-  「悲しい」「絶望した」等の直接的な感情表現を禁止し、重さ・温度・匂いや手の震えなど、身体反応を通した文学的描写を強制。
-* **Guard C (Post-Output Filter) / ガードC（出力後の機械的フィルタリング）**
-  Implemented mechanical text sanitization to remove AI clichés ("いかがでしたか") and leftover markdown.
-  生成後のテキストから「いかがでしたか？」等のAI特有の陳腐な締めくくりや、不要なマークダウン装飾を強制削除するJSフィルターを実装。
+* **Active Character Roster / サブキャラクター追跡ルーチンの実装**
+  Added internal tracking memo to keep secondary characters active, preventing them from fading out in the final chapters.
+  長編の終盤で脇役の存在感が消える問題を解消するため、章終わりの内部ログに「サブキャラクターの現在地・状況」の追跡を義務付けました。
+* **Pacing Enforcement / 描写密度強制（駆け足防止）プロトコル**
+  Mandated sensory and psychological descriptions during intense dialogue or climax scenes to enforce a heavier, more cinematic pacing.
+  クライマックスや会話劇において展開が早歩きになるのを防ぐため、必ず間に「五感を通じた環境描写」や「苦痛の描写」を挟むよう指示を追加しました。
+* **Dynamic Chekhov's Gun / 動的「チェーホフの銃」プロトコルの導入**
+  Instructed the AI to plant an irrelevant-seeming item or habit in the early chapters (Setup) and weaponize it as a critical element in the final act (Payoff).
+  序盤（Setup）で提示した一見無関係な日常の習慣やアイテムを、終盤（Payoff）で物語の根幹に関わる致命的な要素として回収させる動的伏線を強制しました。

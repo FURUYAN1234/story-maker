@@ -143,6 +143,14 @@ AIが出力**前**に実行する自己検証チェックリストと、出力**
 | Character narrative function / キャラの物語的機能 | Bystander characters / 傍観者だけの登場人物 |
 | **Guard C (Post-filter)** / ガードC | Cliché phrases ("In conclusion...") / AI特有の陳腐な言い回し（「いかがでしたか」等）の物理削除 |
 
+### 7. Long-Form Narrative Protocols / 長編専用・文脈維持プロトコル
+These protocols apply exclusively to the `long` (長編小説) mode to prevent structural collapse and loss of detail across a multi-chapter (100,000+ characters) generated text.
+長編小説モード専用のプロトコル群。複数回に分けて10万字超の物語を生成する際に生じる「伏線の破綻」や「後半の息切れ」を防ぎます。
+
+- **Active Character Roster / サブキャラ追跡**: Tracks supporting characters' current locations and statuses in the internal memo to prevent them from disappearing in later chapters. / サブキャラクターの現在地と状況を毎章の内部メモとして記録し、終盤での消失を防ぐ。
+- **Pacing Enforcement / 描写密度の強制**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / クライマックスや会話劇において五感描写や肉体的痛覚を強制的に挿入させ、展開の「駆け足」を防止する。
+- **Dynamic Chekhov's Gun / 動的チェーホフの銃**: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 序盤に無関係に見えるアイテムや習慣を配置し、終盤の致命的な突破口として反転回収させる動的伏線。
+
 ---
 
 ## 💻 Tech Stack / 技術スタック
@@ -338,6 +346,9 @@ AIを使って漫画を10言語に翻訳するツールです。
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v2.9.8 — 2026-05-04
+- **Long-Form Routine Enhancements (Pacing & Sub-plots)**: Implemented three advanced routines into the long-form prompt to solve common AI writing flaws in extended narratives. Added "Active Character Roster" tracking to prevent secondary characters from disappearing in late chapters. Added "Pacing Enforcement" to mandate sensory descriptions during climaxes to prevent rushed dialogue pacing. Added "Dynamic Chekhov's Gun" protocol to force the AI to plant an irrelevant item/habit in the Setup phase and weaponize it in the Payoff phase for maximum reader impact. / 長編小説モードにおけるAI特有の欠陥（終盤の脇役消失、クライマックスの駆け足展開、伏線の単調さ）を解消する3つのルーチンを統合。「サブキャラクター追跡」による脇役の生存確保、「描写密度強制」による対話間の五感・苦痛描写の義務付け、「動的チェーホフの銃」による序盤の何気ない日常描写の致命的要素への反転回収を実装。
 
 ### v2.9.7 — 2026-05-04
 - **Long-Form Interactive Control Enhancement**: Significantly reinforced the chapter-by-chapter stop/continue dialogue protocol in the long-form novel prompt template. Added a dedicated "Output Format per Chapter" section with explicit stop markers (★★★) to prevent the AI from auto-continuing to the next chapter without user permission. The "continue to next chapter?" confirmation message is now mandated at 3 separate points in the template for redundancy. / 長編小説モードの「1章ずつ停止→続行確認」プロトコルを大幅強化。各章の出力フォーマットセクションを新設し、明示的な停止マーカー（★★★）を追加。AIが勝手に次の章を書き始めることを防止するため、テンプレート内3箇所で停止指示を冗長に記述。
