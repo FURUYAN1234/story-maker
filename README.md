@@ -109,11 +109,13 @@ Setup (導入) → Inciting Incident (事件) → Deviation (逸脱/第一の扉
 
 ### 4. Scene Dynamics & Physicality / シーンの駆動力と身体性
 
-To prevent flat, "AI-like" abstract writing, every scene must adhere to two strict rules:
-AI特有の平坦で抽象的な文章を防ぐため、全シーンに以下の厳格なルールを適用：
+To prevent flat, "AI-like" abstract writing, every scene must adhere to strict rules including Stakes, Subtext, and Loglines:
+AI特有の平坦で抽象的な文章を防ぐため、全シーンにステークス・サブテキスト・ログラインを含む以下の厳格なルールを適用：
 
-- **G.M.C. (Goal, Motivation, Conflict)**: Every scene must clearly define what the character wants, why they want it, and what stands in their way. / 全てのシーンに「目的」「動機」「障害」を設定し、物語の停滞を防ぐ。
+- **Logline Anchor (ログラインによる軸固定)**: The AI must establish a 1-sentence core summary (Logline) before writing and strictly adhere to it throughout the story to prevent plot wandering. / 執筆前に物語の核となる1文要約（ログライン）を内部設定させ、途中で話がブレるのを防ぐ。
+- **G.M.C.+S. (Goal, Motivation, Conflict, Stakes)**: Every scene must clearly define what the character wants, why they want it, what stands in their way, and what they lose if they fail (Stakes). / 全てのシーンに「目的」「動機」「障害」に加え「ステークス（失敗時の代償）」を設定し、物語の停滞を防ぎ緊迫感を高める。
 - **Physicality (Show, Don't Tell)**: Direct emotion words ("I was sad") are banned. Emotions must be described through five senses (weight, temperature, smell, trembling hands). / 「悲しい」などの直接的な感情語を禁止。重さ、温度、匂い、身体反応（五感）を通して感情を描写する。
+- **Subtext (サブテキスト)**: Direct expression of true feelings in dialogue is banned (No "On the Nose" dialogue). Characters must hide their true intentions, requiring readers to infer meaning from actions. / セリフで直接感情を説明させること（オン・ザ・ノーズ）を禁止。裏の感情を隠し、行動との矛盾から読者に推測させる。
 
 ### 5. Tone Variation System / 文体緩急の3系統
 
@@ -336,6 +338,9 @@ AIを使って漫画を10言語に翻訳するツールです。
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v2.9.5 — 2026-05-03
+- **Prompt Engineering Refinement (GMC+S, Subtext, Logline)**: Upgraded the scene dynamics protocol from GMC to GMC+S by mandating "Stakes" (what characters lose if they fail) for every scene. Enforced strict "Subtext" rules to eliminate "On the Nose" dialogue, and introduced a "Logline Anchor" rule to prevent the AI from wandering off-plot during generation. / シーン推進ロジックをGMCから「GMC+S（ステークス）」にアップグレードし、全シーンに失敗時の代償を設定。さらに「サブテキスト」ルールを追加して説明台詞（オン・ザ・ノーズ）を禁止し、物語開始時に「ログライン」を固定させることでポン出し生成時のプロットのブレを防止。
 
 ### v2.9.4 — 2026-05-03
 - **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: New experimental module that performs deep computational stylistics analysis on uploaded text files. Extracts 50+ parameters across 10 categories (rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, literary influences, anti-patterns, and reproduction prompt). Outputs in dual format: human-readable text for review and structured JSON for injection into other AI novel tools (ChatGPT, Claude, Gemini). Includes "Style Rewrite" function to apply extracted style to generated stories while preserving plot. Full model fallback support with real-time progress display. / 任意のテキストファイルをドロップするだけで、AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析するβ版モジュール。結果は人間用テキストとAI小説ツール向けJSONの2形式で出力。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。モデルフォールバック完全対応。
