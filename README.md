@@ -339,6 +339,9 @@ AIを使って漫画を10言語に翻訳するツールです。
 
 ## 📝 Changelog / 更新履歴
 
+### v2.9.6 — 2026-05-03
+- **Long-Form Prompt Overhaul**: Completely updated the master prompt template for long-form generation (novel) to fully support the latest narrative engineering methodologies. The template now integrates the 15-Beat Structure, GMC+S (Goal, Motivation, Conflict, Stakes) scene dynamics, "Show, Don't Tell" physicality rules, Subtext dialogue enforcement, 6 Emotion Gap Techniques, Motif Recurrence tracking, 3 Tone Variations, and a 6-point Quality Gate self-verification checklist. Added a "Logline Anchor" to keep the story axis fixed throughout the multi-chapter generation process. Includes the comprehensive "Guard C" mechanical filter rules to eliminate AI clichés. / 長編小説モード（long）の分割執筆用マスター指示書テンプレートを最新の物語エンジニアリング手法に完全対応。15ビート構造、GMC+S（ステークス）のシーン推進、五感描写（Show, Don't Tell）、サブテキスト（説明台詞禁止）、6種の落差技法、モチーフ回帰、文体の緩急、および出力前自己検証（品質ゲート）を統合。複数章にまたがる執筆での軸ブレを防ぐ「ログライン固定」や、AI特有の悪癖を排除する包括的ガードCルールを適用。
+
 ### v2.9.5 — 2026-05-03
 - **Prompt Engineering Refinement (GMC+S, Subtext, Logline)**: Upgraded the scene dynamics protocol from GMC to GMC+S by mandating "Stakes" (what characters lose if they fail) for every scene. Enforced strict "Subtext" rules to eliminate "On the Nose" dialogue, and introduced a "Logline Anchor" rule to prevent the AI from wandering off-plot during generation. / シーン推進ロジックをGMCから「GMC+S（ステークス）」にアップグレードし、全シーンに失敗時の代償を設定。さらに「サブテキスト」ルールを追加して説明台詞（オン・ザ・ノーズ）を禁止し、物語開始時に「ログライン」を固定させることでポン出し生成時のプロットのブレを防止。
 
