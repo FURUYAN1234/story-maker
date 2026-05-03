@@ -20,6 +20,7 @@ import {
 import { callGemini } from './api.js';
 import { buildPrompt, generateRandomTheme } from './prompt.js';
 import { initCharImport } from './charImport.js';
+import { initStyleAnalyzer } from './styleAnalyzer.js';
 import { version as APP_VERSION } from '../package.json';
 
 const $ = id => document.getElementById(id);
@@ -601,6 +602,8 @@ async function generate() {
     
     const onFb = (m) => {
       out.textContent = `フォールバック中: ${m}...`;
+      btn.innerHTML = `<span class="spinner"></span>フォールバック: ${m}`;
+      if (alertEl) alertEl.innerHTML = `⚠️ <strong>稼働中:</strong> フォールバック中 (${m})...`;
     };
     
     const { text, usedModel } = await callGemini(key, model, prompt, onFb);
@@ -648,6 +651,10 @@ async function generate() {
     tagRow.innerHTML = `<span class="tag tag-gemini">Gemini</span><span class="tag tag-model">${esc(ml)}</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
     $('btn-copy').classList.remove('hidden');
     $('btn-download').classList.remove('hidden');
+    
+    // β版: 作風解析エンジンを活性化（OUTPUT生成後に使用可能にする）
+    const saSection = $('sa-section');
+    if (saSection) saSection.classList.remove('sa-inactive');
     
   } catch (err) {
     out.className = 'output-box empty';
@@ -750,7 +757,8 @@ function init() {
     const blob = new Blob([t], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (state.lastTitle || 'story') + '.txt';
+    const ts = new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
+    a.download = (state.lastTitle || 'story') + '_' + ts + '.txt';
     a.click();
   });
 
@@ -824,6 +832,12 @@ function init() {
 
   // キャラクターシート画像取り込み初期化
   initCharImport(state, renderChars, () => state.apiKey);
+
+  // β版: 作風解析エンジン初期化
+  initStyleAnalyzer(
+    () => state.apiKey,
+    () => $('output')?.textContent || ''
+  );
 }
 
 document.addEventListener('DOMContentLoaded', init);

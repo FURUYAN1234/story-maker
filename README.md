@@ -26,6 +26,7 @@ The core insight: AI outputs converge toward "average" stories when inputs have 
 - **Smart Gender Sync / スマート性別同期**: The character's Sex field and Name are bidirectionally linked. Changing the sex automatically generates a fitting name, and entering a name automatically infers the sex, ensuring consistency with minimal effort. / キャラクターの「性別」と「名前」が双方向に連動。性別を変えると適した名前が自動調整され、名前を手入力すると性別が自動推論されるため、一貫性のあるキャラ設定を支援します。
 - **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
 - **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System のSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: Drop text files (.txt/.md) from any author and the AI performs deep computational stylistics analysis — extracting 50+ parameters covering rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, and more. Results are available in two formats: human-readable text (copy) and structured JSON for direct injection into other AI novel tools (ChatGPT, Claude, etc.). Includes a "Rewrite" function that applies the extracted style to your generated story while preserving the plot. / 任意の作家のテキストファイルをドロップするだけで、AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析。結果は人間用テキスト（コピー）と他のAI小説ツールに直接投入可能な構造化JSONの2形式で提供。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。
 
 ---
 
@@ -336,9 +337,14 @@ AIを使って漫画を10言語に翻訳するツールです。
 
 ## 📝 Changelog / 更新履歴
 
+### v2.9.4 — 2026-05-03
+- **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: New experimental module that performs deep computational stylistics analysis on uploaded text files. Extracts 50+ parameters across 10 categories (rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, literary influences, anti-patterns, and reproduction prompt). Outputs in dual format: human-readable text for review and structured JSON for injection into other AI novel tools (ChatGPT, Claude, Gemini). Includes "Style Rewrite" function to apply extracted style to generated stories while preserving plot. Full model fallback support with real-time progress display. / 任意のテキストファイルをドロップするだけで、AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析するβ版モジュール。結果は人間用テキストとAI小説ツール向けJSONの2形式で出力。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。モデルフォールバック完全対応。
+- **Unified API Status Display / API稼働ステータス表示の統一**: Synchronized real-time API progress and fallback tracking across the global alert bar, the main generation button, and the dedicated Style Analyzer action buttons. / ストーリー生成・作風解析・リライト時のAPI稼働状況（およびフォールバック状況）を、画面上部のアラートバー・左パネルの生成ボタン・右パネルの各アクションボタン間で完全に同期してリアルタイム表示するよう統一。
+- **Timestamped File Downloads**: All downloaded files (story .txt, analysis .json, rewrite .txt) now use `name_YYYYMMDDHHmmss` naming convention for organized file management. / ダウンロードファイル全てに `名前_年月日時分秒` 形式のタイムスタンプを付与し、ファイル管理を効率化。
+
 ### v2.9.3 — 2026-05-02
 - **Narrative Logic Refinement**: Integrated advanced AI novel writing protocols (15-Beat Structure, GMC Scene Dynamics, and Physicality "Show, Don't Tell" rules). / 「AI小説固有の課題解決構造」から15ビート構造、シーンごとのGMC（目的・動機・葛藤）設定、および五感を通じた身体性（Show, Don't Tell）ルールを統合し、長編・中編の構成力と文学的質感を大幅に向上。
-- **Guard C (Post-Output Filter)**: Implemented mechanical text sanitization in `main.js` to automatically remove AI clichés ("いかがでしたか", "結論として") and leftover markdown formatting before rendering. / `main.js`側に出力直前のテキストクリーニング処理（ガードC）を実装。「いかがでしたか？」等のAI悪癖フレーズや不要なマークダウン装飾を自動的に削ぎ落とし、余韻を損なわない品質管理を徹底。
+- **Guard C (Post-Output Filter)**: Implemented mechanical text sanitization in `main.js` to automatically remove AI clichés ("いかがでしたか", "結論として") and leftover markdown formatting before rendering. / `main.js`側に出力直前のテキストクリーニング処理（ガードC）を実装。
 
 ### v2.9.2 — 2026-05-02
 - **Character UI Overhaul**: Separated the "Sex" (性別) attribute from the Detailed Memo into its own dedicated input field alongside Name and Role. Added dropdown options for 男性, 女性, 無性, 回答無し, and custom text.
