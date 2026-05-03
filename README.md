@@ -339,6 +339,10 @@ AIを使って漫画を10言語に翻訳するツールです。
 
 ## 📝 Changelog / 更新履歴
 
+### v2.9.7 — 2026-05-04
+- **Long-Form Interactive Control Enhancement**: Significantly reinforced the chapter-by-chapter stop/continue dialogue protocol in the long-form novel prompt template. Added a dedicated "Output Format per Chapter" section with explicit stop markers (★★★) to prevent the AI from auto-continuing to the next chapter without user permission. The "continue to next chapter?" confirmation message is now mandated at 3 separate points in the template for redundancy. / 長編小説モードの「1章ずつ停止→続行確認」プロトコルを大幅強化。各章の出力フォーマットセクションを新設し、明示的な停止マーカー（★★★）を追加。AIが勝手に次の章を書き始めることを防止するため、テンプレート内3箇所で停止指示を冗長に記述。
+- **Full-Text Compilation on Completion**: Added a "Final Action" protocol to the long-form prompt template. When all chapters are complete, the AI is instructed to: (a) announce completion with total chapter count, (b) report total character count, and (c) output the entire novel text compiled into a single markdown code block — enabling easy one-click copy of the full work. / 長編プロンプトに「全章完了時の最終アクション」を追加。最終章完了時にAIが全章数・総文字数を報告し、第1章から最終章までの全文を1つのコードブロックにまとめて出力する機能。ワンクリックで全文コピーが可能に。
+
 ### v2.9.6 — 2026-05-03
 - **Long-Form Prompt Overhaul**: Completely updated the master prompt template for long-form generation (novel) to fully support the latest narrative engineering methodologies. The template now integrates the 15-Beat Structure, GMC+S (Goal, Motivation, Conflict, Stakes) scene dynamics, "Show, Don't Tell" physicality rules, Subtext dialogue enforcement, 6 Emotion Gap Techniques, Motif Recurrence tracking, 3 Tone Variations, and a 6-point Quality Gate self-verification checklist. Added a "Logline Anchor" to keep the story axis fixed throughout the multi-chapter generation process. Includes the comprehensive "Guard C" mechanical filter rules to eliminate AI clichés. / 長編小説モード（long）の分割執筆用マスター指示書テンプレートを最新の物語エンジニアリング手法に完全対応。15ビート構造、GMC+S（ステークス）のシーン推進、五感描写（Show, Don't Tell）、サブテキスト（説明台詞禁止）、6種の落差技法、モチーフ回帰、文体の緩急、および出力前自己検証（品質ゲート）を統合。複数章にまたがる執筆での軸ブレを防ぐ「ログライン固定」や、AI特有の悪癖を排除する包括的ガードCルールを適用。
 
