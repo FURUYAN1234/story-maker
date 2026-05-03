@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v2.9.3</title>
-  <script type="module" crossorigin src="./assets/index-CkRtXx6Z.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-GL6otH_e.css">
+  <title>Story Maker v2.9.4</title>
+  <script type="module" crossorigin src="./assets/index-BK12JOeF.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DdTzsixX.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v2.9.3</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v2.9.4</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -265,7 +265,7 @@
     </aside>
 
     <!-- 📺 Output Display -->
-    <article class="output-panel">
+    <article class="output-panel" id="output-panel">
       <div class="output-header">
         <div class="output-title">OUTPUT</div>
         <div id="char-counter" class="char-counter">0 字</div>
@@ -286,6 +286,96 @@
           </ol>
         </div>
       </div>
+
+      <!-- ============================================================
+           🧪 β版: 作風解析エンジン (Style Analyzer)
+           OUTPUT欄の直下。OUTPUT生成後に活性化する。
+           ============================================================ -->
+      <section class="sa-beta-section sa-inactive" id="sa-section">
+        <!-- 非活性時のメッセージ -->
+        <div class="sa-inactive-msg" id="sa-inactive-msg">
+          🔒 ストーリーを生成すると、作風解析エンジン（β版）が使えるようになります
+        </div>
+
+        <!-- β版バナー -->
+        <div class="sa-beta-banner">
+          <div class="sa-beta-badge">🧪 β版</div>
+          <div class="sa-beta-text">
+            <strong>作風解析エンジン — Style Analyzer</strong>
+            <span>実験的機能です。正式リリースではありません。解析精度やUI/UXは予告なく変更される場合があります。</span>
+          </div>
+        </div>
+
+        <!-- STEP 1: テキストドロップ -->
+        <div class="sa-block">
+          <div class="sa-block-header">
+            <span class="sa-block-title">📥 STEP 1 — テキストを投入</span>
+            <span class="sa-file-count hidden" id="sa-file-count"></span>
+            <button class="btn-secondary sa-btn-small" id="btn-sa-clear">🗑️ 全クリア</button>
+          </div>
+          <div class="sa-dropzone" id="sa-dropzone">
+            <div class="sa-dropzone-icon">📄</div>
+            <div class="sa-dropzone-text">
+              <strong>テキストファイルをドロップ（複数OK）</strong>
+              <span>またはクリックして選択 — .txt / .md 対応</span>
+            </div>
+            <div class="sa-dropzone-hint">作品集・小説・ブログ記事など、作風を学習させたいテキストを投入してください</div>
+          </div>
+          <input type="file" id="sa-file-input" accept=".txt,.md,.csv,text/plain,text/markdown" multiple class="hidden">
+          <div class="sa-file-list" id="sa-file-list"></div>
+        </div>
+
+        <!-- STEP 2: 作風解析 → 解析結果 → リライト -->
+        <div class="sa-block">
+          <div class="sa-block-header">
+            <span class="sa-block-title">🔬 STEP 2 — 作風解析・リライト</span>
+          </div>
+          <p class="sa-desc">投入テキストの文体・トーン・修辞技法・描写傾向・語彙レベル・構造パターン等をAIが深層分析しパラメータ化します。</p>
+          <!-- API進捗ステータス -->
+          <div class="sa-api-status hidden" id="sa-api-status"></div>
+          <button class="sa-btn-action" id="btn-sa-analyze" disabled>🔬 作風解析を実行</button>
+
+          <!-- 解析結果 -->
+          <div class="sa-result-wrap hidden" id="sa-result-wrap">
+            <div class="sa-block-header">
+              <span class="sa-block-title">📊 解析結果</span>
+              <div class="output-actions">
+                <button class="btn-secondary" id="btn-sa-copy" title="人間が読める形式でコピー">📋 コピー</button>
+                <button class="btn-secondary" id="btn-sa-json" title="AI小説ツール向けJSON形式で保存">💾 JSON保存</button>
+              </div>
+            </div>
+            <p class="sa-format-hint">📋コピー → 人間が読める解析テキスト ／ 💾JSON → ChatGPT・Claude等のAI小説ツールにそのまま投入可能な構造化データ</p>
+            <div class="sa-result-box" id="sa-result"></div>
+          </div>
+
+          <!-- リライト実行ボタン（解析完了後に表示） -->
+          <div class="sa-reflect-wrap hidden" id="sa-reflect-wrap">
+            <div class="sa-divider"></div>
+            <p class="sa-desc">解析した作風を上のOUTPUTストーリーに適用してリライトします（プロット維持・文体のみ変換）。</p>
+            <!-- リライト用API進捗ステータス -->
+            <div class="sa-api-status hidden" id="sa-reflect-api-status"></div>
+            <button class="sa-btn-action sa-btn-reflect" id="btn-sa-reflect">🎨 この作風でリライト実行</button>
+          </div>
+
+          <!-- リライト結果 -->
+          <div class="sa-result-wrap hidden" id="sa-reflect-result-wrap">
+            <div class="sa-block-header">
+              <span class="sa-block-title">🎨 リライト結果</span>
+              <span class="sa-reflect-counter" id="sa-reflect-counter">0 字</span>
+              <div class="output-actions">
+                <button class="btn-secondary" id="btn-sa-reflect-copy">📋 コピー</button>
+                <button class="btn-secondary" id="btn-sa-reflect-dl">📄 .txt保存</button>
+              </div>
+            </div>
+            <div class="sa-result-box sa-reflect-output" id="sa-reflect-output"></div>
+          </div>
+        </div>
+
+        <div class="sa-footer">
+          <span>Style Analyzer β — Powered by Gemini AI</span>
+        </div>
+      </section>
+
     </article>
 
   </main>
