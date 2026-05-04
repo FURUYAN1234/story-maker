@@ -150,6 +150,9 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Active Character Roster / サブキャラ追跡**: Tracks supporting characters' current locations and statuses in the internal memo to prevent them from disappearing in later chapters. / サブキャラクターの現在地と状況を毎章の内部メモとして記録し、終盤での消失を防ぐ。
 - **Pacing Enforcement / 描写密度の強制**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / クライマックスや会話劇において五感描写や肉体的痛覚を強制的に挿入させ、展開の「駆け足」を防止する。
 - **Dynamic Chekhov's Gun / 動的チェーホフの銃**: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 序盤に無関係に見えるアイテムや習慣を配置し、終盤の致命的な突破口として反転回収させる動的伏線。
+- **Scale Declaration / 規模宣言**: The generated master prompt displays the total planned chapter count and estimated character count at the top (e.g., 「全12章構成 / 予定総文字数：約15万字」), so users know the full scope before beginning. / 生成されるマスター指示書の冒頭に全章数と予定総文字数を明示。分割執筆開始前に全体規模が把握可能に。
+- **Progress Tracking / 進捗表示**: Each chapter completion message includes progress: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. / 各章完了時の確認メッセージに「全◯章中 / 残り◯章」を明記。長編執筆中の全体進捗が常に把握可能に。
+- **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 
 ---
 
@@ -346,6 +349,11 @@ AIを使って漫画を10言語に翻訳するツールです。
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v2.9.9 — 2026-05-04
+- **Long-Form Scale Declaration**: The generated master prompt for long-form mode now includes a prominent scale header showing the total planned chapter count and estimated character count (e.g., 「全12章構成 / 予定総文字数：約15万字」). Users can see the full scope before starting chapter-by-chapter generation. / 長編モードのマスター指示書冒頭に「規模宣言」を追加。全章数と予定総文字数を明示し、分割執筆開始前に全体規模を把握可能に。
+- **Chapter Progress Tracking**: Chapter completion messages now include full progress context: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. Users always know how far they've progressed and how many chapters remain. / 各章完了時の確認メッセージに「全◯章中」「残り◯章」の進捗情報を追加。長編執筆中の全体進捗が常に把握可能に。
+- **Final Chapter Full-Text Output Enforcement**: Added a dedicated "Final Chapter Output Format" section to the long-form prompt with a concrete code block template showing the exact expected output structure. Previously, AIs would ignore the full-text compilation rule and end with just 「お疲れ様でした」. The new format makes the expected behavior unambiguous and explicitly prohibits skipping the full-text output. / 最終章完了時の全文コードブロック出力を強制化。専用の「最終章出力フォーマット」セクションを新設し、具体的なテンプレートを提示。AIが「お疲れ様でした」だけで終了する問題を解決。
 
 ### v2.9.8 — 2026-05-04
 - **Long-Form Routine Enhancements (Pacing & Sub-plots)**: Implemented three advanced routines into the long-form prompt to solve common AI writing flaws in extended narratives. Added "Active Character Roster" tracking to prevent secondary characters from disappearing in late chapters. Added "Pacing Enforcement" to mandate sensory descriptions during climaxes to prevent rushed dialogue pacing. Added "Dynamic Chekhov's Gun" protocol to force the AI to plant an irrelevant item/habit in the Setup phase and weaponize it in the Payoff phase for maximum reader impact. / 長編小説モードにおけるAI特有の欠陥（終盤の脇役消失、クライマックスの駆け足展開、伏線の単調さ）を解消する3つのルーチンを統合。「サブキャラクター追跡」による脇役の生存確保、「描写密度強制」による対話間の五感・苦痛描写の義務付け、「動的チェーホフの銃」による序盤の何気ない日常描写の致命的要素への反転回収を実装。
