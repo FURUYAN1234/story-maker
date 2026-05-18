@@ -73,7 +73,7 @@ function updateBanner() {
     if (panel) panel.classList.add('disabled-panel');
     
     const engineLabel = $('engine-label');
-    engineLabel.textContent = 'Gemini API';
+    engineLabel.textContent = 'AI Engine';
     engineLabel.style.color = '';
     engineLabel.style.backgroundColor = '';
     engineLabel.style.borderColor = '';
@@ -316,7 +316,7 @@ function updateCharCountLimit(modeValue) {
     input.max = "300000";
     input.step = "10000";
     input.value = "100000";
-    hint.textContent = "※長編モードでは、長編小説をGeminiに各章ごと分割執筆させるための『専用指示書』を生成します。";
+    hint.textContent = "※長編モードでは、長編小説をAIに各章ごと分割執筆させるための『専用指示書』を生成します。";
     hint.style.color = "#4caf50";
   } else {
     input.max = "4000";
@@ -713,6 +713,8 @@ async function allRandom() {
   $('panel-scroll').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+
+
 function resetAll() {
   if (!confirm('全ての設定（APIキー以外）をリセットしますか？')) return;
   
@@ -752,7 +754,7 @@ function resetAll() {
   
   // 6. Reset UI - Output
   $('output').className = 'output-box empty';
-  $('output').innerHTML = '<div class="guide"><h3>はじめ方</h3>1. Gemini APIキーを保存<br>2. 物語のテーマや登場人物を設定<br>3. 「ストーリー生成」をクリック</div>';
+  $('output').innerHTML = '<div class="guide"><h3>はじめ方</h3>1. APIキーを保存<br>2. 物語のテーマや登場人物を設定<br>3. 「ストーリー生成」をクリック</div>';
   $('tag-row').innerHTML = '';
   $('char-counter').textContent = '0 字';
   $('btn-copy').classList.add('hidden');
