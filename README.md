@@ -358,6 +358,10 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.1.4 — 2026-05-19
+- **Feature/UI**: Added explicit "API Switch" (🔄 API切替) button to the banner to allow seamless toggling between Gemini and ChatGPT engines. Both API keys are now securely held in memory independently, avoiding the need to re-enter keys when switching. / バナー部に「🔄 API切替」ボタンを新設し、GeminiエンジンとChatGPTエンジンをワンクリックでシームレスに切り替えられるように改善。両方のAPIキーをメモリ内に個別に保持するため、切り替えごとの再入力が不要になりました。
+- **UI Bugfix**: When no API key is entered, the banner now explicitly displays a neutral warning ("⚠ API未設定") instead of defaulting to "Gemini API". API acquisition links for both providers are now prominently displayed in the banner for easier onboarding. / APIキー未入力時に「Gemini API」とデフォルト表示されていた問題を修正し、中立的な警告表示（「⚠ API未設定」）に変更。また、APIキー取得用リンク（Gemini / OpenAI）をバナーに表示し、初回設定をサポートしました。
+
 ### v3.1.3 — 2026-05-18
 - **Deploy**: System maintenance and deployment pipeline execution. / システムメンテナンスおよびデプロイパイプラインの実行。
 

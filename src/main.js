@@ -29,6 +29,9 @@ const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 // ─── 状態 ───
 const state = {
   apiKey: '',
+  apiProvider: 'gemini', // 'gemini' | 'openai'
+  geminiKey: '',         // Geminiキーの保持
+  openaiKey: '',         // OpenAIキーの保持
   mode: '4koma',
   genre: null, genreCategory: null,
   era: null, eraCategory: null,
@@ -42,47 +45,138 @@ const state = {
 };
 
 // ============================================================
-// ============================================================
 // APIキー管理（Gemini / OpenAI）
 // ============================================================
+
+/**
+ * API切替ボタンのUI更新（現在のapiProviderに応じた表示）
+ */
+function updateSwitchBtnUI() {
+  const btn = $('btn-switch-api');
+  btn.classList.remove('gemini-mode', 'openai-mode');
+  if (state.apiProvider === 'gemini') {
+    btn.classList.add('gemini-mode');
+    btn.title = 'ChatGPT APIに切替える（現在: Gemini）';
+  } else {
+    btn.classList.add('openai-mode');
+    btn.title = 'Gemini APIに切替える（現在: ChatGPT）';
+  }
+}
+
 function updateBanner() {
   const b = $('banner');
   const panel = document.querySelector('.settings-panel');
+  const engineLabel = $('engine-label');
+  const apikeyInput = $('apikey');
+  
+  // キー保存状態でラベル表示を分岐
   if (state.apiKey) {
+    // キー保存済み → エンジン名を表示
     b.classList.add('ok');
-    $('apikey').value = '********';
-    $('apikey').readOnly = true;
+    apikeyInput.value = '********';
+    apikeyInput.readOnly = true;
     if (panel) panel.classList.remove('disabled-panel');
+    engineLabel.classList.remove('not-set');
     
-    const engineLabel = $('engine-label');
-    if (state.apiKey.startsWith('sk-')) {
-      engineLabel.textContent = 'ChatGPT Engine';
+    if (state.apiProvider === 'openai') {
+      engineLabel.textContent = 'ChatGPT API';
       engineLabel.style.color = 'var(--openai)';
       engineLabel.style.backgroundColor = 'var(--openai-glow)';
       engineLabel.style.borderColor = 'rgba(16,163,127,.3)';
     } else {
-      engineLabel.textContent = 'Gemini Engine';
+      engineLabel.textContent = 'Gemini API';
       engineLabel.style.color = '';
       engineLabel.style.backgroundColor = '';
       engineLabel.style.borderColor = '';
     }
   } else {
+    // キー未設定 → ニュートラルな警告表示
     b.classList.remove('ok');
-    $('apikey').value = '';
-    $('apikey').readOnly = false;
+    apikeyInput.value = '';
+    apikeyInput.readOnly = false;
     if (panel) panel.classList.add('disabled-panel');
     
-    const engineLabel = $('engine-label');
-    engineLabel.textContent = 'AI Engine';
+    engineLabel.textContent = '⚠ API未設定';
+    engineLabel.classList.add('not-set');
     engineLabel.style.color = '';
     engineLabel.style.backgroundColor = '';
     engineLabel.style.borderColor = '';
   }
+  
+  // プレースホルダー更新（切替先に応じた案内）
+  if (state.apiProvider === 'openai') {
+    apikeyInput.placeholder = 'OpenAI APIキーを入力（sk-...）';
+  } else {
+    apikeyInput.placeholder = 'Gemini APIキーを入力';
+  }
+  
+  updateSwitchBtnUI();
 }
+
+/**
+ * APIエンジン切替（Gemini ↔ ChatGPT）
+ * 現在のキーを保存し、切替先の保存済みキーを復元
+ */
+function switchApi() {
+  // 現在のキーを退避
+  if (state.apiProvider === 'gemini') {
+    state.geminiKey = state.apiKey;
+    state.apiProvider = 'openai';
+    state.apiKey = state.openaiKey; // 保存済みOpenAIキーを復元
+  } else {
+    state.openaiKey = state.apiKey;
+    state.apiProvider = 'gemini';
+    state.apiKey = state.geminiKey; // 保存済みGeminiキーを復元
+  }
+  
+  // キーがあればロック状態、なければ編集状態
+  const b = $('banner');
+  if (state.apiKey) {
+    b.classList.add('locked');
+    $('key-save').classList.add('hidden');
+    $('key-edit').classList.remove('hidden');
+  } else {
+    b.classList.remove('locked');
+    $('key-save').classList.remove('hidden');
+    $('key-edit').classList.add('hidden');
+    $('apikey').readOnly = false;
+    $('apikey').value = '';
+  }
+  
+  updateBanner();
+  
+  // 切替フラッシュアニメーション
+  b.classList.remove('banner-switch-flash');
+  void b.offsetWidth; // reflow強制
+  b.classList.add('banner-switch-flash');
+  
+  // キーがない場合は入力欄にフォーカス
+  if (!state.apiKey) {
+    $('apikey').focus();
+  }
+}
+
 function saveKey() {
   const v = $('apikey').value.trim();
   if (!v) { alert('APIキーを入力してください'); return; }
+  
+  // 入力されたキーの種類を自動判定し、違うプロバイダのキーを入れた場合は自動切替
+  const isOpenAIKey = v.startsWith('sk-');
+  if (isOpenAIKey && state.apiProvider === 'gemini') {
+    state.apiProvider = 'openai';
+  } else if (!isOpenAIKey && state.apiProvider === 'openai') {
+    state.apiProvider = 'gemini';
+  }
+  
   state.apiKey = v;
+  
+  // プロバイダ別にキーを保持
+  if (state.apiProvider === 'openai') {
+    state.openaiKey = v;
+  } else {
+    state.geminiKey = v;
+  }
+  
   updateBanner();
   $('banner').classList.add('locked');
   $('key-save').classList.add('hidden');
@@ -769,6 +863,7 @@ function resetAll() {
 function init() {
   $('key-save').addEventListener('click', saveKey);
   $('key-edit').addEventListener('click', editKey);
+  $('btn-switch-api').addEventListener('click', switchApi);
   $('btn-reload').addEventListener('click', () => location.reload());
   $('btn-all-random').addEventListener('click', allRandom);
   $('btn-reset-all').addEventListener('click', resetAll);
