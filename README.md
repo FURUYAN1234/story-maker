@@ -357,7 +357,7 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
-### v2.9.10 — 2026-05-18
+### v3.0.0 — 2026-05-18
 - **Bugfix: Startup Script**: Fixed an issue with the batch file for local deployment (`start_Story_app.bat`). / ローカル実行用のバッチファイル（`start_Story_app.bat`）の起動時挙動を修正。
 
 ### v2.9.9 — 2026-05-04
