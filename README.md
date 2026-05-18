@@ -3,8 +3,8 @@
 > **"Stop generating predictable stories. Start generating stories that surprise you."**
 > **「予定調和な物語を生成するのをやめ、自分が驚くような物語を生成せよ。」**
 >
-> A web application that generates high-variety stories (4-panel manga plots or fiction) using the Gemini API. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
-> Gemini APIを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
+> A web application that generates high-variety stories (4-panel manga plots or fiction) using Google's Gemini and OpenAI's GPT engines. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
+> Google Gemini および OpenAI GPTのデュアルエンジンを使い、バラエティ豊かなストーリー（4コマ漫画ネタ・小説）を生成するWebアプリです。「似たり寄ったりになる問題」をキャラクター・テーマ・ジャンル・時代・オチの型の多軸ランダム化によって構造的に解決することを目的としています。
 
 > [!TIP]
 > **Detailed Commentary Available / 詳細な解説記事を公開中**
@@ -20,6 +20,7 @@ The core insight: AI outputs converge toward "average" stories when inputs have 
 ---
 
 ## 🚀 Core Features / 主要機能
+- **Dual API Engine Architecture / デュアルAPIエンジン対応**: Dynamically routes requests to Google Gemini or OpenAI (GPT-4o) based on your API key prefix (`sk-`). Enjoy Gemini's large context processing or OpenAI's high-nuance narrative generation effortlessly. / 入力されたAPIキーのプレフィックス（`sk-`）を自動判別し、Google GeminiとOpenAI（GPT-4o等）へ動的にリクエストを振り分けます。Geminiの巨大コンテキスト処理と、OpenAIの繊細な心理描写・プロット構築力をシームレスに使い分けることが可能です。
 - **Multiple Output Modes / 複数の出力モード**: Supports 14 distinct modes including 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), short stories (~3,000 chars), novellas (~4,000 chars), full-length novels (~100,000 chars via prompt generation), scenarios, essays, and poems. / 4コマ漫画ネタ（起承転結＋セリフ案）、短編・中編小説、プロンプト生成による長編小説（〜10万字）、エッセイ、詩など、14種の出力モードに対応。
 - **Character Sheet OCR Import / キャラクターシート自動認識**: Drag & drop character sheet images onto the drop zone to auto-extract character data via Gemini Vision API. Supports multiple images. / キャラクターシート画像をドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理に対応。
 - **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
@@ -158,21 +159,21 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 
 ## 💻 Tech Stack / 技術スタック
 - **Frontend**: Vite + Vanilla HTML/CSS/JS (Lightweight frontend / 軽量フロントエンド構成)
-- **LLM/VFM**: Google Gemini API (`gemini-3-flash-preview`, `gemini-1.5-pro`, `gemini-1.5-flash`, plus `gemini-2.5-pro` for vision/OCR tasks)
+- **LLM/VFM**: Google Gemini API (`gemini-3-flash-preview`, `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-2.5-pro`) & OpenAI API (`gpt-4o`, `gpt-4o-mini`)
 - **Deployment**: GitHub Pages (static hosting / 静的ホスティングによるデプロイ)
 
 ---
 
 ## 🌍 Cloud / Browser (Deploy)
 1. **Access**: Open the deployed web app / [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) にアクセス
-2. **Get API Key**: Obtain a Gemini API key at [Google AI Studio](https://aistudio.google.com/app/apikey) / [Google AI Studio](https://aistudio.google.com/app/apikey) でGemini APIキーを取得
-3. **Run**: Enter your Gemini API key at the top and click generate buttons / 上部のAPIキー欄に入力して「保存」後、「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す
+2. **Get API Key**: Obtain a Gemini API key at [Google AI Studio](https://aistudio.google.com/app/apikey) or an OpenAI API key at [OpenAI Platform](https://platform.openai.com/api-keys) / [Google AI Studio](https://aistudio.google.com/app/apikey) でGemini APIキー、または [OpenAI Platform](https://platform.openai.com/api-keys) でOpenAI APIキーを取得
+3. **Run**: Enter your API key at the top and click generate buttons / 上部のAPIキー欄に入力して「保存」後、「🎲 全てランダムで生成」または「ストーリー生成」ボタンを押す
 
 > Billing is pay-per-use (or free tier). Story generation typically uses ~1,000–1,500 tokens per request.
 > 料金は従量課金制（または無料枠）です。通常、1回の物語生成で約1,000〜1,500トークンを消費します。
 >
-> **Note:** The API key is held in memory only and never sent anywhere except the official Google Gemini API endpoint.  
-> **注:** APIキーはメモリ内のみで保持され、Google Gemini公式エンドポイント以外には送信されません。
+> **Note:** The API key is held in memory only and never sent anywhere except the official Google/OpenAI API endpoints.  
+> **注:** APIキーはメモリ内のみで保持され、GoogleおよびOpenAIの公式エンドポイント以外には送信されません。
 
 ### 💻 Run Locally (Windows) / ローカル実行版（ZIPダウンロード時）
 1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) からZIPファイルをダウンロードし、展開する / Unzip the downloaded folder
@@ -195,8 +196,8 @@ This project is developed in full compliance with Article 30-4 of the Japanese C
 本プロジェクトは、日本の著作権法第30条の4（情報解析目的等での利用）に基づき、技術検証および情報解析を目的として開発されており、法的に適正な範囲内で公開されています。
 
 **Official API Usage**
-All generations are performed through the official Google Gemini API. This system adheres strictly to Google's "Generative AI Forbidden Use Policy" and Terms of Service.
-本システムはGoogle公式のGemini APIを介して動作しており、Googleが定める「生成AI禁止事項」および利用規約を厳格に遵守しています。
+All generations are performed through the official Google Gemini API and OpenAI API. This system adheres strictly to their respective usage policies.
+本システムはGoogle公式のGemini APIおよびOpenAI公式のAPIを介して動作しており、各社が定める「生成AI禁止事項」および利用規約を厳格に遵守しています。
 
 **No-Profit & Research Focus**
 The core logic (Prompts/Protocols) is released under CC BY-NC-SA 4.0. Any commercial misuse by third parties is strictly prohibited. This project exists solely for the advancement of LLM control technology and the democratization of creative writing tools.
@@ -356,6 +357,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v3.1.2 — 2026-05-18
+- **Documentation Update**: Expanded the README.md to provide detailed English and Japanese explanations of the new Dual API Engine (Gemini & OpenAI) architecture, updating the feature list, tech stack, and API usage sections. / デュアルAPI対応（Gemini＆OpenAI）に伴い、READMEの解説文を大幅に加筆修正。主要機能や技術スタック、API利用セクションにデュアルエンジン対応の旨を詳細に記載しました。
 
 ### v3.1.1 — 2026-05-18
 - **UI Bugfix**: Removed hardcoded "Gemini API" labels from the initial API key input banner and tutorial guides to correctly reflect the new Dual API Engine support (Gemini & OpenAI). / 未入力時のAPIキー入力欄やチュートリアル文にハードコードされていた「Gemini」表記を、デュアルエンジン対応に合わせて中立的な名称に修正しUIの整合性を向上。
