@@ -358,6 +358,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.1.3 — 2026-05-18
+- **Deploy**: System maintenance and deployment pipeline execution. / システムメンテナンスおよびデプロイパイプラインの実行。
+
 ### v3.1.2 — 2026-05-18
 - **Documentation Update**: Expanded the README.md to provide detailed English and Japanese explanations of the new Dual API Engine (Gemini & OpenAI) architecture, updating the feature list, tech stack, and API usage sections. / デュアルAPI対応（Gemini＆OpenAI）に伴い、READMEの解説文を大幅に加筆修正。主要機能や技術スタック、API利用セクションにデュアルエンジン対応の旨を詳細に記載しました。
 
