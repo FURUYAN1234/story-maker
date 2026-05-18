@@ -1,7 +1,7 @@
 // ============================================================
 // charImport.js — キャラクターシート画像取り込みモジュール v1.0
 // ============================================================
-import { callGeminiVision } from './api.js';
+import { callGenerativeAIVision } from './api.js';
 import { ROLES, PERSONALITIES } from './data.js';
 
 // OCR用プロンプト（キャラクターシート解析）
@@ -321,8 +321,8 @@ export function initCharImport(state, renderChars, getApiKey) {
         // サムネイルを収集
         allThumbnails.push(`data:${file.type};base64,${base64}`);
 
-        // Gemini Vision API呼び出し
-        const { text } = await callGeminiVision(
+        // Vision API呼び出し
+        const { text } = await callGenerativeAIVision(
           apiKey,
           CHAR_ANALYSIS_PROMPT,
           base64,

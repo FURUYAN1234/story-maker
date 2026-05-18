@@ -136,7 +136,11 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType) {
  * モデル優先順位は Nano Banana Pro v2.26 Alpha の IMAGE_MODEL_IDS に準拠
  * gemini-3系はアニメ画像で PROHIBITED_CONTENT を返すため後方に配置
  */
-export async function callGeminiVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
+export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
+  if (apiKey.trim().startsWith("sk-")) {
+    return _callOpenAIVision(apiKey.trim(), prompt, imageBase64, mimeType, onFallback);
+  }
+
   // 画像付きリクエスト用モデルリスト（NBP v2.26 準拠・フィルター寛容モデル優先）
   const IMAGE_MODEL_IDS = [
     'gemini-2.5-pro',                   // Primary: 画像認識実績あり・フィルター寛容
@@ -180,7 +184,11 @@ export async function callGeminiVision(apiKey, prompt, imageBase64, mimeType, on
   throw new Error(errorMsg);
 }
 
-export async function callGemini(apiKey, initialModel, prompt, onFallback) {
+export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback) {
+  if (apiKey.trim().startsWith("sk-")) {
+    return _callOpenAI(apiKey.trim(), prompt, onFallback);
+  }
+
   const allModels = [initialModel, ...GEMINI_MODELS.map(m => m.value).filter(m => m !== initialModel)];
 
   for (const modelId of allModels) {
@@ -212,4 +220,102 @@ export async function callGemini(apiKey, initialModel, prompt, onFallback) {
   }
 
   throw new Error(errorMsg);
+}
+
+// ============================================================
+// OpenAI API呼び出しロジック
+// ============================================================
+
+const OPENAI_TEXT_MODELS = [
+  "gpt-4o",          // Primary
+  "gpt-4o-mini",     // Backup
+];
+
+async function _callOpenAI(apiKey, prompt, onFallback) {
+  for (const modelId of OPENAI_TEXT_MODELS) {
+    try {
+      if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
+      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 1.0,
+          max_tokens: 8192,
+        })
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(`OpenAI HTTP ${resp.status} - ${errData.error?.message || resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+
+      return { text, usedModel: modelId };
+    } catch (err) {
+      console.warn(`Model ${modelId} failed:`, err.message);
+      continue;
+    }
+  }
+
+  throw new Error("全モデル接続失敗: OpenAI API Keyが無効か、使用回数の上限（Quota Exceeded）に達しています。");
+}
+
+const OPENAI_VISION_MODELS = [
+  "gpt-4o",          // Primary
+  "gpt-4o-mini",     // Backup
+];
+
+async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
+  const imageUrl = `data:${mimeType};base64,${imageBase64}`;
+  
+  for (const modelId of OPENAI_VISION_MODELS) {
+    try {
+      if (modelId !== OPENAI_VISION_MODELS[0] && onFallback) onFallback(modelId);
+      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: imageUrl, detail: "high" } }
+              ]
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 8192,
+        })
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(`OpenAI HTTP ${resp.status} - ${errData.error?.message || resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+
+      return { text, usedModel: modelId };
+    } catch (err) {
+      console.warn(`Vision Model ${modelId} failed:`, err.message);
+      continue;
+    }
+  }
+
+  throw new Error("全モデルでの画像認識に失敗: OpenAI API Keyが無効か、使用回数の上限に達しています。");
 }

@@ -357,6 +357,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.1.0 — 2026-05-18
+- **Dual API Engine Integration (Gemini & OpenAI)**: Implemented dual-engine support. The application can now dynamically route text and vision requests between Google's Gemini models and OpenAI's GPT models (gpt-4o, gpt-4o-mini) based on the provided API key (sk-... prefix triggers OpenAI). / デュアルAPIエンジン（Gemini＆OpenAI）対応。入力されたAPIキーを判定（sk-から始まる場合はOpenAI）し、テキスト生成およびキャラクターシート画像解析の通信先をGeminiとChatGPT間で動的に切り替えるルーティング処理を実装。
+
 ### v3.0.0 — 2026-05-18
 - **Bugfix: Startup Script**: Fixed an issue with the batch file for local deployment (`start_Story_app.bat`). / ローカル実行用のバッチファイル（`start_Story_app.bat`）の起動時挙動を修正。
 

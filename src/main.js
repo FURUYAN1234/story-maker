@@ -15,9 +15,8 @@ import {
   ENDING_ORIGINALS, NARR_ORIGINALS,
   WORLDVIEW_ORIGINALS, TARGET_ORIGINALS,
   PERSONALITY_ORIGINALS, ROLE_ORIGINALS,
-  DETAIL_ORIGINALS,
 } from './data.js';
-import { callGemini } from './api.js';
+import { callGenerativeAI } from './api.js';
 import { buildPrompt, generateRandomTheme } from './prompt.js';
 import { initCharImport } from './charImport.js';
 import { initStyleAnalyzer } from './styleAnalyzer.js';
@@ -43,7 +42,8 @@ const state = {
 };
 
 // ============================================================
-// APIキー管理（Gemini専用）
+// ============================================================
+// APIキー管理（Gemini / OpenAI）
 // ============================================================
 function updateBanner() {
   const b = $('banner');
@@ -53,11 +53,30 @@ function updateBanner() {
     $('apikey').value = '********';
     $('apikey').readOnly = true;
     if (panel) panel.classList.remove('disabled-panel');
+    
+    const engineLabel = $('engine-label');
+    if (state.apiKey.startsWith('sk-')) {
+      engineLabel.textContent = 'ChatGPT Engine';
+      engineLabel.style.color = 'var(--openai)';
+      engineLabel.style.backgroundColor = 'var(--openai-glow)';
+      engineLabel.style.borderColor = 'rgba(16,163,127,.3)';
+    } else {
+      engineLabel.textContent = 'Gemini Engine';
+      engineLabel.style.color = '';
+      engineLabel.style.backgroundColor = '';
+      engineLabel.style.borderColor = '';
+    }
   } else {
     b.classList.remove('ok');
     $('apikey').value = '';
     $('apikey').readOnly = false;
     if (panel) panel.classList.add('disabled-panel');
+    
+    const engineLabel = $('engine-label');
+    engineLabel.textContent = 'Gemini API';
+    engineLabel.style.color = '';
+    engineLabel.style.backgroundColor = '';
+    engineLabel.style.borderColor = '';
   }
 }
 function saveKey() {
@@ -534,7 +553,7 @@ async function fetchNewsAndSetTheme() {
   try {
     const model = GEMINI_MODELS[0].value;
     const prompt = '今日の日本の主要なニュース見出しから、物語のインスピレーションとなるキーワードを【異なる複数のカテゴリー（社会、国際、経済、エンタメ、スポーツ、科学、ライフスタイルなど）】から3〜5個抽出してください。特定のカテゴリー（特に「IT・生成AI」など）に偏りすぎないよう、バランスよく分散させて抽出すること。解説は一切不要。キーワードのみを「・」で始まる箇条書きで出力してください。';
-    const { text } = await callGemini(key, model, prompt);
+    const { text } = await callGenerativeAI(key, model, prompt);
     const themeText = text.replace(/^[*-]\s*/gm, '').replace(/\n/g, ', ').trim();
     $('theme-custom').value = themeText;
     state.themeSelected = null; state.themeCategory = null;
@@ -598,7 +617,9 @@ async function generate() {
   
   try {
     const model = GEMINI_MODELS[0].value;
-    btn.innerHTML = '<span class="spinner"></span>Geminiに送信中...';
+    
+    const enginePrefix = key.startsWith('sk-') ? 'ChatGPT' : 'Gemini';
+    btn.innerHTML = `<span class="spinner"></span>${enginePrefix}に送信中...`;
     
     const onFb = (m) => {
       out.textContent = `フォールバック中: ${m}...`;
@@ -606,7 +627,7 @@ async function generate() {
       if (alertEl) alertEl.innerHTML = `⚠️ <strong>稼働中:</strong> フォールバック中 (${m})...`;
     };
     
-    const { text, usedModel } = await callGemini(key, model, prompt, onFb);
+    const { text, usedModel } = await callGenerativeAI(key, model, prompt, onFb);
     
     btn.innerHTML = '<span class="spinner"></span>解析中...';
     let body = text;
@@ -648,7 +669,11 @@ async function generate() {
     ctr.textContent = `${out.textContent.length.toLocaleString()} 字`;
     
     const ml = GEMINI_MODELS.find(m => m.value === usedModel)?.label || usedModel;
-    tagRow.innerHTML = `<span class="tag tag-gemini">Gemini</span><span class="tag tag-model">${esc(ml)}</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    
+    const engineName = key.startsWith('sk-') ? 'ChatGPT' : 'Gemini';
+    const engineClass = key.startsWith('sk-') ? 'tag-openai' : 'tag-gemini';
+    
+    tagRow.innerHTML = `<span class="tag ${engineClass}">${engineName}</span><span class="tag tag-model">${esc(ml)}</span>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
     $('btn-copy').classList.remove('hidden');
     $('btn-download').classList.remove('hidden');
     

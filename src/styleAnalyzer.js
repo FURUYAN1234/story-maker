@@ -2,7 +2,7 @@
 // styleAnalyzer.js — 作風解析エンジン (β版)
 // テキストをドロップ→AIで作風パラメータ抽出→JSON/コピー→リライト
 // ============================================================
-import { callGemini } from './api.js';
+import { callGenerativeAI } from './api.js';
 import { GEMINI_MODELS } from './data.js';
 
 const $ = id => document.getElementById(id);
@@ -340,7 +340,7 @@ async function runAnalysis() {
 
     const fullPrompt = ANALYSIS_PROMPT + corpus;
     const model = GEMINI_MODELS[0].value;
-    const { text } = await callGemini(apiKey, model, fullPrompt, (fb) => {
+    const { text } = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
       updateApiStatus(`フォールバック: ${fb}`);
       btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
     });
@@ -522,7 +522,7 @@ async function runReflection() {
   try {
     const prompt = buildReflectionPrompt(analysisResult, originalText);
     const model = GEMINI_MODELS[0].value;
-    const { text } = await callGemini(apiKey, model, prompt, (fb) => {
+    const { text } = await callGenerativeAI(apiKey, model, prompt, (fb) => {
       updateApiStatus(`リライト フォールバック: ${fb}`);
       btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
     });
