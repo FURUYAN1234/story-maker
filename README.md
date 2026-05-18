@@ -357,6 +357,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v2.9.10 — 2026-05-18
+- **Bugfix: Startup Script**: Fixed an issue with the batch file for local deployment (`start_Story_app.bat`). / ローカル実行用のバッチファイル（`start_Story_app.bat`）の起動時挙動を修正。
+
 ### v2.9.9 — 2026-05-04
 - **Long-Form Scale Declaration**: The generated master prompt for long-form mode now includes a prominent scale header showing the total planned chapter count and estimated character count (e.g., 「全12章構成 / 予定総文字数：約15万字」). Users can see the full scope before starting chapter-by-chapter generation. / 長編モードのマスター指示書冒頭に「規模宣言」を追加。全章数と予定総文字数を明示し、分割執筆開始前に全体規模を把握可能に。
 - **Chapter Progress Tracking**: Chapter completion messages now include full progress context: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. Users always know how far they've progressed and how many chapters remain. / 各章完了時の確認メッセージに「全◯章中」「残り◯章」の進捗情報を追加。長編執筆中の全体進捗が常に把握可能に。
