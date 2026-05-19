@@ -40,12 +40,12 @@ This system acts as a sophisticated prompt engineering compiler. It leverages mu
   Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable. / キャラ×テーマ×ジャンル×時代×オチ×語り口を独立計算し、組み合わせの爆発によりハルシネーションではなく「意味のある多様性」を生み出す設計。
 * **Anti-Repetition Engine / 反復防止プロンプトエンジン**: Explicitly instructs Gemini to avoid the most predictable development for the genre, connect the theme in an indirect/unexpected way, and use each character's personality to generate unique reactions. / ありきたりな展開を構造的に回避するよう、「ジャンルの王道展開の回避」「テーマの間接的接続」などをAIに明示的に指示。
 * **Foreshadowing Tier System / 伏線ルールのモード別ティア制**: Dynamically switches prompt constraints based on the narrative mode. / 出力モードによってプロンプトの制約レベルを動的に切り替える仕組み。
-  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 10 rules including Emotion Gap Design, Motif Recurrence, and Emotion Curve Design. / 物語系モードは、感情落差設計（6種のズレ技法）・モチーフ回帰・感情曲線設計を含む10の構成・感情設計ルールを適用。
+  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 15 rules including Emotion Gap Design, Motif Recurrence, Emotion Curve Design, Sensory Balance Enforcement, World-Grounded Metaphor Guard, and Character Knowledge Boundary. / 物語系モードは、感情落差設計・モチーフ回帰・感情曲線設計に加え、五感バランス強制・世界観準拠の比喩ガード・キャラクター知識境界チェックを含む15の構成・感情・描写設計ルールを適用。
   * **Tier 2 (Comedy)**: `4koma` mode uses the optimized Comedy Structure Method, integrating the generalized 6-gap techniques and tone variations to ensure high-impact punchlines. / 4コマモードは、一般化された6種のズレ技法とトーン調整を統合したコメディ構造メソッドを適用し、パンチラインのインパクトを最大化。
   * **Tier 3 (None)**: Non-narrative modes (essay, poem, letter, diary) exclude foreshadowing entirely, replaced with mode-specific composition rules. / 非物語系モードは伏線ルールを完全除外。
 * **Full-Category Style Guide Engine / 全カテゴリ対応・文体ガイドエンジン**: Centralized style guide data (~250 entries). Instead of passing preset selections (e.g., "Surreal Gag") as mere labels, the system injects specific, actionable writing instructions into the prompt. / 単なるラベル名渡しではなく、250以上の詳細な執筆ルール（文体・構成指示等）をプロンプトに注入するエンジン。
-* **10-Rule Narrative Structure / 10の伏線・構成・感情設計ルール**: Strict guidelines including "Show Don't Tell", protagonist conviction at endings, Emotion Gap Design (6 gap techniques), Motif Recurrence (symbolic element callbacks), and Emotion Curve Design (Setup→Deviation→Build-up→Payoff). / 「Show Don't Tell」「結末での主人公の意志表示」に加え、感情落差設計（6種の落差技法）・モチーフ回帰・感情曲線設計を追加。
-* **Quality Gate / 品質ゲート**: AI self-verification checklist executed before output (6 checks including Setup-Payoff structure, emotion gap sufficiency, motif recurrence, ending pattern diversity, tone variation, and character narrative function). / AIが出力前に自己検証する6項目のチェックリスト。
+* **15-Rule Narrative Structure / 15の物語構成・描写設計ルール**: Strict guidelines including "Show Don't Tell", protagonist conviction at endings, Emotion Gap Design (6 gap techniques), Motif Recurrence, Emotion Curve Design, Sensory Balance Enforcement (anti-visual-bias), World-Grounded Metaphor Guard (cliché elimination), and Character Knowledge Boundary (information leak prevention). / 「Show Don't Tell」「結末での主人公の意志表示」に加え、感情落差設計・モチーフ回帰・感情曲線設計・五感バランス強制（視覚偏重防止）・比喩の世界観準拠（クリシェ排除）・キャラクター知識境界（情報漏洩防止）を追加した15の構造ルール。
+* **Quality Gate / 品質ゲート**: AI self-verification checklist executed before output (9 checks including Setup-Payoff structure, emotion gap sufficiency, motif recurrence, ending pattern diversity, tone variation, character narrative function, sensory balance, metaphor originality, and character knowledge boundary). / AIが出力前に自己検証する9項目のチェックリスト。五感バランス・比喩の独自性・キャラ知識境界チェックを新たに追加。
 * **Era Consistency Rules / 時代設定の整合性ルール**: AI auto-corrects anachronistic expressions when historical era settings are selected. / 非現代の時代設定時にAIが時代にそぐわない語彙を自動で読み替えるルール。
 
 ---
@@ -142,6 +142,9 @@ AIが出力**前**に実行する自己検証チェックリストと、出力**
 | Ending pattern diversity / 結末パターン多様性 | Same structure every time / 毎回同じ構造の結末 |
 | Tone variation / 文体の緩急 | Monotonous writing style / 単調な文体 |
 | Character narrative function / キャラの物語的機能 | Bystander characters / 傍観者だけの登場人物 |
+| Sensory balance / 五感バランス | Visual-only descriptions / 視覚偏重の描写 |
+| Metaphor originality / 比喩の独自性 | Cliché metaphors / 使い古された定型比喩 |
+| Character knowledge boundary / キャラ知識境界 | Information leaks across characters / キャラ間の不自然な情報漏洩 |
 | **Guard C (Post-filter)** / ガードC | Cliché phrases ("In conclusion...") / AI特有の陳腐な言い回し（「いかがでしたか」等）の物理削除 |
 
 ### 7. Long-Form Narrative Protocols / 長編専用・文脈維持プロトコル
@@ -357,6 +360,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v3.2.0 — 2026-05-19
+- **Advanced Narrative Quality Engine**: Upgraded the prompt engineering architecture with 3 new writing rules and 3 new quality gate checks, raising the total from 12 to 15 rules and from 6 to 9 quality gate items. These enhancements apply to both standard and long-form modes, and work identically across Gemini and ChatGPT engines. / プロンプトエンジニアリングを大幅強化。執筆ルール3項目・品質ゲート3項目を新規追加し、構成ルール数を12→15、品質ゲート項目数を6→9に拡大。通常モードと長編モードの両方に適用され、Gemini/ChatGPT両エンジンで同一品質を実現。
+  - **Sensory Balance Enforcement / 五感バランス強制**: Prohibits visual-only scene descriptions. After any visual description, at least one non-visual sense (auditory, tactile, olfactory, gustatory, or interoceptive) must be included. Scene transitions must begin with non-visual information (ambient sound, air texture, smell). / 各シーンで視覚偏重の描写を禁止。視覚描写の直後に聴覚・触覚・嗅覚・体内感覚のいずれかを必ず組み合わせ、場面転換時は非視覚情報から描写を開始することで没入感を向上。
+  - **World-Grounded Metaphor Guard / 比喩素材の世界観準拠**: Bans overused cliché metaphors ("time stopped", "heavy as lead", etc.) and requires metaphors to be constructed from materials native to the story's setting and era (e.g., medieval → forge/candle/horseback imagery; cyberpunk → circuit/current/data imagery). / 使い古された定型比喩（「時間が止まった」「鉛のように重い」等）を禁止し、物語の舞台・時代・世界観に由来する素材で比喩を構築することを義務付け。
+  - **Character Knowledge Boundary / キャラクター知識境界の遵守**: Before writing dialogue or inner thoughts, the AI must verify what each character knows and doesn't know. Characters are strictly prohibited from referencing unseen events, other characters' secrets, or truths revealed later in the story. Maintains the "reader suspects but character doesn't know" foreshadowing structure. / 台詞・内面描写の前にキャラの知識状態を検証し、未見の情報や他キャラの秘密への言及を厳禁。「読者には匂わせるがキャラは気づいていない」伏線構造を正確に維持。
 
 ### v3.1.4 — 2026-05-19
 - **Feature/UI**: Added explicit "API Switch" (🔄 API切替) button to the banner to allow seamless toggling between Gemini and ChatGPT engines. Both API keys are now securely held in memory independently, avoiding the need to re-enter keys when switching. / バナー部に「🔄 API切替」ボタンを新設し、GeminiエンジンとChatGPTエンジンをワンクリックでシームレスに切り替えられるように改善。両方のAPIキーをメモリ内に個別に保持するため、切り替えごとの再入力が不要になりました。
