@@ -361,6 +361,10 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.1 — 2026-05-19
+- **Local RAG Integration / 完全ローカルRAG（検索拡張生成）辞書の統合**: Implemented a standalone, zero-cost RAG system that injects specific world-building details (props, era-specific terminology, sensory elements) into the prompt based on the user's selected worldview, era, and theme. This forces the AI to ground its narrative in concrete details rather than abstract tropes, significantly improving world authenticity. / 外部サービス不要・完全無料のローカルRAG（検索拡張生成）システムを実装。ユーザーが選択した世界観・時代・テーマに基づき、専用辞書から具体的なディテール（小道具・通貨・歴史用語・匂いなど）をプロンプトに動的注入。AI特有の「抽象的でフワッとした描写」を防ぎ、物語の解像度と世界観の説得力を劇的に向上させます。
+- **Google Search Grounding (Gemini) / Google検索グラウンディング対応**: Enabled Gemini's native Search Grounding tool for text generation. When the AI determines that factual accuracy is necessary (e.g., historical events, scientific terms, real-world locations), it will automatically perform a Google search and incorporate the findings into the story. / Geminiエンジンのテキスト生成においてGoogle検索グラウンディングを有効化。時代考証や専門知識が必要なテーマが選ばれた際、AIが自律的にGoogle検索を実行して事実確認を行い、正確な知識をベースにした物語を執筆できるようになりました。
+
 ### v3.2.0 — 2026-05-19
 - **Advanced Narrative Quality Engine**: Upgraded the prompt engineering architecture with 3 new writing rules and 3 new quality gate checks, raising the total from 12 to 15 rules and from 6 to 9 quality gate items. These enhancements apply to both standard and long-form modes, and work identically across Gemini and ChatGPT engines. / プロンプトエンジニアリングを大幅強化。執筆ルール3項目・品質ゲート3項目を新規追加し、構成ルール数を12→15、品質ゲート項目数を6→9に拡大。通常モードと長編モードの両方に適用され、Gemini/ChatGPT両エンジンで同一品質を実現。
   - **Sensory Balance Enforcement / 五感バランス強制**: Prohibits visual-only scene descriptions. After any visual description, at least one non-visual sense (auditory, tactile, olfactory, gustatory, or interoceptive) must be included. Scene transitions must begin with non-visual information (ambient sound, air texture, smell). / 各シーンで視覚偏重の描写を禁止。視覚描写の直後に聴覚・触覚・嗅覚・体内感覚のいずれかを必ず組み合わせ、場面転換時は非視覚情報から描写を開始することで没入感を向上。

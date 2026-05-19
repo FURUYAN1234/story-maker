@@ -1,5 +1,5 @@
 // ============================================================
-// prompt.js — プロンプト構築ロジック v2.6: 長編プロンプト最新ルーチン統合
+// prompt.js — プロンプト構築ロジック v2.7: RAG（検索拡張生成）統合
 // ============================================================
 import {
   THEME_RANDOM_BASE, THEME_MODIFIERS, THEME_ADJUNCTS,
@@ -9,6 +9,7 @@ import {
   WORLDVIEW_STYLE_GUIDES, TARGET_STYLE_GUIDES,
   NARR_STYLE_GUIDES, lookupGuide,
 } from './styleGuides.js';
+import { retrieveKnowledge } from './knowledge.js';
 
 const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
 
@@ -462,9 +463,17 @@ ${(() => {
 物語が完全に終了した際は、最後に必ず「【完】」（続く場合は「【続く】」）と記載し、文章が途切れていないことを示してください。`;
   }
 
+  // ─── ローカルRAG: 知識注入 ───
+  // ユーザー設定に基づき、関連する世界観・時代・ジャンル知識を検索してプロンプトに追加
+  const ragKnowledge = retrieveKnowledge(s);
+  if (ragKnowledge) {
+    prompt += ragKnowledge;
+  }
+
   // タグ生成
   const tags = [genre, era, worldview, target, ending, modeLabel];
   if (s.charCount) tags.push(`${s.charCount}字`);
+  if (ragKnowledge) tags.push('📚RAG');
 
   return { prompt, tags };
 }

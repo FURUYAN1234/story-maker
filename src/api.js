@@ -36,6 +36,8 @@ async function _callGemini(apiKey, model, prompt) {
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { maxOutputTokens: 8192, temperature: 1.0 },
+      // Google検索グラウンディング: AIが事実確認を必要と判断した場合に裏でGoogle検索を実行
+      tools: [{ googleSearch: {} }],
       safetySettings: [
         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
