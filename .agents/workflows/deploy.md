@@ -14,6 +14,18 @@ description: Story Makerのデプロイ一気通貫ワークフロー。「デ�
 
 ## 手順
 
+### Phase 0: NBPシナリオ仕様確認（クロスプロジェクト同期）
+0-1. `C:\nano-banana-pro-main\docs\scenario_spec.md` を `view_file` で読み取り、シナリオパーサーの最新仕様を確認する。
+     （scenario_spec.md が存在しない場合は `C:\nano-banana-pro-main\src\App.jsx` をフォールバックとして参照）
+     - 確認対象: ヘッダータグ (`Topic:`, `Logline:`, `Location:`, `Outfit:`, `Punchline:`, `Scenario:`)
+     - 確認対象: コマ内タグ (`[EMOTION: XXX]`, `[Camera: XXX]`) と利用可能な値の一覧
+     - 確認対象: Punchline タイプ一覧
+     - 確認対象: セリフフォーマット、その他新規タグの有無
+0-2. `src/prompt.js` の `4koma_scenario` モード（`baseMode === '4koma_scenario'` ブロック）と比較する。
+0-3. **差異がある場合**: `src/prompt.js` を更新し、Phase 1 のバージョンバンプに含める。変更内容はコミットメッセージとREADMEのChangelogに記載する。
+0-4. **差異がない場合**: 「NBP仕様確認: 変更なし」と記録し、Phase 1 に進む。
+0-5. **参照ファイルが存在しない場合**: ユーザーに確認を取り、スキップ可否の判断を仰ぐ。推測で仕様を補完しない。
+
 ### Phase 1: バージョン更新
 1. `package.json` のバージョンを適切にインクリメントする（バグ修正=patch, 機能追加=minor）
 2. `index.html` の `<title>` と `<span class="title-version">` のバージョンを一致させる

@@ -363,6 +363,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.3 — 2026-05-19
+- **NBP Scenario Parser Sync / NBPシナリオパーサー同期**: Updated the "4-koma scenario" output format to fully comply with the latest Nano Banana Pro (NBP) scenario parser specifications (v3.71-alpha). Expanded EMOTION tags from 6 to 17, adopted 8 Japanese Camera angle tags with strict non-duplication rules, and integrated 12 predefined Punchline types for robust cross-project synchronization. / 4コマシナリオ出力フォーマットをNano Banana Pro (NBP) の最新パーサー仕様（v3.71-alpha）に完全準拠するよう更新。EMOTIONタグを6種から17種へ拡大、Cameraアングルを重複禁止ルールの下で日本語8種に変更、さらに12種の定義済みPunchlineタイプを統合し、強固なクロスプロジェクト同期を実現しました。
+
 ### v3.2.2 — 2026-05-19
 - **Expanded Local RAG Dictionary (IT & Technology) / ローカルRAG辞書の拡張（IT・テクノロジー領域）**: Added deep industry-specific knowledge to the Local RAG database, covering Software Development, SIer (System Integration) culture, Infrastructure/Networking, AI/Machine Learning, and Hacker/Cybersecurity domains. This empowers the AI to generate highly authentic, jargon-rich, and atmospherically accurate narratives set in modern tech environments. / ローカルRAGの知識データベースに「IT・テクノロジー領域」を新設。ソフトウェア開発、SIer・炎上プロジェクト、インフラ・ネットワーク、AI開発、ハッカー・セキュリティの5カテゴリを追加。開発現場特有の文化や過酷な空気感をAIに注入し、リアリティの高い専門的な描写が可能になりました。
 
