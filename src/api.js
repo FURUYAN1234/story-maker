@@ -321,3 +321,158 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
 
   throw new Error("全モデルでの画像認識に失敗: OpenAI API Keyが無効か、使用回数の上限に達しています。");
 }
+
+/**
+ * Gemini マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
+ */
+async function _callGeminiMultimodal(apiKey, model, prompt, images) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const parts = [{ text: prompt }];
+  images.forEach(img => {
+    parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
+  });
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+      ]
+    }),
+  });
+  if (!resp.ok) {
+    const et = await resp.text();
+    let errMsg = `Gemini HTTP ${resp.status}`;
+    try {
+        const errJson = JSON.parse(et);
+        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+    } catch (e) {
+        errMsg += ` — ${et.slice(0, 300)}`;
+    }
+    throw new Error(errMsg);
+  }
+  const data = await resp.json();
+
+  if (data.promptFeedback?.blockReason) {
+    throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
+  }
+
+  if (data.candidates?.[0]?.content?.parts) {
+    const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
+    if (!text) {
+        const reason = data.candidates[0].finishReason || "UNKNOWN";
+        throw new Error(`Empty response (FinishReason: ${reason}).`);
+    }
+    return text;
+  }
+  if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
+  throw new Error("No response candidates (Unknown Model Refusal)");
+}
+
+/**
+ * OpenAI マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
+ */
+async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback) {
+  const OPENAI_VISION_MODELS = ["gpt-4o", "gpt-4o-mini"];
+  
+  for (const modelId of OPENAI_VISION_MODELS) {
+    try {
+      if (modelId !== OPENAI_VISION_MODELS[0] && onFallback) onFallback(modelId);
+      
+      const content = [{ type: "text", text: prompt }];
+      images.forEach(img => {
+        content.push({
+          type: "image_url",
+          image_url: { url: `data:${img.mimeType};base64,${img.base64}`, detail: "high" }
+        });
+      });
+
+      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content }],
+          temperature: 0.4,
+          max_tokens: 8192,
+        })
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(`OpenAI HTTP ${resp.status} - ${errData.error?.message || resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      const text = data.choices?.[0]?.message?.content || "";
+      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+
+      return { text, usedModel: modelId };
+    } catch (err) {
+      console.warn(`Vision Model ${modelId} failed:`, err.message);
+      continue;
+    }
+  }
+
+  throw new Error("全モデルでの画像認識に失敗: OpenAI API Keyが無効か、使用回数の上限に達しています。");
+}
+
+/**
+ * 複合マルチモーダル解析API呼び出し（複数画像＋テキスト）
+ */
+export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallback) {
+  if (apiKey.trim().startsWith("sk-")) {
+    return _callOpenAIMultimodal(apiKey.trim(), prompt, images, onFallback);
+  }
+
+  // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
+  const IMAGE_MODEL_IDS = [
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-3-flash-preview',
+    'gemini-2.5-flash-lite',
+    'gemini-3.1-flash-lite-preview',
+  ];
+
+  for (const modelId of IMAGE_MODEL_IDS) {
+    try {
+      if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: ${modelId} (60s)`)), 60000)
+      );
+
+      const fetchPromise = _callGeminiMultimodal(apiKey, modelId, prompt, images);
+      const text = await Promise.race([fetchPromise, timeoutPromise]);
+      return { text, usedModel: modelId };
+    } catch (err) {
+      console.warn(`Vision model ${modelId} failed:`, err.message);
+      continue;
+    }
+  }
+
+  // --- 全モデル失敗時：アカウント診断 ---
+  const diagnosis = await diagnoseConnection(apiKey);
+  console.error("VISION DIAGNOSIS:", diagnosis);
+
+  let errorMsg = `全モデルでの画像認識に失敗: ${diagnosis}`;
+  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+    errorMsg = "【API制限】使用回数の上限に達しました。しばらく時間を置いてから再試行してください。";
+  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+    errorMsg = "【コンテンツ制限】画像が安全フィルターによりブロックされました。別の画像をお試しください。";
+  } else if (diagnosis.includes("API key not valid") || diagnosis.includes("403")) {
+    errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
+  }
+
+  throw new Error(errorMsg);
+}
+

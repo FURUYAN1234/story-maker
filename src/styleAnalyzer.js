@@ -2,13 +2,14 @@
 // styleAnalyzer.js — 作風解析エンジン (β版)
 // テキストをドロップ→AIで作風パラメータ抽出→JSON/コピー→リライト
 // ============================================================
-import { callGenerativeAI } from './api.js';
+import { callGenerativeAI, callGenerativeAIMultimodal } from './api.js';
 import { GEMINI_MODELS } from './data.js';
 
 const $ = id => document.getElementById(id);
 
 // --- 内部状態 ---
 let droppedTexts = [];        // ドロップされたテキスト群
+let droppedImages = [];       // ドロップされた画像群 [{ name, base64, mimeType, previewUrl }]
 let analysisResult = null;    // 解析結果（JSONオブジェクト）
 let reflectedOutput = '';     // リライト後のテキスト
 let getApiKey = () => '';     // APIキー取得コールバック
@@ -224,19 +225,23 @@ function initDropzone() {
 // ============================================================
 async function handleFiles(fileList) {
   const files = Array.from(fileList);
+  
   const textFiles = files.filter(f =>
     f.type === 'text/plain' ||
     f.name.endsWith('.txt') ||
     f.name.endsWith('.md') ||
     f.name.endsWith('.csv') ||
-    f.type === '' // 拡張子なしのテキストファイル対策
+    f.type === ''
   );
 
-  if (textFiles.length === 0) {
-    alert('テキストファイル (.txt, .md) をドロップしてください');
+  const imageFiles = files.filter(f => f.type.startsWith('image/'));
+
+  if (textFiles.length === 0 && imageFiles.length === 0) {
+    alert('テキストファイル (.txt, .md) または画像ファイルをドロップしてください');
     return;
   }
 
+  // テキストファイルの処理
   for (const file of textFiles) {
     try {
       const text = await readFileAsText(file);
@@ -248,10 +253,22 @@ async function handleFiles(fileList) {
     }
   }
 
+  // 画像ファイルの処理
+  for (const file of imageFiles) {
+    try {
+      const base64 = await readFileAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+      droppedImages.push({ name: file.name, base64, mimeType: file.type, previewUrl });
+    } catch (err) {
+      console.warn(`画像ファイル読み込み失敗: ${file.name}`, err);
+    }
+  }
+
   // UI更新
   updateFileList();
+  updateImageList();
 
-  if (droppedTexts.length > 0) {
+  if (droppedTexts.length > 0 || droppedImages.length > 0) {
     $('sa-dropzone').classList.add('sa-has-files');
   }
   updateAnalyzeButtonState();
@@ -263,6 +280,18 @@ function readFileAsText(file) {
     reader.onload = (e) => resolve(e.target.result);
     reader.onerror = reject;
     reader.readAsText(file, 'UTF-8');
+  });
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Data = e.target.result.split(',')[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
@@ -303,6 +332,46 @@ function updateFileList() {
   });
 }
 
+// ============================================================
+// 画像プレビューリスト表示
+// ============================================================
+function updateImageList() {
+  const listEl = $('sa-image-list');
+  if (!listEl) return;
+
+  if (droppedImages.length === 0) {
+    listEl.classList.add('hidden');
+    listEl.innerHTML = '';
+    return;
+  }
+
+  listEl.classList.remove('hidden');
+  listEl.innerHTML = droppedImages.map((img, i) => `
+    <div class="sa-image-item">
+      <img src="${img.previewUrl}" alt="${escHtml(img.name)}" class="sa-image-thumb" />
+      <span class="sa-image-name">${escHtml(img.name)}</span>
+      <button class="sa-file-remove" data-img-idx="${i}" title="除去">✕</button>
+    </div>
+  `).join('');
+
+  // 画像個別削除ボタン
+  listEl.querySelectorAll('.sa-file-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.imgIdx);
+      // メモリリーク防止: ObjectURLを解放
+      if (droppedImages[idx]?.previewUrl) {
+        URL.revokeObjectURL(droppedImages[idx].previewUrl);
+      }
+      droppedImages.splice(idx, 1);
+      updateImageList();
+      if (droppedTexts.length === 0 && droppedImages.length === 0) {
+        $('sa-dropzone').classList.remove('sa-has-files');
+      }
+      updateAnalyzeButtonState();
+    });
+  });
+}
+
 function escHtml(s) {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -313,7 +382,16 @@ function escHtml(s) {
 async function runAnalysis() {
   const apiKey = getApiKey();
   if (!apiKey) { alert('APIキーを保存してから解析してください'); return; }
-  if (droppedTexts.length === 0) { alert('テキストファイルをドロップしてください'); return; }
+
+  // 直貼りテキスト取得
+  const directTextEl = $('sa-direct-text');
+  const directText = directTextEl ? directTextEl.value.trim() : '';
+
+  // 入力チェック: テキスト（ドロップまたは直貼り）か画像のいずれかが必要
+  if (droppedTexts.length === 0 && droppedImages.length === 0 && !directText) {
+    alert('テキスト（ファイルドロップまたは直接貼り付け）か画像を投入してください');
+    return;
+  }
 
   const btn = $('btn-sa-analyze');
   const resultWrap = $('sa-result-wrap');
@@ -332,18 +410,59 @@ async function runAnalysis() {
   showApiActivity('🔬 作風解析中...');
 
   try {
-    // テキストを結合（最大100,000文字）
-    let corpus = droppedTexts.map(t => `--- ${t.name} ---\n${t.text}`).join('\n\n');
+    // テキストを結合（ドロップされたファイル + 直貼りテキスト）（最大100,000文字）
+    let corpusParts = [];
+    if (droppedTexts.length > 0) {
+      corpusParts = droppedTexts.map(t => `--- ${t.name} ---\n${t.text}`);
+    }
+    if (directText) {
+      corpusParts.push(`--- 直接貼り付けテキスト ---\n${directText}`);
+    }
+    let corpus = corpusParts.join('\n\n');
     if (corpus.length > 100000) {
       corpus = corpus.slice(0, 100000) + '\n\n[...以降のテキストは省略（コンテキスト上限）...]';
     }
 
-    const fullPrompt = ANALYSIS_PROMPT + corpus;
+    const hasImages = droppedImages.length > 0;
+    const hasText = corpus.length > 0;
+
+    // プロンプト構築: 画像がある場合は追加指示をマージ
+    let fullPrompt = ANALYSIS_PROMPT;
+    if (hasImages && hasText) {
+      // テキスト＋画像の複合分析: プロンプト冒頭を画像分析指示込みに差し替え
+      fullPrompt = ANALYSIS_PROMPT.replace(
+        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下のテキスト群を精密に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。',
+        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下のテキスト群と添付画像を総合的に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。\n\n## 画像分析の追加指示:\n- 添付画像の色彩傾向・構図・タッチ・雰囲気を分析し、description_focus.visual に統合すること\n- 画像のトーン（暖色系/寒色系/モノクロ等）を tone に反映すること\n- テキストと画像の両方から相乗的に作風パラメータを抽出すること'
+      );
+    } else if (hasImages && !hasText) {
+      fullPrompt = ANALYSIS_PROMPT.replace(
+        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下のテキスト群を精密に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。',
+        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下の添付画像（イラスト・挿絵等）を分析し、この作者のビジュアル面の「作風」をパラメータとして抽出してください。テキスト固有の項目（sentence_style等）は画像から推測できる範囲で記述し、不明な場合は「画像のみのため判定不可」と記載すること。\n\n## 画像分析指示:\n- 色彩傾向・構図・タッチ・雰囲気・ライティング等を詳細に分析すること\n- 画像のトーン（暖色系/寒色系/モノクロ等）を tone に反映すること'
+      );
+    }
+
+    // テキスト部分をプロンプトに結合
+    if (hasText) {
+      fullPrompt = fullPrompt + corpus;
+    }
+
     const model = GEMINI_MODELS[0].value;
-    const { text } = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
-      updateApiStatus(`フォールバック: ${fb}`);
-      btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-    });
+    let text;
+
+    // 画像がある場合はマルチモーダルAPI、なければテキストAPI
+    if (hasImages) {
+      const result = await callGenerativeAIMultimodal(apiKey, fullPrompt, droppedImages, (fb) => {
+        updateApiStatus(`フォールバック: ${fb}`);
+        btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
+      });
+      text = result.text;
+    } else {
+      const result = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
+        updateApiStatus(`フォールバック: ${fb}`);
+        btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
+      });
+      text = result.text;
+    }
 
     // JSONブロック抽出
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
@@ -598,10 +717,21 @@ function saveReflectionTxt() {
 }
 
 function clearAll() {
+  // 画像のObjectURLを全て解放（メモリリーク防止）
+  droppedImages.forEach(img => {
+    if (img.previewUrl) URL.revokeObjectURL(img.previewUrl);
+  });
+
   droppedTexts = [];
+  droppedImages = [];
   analysisResult = null;
   reflectedOutput = '';
   updateFileList();
+  updateImageList();
+
+  // 直貼りテキストエリアのクリア
+  const directTextEl = $('sa-direct-text');
+  if (directTextEl) directTextEl.value = '';
 
   $('sa-dropzone').classList.remove('sa-has-files');
   $('sa-file-count')?.classList.add('hidden');
@@ -630,8 +760,13 @@ export function updateAnalyzeButtonState() {
   const btn = $('btn-sa-analyze');
   if (!btn) return;
   const apiKey = (typeof getApiKey === 'function') ? getApiKey() : '';
-  const hasFiles = droppedTexts.length > 0;
-  btn.disabled = !(apiKey && hasFiles);
+  const hasTexts = droppedTexts.length > 0;
+  const hasImages = droppedImages.length > 0;
+  const directTextEl = $('sa-direct-text');
+  const hasDirectText = directTextEl && directTextEl.value.trim().length > 0;
+  // テキスト（ドロップ or 直貼り）または画像のいずれかがあればOK
+  const hasInput = hasTexts || hasImages || hasDirectText;
+  btn.disabled = !(apiKey && hasInput);
 }
 
 export function updateReflectButtonState() {
@@ -661,6 +796,12 @@ export function initStyleAnalyzer(apiKeyGetter, lastOutputGetter) {
   $('btn-sa-reflect-copy')?.addEventListener('click', copyReflection);
   $('btn-sa-reflect-dl')?.addEventListener('click', saveReflectionTxt);
   $('btn-sa-clear')?.addEventListener('click', clearAll);
+
+  // 直貼りテキストエリアの入力変更で解析ボタン状態を更新
+  const directTextEl = $('sa-direct-text');
+  if (directTextEl) {
+    directTextEl.addEventListener('input', () => updateAnalyzeButtonState());
+  }
 
   // 初期化時のセクション活性化状態の更新
   updateStyleAnalyzerSectionState();

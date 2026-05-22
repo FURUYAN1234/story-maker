@@ -1112,6 +1112,81 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 
 /* アクション行（output-actionsクラスを共用） */
 
+/* 画像プレビューリスト */
+.sa-image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.sa-image-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  transition: var(--transition);
+}
+.sa-image-item:hover {
+  border-color: rgba(251,191,36,.4);
+  box-shadow: 0 2px 8px rgba(251,191,36,.1);
+}
+.sa-image-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sa-image-name {
+  flex: 1;
+  color: var(--text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+/* 直貼りテキストエリア */
+.sa-direct-input-wrap {
+  margin-top: 10px;
+}
+.sa-direct-textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 200px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  resize: vertical;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+.sa-direct-textarea:focus {
+  outline: none;
+  border-color: rgba(251,191,36,.5);
+  box-shadow: 0 0 0 2px rgba(251,191,36,.12);
+}
+.sa-direct-textarea::placeholder {
+  color: var(--text3);
+  opacity: .6;
+  font-size: 11px;
+}
+
 /* フッター */
 .sa-footer {
   text-align: center;
@@ -1408,6 +1483,81 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .ui-asset-card.is-locked .ui-asset-lock {
   color: var(--accent2);
   text-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+
+/* ============================================================
+   🧪 β版: 作風解析エンジン (Style Analyzer) 追加スタイル
+   ============================================================ */
+
+/* 直接貼付テキストエリア */
+.sa-direct-input-wrap {
+  margin-top: 10px;
+}
+.sa-direct-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+  transition: var(--transition);
+}
+.sa-direct-textarea:focus {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* 画像プレビューリスト */
+.sa-image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+}
+.sa-image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  overflow: hidden;
+  background: #000;
+}
+.sa-image-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sa-image-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.sa-image-remove:hover {
+  background: var(--danger);
+  transform: scale(1.1);
 }
 
 

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.2.8</title>
+  <title>Story Maker v3.2.9</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.8</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.9</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -336,10 +336,6 @@
            OUTPUT欄の直下。OUTPUT生成後に活性化する。
            ============================================================ -->
       <section class="sa-beta-section sa-inactive" id="sa-section">
-        <!-- 非活性時のメッセージ -->
-        <div class="sa-inactive-msg" id="sa-inactive-msg">
-          🔑 上部の設定パネルでAPIキーを入力・保存すると、作風解析エンジンが使えるようになります
-        </div>
 
         <!-- β版バナー -->
         <div class="sa-beta-banner" style="flex-direction: column; align-items: stretch; gap: 8px;">
@@ -353,28 +349,35 @@
           <div style="border-top: 1px solid rgba(251,191,36,0.2); margin-top: 10px; padding-top: 10px;">
             <p class="sa-desc-hint" style="margin: 0; padding: 0;">
               💡 <strong>ストーリー生成前でも作風解析は実行可能</strong><br>
-              ストーリーを生成する前であっても、ご自身の文章を先にドロップして「作風解析」を実行し、解析結果のコピーやJSON保存を行うことが可能です。
+              ストーリーを生成する前であっても、ご自身の文章・画像を先にドロップ（またはテキスト貼り付け）して「作風解析」を実行し、解析結果のコピーやJSON保存を行うことが可能です。
             </p>
           </div>
         </div>
 
-        <!-- STEP 1: テキストドロップ -->
+        <!-- STEP 1: テキスト・画像ドロップと直接貼付 -->
         <div class="sa-block">
           <div class="sa-block-header">
-            <span class="sa-block-title">📥 STEP 1 — テキストを投入</span>
+            <span class="sa-block-title">📥 STEP 1 — テキスト・画像を投入</span>
             <span class="sa-file-count hidden" id="sa-file-count"></span>
             <button class="btn-secondary sa-btn-small" id="btn-sa-clear">🗑️ 全クリア</button>
           </div>
+          
           <div class="sa-dropzone" id="sa-dropzone">
-            <div class="sa-dropzone-icon">📄</div>
+            <div class="sa-dropzone-icon">📥</div>
             <div class="sa-dropzone-text">
-              <strong>テキストファイルをドロップ（複数OK）</strong>
-              <span>またはクリックして選択 — .txt / .md 対応</span>
+              <strong>テキストや画像をドロップ（複数OK）</strong>
+              <span>またはクリックして選択 — .txt / .md / 画像対応</span>
             </div>
-            <div class="sa-dropzone-hint">作品集・小説・ブログ記事など、作風を学習させたいテキストを投入してください</div>
+            <div class="sa-dropzone-hint">文体分析用の作品テキストや、色彩・トーン分析用のイラスト画像を投入してください</div>
           </div>
-          <input type="file" id="sa-file-input" accept=".txt,.md,.csv,text/plain,text/markdown" multiple class="hidden">
+          <input type="file" id="sa-file-input" accept=".txt,.md,.csv,text/plain,text/markdown,image/*" multiple class="hidden">
+          
+          <div class="sa-image-list hidden" id="sa-image-list"></div>
           <div class="sa-file-list" id="sa-file-list"></div>
+
+          <div class="sa-direct-input-wrap">
+            <textarea id="sa-direct-text" class="sa-direct-textarea" placeholder="または、解析したい文章を直接ここに貼り付けることも可能です..."></textarea>
+          </div>
         </div>
 
         <!-- STEP 2: 作風解析 → 解析結果 → リライト -->
