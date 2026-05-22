@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Story Maker v3.2.7</title>
-  <script type="module" crossorigin src="./assets/index-BM9zMHop.js"></script>
+  <script type="module" crossorigin src="./assets/index-DaV0HeTU.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-Cnf6Y82n.css">
 </head>
 <body>
@@ -336,14 +336,26 @@
            🧪 β版: 作風解析エンジン (Style Analyzer)
            OUTPUT欄の直下。OUTPUT生成後に活性化する。
            ============================================================ -->
-      <section class="sa-beta-section" id="sa-section">
+      <section class="sa-beta-section sa-inactive" id="sa-section">
+        <!-- 非活性時のメッセージ -->
+        <div class="sa-inactive-msg" id="sa-inactive-msg">
+          🔑 上部の設定パネルでAPIキーを入力・保存すると、作風解析エンジンが使えるようになります
+        </div>
 
         <!-- β版バナー -->
-        <div class="sa-beta-banner">
-          <div class="sa-beta-badge">🧪 β版</div>
-          <div class="sa-beta-text">
-            <strong>作風解析エンジン — Style Analyzer</strong>
-            <span>実験的機能です。正式リリースではありません。解析精度やUI/UXは予告なく変更される場合があります。</span>
+        <div class="sa-beta-banner" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div class="sa-beta-badge">🧪 β版</div>
+            <div class="sa-beta-text">
+              <strong>作風解析エンジン — Style Analyzer</strong>
+              <span>実験的機能です。正式リリースではありません。解析精度やUI/UXは予告なく変更される場合があります。</span>
+            </div>
+          </div>
+          <div style="border-top: 1px solid rgba(251,191,36,0.2); margin-top: 10px; padding-top: 10px;">
+            <p class="sa-desc-hint" style="margin: 0; padding: 0;">
+              💡 <strong>ストーリー生成前でも作風解析は実行可能</strong><br>
+              ストーリーを生成する前であっても、ご自身の文章を先にドロップして「作風解析」を実行し、解析結果のコピーやJSON保存を行うことが可能です。
+            </p>
           </div>
         </div>
 
