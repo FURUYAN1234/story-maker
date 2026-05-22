@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.3.2</title>
-  <script type="module" crossorigin src="./assets/index-BkqVGepb.js"></script>
+  <title>Story Maker v3.3.10</title>
+  <script type="module" crossorigin src="./assets/index-DQEHoqFX.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-fjHRoQcB.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.3.2</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.3.10</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -332,7 +332,7 @@
       </div>
 
       <!-- ============================================================
-           🧪 β版: 作風解析エンジン (Style Analyzer)
+           🧪 β版: 超強引！作風解析エンジン (Super Forced! Style Analyzer Engine)
            OUTPUT欄の直下。OUTPUT生成後に活性化する。
            ============================================================ -->
       <section class="sa-beta-section sa-inactive" id="sa-section">
@@ -342,14 +342,15 @@
           <div style="display: flex; align-items: flex-start; gap: 14px;">
             <div class="sa-beta-badge">🧪 β版</div>
             <div class="sa-beta-text">
-              <strong>作風解析エンジン — Style Analyzer</strong>
+              <strong>超強引！作風解析エンジン — Super Forced! Style Analyzer Engine</strong>
               <span>実験的機能です。正式リリースではありません。解析精度やUI/UXは予告なく変更される場合があります。</span>
             </div>
           </div>
           <div style="border-top: 1px solid rgba(251,191,36,0.2); margin-top: 10px; padding-top: 10px;">
             <p class="sa-desc-hint" style="margin: 0; padding: 0;">
               💡 <strong>ストーリー生成前でも作風解析は実行可能</strong><br>
-              ストーリーを生成する前であっても、ご自身の文章・画像を先にドロップ（またはテキスト貼り付け）して「作風解析」を実行し、解析結果のコピーやJSON保存を行うことが可能です。
+              ストーリーを生成する前であっても、ご自身の文章・画像を先にドロップ（またはテキスト貼り付け）して「超強引！作風解析エンジン」を実行し、解析結果のコピーやJSON保存を行うことが可能です。<br>
+              💡 <strong>どんな資料でも強引に全項目を解析・補完</strong>：たとえ短すぎる単語や、文章が含まれない画像のみのファイルであっても、AIが豊かな想像力で超強引に補完し、すべてのパラメータを100%埋めて出力します。
             </p>
           </div>
         </div>
@@ -368,7 +369,7 @@
               <strong>テキストや画像をドロップ（複数OK）</strong>
               <span>またはクリックして選択 — .txt / .md / 画像対応</span>
             </div>
-            <div class="sa-dropzone-hint">文体分析用の作品テキストや、色彩・トーン分析用のイラスト画像を投入してください</div>
+            <div class="sa-dropzone-hint">文体分析用の作品テキストや、色彩・トーン分析用のイラスト画像を投入してください（要件を満たさない短い文章や画像のみでも、AIが超強引に想像して全項目を解析します）</div>
           </div>
           <input type="file" id="sa-file-input" accept=".txt,.md,.csv,text/plain,text/markdown,image/*" multiple class="hidden">
           
@@ -384,12 +385,12 @@
         <!-- STEP 2: 作風解析 → 解析結果 → リライト -->
         <div class="sa-block">
           <div class="sa-block-header">
-            <span class="sa-block-title">🔬 STEP 2 — 作風解析・リライト</span>
+            <span class="sa-block-title">🔬 STEP 2 — 超強引！作風解析・リライト</span>
           </div>
           <p class="sa-desc">投入テキストの文体・トーン・修辞技法・描写傾向・語彙レベル・構造パターン等をAIが深層分析しパラメータ化します。</p>
           <!-- API進捗ステータス -->
           <div class="sa-api-status hidden" id="sa-api-status"></div>
-          <button class="sa-btn-action" id="btn-sa-analyze" disabled>🔬 作風解析を実行</button>
+          <button class="sa-btn-action" id="btn-sa-analyze" disabled>🔬 超強引！作風解析を実行</button>
 
           <!-- 解析結果 -->
           <div class="sa-result-wrap hidden" id="sa-result-wrap">
@@ -431,7 +432,7 @@
         </div>
 
         <div class="sa-footer">
-          <span>Style Analyzer β</span>
+          <span>Super Forced! Style Analyzer Engine β</span>
         </div>
       </section>
 
