@@ -25,8 +25,8 @@
 - **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
 - **Smart Gender Sync / スマート性別同期**: The character's Sex field and Name are bidirectionally linked. Changing the sex automatically generates a fitting name, and entering a name automatically infers the sex, ensuring consistency with minimal effort. / キャラクターの「性別」と「名前」が双方向に連動。性別を変えると適した名前が自動調整され、名前を手入力すると性別が自動推論されるため、一貫性のあるキャラ設定を支援します。
 - **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
-- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System のSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
-- **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: Supports multimodal composite analysis — drop text files (.txt/.md), images (illustrations, art), or paste text directly into the text area. The AI performs deep computational stylistics analysis, extracting 50+ parameters covering rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, and more. When images are included, visual tone (color palette, composition, lighting) is integrated into the analysis. Results are available in two formats: human-readable text (copy) and structured JSON for direct injection into other AI novel tools (ChatGPT, Claude, etc.). Includes a "Rewrite" function that applies the extracted style to your generated story while preserving the plot. Style analysis can be executed independently before story generation. / テキストファイルのドロップ・画像ドロップ（イラスト等）・テキスト直接貼り付けの3入力方式に対応したマルチモーダル複合解析。AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析。画像が含まれる場合は色彩傾向・構図・タッチ等のビジュアルトーンも統合解析。結果は人間用テキスト（コピー）と他のAI小説ツールに直接投入可能な構造化JSONの2形式で提供。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。ストーリー生成前でも作風解析は単独実行可能。
+- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4-koma System のSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: Supports multimodal composite analysis — drop text files (.txt/.md), images (illustrations, art), or paste text directly into the text area. The AI performs deep computational stylistics analysis, extracting 50+ parameters covering rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, and more. When images are included, visual tone (color palette, composition, lighting) is integrated into the analysis. Results are available in two formats: human-readable text (copy) and structured JSON for direct injection into other AI novel tools (ChatGPT, Claude, etc.) or drag-and-drop into AI 4-koma System. Includes a "Rewrite" function that applies the extracted style to your generated story while preserving the plot. Style analysis can be executed independently before story generation. / テキストファイルのドロップ・画像ドロップ（イラスト等）・テキスト直接貼り付けの3入力方式に対応したマルチモーダル複合解析。AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析。画像が含まれる場合は色彩傾向・構図・タッチ等のビジュアルトーンも統合解析。結果は人間用テキスト（コピー）と他のAI小説ツール（ChatGPT等）への投入や AI 4-koma System への直接ドラッグ＆ドロップ連携が可能な構造化JSONの2形式で提供。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。ストーリー生成前でも作風解析は単独実行可能。
 
 ---
 
@@ -51,8 +51,8 @@ This system acts as a sophisticated prompt engineering compiler. It leverages mu
 
 ## 🧠 v2.9 Narrative Engineering Methods / v2.9 物語構造メソッド解説
 
-> These methods were originally developed for comedy manga (4-panel gag) generation in [Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres — because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
-> これらのメソッドは元々 [Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro) でギャグ漫画（4コマ）生成用に開発されました。分析の結果、その核心は**全ジャンルに適用可能な普遍的物語技法**であることが判明しました。笑い・恐怖・感動・驚きは全て同じ構造的原理、すなわち**「読者の期待（E）と実際の展開（R）の落差」**から生まれるためです。
+> These methods were originally developed for comedy manga (4-panel gag) generation in [AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres — because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
+> これらのメソッドは元々 [AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro) でギャグ漫画（4コマ）生成用に開発されました。分析の結果、その核心は**全ジャンルに適用可能な普遍的物語技法**であることが判明しました。笑い・恐怖・感動・驚きは全て同じ構造的原理、すなわち**「読者の期待（E）と実際の展開（R）の落差」**から生まれるためです。
 
 ### 1. Emotion Gap Design / 感情落差設計
 
@@ -184,7 +184,7 @@ Deep computational stylistics analysis tool that evaluates user-provided texts a
   - Dropping a text sample triggers deep stylistic parsing covering Rhetoric (metaphors, repetition), Syntax (average sentence length, ending verbs), Vocabulary (parts of speech, density of abstract words), Dialogue balance, and Emotional arc. / テキストをドロップして解析を実行すると、AIが修辞技法、構文（文長、体言止め比率）、語彙の偏り、会話比率、感情曲線など50以上の文体特徴を深層分析します。
 - **Dual Format Output / 2形式のレポート出力**:
   - **Human-Readable (文章表示)**: Clear, itemized analysis of the writer's style for study or presentation. / 解析結果を論理的に解説した人間用文章レポート。
-  - **Structured JSON (構造化JSON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) to command writing cloning. / 外部ツール（ChatGPT / Claude等）にそのままコピー＆ペーストして作風クローンを指示できる、高度に定義された構造化JSON出力。
+  - **Structured JSON (構造化JSON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) or dragged and dropped into AI 4-koma System's STEP1. / 外部ツール（ChatGPT / Claude等）にそのままコピー＆ペーストして作風クローンを指示できるほか、AI 4-koma System のSTEP1に直接ドラッグ＆ドロップして適用可能な構造化JSON出力。
 - **Plot-Preserving Rewrite / 構成維持型リライト機能**:
   - Implements the "Rewrite with Style" feature. It takes the original generated story, maps its core plot points, and uses the saved style parameters to rewrite the draft. Changes style, voice, and sensory details while retaining 100% of the original story progression (Ki-sho-ten-ketsu structure). / 解析した文体を、上の出力エリアに生成されたストーリーに適用して「リライト」を実行。ストーリー展開（起承転結）を完全に保ったまま、文章表現・描写・語り口のみを解析した作風へとコンバートします。
 
@@ -372,7 +372,7 @@ These terms are governed by the laws of Japan.
 This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
 本プロジェクトは、AIを活用した漫画・ストーリー制作を支援する統合エコシステムの一部です。
 
-#### 1. Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System
+#### 1. AI 4-koma System
 A system specialized in creating 4-panel manga with AI. / AIを活用した4コマ漫画制作に特化したシステムです。
 - [Explanation / 解説](https://note.com/happy_duck780/n/ndf063558c1f5)
 - [Demo / デモ](https://furuyan1234.github.io/nano-banana-pro/)
@@ -410,6 +410,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v3.3.4 — 2026-05-22
+- **Nano Banana Pro Link Integration / Nano Banana Proへの連携説明文追加**: Added an explanation to the Style Analyzer JSON output section indicating that generated style JSON files can be directly dragged and dropped into AI 4-koma System's STEP1 drop zone. / 作風解析エンジンのJSON出力結果エリアおよびREADMEに、生成した作風JSONファイルが AI 4-koma System のSTEP1（ドロップエリア）に直接連携可能であることを明記する説明文を追加しました。
 
 ### v3.3.3 — 2026-05-22
 - **Update Style Analyzer Engine Title & Explanation Polish / 「超強引！作風解析エンジン」への名称修正と説明文言のブラッシュアップ**:
@@ -552,11 +555,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ### v2.7.0 — 2026-04-03
 - **Character Sheet OCR Import**: Drag & drop character sheet images onto the new drop zone to auto-extract character data via Gemini Vision API. Supports multiple images at once with progress indicator. / キャラクターシート画像をドロップゾーンにドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理・進捗表示に対応。
-- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma SystemのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **AI 4koma Scenario Link (STEP2)**: New output mode that generates scenarios in AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4koma シナリオ連携（STEP2）モードを追加。AI 4-koma SystemのSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
 - **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
 - **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
 - **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
-- **Model Priority Update**: Image recognition models follow Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをNano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
+- **Model Priority Update**: Image recognition models follow AI 4-koma System v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをAI 4-koma System v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
 
 ### v2.6.0 — 2026-03-31
 - **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "シュールギャグ", "どんでん返し") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 全カテゴリ×全サブプリセットに対応するAI文体ガイドエンジンを追加。従来はプリセット選択がラベル名としてしかプロンプトに渡されず、AIに無視されがちだった問題を解消。
@@ -579,7 +582,7 @@ This project is part of an integrated ecosystem designed to support AI-powered m
 
 ### Ecosystem Components / 構成システム
 
-#### 1. Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System
+#### 1. AI 4-koma System
 A system specialized in creating 4-panel manga with AI. / AIを活用した4コマ漫画制作に特化したシステムです。
 - [Explanation / 解説](https://note.com/happy_duck780/n/ndf063558c1f5)
 - [Demo / デモ](https://furuyan1234.github.io/nano-banana-pro/)
