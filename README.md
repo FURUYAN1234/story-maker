@@ -411,6 +411,15 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.10 — 2026-05-22
+- **Style Analyzer Direct Input Confirm & News Append / 作風解析直接入力確定追加＆ニューステーマ追記機能**: Added a "Confirm Add" button for direct text input in the Style Analyzer, allowing users to queue multiple text blocks as virtual files for cumulative analysis. Also updated the Today's News Keywords feature to append new keywords to the custom theme field with a comma, preventing overwriting existing inputs. / 作風解析エンジンのテキスト直接入力に「確定追加」ボタンを実装し、複数のテキストブロックを仮想ファイルとして蓄積（積み上げ）した上で一括解析できるように改善。また、「今日のニュースキーワード取得」実行時に、既存のカスタムテーマ入力を上書きせず、カンマ（`, `）で繋げて追記する仕様に変更しました。
+
+### v3.2.9 — 2026-05-22
+- **Multimodal Style Analyzer / マルチモーダル作風解析エンジン**: Enhanced the Style Analyzer to support composite analysis, allowing users to drop images, drop text files, and paste text directly to analyze artistic and narrative styles together. / 作風解析エンジンで画像ドロップ、テキストドロップ、テキスト直貼りの複合解析に対応し、ビジュアルと文体の両面から総合的な作風解析を行えるように強化しました。
+
+### v3.2.8 — 2026-05-22
+- **Specification Documentation & Cleanup / 仕様ドキュメント追加とクリーンアップ**: Added specifications for "Today's News Keywords" and "Individual Input Locking" functions to `README.md`. Removed obsolete development scripts and local test files to secure the release. Synchronized 4koma scenario modes with NBP parser format. / `README.md`に「今日のニュースキーワード取得」および「個別入力ロック機能」の詳細仕様を追加。不要な開発スクリプトや一時ファイルをクリーンアップし、デプロイ安全性を確保。4コマシナリオのフォーマットとNBPパーサー仕様を完全同期。
+
 ### v3.2.7 — 2026-05-22
 - **Style Rewrite Activation Guard & README Expansion / 作風リライト実行ボタンのガード追加と新機能ドキュメント拡充**: Added validation to the Style Analyzer "Rewrite with Style" action. The button is now properly disabled until a story has actually been generated in the OUTPUT panel (empty states are detected via CSS `.empty` classes) and a style has been successfully analyzed. Also expanded README.md with detailed operational specifications and usage benefits for the Universal Intake (β) and Style Analyzer Engine (β). / 作風解析エンジンの「この作風でリライト実行」ボタンの不具合を修正。上の出力エリアにストーリーが生成されていない初期状態（および「思考中...」状態）ではリライト実行できないようガードロジックを追加しました。また、README.mdに「万能インプット（ユニバーサル・インテーク）」と「作風解析エンジン」の動作仕様やメリットに関する詳細説明を追記しました。
 
@@ -490,8 +499,7 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 - **Enhanced Gender Sync**: Updated the bidirectional gender synchronization logic to automatically update the Sex field based on Name inferences, and vice versa.
 - **AI Vision Parsing**: Updated the character sheet OCR extraction prompt to recognize the sex attribute separately.
 
-### v3.2.8 — 2026-05-22
-- **Specification Documentation & Cleanup**: Added specifications for "Today's News Keywords" and "Individual Input Locking" functions to `README.md`. Removed obsolete development scripts and local test files to secure the release. Synchronized 4koma scenario modes with NBP parser format. / `README.md`に「今日のニュースキーワード取得」および「個別入力ロック機能」の詳細仕様を追加。不要な開発スクリプトや一時ファイルをクリーンアップし、デプロイ安全性を確保。4コマシナリオのフォーマットとNBPパーサー仕様を完全同期。
+
 
 ### v2.9.1 — 2026-04-30
 - **Security Audit & Cleanup**: Performed pre-deployment security audit (confirmed no hardcoded credentials and zero `localStorage` API key leakage). Removed obsolete development artifacts (`diff.txt`, `gitlog.txt`, `pkg_log.txt`) from root. / デプロイ前セキュリティ監査を実施（ハードコードなし、localStorageへのAPIキー漏洩ゼロを確認）。ルートディレクトリから不要な開発時一時ファイル群を削除しクリーンアップ。

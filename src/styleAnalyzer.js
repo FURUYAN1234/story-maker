@@ -372,6 +372,57 @@ function updateImageList() {
   });
 }
 
+// ============================================================
+// JSON修復パーサー
+// AIが返すJSONにありがちな構文エラーを修復してパースする
+// ============================================================
+function parseJsonWithRepair(raw) {
+  // まず素直にパースを試行
+  try {
+    return JSON.parse(raw);
+  } catch (firstErr) {
+    console.warn('JSON初回パース失敗、修復を試行:', firstErr.message);
+  }
+
+  let fixed = raw;
+
+  // 1. 制御文字除去（タブ・改行はJSON文字列値内で不正）
+  //    ただし構造的な改行は残す（{, }, [, ], : の前後）
+  //    文字列値内の改行を \\n にエスケープ
+  fixed = fixed.replace(/"([^"]*?)"/g, (match) => {
+    return match
+      .replace(/\t/g, '\\t')
+      .replace(/\r\n/g, '\\n')
+      .replace(/\r/g, '\\n')
+      .replace(/\n/g, '\\n');
+  });
+
+  // 2. 末尾カンマ除去: },] や },} の前のカンマ
+  fixed = fixed.replace(/,\s*([\]}])/g, '$1');
+
+  // 3. JSONコメント除去: // ... や /* ... */
+  fixed = fixed.replace(/\/\/[^\n]*/g, '');
+  fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // 4. シングルクォートをダブルクォートに変換（キー名のみ、値内のアポストロフィは除外）
+  //    安全策: キー名のパターンのみ対象
+  fixed = fixed.replace(/(\{|,)\s*'([^']+)'\s*:/g, '$1"$2":');
+
+  // 修復後に再パース
+  try {
+    return JSON.parse(fixed);
+  } catch (secondErr) {
+    // 最終手段: より攻撃的な修復
+    try {
+      // 文字列値内のエスケープされていないバックスラッシュを処理
+      let aggressive = fixed.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+      return JSON.parse(aggressive);
+    } catch (thirdErr) {
+      throw new Error(`AIの応答JSONの解析に失敗しました。元のエラー: ${thirdErr.message}`);
+    }
+  }
+}
+
 function escHtml(s) {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -465,17 +516,21 @@ async function runAnalysis() {
     }
 
     // JSONブロック抽出
+    let rawJson = '';
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
-      analysisResult = JSON.parse(jsonMatch[1]);
+      rawJson = jsonMatch[1];
     } else {
       const braceMatch = text.match(/\{[\s\S]*\}/);
       if (braceMatch) {
-        analysisResult = JSON.parse(braceMatch[0]);
+        rawJson = braceMatch[0];
       } else {
         throw new Error('AIの応答からJSONを抽出できませんでした');
       }
     }
+
+    // JSON修復: AIが返すJSONにありがちな構文エラーを修復
+    analysisResult = parseJsonWithRepair(rawJson);
 
     // 結果表示
     displayAnalysisResult(analysisResult);
@@ -733,6 +788,8 @@ function clearAll() {
   const directTextEl = $('sa-direct-text');
   if (directTextEl) directTextEl.value = '';
 
+  updateAddTextButtonState();
+
   $('sa-dropzone').classList.remove('sa-has-files');
   $('sa-file-count')?.classList.add('hidden');
   updateAnalyzeButtonState();
@@ -742,7 +799,33 @@ function clearAll() {
   $('sa-result-wrap')?.classList.add('hidden');
   $('sa-reflect-wrap')?.classList.add('hidden');
   $('sa-reflect-result-wrap')?.classList.add('hidden');
-  $('sa-reflect-output').textContent = '';
+}
+
+function addDirectText() {
+  const directTextEl = $('sa-direct-text');
+  if (!directTextEl) return;
+  const val = directTextEl.value.trim();
+  if (!val) return;
+
+  droppedTexts.push({
+    name: `直接入力テキスト_${droppedTexts.length + 1}`,
+    text: val,
+    charCount: val.length
+  });
+
+  directTextEl.value = '';
+  updateFileList();
+  $('sa-dropzone').classList.add('sa-has-files');
+  updateAnalyzeButtonState();
+  updateAddTextButtonState();
+}
+
+export function updateAddTextButtonState() {
+  const btn = $('btn-sa-add-text');
+  if (!btn) return;
+  const directTextEl = $('sa-direct-text');
+  const hasText = directTextEl && directTextEl.value.trim().length > 0;
+  btn.disabled = !hasText;
 }
 
 export function updateStyleAnalyzerSectionState() {
@@ -796,13 +879,18 @@ export function initStyleAnalyzer(apiKeyGetter, lastOutputGetter) {
   $('btn-sa-reflect-copy')?.addEventListener('click', copyReflection);
   $('btn-sa-reflect-dl')?.addEventListener('click', saveReflectionTxt);
   $('btn-sa-clear')?.addEventListener('click', clearAll);
+  $('btn-sa-add-text')?.addEventListener('click', addDirectText);
 
   // 直貼りテキストエリアの入力変更で解析ボタン状態を更新
   const directTextEl = $('sa-direct-text');
   if (directTextEl) {
-    directTextEl.addEventListener('input', () => updateAnalyzeButtonState());
+    directTextEl.addEventListener('input', () => {
+      updateAnalyzeButtonState();
+      updateAddTextButtonState();
+    });
   }
 
   // 初期化時のセクション活性化状態の更新
   updateStyleAnalyzerSectionState();
+  updateAddTextButtonState();
 }

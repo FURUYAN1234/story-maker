@@ -742,11 +742,13 @@ async function fetchNewsAndSetTheme() {
     const prompt = '今日の日本の主要なニュース見出しから、物語のインスピレーションとなるキーワードを【異なる複数のカテゴリー（社会、国際、経済、エンタメ、スポーツ、科学、ライフスタイルなど）】から3〜5個抽出してください。特定のカテゴリー（特に「IT・生成AI」など）に偏りすぎないよう、バランスよく分散させて抽出すること。解説は一切不要。キーワードのみを「・」で始まる箇書きで出力してください。';
     const { text } = await callGenerativeAI(key, model, prompt);
     const themeText = text.replace(/^[*-]\s*/gm, '').replace(/\n/g, ', ').trim();
-    $('theme-custom').value = themeText;
+    const existingVal = $('theme-custom').value.trim();
+    const newVal = existingVal ? `${existingVal}, ${themeText}` : themeText;
+    $('theme-custom').value = newVal;
     state.themeSelected = null; state.themeCategory = null;
     if ($('theme-cat-chips')) $('theme-cat-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     $('theme-sub-chips').innerHTML = '';
-    updateClear('theme-custom-clear', themeText);
+    updateClear('theme-custom-clear', newVal);
   } catch (err) {
     alert('ニュース取得失敗: ' + err.message);
   } finally {
@@ -1553,7 +1555,15 @@ function init() {
   });
 
   initSectionClearButtons();
-  $('btn-today-news').addEventListener('click', fetchNewsAndSetTheme);
+
+  // テーマchipsの末尾に「📡 AI: 今日のニュース」chipを追加（他のプリセットと同列）
+  const newsChip = document.createElement('button');
+  newsChip.className = 'chip chip-ai';
+  newsChip.id = 'btn-today-news';
+  newsChip.title = 'AIが今日の主要ニュースからキーワードを自動抽出して、テーマ入力欄に設定します';
+  newsChip.innerHTML = '📡 AI: 今日のニュース';
+  $('theme-cat-chips').appendChild(newsChip);
+  newsChip.addEventListener('click', fetchNewsAndSetTheme);
   $('btn-add-char').addEventListener('click', addChar);
   $('btn-remove-char').addEventListener('click', removeLastChar);
   $('btn-rand-chars-content').addEventListener('click', randomizeAllChars);
