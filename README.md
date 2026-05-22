@@ -411,8 +411,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
-### v3.2.10 — 2026-05-22
-- **Style Analyzer Direct Input Confirm & News Append / 作風解析直接入力確定追加＆ニューステーマ追記機能**: Added a "Confirm Add" button for direct text input in the Style Analyzer, allowing users to queue multiple text blocks as virtual files for cumulative analysis. Also updated the Today's News Keywords feature to append new keywords to the custom theme field with a comma, preventing overwriting existing inputs. / 作風解析エンジンのテキスト直接入力に「確定追加」ボタンを実装し、複数のテキストブロックを仮想ファイルとして蓄積（積み上げ）した上で一括解析できるように改善。また、「今日のニュースキーワード取得」実行時に、既存のカスタムテーマ入力を上書きせず、カンマ（`, `）で繋げて追記する仕様に変更しました。
+### v3.3.0 — 2026-05-22
+- **Robust Style Analyzer & Direct Input Confirm & News Append / 頑健な作風解析エンジン（JSON自動修復）、テキスト確定追加、およびニューステーマ追記**: 
+  - **Robust JSON Parsing**: Upgraded the Style Analyzer's JSON repair logic to a robust state-machine parser, successfully resolving parsing errors (`SyntaxError: Expected ',' or '}'`) by automatically escaping unescaped double quotes and handling control line-breaks inside AI-generated JSON values (such as in reproduction prompts). / 作風解析エンジンのJSON修復ロジックをステートマシンベースのパーサーに刷新。AIが生成したJSONの値に含まれるエスケープされていないダブルクォートや制御改行文字を安全に自動エスケープし、JSONパースエラー（`SyntaxError: Expected ',' or '}'`等）を堅牢に解消しました。
+  - **Direct Input Confirm**: Added a "Confirm Add" button for direct text input in the Style Analyzer, allowing users to queue multiple text blocks as virtual files for cumulative analysis. / 作風解析のテキスト直接入力に「確定追加」ボタンを実装し、複数のテキストブロックを仮想ファイルとして蓄積（積み上げ）した上で一括解析できるように改善。
+  - **News Theme Append**: Updated the Today's News Keywords feature to append new keywords to the custom theme field with a comma, preventing overwriting existing inputs. / 「今日のニュースキーワード取得」実行時に、既存のカスタムテーマ入力を上書きせず、カンマ（`, `）で繋げて追記する仕様に変更しました。
+  - **Nano Banana Pro Scenario Alignment**: Enhanced the `4koma_scenario` prompt template by adding strict guidelines forbidding the AI from wrapping header values (e.g., Topic) in brackets like `【】`, ensuring seamless integration with the NBP scenario parser. / `4koma_scenario` プロンプトテンプレートを強化し、Topicなどのヘッダー値を `【Topic: xxx】` のように隅付き括弧（【】）で囲むことを厳密に禁止する指示を追加。NBPのシナリオパーサー仕様との整合性を向上させました。
 
 ### v3.2.9 — 2026-05-22
 - **Multimodal Style Analyzer / マルチモーダル作風解析エンジン**: Enhanced the Style Analyzer to support composite analysis, allowing users to drop images, drop text files, and paste text directly to analyze artistic and narrative styles together. / 作風解析エンジンで画像ドロップ、テキストドロップ、テキスト直貼りの複合解析に対応し、ビジュアルと文体の両面から総合的な作風解析を行えるように強化しました。

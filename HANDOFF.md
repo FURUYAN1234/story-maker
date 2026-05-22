@@ -1,14 +1,13 @@
 # HANDOFF (Story Maker → Codex)
 
 ## Snapshot Date
-2026-05-22T14:45:00+09:00
+2026-05-22T15:00:00+09:00
 
 ## Current Status
-- ✅ **v3.2.10** — 安定稼働中（GitHub Pages デプロイ＆リリース完了）
+- 🛠️ **v3.3.0** — ローカル環境にて機能追加＆バグ修正検証完了（試用前のデプロイ保留中）
 - ブランチ: `main`
-- 未コミット変更: なし (Working tree clean)
-- 直近のコミット:
-  - `388cbcd` v3.2.10: Style Analyzer direct input confirm addition & News theme append / 作風解析直接入力確定追加＆ニューステーマ追記機能
+- 未コミット変更: あり（`package.json`, `index.html`, `README.md`, `src/main.js`, `src/styleAnalyzer.js` 等がローカルで修正・検証完了状態。試用前デプロイ防止ルールに基づき、コミット・プッシュ・デプロイ・タグ作成・リリースはすべて未実行です）
+- 現在実行中の開発サーバー: `http://localhost:5178/`
 
 ## Architecture & Key Files
 | 用途 | ファイル |
@@ -20,45 +19,28 @@
 | ビルド設定 | `vite.config.js` (base: GH Pages用設定 — 変更禁止) |
 
 ## Rule Enforcement (重要)
+- **試用前デプロイ・リリースの禁止**: ユーザーが実際にローカル（`http://localhost:5178/`）で試用し、動作確認を終えるまで、`npm run deploy` や GitHub リリース（タグ `v3.3.0`）は絶対に実行しないこと。
 - 作業開始前に **必ず** `docs/project_standards.md` と `docs/deploy.md` を読むこと。
-- デプロイ先: GitHub Pages のみ（HF Spaces は対象外）
-- `vite.config.js` の `base` を推測で変更しない
+- `vite.config.js` の `base` を推測で変更しない。
 
 ## Done (今回作業)
-- **作風解析エンジン直接入力確定追加**: `index.html`・`src/style.css`・`src/styleAnalyzer.js` を修正し、直接入力されたテキストを「確定追加」ボタン (`#btn-sa-add-text`) で `droppedTexts` に仮想ファイルとして蓄積・解析できるようにしました。
-- **ニュースキーワード追記化**: `src/main.js` 内のニュースキーワード取得処理を変更し、既存値がある場合はカンマ（`, `）で繋いで追記する仕様に改善しました。また、「📡 AI: 今日のニュース」チップスをプリセットチップスの末尾に移動しました。
-- **堅牢なJSONパーサー**: `src/styleAnalyzer.js` に `parseJsonWithRepair(raw)` を実装し、AIが返すJSONの構文エラー（制御文字、余分なカンマ、シングルクォート）を自動修復してパースするガードを追加しました。
-- **デプロイ＆リリース**: `npm run build` 検証成功後、`npm run deploy` で GitHub Pages にデプロイ。annotated tag `v3.2.10` および GitHub Release `v3.2.10` を作成。さらに ZIP アーカイブをダウンロード検証し、`C:\story-maker-main` へ正しく同期展開しました。
+- **バージョン順序の是正**: `v3.2.9` の次のバージョンをセマンティックバージョニング規則に基づき `v3.3.0` に再バンプ・同期しました（`package.json`, `index.html`, `README.md`, `src/main.js`）。
+- **JSON解析エラーの解消**: `src/styleAnalyzer.js` 内の `parseJsonWithRepair(raw)` をステートマシンベースのスキャン処理に刷新。AIが返却するJSONの文字列値に含まれるエスケープされていないダブルクォート（`"`）や制御改行文字（`\n`）を安全に自動エスケープし、`SyntaxError: Expected ',' or '}'` などの解析エラーを堅牢に解決しました。ローカルの Node.js ユニット検証で正常動作を確認。
+- **機能追加（実装済み）**: 作風解析の確定追加ボタン（`#btn-sa-add-text`）の実装、およびニュースキーワード取得時のテーマ追記仕様（カンマ `, ` 区切りでの追記）の実装を完了しました。
+- **ローカルビルド検証**: `npm run build` を実行し、`story-maker@3.3.0` のプロダクションビルドがエラーなく通ることを確認。
 
 ## Remaining Tasks
-- なし (すべての要望に対応しデプロイ・同期完了)
+- [ ] ユーザーによるローカル試用およびデプロイ・リリース承認（承認待ち）
+- [ ] （承認後）「デプロイして」プロトコルに沿ったフルデプロイ・リリース
+  - `npm run deploy` で GitHub Pages へデプロイ。
+  - タグ `v3.3.0` の作成・プッシュ、および GitHub Release `v3.3.0` の作成。
+  - リリースZIPをダウンロード検証し、`C:\story-maker-main` へ上書き同期。
 
 ## Verification State
-- GitHub Pages デプロイ済み (v3.2.10)
-- ローカル C ドライブ展開完了 (`C:\story-maker-main\package.json` 存在確認 True)
-
-## Risks
-- なし。現在の `main` ブランチとリモート `gh-pages` は完全に同期されています。
+- ローカルビルド確認済み (v3.3.0)
+- ローカル開発サーバー起動中 (`http://localhost:5178/`)
 
 ## Entry Points for Codex
 1. `AGENTS.md` → 全体ルール
 2. `docs/project_standards.md` → コード規約・禁止事項
 3. `docs/deploy.md` → デプロイ手順
-
-## Root App Protection Rule
-This workspace root app is an active product app and must not be treated as a scratchpad, disposable shell, or temporary target for unrelated UI experiments.
-
-### Protected Existing App
-- `C:\Users\sx717\Antigravity\story-maker`
-
-### Protected Files
-- `src/App.jsx`
-- `src/App.css`
-- `src/index.css`
-- `src/lib/`
-- `public/`
-- `README.md`
-- `package.json`
-- `package-lock.json`
-- `vite.config.js`
-- `dist/`

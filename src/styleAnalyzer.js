@@ -384,34 +384,105 @@ function parseJsonWithRepair(raw) {
     console.warn('JSON初回パース失敗、修復を試行:', firstErr.message);
   }
 
-  let fixed = raw;
+  let fixed = raw.trim();
 
-  // 1. 制御文字除去（タブ・改行はJSON文字列値内で不正）
-  //    ただし構造的な改行は残す（{, }, [, ], : の前後）
-  //    文字列値内の改行を \\n にエスケープ
-  fixed = fixed.replace(/"([^"]*?)"/g, (match) => {
-    return match
+  // 1. JSONコメント除去: // ... や /* ... */
+  fixed = fixed.replace(/\/\/[^\n]*/g, '');
+  fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // 2. シングルクォートをダブルクォートに変換（キー名のみ、値内のアポストロフィは除外）
+  fixed = fixed.replace(/(\{|,)\s*'([^']+)'\s*:/g, '$1"$2":');
+
+  // 3. 制御文字やエスケープされていないダブルクォートを修復するためのステートマシン
+  let result = '';
+  let inString = false;
+  let currentString = '';
+
+  for (let i = 0; i < fixed.length; i++) {
+    const char = fixed[i];
+
+    if (!inString) {
+      if (char === '"') {
+        inString = true;
+        currentString = '';
+      } else {
+        result += char;
+      }
+    } else {
+      // 文字列の内部
+      if (char === '\\') {
+        // エスケープ文字
+        if (i + 1 < fixed.length) {
+          const nextChar = fixed[i + 1];
+          currentString += '\\' + nextChar;
+          i++; // 次の文字を消費
+        } else {
+          currentString += '\\';
+        }
+      } else if (char === '"') {
+        // ダブルクォートを発見。これが本当の終了クォートか、それとも文字列内の生のクォートか判定する。
+        // 判断のために、このダブルクォートの後の有効な次の文字（スペース・改行以外の文字）を確認する。
+        let nextValidChar = '';
+        let nextIdx = i + 1;
+        while (nextIdx < fixed.length) {
+          const c = fixed[nextIdx];
+          if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+            nextValidChar = c;
+            break;
+          }
+          nextIdx++;
+        }
+
+        // 判断基準：
+        // もしこの文字列がキー名である場合、その後に ':' が続くはず。
+        // もしこの文字列が値である場合、その後に ',' または '}' または ']' が続くはず、
+        // または、JSON全体の末尾付近であれば何も続かないか、閉じ括弧のみ。
+        let isRealEnd = false;
+        if (nextValidChar === ':' || nextValidChar === ',' || nextValidChar === '}' || nextValidChar === ']' || nextValidChar === '') {
+          isRealEnd = true;
+        }
+
+        if (isRealEnd) {
+          // 本物の終了クォート。これまでの文字列を処理して出力に加える。
+          // 文字列内の改行やタブなどの制御文字をエスケープ
+          let processed = currentString
+            .replace(/\t/g, '\\t')
+            .replace(/\r\n/g, '\\n')
+            .replace(/\r/g, '\\n')
+            .replace(/\n/g, '\\n');
+
+          result += '"' + processed + '"';
+          inString = false;
+        } else {
+          // 生のダブルクォート（文字列の途中）。エスケープして文字列に蓄積する。
+          currentString += '\\"';
+        }
+      } else {
+        currentString += char;
+      }
+    }
+  }
+
+  // 万が一、文字列が閉じられないまま終わった場合は閉じる
+  if (inString) {
+    let processed = currentString
       .replace(/\t/g, '\\t')
       .replace(/\r\n/g, '\\n')
       .replace(/\r/g, '\\n')
       .replace(/\n/g, '\\n');
-  });
+    result += '"' + processed + '"';
+  }
 
-  // 2. 末尾カンマ除去: },] や },} の前のカンマ
+  fixed = result;
+
+  // 4. 末尾カンマ除去: },] や },} の前のカンマ
   fixed = fixed.replace(/,\s*([\]}])/g, '$1');
-
-  // 3. JSONコメント除去: // ... や /* ... */
-  fixed = fixed.replace(/\/\/[^\n]*/g, '');
-  fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
-
-  // 4. シングルクォートをダブルクォートに変換（キー名のみ、値内のアポストロフィは除外）
-  //    安全策: キー名のパターンのみ対象
-  fixed = fixed.replace(/(\{|,)\s*'([^']+)'\s*:/g, '$1"$2":');
 
   // 修復後に再パース
   try {
     return JSON.parse(fixed);
   } catch (secondErr) {
+    console.warn('JSON修復パース失敗、第2段階修復を試行:', secondErr.message);
     // 最終手段: より攻撃的な修復
     try {
       // 文字列値内のエスケープされていないバックスラッシュを処理
