@@ -508,6 +508,33 @@ ${(() => {
 物語が完全に終了した際は、最後に必ず「【完】」（続く場合は「【続く】」）と記載し、文章が途切れていないことを示してください。`;
   }
 
+  // ─── 万能インプット（ユニバーサル・インテーク）アセット情報の構築 ───
+  let assetDesc = '';
+  if (s.universalAssets && s.universalAssets.length > 0) {
+    assetDesc = '\n\n【入力アセット情報（インスピレーションソース）】\n';
+    assetDesc += '以下のユーザーから投入されたアセット情報（画像、URL、テキストなど）を、指定された「縛り（設定項目）」をすべて満たした上で、物語の要素、描写、モチーフ、設定として自然に溶け込ませて構成してください。\n';
+    s.universalAssets.forEach((asset, idx) => {
+      assetDesc += `[アセット ${idx + 1}] 型: ${asset.type}\n`;
+      if (asset.type === 'image') {
+        assetDesc += `・画像ファイル名: ${asset.name || '不明'}\n`;
+        const analysisText = asset.status === 'error' ? '画像解析エラーにより詳細情報なし' : (asset.analysis || '解析中、または解析不可');
+        assetDesc += `・ビジュアル事前解析結果: ${analysisText}\n`;
+      } else if (asset.type === 'url') {
+        assetDesc += `・リンクURL: ${asset.value}\n`;
+        if (asset.title && asset.status !== 'error') assetDesc += `・リンク先タイトル: ${asset.title}\n`;
+        if (asset.content && asset.status !== 'error') {
+          assetDesc += `・リンク先コンテンツ（要約/抽出テキスト）: ${asset.content.slice(0, 1500)}${asset.content.length > 1500 ? '...' : ''}\n`;
+        }
+      } else if (asset.type === 'text') {
+        assetDesc += `・文書名: ${asset.name || '不明'}\n`;
+        if (asset.content && asset.status !== 'error') {
+          assetDesc += `・文書内容: ${asset.content.slice(0, 1500)}${asset.content.length > 1500 ? '...' : ''}\n`;
+        }
+      }
+    });
+    prompt += assetDesc;
+  }
+
   // ─── ローカルRAG: 知識注入 ───
   // ユーザー設定に基づき、関連する世界観・時代・ジャンル知識を検索してプロンプトに追加
   const ragKnowledge = retrieveKnowledge(s);
@@ -519,6 +546,9 @@ ${(() => {
   const tags = [genre, era, worldview, target, ending, modeLabel];
   if (s.charCount) tags.push(`${s.charCount}字`);
   if (ragKnowledge) tags.push('📚RAG');
+  if (s.universalAssets && s.universalAssets.length > 0) {
+    tags.push(`🖼️アセット(${s.universalAssets.length})`);
+  }
 
   return { prompt, tags };
 }

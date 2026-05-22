@@ -1068,3 +1068,245 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
     gap: 8px;
   }
 }
+
+/* ============================================================
+   📁 万能インプット（ユニバーサル・インテーク）スタイル
+   ============================================================ */
+.ui-dropzone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: linear-gradient(135deg, rgba(167,139,250,.03), rgba(139,108,255,.03));
+  position: relative;
+  overflow: hidden;
+  outline: none;
+}
+.ui-dropzone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(167,139,250,.08), rgba(139,108,255,.08));
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.ui-dropzone:hover, .ui-dropzone:focus {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(167,139,250,.06), rgba(139,108,255,.06));
+}
+.ui-dropzone:hover::before, .ui-dropzone:focus::before { opacity: 1; }
+.ui-dropzone.ui-dragover {
+  border-color: var(--accent);
+  border-style: solid;
+  background: linear-gradient(135deg, rgba(167,139,250,.12), rgba(139,108,255,.1));
+  box-shadow: 0 0 30px rgba(167,139,250,.25), inset 0 0 20px rgba(167,139,250,.08);
+  transform: scale(1.01);
+}
+.ui-dropzone-icon {
+  font-size: 32px;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+  transition: var(--transition);
+}
+.ui-dropzone:hover .ui-dropzone-icon { transform: scale(1.15) rotate(-5deg); }
+.ui-dropzone-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ui-dropzone-text strong {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 700;
+}
+.ui-dropzone-text span {
+  font-size: 10px;
+  color: var(--text3);
+}
+.ui-dropzone-hint {
+  font-size: 9px;
+  color: var(--text3);
+  margin-top: 6px;
+  opacity: .7;
+  position: relative;
+  z-index: 1;
+}
+
+/* アセットリスト */
+.ui-asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ui-asset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 11px;
+  position: relative;
+  transition: var(--transition);
+}
+.ui-asset-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.ui-asset-card:hover {
+  border-color: var(--accent2);
+}
+.ui-asset-thumb {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: #000;
+}
+.ui-asset-icon {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139,108,255,.08);
+  border-radius: 4px;
+  color: var(--accent);
+}
+.ui-asset-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ui-asset-title {
+  color: var(--text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-asset-meta {
+  font-size: 9px;
+  color: var(--text3);
+}
+.ui-asset-remove {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text3);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.ui-asset-remove:hover {
+  color: var(--danger);
+  background: rgba(248,113,113,.1);
+}
+
+/* 解析中スピナー */
+.ui-spinner {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+.ui-spinner .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(139,108,255,.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 手動入力行 */
+.ui-input-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+#ui-text-input {
+  flex: 1;
+  font-size: 11px;
+  padding: 6px 10px;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: var(--transition);
+}
+#ui-text-input:focus {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+.ui-btn-add {
+  padding: 6px 12px;
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, rgba(139,108,255,.1), rgba(192,132,252,.15));
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.ui-btn-add:hover {
+  background: linear-gradient(135deg, rgba(139,108,255,.2), rgba(192,132,252,.3));
+  box-shadow: 0 0 8px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.ui-btn-add:active {
+  transform: translateY(0);
+}
+
+/* アセット詳細表示 */
+.ui-asset-detail {
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.5;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  margin-top: 6px;
+  max-height: 100px;
+  overflow-y: auto;
+  word-break: break-all;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+

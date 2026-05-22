@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v2.9.3
+// main.js — v3.2.4
 // ============================================================
 import './style.css';
 import {
@@ -16,7 +16,7 @@ import {
   WORLDVIEW_ORIGINALS, TARGET_ORIGINALS,
   PERSONALITY_ORIGINALS, ROLE_ORIGINALS,
 } from './data.js';
-import { callGenerativeAI } from './api.js';
+import { callGenerativeAI, callGenerativeAIVision } from './api.js';
 import { buildPrompt, generateRandomTheme } from './prompt.js';
 import { initCharImport } from './charImport.js';
 import { initStyleAnalyzer } from './styleAnalyzer.js';
@@ -28,10 +28,10 @@ const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 
 // ─── 状態 ───
 const state = {
-  apiKey: '',
-  apiProvider: 'gemini', // 'gemini' | 'openai'
-  geminiKey: '',         // Geminiキーの保持
-  openaiKey: '',         // OpenAIキーの保持
+  apiKey: sessionStorage.getItem('api_key') || '',
+  apiProvider: sessionStorage.getItem('api_provider') || 'gemini', // 'gemini' | 'openai'
+  geminiKey: sessionStorage.getItem('gemini_key') || '',         // Geminiキーの保持
+  openaiKey: sessionStorage.getItem('openai_key') || '',         // OpenAIキーの保持
   mode: '4koma',
   genre: null, genreCategory: null,
   era: null, eraCategory: null,
@@ -42,6 +42,7 @@ const state = {
   themeCategory: null, themeSelected: null,
   characters: [], charIdCounter: 0,
   lastTitle: '',
+  universalAssets: [], // 万能インプットで投入されたアセットリスト
 };
 
 // ============================================================
@@ -129,6 +130,12 @@ function switchApi() {
     state.apiKey = state.geminiKey; // 保存済みGeminiキーを復元
   }
   
+  // sessionStorage に同期
+  sessionStorage.setItem('api_key', state.apiKey);
+  sessionStorage.setItem('api_provider', state.apiProvider);
+  sessionStorage.setItem('gemini_key', state.geminiKey);
+  sessionStorage.setItem('openai_key', state.openaiKey);
+  
   // キーがあればロック状態、なければ編集状態
   const b = $('banner');
   if (state.apiKey) {
@@ -177,6 +184,12 @@ function saveKey() {
     state.geminiKey = v;
   }
   
+  // sessionStorage に同期
+  sessionStorage.setItem('api_key', state.apiKey);
+  sessionStorage.setItem('api_provider', state.apiProvider);
+  sessionStorage.setItem('gemini_key', state.geminiKey);
+  sessionStorage.setItem('openai_key', state.openaiKey);
+  
   updateBanner();
   $('banner').classList.add('locked');
   $('key-save').classList.add('hidden');
@@ -189,6 +202,18 @@ function editKey() {
   $('apikey').readOnly = false;
   $('apikey').value = '';
   $('apikey').focus();
+  
+  // 編集/クリア時にsessionStorageの該当キーもクリア
+  state.apiKey = '';
+  sessionStorage.removeItem('api_key');
+  if (state.apiProvider === 'openai') {
+    state.openaiKey = '';
+    sessionStorage.removeItem('openai_key');
+  } else {
+    state.geminiKey = '';
+    sessionStorage.removeItem('gemini_key');
+  }
+  updateBanner();
 }
 
 // ============================================================
@@ -686,6 +711,7 @@ function gatherSettings() {
     narrCustom: $('narr-custom').value.trim(),
     charCount: $('charcount-check').checked ? parseInt($('char-count').value) || null : null,
     supplement: $('supplement').value.trim(),
+    universalAssets: state.universalAssets || [],
   };
 }
 
@@ -823,6 +849,15 @@ function resetAll() {
   state.characters = [];
   state.lastTitle = '';
   
+  // 万能インプットのリセット
+  state.universalAssets.forEach(asset => {
+    if (asset.type === 'image' && asset.localUrl) {
+      URL.revokeObjectURL(asset.localUrl);
+    }
+  });
+  state.universalAssets = [];
+  renderUniversalAssets();
+  
   // 2. Reset UI - Mode
   initMode();
   $('mode-custom').value = '';
@@ -858,6 +893,417 @@ function resetAll() {
 }
 
 // ============================================================
+// 📁 万能インプット（ユニバーサル・インテーク）ロジック
+// ============================================================
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
+}
+
+function readTextFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+async function fetchUrlContent(url) {
+  // まず api.codetabs.com (NBPで動いていたCORSプロキシ) を試す
+  try {
+    const codetabsUrl = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`;
+    const response = await fetch(codetabsUrl);
+    if (response.ok) {
+      const html = await response.text();
+      if (html && html.trim()) {
+        return parseHtmlContent(html, url);
+      }
+    }
+  } catch (e) {
+    console.warn('Codetabs proxy failed, trying allorigins...', e);
+  }
+
+  // フォールバック: api.allorigins.win
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const response = await fetch(proxyUrl);
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const json = await response.json();
+  const html = json.contents;
+  if (!html) throw new Error('コンテンツの取得に失敗しました');
+
+  return parseHtmlContent(html, url);
+}
+
+function parseHtmlContent(html, url) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  const title = doc.title || url;
+  const descMeta = doc.querySelector('meta[name="description"]') || doc.querySelector('meta[property="og:description"]');
+  const desc = descMeta ? descMeta.getAttribute('content') : '';
+
+  const scripts = doc.querySelectorAll('script, style, nav, footer, header');
+  scripts.forEach(s => s.remove());
+  
+  let text = doc.body ? doc.body.innerText || doc.body.textContent : '';
+  text = text.replace(/\s+/g, ' ').trim();
+  const cleanContent = text.slice(0, 3000);
+
+  return { title, desc, content: cleanContent };
+}
+
+async function handleUniversalItem(item, isDirectInput = false) {
+  const spinner = $('ui-spinner');
+  if (spinner) spinner.classList.remove('hidden');
+
+  try {
+    if (item instanceof File) {
+      if (item.type.startsWith('image/')) {
+        await processImageFile(item);
+      } else if (item.type.startsWith('text/') || item.name.endsWith('.txt') || item.name.endsWith('.md')) {
+        await processTextFile(item);
+      }
+    } else if (typeof item === 'string') {
+      const trimmed = item.trim();
+      if (/^https?:\/\/[^\s]+$/.test(trimmed)) {
+        await processUrl(trimmed);
+      } else if (trimmed.length > 0) {
+        await processRawText(trimmed, isDirectInput);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    alert('アセットの処理中にエラーが発生しました: ' + err.message);
+  } finally {
+    if (spinner) spinner.classList.add('hidden');
+    renderUniversalAssets();
+  }
+}
+
+async function processImageFile(file) {
+  const id = 'asset-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  const localUrl = URL.createObjectURL(file);
+
+  const asset = {
+    id,
+    type: 'image',
+    name: file.name,
+    mimeType: file.type,
+    localUrl: localUrl,
+    analysis: '解析中...',
+    status: 'analyzing'
+  };
+
+  state.universalAssets.push(asset);
+  renderUniversalAssets();
+
+  try {
+    const base64 = await fileToBase64(file);
+    const key = state.apiKey;
+    if (!key) {
+      asset.analysis = 'APIキーが設定されていないため、画像解析を実行できませんでした。APIキーを保存した状態で、画像を再度ドロップしてください。';
+      asset.status = 'error';
+      renderUniversalAssets();
+      return;
+    }
+
+    const prompt = "この画像を詳細に解析して説明してください。\n- 人物・キャラクター：容姿、表情、服装、性別、行動、全体の雰囲気。\n- 物体・製品・食べ物：具体的な名称や製品名、ブランド（例：マクドナルドのハンバーガー、コカ・コーラなど特定できるものはその名称）、色、状態。\n- 文字情報：看板、ラベル、本などの文字。\nこれらを100〜250文字程度で、具体的かつ客観的に日本語で要約してください。";
+    const res = await callGenerativeAIVision(key, prompt, base64, file.type);
+    
+    asset.analysis = res.text;
+    asset.status = 'done';
+  } catch (err) {
+    console.error(err);
+    asset.analysis = '解析エラー: ' + err.message;
+    asset.status = 'error';
+  } finally {
+    renderUniversalAssets();
+  }
+}
+
+async function processUrl(url) {
+  const id = 'asset-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  
+  const asset = {
+    id,
+    type: 'url',
+    value: url,
+    title: 'リンク解析中...',
+    content: '',
+    status: 'analyzing'
+  };
+
+  state.universalAssets.push(asset);
+  renderUniversalAssets();
+
+  try {
+    const info = await fetchUrlContent(url);
+    asset.title = info.title;
+    asset.content = `【ページタイトル】: ${info.title}\n【説明】: ${info.desc}\n【本文テキスト】: ${info.content}`;
+    asset.status = 'done';
+  } catch (err) {
+    console.error(err);
+    asset.title = url;
+    asset.content = 'リンク先（CORS制限のあるWebサイト）の本文自動解析に失敗しました。このURLはそのまま物語の参考情報としてAIに送信されます。不要な場合は右上の✕ボタンで削除してください。';
+    asset.status = 'error';
+  } finally {
+    renderUniversalAssets();
+  }
+}
+
+async function processTextFile(file) {
+  const id = 'asset-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  
+  const asset = {
+    id,
+    type: 'text',
+    name: file.name,
+    content: '読み込み中...',
+    status: 'analyzing'
+  };
+
+  state.universalAssets.push(asset);
+  renderUniversalAssets();
+
+  try {
+    const text = await readTextFile(file);
+    asset.content = text;
+    asset.status = 'done';
+  } catch (err) {
+    console.error(err);
+    asset.content = 'ファイルの読み込みに失敗しました';
+    asset.status = 'error';
+  } finally {
+    renderUniversalAssets();
+  }
+}
+
+async function processRawText(text, isDirectInput = false) {
+  const id = 'asset-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  const truncatedName = text.slice(0, 15) + (text.length > 15 ? '...' : '');
+  const prefix = isDirectInput ? '直接入力テキスト' : 'ペーストテキスト';
+  
+  const asset = {
+    id,
+    type: 'text',
+    name: `${prefix} (${truncatedName})`,
+    content: text,
+    status: 'done'
+  };
+
+  state.universalAssets.push(asset);
+  renderUniversalAssets();
+}
+
+function removeUniversalAsset(id) {
+  const idx = state.universalAssets.findIndex(a => a.id === id);
+  if (idx !== -1) {
+    const asset = state.universalAssets[idx];
+    if (asset.type === 'image' && asset.localUrl) {
+      URL.revokeObjectURL(asset.localUrl);
+    }
+    state.universalAssets.splice(idx, 1);
+  }
+  renderUniversalAssets();
+}
+
+function renderUniversalAssets() {
+  const listEl = $('ui-asset-list');
+  if (!listEl) return;
+
+  listEl.innerHTML = '';
+  
+  if (state.universalAssets.length === 0) {
+    listEl.classList.add('hidden');
+    return;
+  }
+  
+  listEl.classList.remove('hidden');
+
+  state.universalAssets.forEach(asset => {
+    const card = document.createElement('div');
+    card.className = `ui-asset-card ${asset.status}`;
+    card.dataset.id = asset.id;
+
+    let thumbHtml = '';
+    if (asset.type === 'image') {
+      thumbHtml = `<img src="${asset.localUrl}" class="ui-asset-thumb" alt="Preview">`;
+    } else if (asset.type === 'url') {
+      thumbHtml = `<div class="ui-asset-icon">🔗</div>`;
+    } else {
+      thumbHtml = `<div class="ui-asset-icon">📄</div>`;
+    }
+
+    let title = '';
+    let meta = '';
+    if (asset.type === 'image') {
+      title = asset.name;
+      meta = asset.status === 'analyzing' ? '🔍 画像解析中...' : '✅ 解析完了';
+      if (asset.status === 'error') meta = '❌ 解析エラー';
+    } else if (asset.type === 'url') {
+      title = asset.title || asset.value;
+      meta = asset.status === 'analyzing' ? '🔍 リンク解析中...' : '✅ リンク取得済';
+      if (asset.status === 'error') meta = '⚠️ 解析失敗 (URLのみ埋め込み)';
+    } else {
+      title = asset.name;
+      meta = `✅ テキスト読み込み済 (${asset.content.length}文字)`;
+    }
+
+    let detailHtml = '';
+    if (asset.type === 'image') {
+      if (asset.status === 'done') {
+        detailHtml = `<div class="ui-asset-detail">${esc(asset.analysis)}</div>`;
+      } else if (asset.status === 'error') {
+        detailHtml = `<div class="ui-asset-detail text-danger">${esc(asset.analysis)}</div>`;
+      }
+    } else if (asset.type === 'url') {
+      if (asset.status === 'done') {
+        // タイトルや主要な説明文を折りたたんで表示
+        detailHtml = `<div class="ui-asset-detail">${esc(asset.content.slice(0, 180))}${asset.content.length > 180 ? '...' : ''}</div>`;
+      } else if (asset.status === 'error') {
+        detailHtml = `<div class="ui-asset-detail text-warning">${esc(asset.content)}</div>`;
+      }
+    } else if (asset.type === 'text') {
+      if (asset.status === 'done') {
+        detailHtml = `<div class="ui-asset-detail">${esc(asset.content.slice(0, 180))}${asset.content.length > 180 ? '...' : ''}</div>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="ui-asset-main">
+        ${thumbHtml}
+        <div class="ui-asset-info">
+          <div class="ui-asset-title">${esc(title)}</div>
+          <div class="ui-asset-meta">${esc(meta)}</div>
+        </div>
+        <button class="ui-asset-remove" title="削除">✕</button>
+      </div>
+      ${detailHtml}
+    `;
+
+    card.querySelector('.ui-asset-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeUniversalAsset(asset.id);
+    });
+
+    listEl.appendChild(card);
+  });
+}
+
+function initUniversalIntake() {
+  const dropzone = $('ui-dropzone');
+  if (!dropzone) return;
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.id = 'ui-file-input';
+  fileInput.accept = 'image/*,.txt,.md';
+  fileInput.multiple = true;
+  fileInput.className = 'hidden';
+  dropzone.parentNode.appendChild(fileInput);
+
+  dropzone.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files) {
+      Array.from(e.target.files).forEach(file => handleUniversalItem(file));
+    }
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('ui-dragover');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('ui-dragover');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('ui-dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      Array.from(e.dataTransfer.files).forEach(file => handleUniversalItem(file));
+    } else {
+      const text = e.dataTransfer.getData('text');
+      if (text) {
+        handleUniversalItem(text);
+      }
+    }
+  });
+
+  dropzone.addEventListener('paste', (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    
+    if (clipboardData.files && clipboardData.files.length > 0) {
+      e.preventDefault();
+      Array.from(clipboardData.files).forEach(file => handleUniversalItem(file));
+      return;
+    }
+
+    const text = clipboardData.getData('text');
+    if (text) {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && activeEl !== dropzone) {
+        return;
+      }
+      
+      e.preventDefault();
+      handleUniversalItem(text);
+    }
+  });
+
+  const textInput = $('ui-text-input');
+  const btnAdd = $('ui-btn-add');
+  const triggerAdd = () => {
+    if (!textInput) return;
+    const value = textInput.value.trim();
+    if (value) {
+      handleUniversalItem(value, true);
+      textInput.value = '';
+    }
+  };
+  if (textInput) {
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        triggerAdd();
+      }
+    });
+  }
+  if (btnAdd) {
+    btnAdd.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerAdd();
+    });
+  }
+
+  const clearBtn = $('btn-clear-universal-intake');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      state.universalAssets.forEach(asset => {
+        if (asset.type === 'image' && asset.localUrl) {
+          URL.revokeObjectURL(asset.localUrl);
+        }
+      });
+      state.universalAssets = [];
+      renderUniversalAssets();
+    });
+  }
+}
+
+// ============================================================
 // 初期化実行
 // ============================================================
 function init() {
@@ -884,6 +1330,15 @@ function init() {
     a.click();
   });
 
+  if (state.apiKey) {
+    $('banner').classList.add('locked');
+    $('key-save').classList.add('hidden');
+    $('key-edit').classList.remove('hidden');
+  } else {
+    $('banner').classList.remove('locked');
+    $('key-save').classList.remove('hidden');
+    $('key-edit').classList.add('hidden');
+  }
   updateBanner();
   initMode();
 
@@ -960,6 +1415,9 @@ function init() {
     () => state.apiKey,
     () => $('output')?.textContent || ''
   );
+
+  // 万能インプット（ユニバーサル・インテーク）初期化
+  initUniversalIntake();
 }
 
 document.addEventListener('DOMContentLoaded', init);

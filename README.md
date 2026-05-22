@@ -363,6 +363,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.4 — 2026-05-22
+- **Universal Intake Bug Fixes & UX Improvements / 万能インプット（ユニバーサル・インテーク）の不具合修正とUX改善**: Fixed API key reset issue on reload by using `sessionStorage` to temporarily retain keys. Fixed text asset limitation to allow short direct inputs (>0 chars). Improved CORS scraping failures and missing key states for images with user-friendly warnings, while preventing UI error texts from polluting the prompt during generation. / リロード時にAPIキーが消失する不具合を `sessionStorage` による一時保持で解決。テキストアセット登録時の文字数制限を緩和し、短い手動入力も登録可能に改善。Webリンクの解析失敗（CORSエラー）や画像解析の失敗（APIキー未設定時）のUI表現を分かりやすく修正し、エラー状態のアセットが生成時のプロンプトを汚染（エラーUI文字がそのままAIに入力される問題）しないよう除外ロジックを追加しました。
+
 ### v3.2.3 — 2026-05-19
 - **NBP Scenario Parser Sync / NBPシナリオパーサー同期**: Updated the "4-koma scenario" output format to fully comply with the latest Nano Banana Pro (NBP) scenario parser specifications (v3.71-alpha). Expanded EMOTION tags from 6 to 17, adopted 8 Japanese Camera angle tags with strict non-duplication rules, and integrated 12 predefined Punchline types for robust cross-project synchronization. / 4コマシナリオ出力フォーマットをNano Banana Pro (NBP) の最新パーサー仕様（v3.71-alpha）に完全準拠するよう更新。EMOTIONタグを6種から17種へ拡大、Cameraアングルを重複禁止ルールの下で日本語8種に変更、さらに12種の定義済みPunchlineタイプを統合し、強固なクロスプロジェクト同期を実現しました。
 

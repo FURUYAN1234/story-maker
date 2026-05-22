@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.2.3</title>
+  <title>Story Maker v3.2.4</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.3</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.4</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -249,6 +249,32 @@
           <button class="custom-clear-btn hidden" id="narr-custom-clear">✕</button>
           <button class="custom-rnd-btn" id="narr-custom-rnd">🎲 生成</button>
         </div>
+      </section>
+
+      <!-- 📁 万能インプット（画像・URL・文書） -->
+      <section class="s-section" id="section-universal-intake">
+        <div class="s-label">
+          <span>📁 万能インプット</span>
+          <div class="s-label-actions">
+            <button class="btn-section-clear" id="btn-clear-universal-intake" title="クリア">🗑️</button>
+          </div>
+        </div>
+        <div class="ui-dropzone" id="ui-dropzone" tabindex="0">
+          <div class="ui-dropzone-icon">📥</div>
+          <div class="ui-dropzone-text">
+            <strong>画像・URL・テキストをドロップ</strong>
+            <span>または ここにコピペ (Ctrl+V)</span>
+          </div>
+          <div class="ui-dropzone-hint">PNG/JPG/WEBP画像、Webリンク、.txt/.mdファイル対応</div>
+          <div class="ui-spinner hidden" id="ui-spinner">
+            <span class="spinner"></span> 読み込み/解析中...
+          </div>
+        </div>
+        <div class="ui-input-row">
+          <input type="text" id="ui-text-input" placeholder="URLやテキストを直接入力してEnterで追加">
+          <button id="ui-btn-add" class="ui-btn-add" title="追加">＋</button>
+        </div>
+        <div class="ui-asset-list hidden" id="ui-asset-list"></div>
       </section>
 
       <!-- 📎 補足メモ -->
