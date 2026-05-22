@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v3.3.0
+// main.js — v3.3.1
 // ============================================================
 import './style.css';
 import {
@@ -1471,13 +1471,35 @@ function init() {
   $('btn-reset-all').addEventListener('click', resetAll);
   $('btn-generate').addEventListener('click', generate);
   $('btn-copy').addEventListener('click', () => {
-    navigator.clipboard.writeText($('output').textContent).then(() => {
+    let text = $('output').textContent;
+    if (state.mode === '4koma_scenario') {
+      // 4コマ連携モード時、AIがヘッダー項目を隅付き括弧【】や太字**で囲んだ場合の自動クレンジング
+      text = text.replace(/^【?(Topic|Logline|Location|Outfit|Punchline|Scenario):?\s*(.*?)】?$/gim, (match, key, content) => {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        return `${capitalizedKey}: ${content.trim()}`;
+      });
+      text = text.replace(/^\*\*?(Topic|Logline|Location|Outfit|Punchline|Scenario):\*\*?\s*(.*?)$/gim, (match, key, content) => {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        return `${capitalizedKey}: ${content.trim()}`;
+      });
+    }
+    navigator.clipboard.writeText(text).then(() => {
       $('btn-copy').textContent = '✅ コピー完了';
       setTimeout(() => $('btn-copy').textContent = '📋 コピー', 2000);
     });
   });
   $('btn-download').addEventListener('click', () => {
-    const t = $('output').textContent;
+    let t = $('output').textContent;
+    if (state.mode === '4koma_scenario') {
+      t = t.replace(/^【?(Topic|Logline|Location|Outfit|Punchline|Scenario):?\s*(.*?)】?$/gim, (match, key, content) => {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        return `${capitalizedKey}: ${content.trim()}`;
+      });
+      t = t.replace(/^\*\*?(Topic|Logline|Location|Outfit|Punchline|Scenario):\*\*?\s*(.*?)$/gim, (match, key, content) => {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        return `${capitalizedKey}: ${content.trim()}`;
+      });
+    }
     const blob = new Blob([t], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

@@ -411,6 +411,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.3.1 — 2026-05-22
+- **Copy & Download Auto-Sanitization for NBP Integration / コピー・ダウンロード時のヘッダー記号自動クレンジング**: 
+  - **Auto-Sanitization**: Implemented client-side auto-sanitization upon copy and download. This automatically detects and removes unneeded bracket characters (\`【】\`) or bold Markdown markers (\`**\`) from the generated headers (\`Topic\`, \`Logline\`, \`Location\`, \`Outfit\`, \`Punchline\`, \`Scenario\`), ensuring plain-text format alignment for Nano Banana Pro. / コピーおよびダウンロードの実行時に、生成されたテキストのヘッダー項目（\`Topic\`, \`Logline\`, \`Location\`, \`Outfit\`, \`Punchline\`, \`Scenario\`）に含まれる不要な隅付き括弧（\`【】\`）や太字（\`**\`）のMarkdown記号を正規表現で自動検出し、プレーンテキスト形式に正規化するクレンジング処理を実装しました。
+  - **Residue Prevention**: This client-side sanitation guarantees zero bracket or formatting residue in clipboard data, securing the scenario parsing pipeline for Nano Banana Pro. / これにより、AIが出力に括弧や装飾を含めてしまった場合でも、コピー時に記号が完全にクレンジングされ、Nano Banana Pro側でのパース不具合や記号残存バグを完全に予防できます。
+
 ### v3.3.0 — 2026-05-22
 - **Robust Style Analyzer & Direct Input Confirm & News Append / 頑健な作風解析エンジン（JSON自動修復）、テキスト確定追加、およびニューステーマ追記**: 
   - **Robust JSON Parsing**: Upgraded the Style Analyzer's JSON repair logic to a robust state-machine parser, successfully resolving parsing errors (`SyntaxError: Expected ',' or '}'`) by automatically escaping unescaped double quotes and handling control line-breaks inside AI-generated JSON values (such as in reproduction prompts). / 作風解析エンジンのJSON修復ロジックをステートマシンベースのパーサーに刷新。AIが生成したJSONの値に含まれるエスケープされていないダブルクォートや制御改行文字を安全に自動エスケープし、JSONパースエラー（`SyntaxError: Expected ',' or '}'`等）を堅牢に解消しました。
