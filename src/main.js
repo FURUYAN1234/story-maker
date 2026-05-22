@@ -19,7 +19,7 @@ import {
 import { callGenerativeAI, callGenerativeAIVision } from './api.js';
 import { buildPrompt, generateRandomTheme } from './prompt.js';
 import { initCharImport } from './charImport.js';
-import { initStyleAnalyzer } from './styleAnalyzer.js';
+import { initStyleAnalyzer, updateAnalyzeButtonState, updateReflectButtonState, updateStyleAnalyzerSectionState } from './styleAnalyzer.js';
 import { version as APP_VERSION } from '../package.json';
 
 const $ = id => document.getElementById(id);
@@ -202,6 +202,8 @@ function switchApi() {
   if (!state.apiKey) {
     $('apikey').focus();
   }
+  updateAnalyzeButtonState();
+  updateStyleAnalyzerSectionState();
 }
 
 function saveKey() {
@@ -229,6 +231,8 @@ function saveKey() {
   $('banner').classList.add('locked');
   $('key-save').classList.add('hidden');
   $('key-edit').classList.remove('hidden');
+  updateAnalyzeButtonState();
+  updateStyleAnalyzerSectionState();
 }
 function editKey() {
   $('banner').classList.remove('locked');
@@ -245,6 +249,8 @@ function editKey() {
     state.geminiKey = '';
   }
   updateBanner();
+  updateAnalyzeButtonState();
+  updateStyleAnalyzerSectionState();
 }
 
 // ============================================================
@@ -791,6 +797,8 @@ async function generate() {
   const settings = gatherSettings();
   const { prompt, tags } = buildPrompt(settings);
   
+  out.className = 'output-box empty';
+  updateReflectButtonState();
 
   out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
   if (alertEl) {
@@ -860,13 +868,13 @@ async function generate() {
     $('btn-copy').classList.remove('hidden');
     $('btn-download').classList.remove('hidden');
     
-    // β版: 作風解析エンジンを活性化（OUTPUT生成後に使用可能にする）
-    const saSection = $('sa-section');
-    if (saSection) saSection.classList.remove('sa-inactive');
+    // β版: 作風リライト実行ボタンを有効化（OUTPUT生成かつ作風解析済みの状態で使用可能にする）
+    updateReflectButtonState();
     
   } catch (err) {
     out.className = 'output-box empty';
     out.innerHTML = `<div class="error-msg">エラー: ${esc(err.message)}</div>`;
+    updateReflectButtonState();
   } finally {
     if (alertEl) alertEl.style.display = 'none';
   }
@@ -969,6 +977,7 @@ function resetAll() {
   $('char-counter').textContent = '0 字';
   $('btn-copy').classList.add('hidden');
   $('btn-download').classList.add('hidden');
+  updateReflectButtonState();
   
   $('panel-scroll').scrollTo({ top: 0, behavior: 'smooth' });
 }

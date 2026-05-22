@@ -253,8 +253,8 @@ async function handleFiles(fileList) {
 
   if (droppedTexts.length > 0) {
     $('sa-dropzone').classList.add('sa-has-files');
-    $('btn-sa-analyze').disabled = false;
   }
+  updateAnalyzeButtonState();
 }
 
 function readFileAsText(file) {
@@ -296,9 +296,9 @@ function updateFileList() {
       updateFileList();
       if (droppedTexts.length === 0) {
         $('sa-dropzone').classList.remove('sa-has-files');
-        $('btn-sa-analyze').disabled = true;
         $('sa-file-count').classList.add('hidden');
       }
+      updateAnalyzeButtonState();
     });
   });
 }
@@ -363,6 +363,7 @@ async function runAnalysis() {
 
     // リライトボタンを表示（解析完了後に連続で使える）
     reflectWrap.classList.remove('hidden');
+    updateReflectButtonState();
 
   } catch (err) {
     resultEl.textContent = `解析エラー: ${err.message}`;
@@ -502,7 +503,8 @@ async function runReflection() {
 
   // OUTPUTエリアのテキストを取得
   const originalText = getLastOutput();
-  if (!originalText || originalText.length < 10) {
+  const storyOutputEl = $('output');
+  if (!originalText || originalText.length < 10 || (storyOutputEl && storyOutputEl.classList.contains('empty'))) {
     alert('まず上のストーリー生成でテキストを生成してから、リライトを実行してください');
     return;
   }
@@ -602,14 +604,44 @@ function clearAll() {
   updateFileList();
 
   $('sa-dropzone').classList.remove('sa-has-files');
-  $('btn-sa-analyze').disabled = true;
   $('sa-file-count')?.classList.add('hidden');
+  updateAnalyzeButtonState();
+  updateReflectButtonState();
 
   $('sa-result').textContent = '';
   $('sa-result-wrap')?.classList.add('hidden');
   $('sa-reflect-wrap')?.classList.add('hidden');
   $('sa-reflect-result-wrap')?.classList.add('hidden');
   $('sa-reflect-output').textContent = '';
+}
+
+export function updateStyleAnalyzerSectionState() {
+  const saSection = $('sa-section');
+  if (!saSection) return;
+  const apiKey = (typeof getApiKey === 'function') ? getApiKey() : '';
+  if (apiKey) {
+    saSection.classList.remove('sa-inactive');
+  } else {
+    saSection.classList.add('sa-inactive');
+  }
+}
+
+export function updateAnalyzeButtonState() {
+  const btn = $('btn-sa-analyze');
+  if (!btn) return;
+  const apiKey = (typeof getApiKey === 'function') ? getApiKey() : '';
+  const hasFiles = droppedTexts.length > 0;
+  btn.disabled = !(apiKey && hasFiles);
+}
+
+export function updateReflectButtonState() {
+  const reflectBtn = $('btn-sa-reflect');
+  if (!reflectBtn) return;
+  const originalText = (typeof getLastOutput === 'function') ? getLastOutput() : '';
+  const outputEl = $('output');
+  const hasStory = originalText && originalText.length >= 10 && outputEl && !outputEl.classList.contains('empty');
+  const hasAnalysis = analysisResult !== null;
+  reflectBtn.disabled = !(hasStory && hasAnalysis);
 }
 
 // ============================================================
@@ -629,4 +661,7 @@ export function initStyleAnalyzer(apiKeyGetter, lastOutputGetter) {
   $('btn-sa-reflect-copy')?.addEventListener('click', copyReflection);
   $('btn-sa-reflect-dl')?.addEventListener('click', saveReflectionTxt);
   $('btn-sa-clear')?.addEventListener('click', clearAll);
+
+  // 初期化時のセクション活性化状態の更新
+  updateStyleAnalyzerSectionState();
 }

@@ -160,6 +160,30 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Progress Tracking / 進捗表示**: Each chapter completion message includes progress: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. / 各章完了時の確認メッセージに「全◯章中 / 残り◯章」を明記。長編執筆中の全体進捗が常に把握可能に。
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 
+### 8. Universal Intake Spec / 万能インプット（ユニバーサル・インテーク）詳細仕様
+A unified asset injection pipeline that accepts various content types (images, web links, documents, and manual text) and dynamic embeds context into prompt generation.
+画像、Webリンク、文書ファイル、直接入力などの多種多様なアセットを一つのインターフェースで受領し、ストーリー生成のコンテキストとして動的にプロンプトへ注入する機能です。
+
+- **Multi-Format Ingestion / 多彩なフォーマット受領**:
+  - **Images (画像)**: Automatically processes characters, illustrations, or product sheets. Uses Gemini Vision API to convert visual cues (outfit, facial expressions, actions, objects, specific brands) into a 100-250 characters textual summary. / キャラクター設定シートや製品イラストなどをドロップすると、Gemini Vision APIが自動でビジュアル要素（服装、表情、物体、ブランド、看板文字など）を抽出し、100〜250文字の解説要約としてテキスト化します。
+  - **Web Links (URL)**: Resolves CORS scraping limitations using public proxies (Codetabs & Allorigins fallback). Automatically strips boilerplate code (`<script>`, `<style>`, `nav`, `footer`, etc.) and digests the core metadata and text body up to 3,000 characters. / Webサイトのリンクを入力すると、CORSプロキシを経由して本文をスクレイピング。不要なスクリプトやナビゲーションを除去した上で、最大3000文字のコンテキストデータを抽出します。
+  - **Text Documents (文書ドロップ)**: Instantly processes local `.txt` or `.md` files via FileReader API (UTF-8 encoding). / ローカルのテキストファイル（.txt / .md）をドロップするだけで、即座にアセットとして登録します。
+- **Asset Control / アセット制御システム**:
+  - Each item supports independent locking (locking freezes the asset status during random generation) and individual deletion. / 投入したアセットは個別にロック（全ランダム生成でのクリアから保護）および個別削除が可能です。
+  - OBSTACLE-FREE GENERATION: Built-in validation filters out error state assets (e.g., scraping failure messages) from prompt construction to prevent prompt pollution. / 解析エラーになったアセット（CORS拒否等）がプロンプトへ混入するのを防ぐ物理除外ガードを搭載。
+
+### 9. Style Analyzer Engine / 作風解析エンジン詳細仕様
+Deep computational stylistics analysis tool that evaluates user-provided texts and clones the target writing style onto the generated story plot.
+自筆の文章や好きな作家のテキストを解析し、その文体や修辞特徴を深層分析して、生成したストーリーのプロット（構成）を維持したまま文章をその作風へと「リライト」するエンジンです。
+
+- **50+ Parameter Analysis / 50以上のパラメータ解析**:
+  - Dropping a text sample triggers deep stylistic parsing covering Rhetoric (metaphors, repetition), Syntax (average sentence length, ending verbs), Vocabulary (parts of speech, density of abstract words), Dialogue balance, and Emotional arc. / テキストをドロップして解析を実行すると、AIが修辞技法、構文（文長、体言止め比率）、語彙の偏り、会話比率、感情曲線など50以上の文体特徴を深層分析します。
+- **Dual Format Output / 2形式のレポート出力**:
+  - **Human-Readable (文章表示)**: Clear, itemized analysis of the writer's style for study or presentation. / 解析結果を論理的に解説した人間用文章レポート。
+  - **Structured JSON (構造化JSON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) to command writing cloning. / 外部ツール（ChatGPT / Claude等）にそのままコピー＆ペーストして作風クローンを指示できる、高度に定義された構造化JSON出力。
+- **Plot-Preserving Rewrite / 構成維持型リライト機能**:
+  - Implements the "Rewrite with Style" feature. It takes the original generated story, maps its core plot points, and uses the saved style parameters to rewrite the draft. Changes style, voice, and sensory details while retaining 100% of the original story progression (Ki-sho-ten-ketsu structure). / 解析した文体を、上の出力エリアに生成されたストーリーに適用して「リライト」を実行。ストーリー展開（起承転結）を完全に保ったまま、文章表現・描写・語り口のみを解析した作風へとコンバートします。
+
 ---
 
 ## 💻 Tech Stack / 技術スタック
@@ -362,6 +386,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v3.2.7 — 2026-05-22
+- **Style Rewrite Activation Guard & README Expansion / 作風リライト実行ボタンのガード追加と新機能ドキュメント拡充**: Added validation to the Style Analyzer "Rewrite with Style" action. The button is now properly disabled until a story has actually been generated in the OUTPUT panel (empty states are detected via CSS `.empty` classes) and a style has been successfully analyzed. Also expanded README.md with detailed operational specifications and usage benefits for the Universal Intake (β) and Style Analyzer Engine (β). / 作風解析エンジンの「この作風でリライト実行」ボタンの不具合を修正。上の出力エリアにストーリーが生成されていない初期状態（および「思考中...」状態）ではリライト実行できないようガードロジックを追加しました。また、README.mdに「万能インプット（ユニバーサル・インテーク）」と「作風解析エンジン」の動作仕様やメリットに関する詳細説明を追記しました。
 
 ### v3.2.6 — 2026-05-22
 - **Item Locking, Reset Integration & Universal Input Processing Indicator / 項目ロック・リセット連携 & 万能インプット解析時AI稼働状況アニメーション**: Implemented individual lock buttons for each input field (genre, theme, era, worldview, target, ending, perspective) to allow users to freeze specific settings during random generation. Integrated lock states with the master reset button to clear all locks automatically. Fixed an issue where the global processing indicator (yellow progress bar) failed to animate during heavy AI tasks, such as universal input asset scraping and image analysis. Also resolved code syntax errors and removed obsolete NBP code references from comments. / 各入力項目（ジャンル、テーマ、時代、世界観、ターゲット、結末、語り口）に個別ロックボタンを実装し、ランダム生成時に特定の選択を固定できるように改善。全リセット時にはロック状態も同時に解除されることを明記。万能インプットの画像解析やスクレイピングなど、AIが重い処理を実行している際も上部の黄色い稼働状況アニメーションバーが正しく動作し、稼働中であることが視覚的に伝わるように改善。その他、マージ時の構文エラー解消、コメント内の他プロジェクト由来の固有名詞 `NBP` をクリーンアップ。

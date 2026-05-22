@@ -799,6 +799,12 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   border-radius: 0 var(--radius) var(--radius) 0;
   line-height: 1.6;
 }
+.sa-desc-hint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+  line-height: 1.4;
+}
 
 /* β版バナー: 警告カラーで目立たせる */
 .sa-beta-banner {
