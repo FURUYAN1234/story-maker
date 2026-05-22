@@ -244,6 +244,7 @@ export function initCharImport(state, renderChars, getApiKey) {
   // ドラッグ＆ドロップ
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
+    if (state.locked && state.locked.chars) return;
     dropzone.classList.add('ci-dragover');
   });
   dropzone.addEventListener('dragleave', () => {
@@ -252,13 +253,18 @@ export function initCharImport(state, renderChars, getApiKey) {
   dropzone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropzone.classList.remove('ci-dragover');
+    if (state.locked && state.locked.chars) return;
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     if (files.length > 0) processImages(files);
   });
 
   // クリックでファイル選択（複数対応）
-  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('click', () => {
+    if (state.locked && state.locked.chars) return;
+    fileInput.click();
+  });
   fileInput.addEventListener('change', (e) => {
+    if (state.locked && state.locked.chars) return;
     const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
     if (files.length > 0) {
       processImages(files);
@@ -270,6 +276,7 @@ export function initCharImport(state, renderChars, getApiKey) {
    * 複数画像を順次処理し、全キャラクターを統合してモーダル表示
    */
   async function processImages(files) {
+    if (state.locked && state.locked.chars) return;
     const apiKey = getApiKey();
     if (!apiKey) {
       alert('APIキーを先に保存してください');

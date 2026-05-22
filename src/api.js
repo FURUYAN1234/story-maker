@@ -1,5 +1,5 @@
 // ============================================================
-// api.js — Gemini API呼び出し（フォールバック対応・Nano Banana Pro準拠）
+// api.js — Gemini API呼び出し（フォールバック対応）
 // ============================================================
 import { GEMINI_MODELS } from './data.js';
 
@@ -76,7 +76,7 @@ async function _callGemini(apiKey, model, prompt) {
 }
 
 /**
- * Gemini API呼び出し（Nano Banana Pro 準拠のフォールバック付き）
+ * Gemini API呼び出し（フォールバック付き）
  */
 /**
  * Gemini Vision API呼び出し（画像付き・単一モデル）
@@ -135,7 +135,7 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType) {
  * Gemini Vision API呼び出し（フォールバック付き）
  * 画像認識用：キャラクターシート解析等に使用
  * 
- * モデル優先順位は Nano Banana Pro v2.26 Alpha の IMAGE_MODEL_IDS に準拠
+ * モデル優先順位は画像認識に最適化された優先順位に準拠
  * gemini-3系はアニメ画像で PROHIBITED_CONTENT を返すため後方に配置
  */
 export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
@@ -143,7 +143,7 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
     return _callOpenAIVision(apiKey.trim(), prompt, imageBase64, mimeType, onFallback);
   }
 
-  // 画像付きリクエスト用モデルリスト（NBP v2.26 準拠・フィルター寛容モデル優先）
+  // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
   const IMAGE_MODEL_IDS = [
     'gemini-2.5-pro',                   // Primary: 画像認識実績あり・フィルター寛容
     'gemini-2.5-flash',                 // Backup 1: 高速・画像対応
@@ -156,7 +156,7 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
 
-      // 60秒タイムアウト（NBP準拠）
+      // 60秒タイムアウト
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error(`Timeout: ${modelId} (60s)`)), 60000)
       );

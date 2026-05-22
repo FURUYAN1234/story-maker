@@ -43,7 +43,54 @@ const state = {
   characters: [], charIdCounter: 0,
   lastTitle: '',
   universalAssets: [], // 万能インプットで投入されたアセットリスト
+  locked: {
+    mode: false,
+    theme: false,
+    chars: false,
+    genre: false,
+    worldview: false,
+    target: false,
+    era: false,
+    ending: false,
+    narr: false,
+    supplement: false,
+    universal: false
+  }
 };
+
+/**
+ * 各パラメータセクションのロック状態に応じてUIを更新する
+ * @param {string} section - セクション名
+ */
+function updateLockUI(section) {
+  const isLocked = state.locked[section];
+  
+  // ロックボタンのUI更新
+  const btn = document.querySelector(`.btn-lock[data-section="${section}"]`);
+  if (btn) {
+    btn.textContent = isLocked ? '🔒' : '🔓';
+    btn.classList.toggle('locked', isLocked);
+    btn.title = isLocked ? 'この項目のロックを解除する' : 'この項目をロックしてランダム変更から保護';
+  }
+  
+  // セクション要素のUI更新
+  let sectionEl = $(`section-${section}`);
+  if (!sectionEl && section === 'universal') {
+    sectionEl = $('section-universal-intake');
+  }
+  if (sectionEl) {
+    sectionEl.classList.toggle('is-locked', isLocked);
+    // ロックボタン以外の全ての入力要素、ボタン、テキストエリア、セレクトを無効化
+    sectionEl.querySelectorAll('input, textarea, select, button:not(.btn-lock)').forEach(el => {
+      el.disabled = isLocked;
+    });
+  }
+  
+  // 登場人物セクションがロックされたら、中身を再描画してdisabled属性を適用する
+  if (section === 'chars') {
+    renderChars();
+  }
+}
 
 // ============================================================
 // APIキー管理（Gemini / OpenAI）
@@ -57,10 +104,10 @@ function updateSwitchBtnUI() {
   btn.classList.remove('gemini-mode', 'openai-mode');
   if (state.apiProvider === 'gemini') {
     btn.classList.add('gemini-mode');
-    btn.title = 'ChatGPT APIに切替える（現在: Gemini）';
+    btn.title = '現在の設定内容は保持したまま、ChatGPT APIに切り替えます（現在: Gemini）';
   } else {
     btn.classList.add('openai-mode');
-    btn.title = 'Gemini APIに切替える（現在: ChatGPT）';
+    btn.title = '現在の設定内容は保持したまま、Gemini APIに切り替えます（現在: ChatGPT）';
   }
 }
 
@@ -232,6 +279,8 @@ function renderSubs(subId, subs, stateKey, customId, clearId) {
  * 階層型セクションの初期化
  */
 function initCatSection({ catId, subId, customId, clearId, headerRndId, customRndId, categories, originals, stateKey, stateCatKey }) {
+  const sectionKey = stateKey === 'themeSelected' ? 'theme' : (stateKey === 'narration' ? 'narr' : stateKey);
+
   const catEl = $(catId);
   if (catEl && categories) {
     catEl.innerHTML = Object.keys(categories).map(c =>
@@ -239,6 +288,7 @@ function initCatSection({ catId, subId, customId, clearId, headerRndId, customRn
     ).join('');
     catEl.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        if (state.locked[sectionKey]) return;
         catEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state[stateCatKey] = chip.dataset.cat;
@@ -259,6 +309,7 @@ function initCatSection({ catId, subId, customId, clearId, headerRndId, customRn
 
   // ヘッダー🎲
   $(headerRndId)?.addEventListener('click', () => {
+    if (state.locked[sectionKey]) return;
     if (!categories) return;
     const cats = Object.keys(categories);
     const cat = rnd(cats);
@@ -275,6 +326,7 @@ function initCatSection({ catId, subId, customId, clearId, headerRndId, customRn
 
   // カスタム🎲 生成
   $(customRndId)?.addEventListener('click', () => {
+    if (state.locked[sectionKey]) return;
     let text;
     if (stateKey === 'themeSelected') {
       text = generateRandomTheme();
@@ -292,12 +344,14 @@ function initCatSection({ catId, subId, customId, clearId, headerRndId, customRn
 
   // ✕クリア (カスタム欄のみ)
   $(clearId)?.addEventListener('click', () => {
+    if (state.locked[sectionKey]) return;
     $(customId).value = '';
     updateClear(clearId, '');
   });
 
   // 入力時にチップクリア
   $(customId)?.addEventListener('input', () => {
+    if (state.locked[sectionKey]) return;
     const v = $(customId).value.trim();
     updateClear(clearId, v);
     if (v) {
@@ -316,6 +370,7 @@ function initSectionClearButtons() {
   document.querySelectorAll('.btn-section-clear').forEach(btn => {
     btn.addEventListener('click', () => {
       const sectionId = btn.dataset.section;
+      if (sectionId && state.locked[sectionId]) return;
       if (sectionId === 'chars') { resetChars(); return; }
       if (sectionId === 'mode') {
         $('mode-custom').value = '';
@@ -367,6 +422,7 @@ function initMode() {
   ).join('');
   container.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      if (state.locked.mode) return;
       container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       state.mode = chip.dataset.v;
@@ -376,6 +432,7 @@ function initMode() {
     });
   });
   $('btn-rand-mode').addEventListener('click', () => {
+    if (state.locked.mode) return;
     const selected = rnd(MODES);
     state.mode = selected.value;
     container.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.v === selected.value));
@@ -384,6 +441,7 @@ function initMode() {
     updateCharCountLimit(state.mode);
   });
   $('mode-custom-rnd').addEventListener('click', () => {
+    if (state.locked.mode) return;
     const t = rnd(MODE_ORIGINALS);
     $('mode-custom').value = t;
     state.mode = null;
@@ -391,6 +449,7 @@ function initMode() {
     updateClear('mode-custom-clear', t);
   });
   $('mode-custom').addEventListener('input', () => {
+    if (state.locked.mode) return;
     const v = $('mode-custom').value.trim();
     updateClear('mode-custom-clear', v);
     if (v) {
@@ -400,10 +459,12 @@ function initMode() {
     }
   });
   $('charcount-check').addEventListener('change', () => {
+    if (state.locked.mode) return;
     $('charcount-wrap').classList.toggle('hidden', !$('charcount-check').checked);
   });
   
   $('char-count').addEventListener('input', (e) => {
+    if (state.locked.mode) return;
     const max = parseInt(e.target.max) || 6000;
     const val = parseInt(e.target.value);
     if (val > max) e.target.value = max;
@@ -439,72 +500,73 @@ function renderChars() {
   $('char-count-display').textContent = state.characters.length;
   const list = $('char-list');
   
+  const isCharLocked = state.locked && state.locked.chars;
   const rolesDatalist = `<datalist id="roles-list">${ROLES.map(r => `<option value="${r}"></option>`).join('')}</datalist>`;
   const personalitiesDatalist = `<datalist id="personalities-list">${PERSONALITIES.map(p => `<option value="${p}"></option>`).join('')}</datalist>`;
   const sexDatalist = `<datalist id="sex-list"><option value="男性"></option><option value="女性"></option><option value="無性"></option><option value="回答無し"></option></datalist>`;
-
+ 
   list.innerHTML = state.characters.map((c, i) => `
     <div class="char-card shadow-sm">
       <div class="char-card-header">
         <span class="char-card-num">キャラ ${i + 1}</span>
         <div class="btn-group">
-          <button class="char-field-btn btn-char-rnd-all" data-idx="${i}" title="この人物の全項目をランダムに埋める（個別の微調整も可能）">🎲 全ランダム</button>
-          <button class="btn-char-del" data-idx="${i}" title="この人物を削除">🗑️</button>
+          <button class="char-field-btn btn-char-rnd-all" data-idx="${i}" title="この人物の全項目をランダムに埋める（個別の微調整も可能）"${isCharLocked ? ' disabled' : ''}>🎲 全ランダム</button>
+          <button class="btn-char-del" data-idx="${i}" title="この人物を削除"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
-
+ 
       <label class="char-field-label">名前（空欄ならストーリー生成時にAI命名 / 🎲 今すぐ生成）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <input type="text" class="char-name-input" value="${esc(c.name)}" data-idx="${i}" placeholder="例：山田太郎（空欄でAIお任せ）">
+          <input type="text" class="char-name-input" value="${esc(c.name)}" data-idx="${i}" placeholder="例：山田太郎（空欄でAIお任せ）"${isCharLocked ? ' disabled' : ''}>
         </div>
         <div class="btn-group">
-          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="name" title="今すぐ名前の案を出す">🎲</button>
-          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="name" title="消去">🗑️</button>
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="name" title="今すぐ名前の案を出す"${isCharLocked ? ' disabled' : ''}>🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="name" title="消去"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
-
+ 
       <label class="char-field-label">性別（空欄でAIお任せ / 🎲 今すぐ生成 / 手入力・選択可）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <input type="text" class="char-sel" list="sex-list" data-idx="${i}" data-key="sex" value="${esc(c.sex)}" placeholder="例：男性、女性、無性（空欄でAIお任せ）">
+          <input type="text" class="char-sel" list="sex-list" data-idx="${i}" data-key="sex" value="${esc(c.sex)}" placeholder="例：男性、女性、無性（空欄でAIお任せ）"${isCharLocked ? ' disabled' : ''}>
         </div>
         <div class="btn-group">
-          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="sex" title="今すぐ性別の案を出す">🎲</button>
-          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="sex" title="消去">🗑️</button>
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="sex" title="今すぐ性別の案を出す"${isCharLocked ? ' disabled' : ''}>🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="sex" title="消去"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
-
+ 
       <label class="char-field-label">役割（空欄でAIお任せ / 🎲 今すぐ生成 / 手入力・選択可）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <input type="text" class="char-sel" list="roles-list" data-idx="${i}" data-key="role" value="${esc(c.role)}" placeholder="例：主人公、ライバル（空欄でAIお任せ）">
+          <input type="text" class="char-sel" list="roles-list" data-idx="${i}" data-key="role" value="${esc(c.role)}" placeholder="例：主人公、ライバル（空欄でAIお任せ）"${isCharLocked ? ' disabled' : ''}>
         </div>
         <div class="btn-group">
-          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="role" title="今すぐ役割の案を出す">🎲</button>
-          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="role" title="消去">🗑️</button>
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="role" title="今すぐ役割の案を出す"${isCharLocked ? ' disabled' : ''}>🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="role" title="消去"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
-
+ 
       <label class="char-field-label">性格（空欄でAIお任せ / 🎲 今すぐ生成 / 手入力・選択可）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <input type="text" class="char-sel" list="personalities-list" data-idx="${i}" data-key="personality" value="${esc(c.personality)}" placeholder="例：熱血、クール（空欄でAIお任せ）">
+          <input type="text" class="char-sel" list="personalities-list" data-idx="${i}" data-key="personality" value="${esc(c.personality)}" placeholder="例：熱血、クール（空欄でAIお任せ）"${isCharLocked ? ' disabled' : ''}>
         </div>
         <div class="btn-group">
-          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="personality" title="今すぐ性格の案を出す">🎲</button>
-          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="personality" title="消去">🗑️</button>
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="personality" title="今すぐ性格の案を出す"${isCharLocked ? ' disabled' : ''}>🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="personality" title="消去"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
-
+ 
       <label class="char-field-label">詳細メモ（空欄ならAIが文脈に合わせ補完 / 🎲 今すぐ案を生成）</label>
       <div class="char-field-row">
         <div class="input-wrap">
-          <textarea class="char-memo" data-idx="${i}" placeholder="例：短髪, 眼鏡, いつも黒い服を着ている">${esc(c.note)}</textarea>
+          <textarea class="char-memo" data-idx="${i}" placeholder="例：短髪, 眼鏡, いつも黒い服を着ている"${isCharLocked ? ' disabled' : ''}>${esc(c.note)}</textarea>
         </div>
         <div class="btn-group">
-          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="note" title="今すぐ詳細メモの案を出す">🎲</button>
-          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="note" title="消去">🗑️</button>
+          <button class="char-field-btn btn-field-rnd" data-idx="${i}" data-key="note" title="今すぐ詳細メモの案を出す"${isCharLocked ? ' disabled' : ''}>🎲</button>
+          <button class="char-field-btn delete btn-field-clear" data-idx="${i}" data-key="note" title="消去"${isCharLocked ? ' disabled' : ''}>🗑️</button>
         </div>
       </div>
     </div>
@@ -540,18 +602,22 @@ function renderChars() {
   list.querySelectorAll('.btn-char-del').forEach(el => el.addEventListener('click', e => deleteChar(parseInt(el.dataset.idx))));
 }
 function addChar() {
+  if (state.locked.chars) return;
   state.characters.push({ name: '', role: '', personality: '', sex: '', note: '' });
   renderChars();
 }
 function deleteChar(idx) {
+  if (state.locked.chars) return;
   state.characters.splice(idx, 1);
   renderChars();
 }
 function removeLastChar() {
+  if (state.locked.chars) return;
   state.characters.pop();
   renderChars();
 }
 function randomizeCharField(idx, key) {
+  if (state.locked.chars) return;
   const c = state.characters[idx];
   const gender = detectGenderFromSex(c.sex) || detectGenderFromName(c.name) || (Math.random() < 0.5 ? 'M' : 'F');
 
@@ -573,10 +639,12 @@ function randomizeCharField(idx, key) {
   renderChars();
 }
 function clearCharField(idx, key) {
+  if (state.locked.chars) return;
   state.characters[idx][key] = '';
   renderChars();
 }
 function randomizeChar(idx) {
+  if (state.locked.chars) return;
   const gender = Math.random() < 0.5 ? 'M' : 'F';
   const nameList = gender === 'M' ? GIVEN_NAMES_M : GIVEN_NAMES_F;
   const detailList = gender === 'M' ? DETAILS_M : DETAILS_F;
@@ -631,10 +699,12 @@ function syncGender(idx, triggerField) {
   }
 }
 function randomizeAllChars() {
+  if (state.locked.chars) return;
   if (state.characters.length === 0) addChar();
   state.characters.forEach((_, i) => randomizeChar(i));
 }
 function randomizeCharCountAndContent() {
+  if (state.locked.chars) return;
   const count = Math.floor(Math.random() * 4) + 1; // 1 to 4
   state.characters = [];
   for (let i = 0; i < count; i++) {
@@ -647,15 +717,23 @@ function randomizeCharCountAndContent() {
 // 今日のニュース取得ロジック
 // ============================================================
 async function fetchNewsAndSetTheme() {
+  if (state.locked.theme) return;
   const key = state.apiKey;
   if (!key) { alert('APIキーを設定してください（ニュースの取得にAIを使用します）'); return; }
   const btn = $('btn-today-news');
   const org = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>取得中...';
+
+  const alertEl = $('global-alert');
+  if (alertEl) {
+    alertEl.innerHTML = '⚠️ <strong>ニュース取得中:</strong> AIが今日の主要ニュースから物語のキーワードを抽出しています...';
+    alertEl.style.display = 'flex';
+  }
+
   try {
     const model = GEMINI_MODELS[0].value;
-    const prompt = '今日の日本の主要なニュース見出しから、物語のインスピレーションとなるキーワードを【異なる複数のカテゴリー（社会、国際、経済、エンタメ、スポーツ、科学、ライフスタイルなど）】から3〜5個抽出してください。特定のカテゴリー（特に「IT・生成AI」など）に偏りすぎないよう、バランスよく分散させて抽出すること。解説は一切不要。キーワードのみを「・」で始まる箇条書きで出力してください。';
+    const prompt = '今日の日本の主要なニュース見出しから、物語のインスピレーションとなるキーワードを【異なる複数のカテゴリー（社会、国際、経済、エンタメ、スポーツ、科学、ライフスタイルなど）】から3〜5個抽出してください。特定のカテゴリー（特に「IT・生成AI」など）に偏りすぎないよう、バランスよく分散させて抽出すること。解説は一切不要。キーワードのみを「・」で始まる箇書きで出力してください。';
     const { text } = await callGenerativeAI(key, model, prompt);
     const themeText = text.replace(/^[*-]\s*/gm, '').replace(/\n/g, ', ').trim();
     $('theme-custom').value = themeText;
@@ -668,6 +746,7 @@ async function fetchNewsAndSetTheme() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = org;
+    if (alertEl) alertEl.style.display = 'none';
   }
 }
 
@@ -801,18 +880,29 @@ async function generate() {
 // 全ランダム & リセット
 // ============================================================
 async function allRandom() {
-  const selectedMode = rnd(MODES);
-  state.mode = selectedMode.value;
-  initMode();
-  $('mode-custom').value = selectedMode.label;
-  updateClear('mode-custom-clear', selectedMode.label);
+  if (!state.locked.mode) {
+    const selectedMode = rnd(MODES);
+    state.mode = selectedMode.value;
+    initMode();
+    $('mode-custom').value = selectedMode.label;
+    updateClear('mode-custom-clear', selectedMode.label);
+  }
   
   const keys = ['theme', 'genre', 'worldview', 'target', 'era', 'ending', 'narr'];
-  keys.forEach(k => $(`btn-rand-${k}`)?.click());
+  keys.forEach(k => {
+    if (!state.locked[k]) {
+      $(`btn-rand-${k}`)?.click();
+    }
+  });
   
-  randomizeAllChars();
-  $('supplement').value = '';
-  updateClear('supplement-clear', '');
+  if (!state.locked.chars) {
+    randomizeAllChars();
+  }
+  
+  if (!state.locked.supplement) {
+    $('supplement').value = '';
+    updateClear('supplement-clear', '');
+  }
   
   $('panel-scroll').scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -821,6 +911,13 @@ async function allRandom() {
 
 function resetAll() {
   if (!confirm('全ての設定（APIキー以外）をリセットしますか？')) return;
+  
+  // 全てのロック状態を解除
+  const sections = ['mode', 'theme', 'chars', 'genre', 'worldview', 'target', 'era', 'ending', 'narr', 'supplement', 'universal'];
+  sections.forEach(s => {
+    state.locked[s] = false;
+    updateLockUI(s);
+  });
   
   // 1. Reset state
   state.mode = '4koma';
@@ -902,7 +999,7 @@ function readTextFile(file) {
 }
 
 async function fetchUrlContent(url) {
-  // まず api.codetabs.com (NBPで動いていたCORSプロキシ) を試す
+  // まず api.codetabs.com (CORSプロキシ) を試す
   try {
     const codetabsUrl = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`;
     const response = await fetch(codetabsUrl);
@@ -946,12 +1043,19 @@ function parseHtmlContent(html, url) {
 }
 
 async function handleUniversalItem(item, isDirectInput = false) {
+  if (state.locked.universal) return;
   const spinner = $('ui-spinner');
   if (spinner) spinner.classList.remove('hidden');
+
+  const alertEl = $('global-alert');
 
   try {
     if (item instanceof File) {
       if (item.type.startsWith('image/')) {
+        if (alertEl) {
+          alertEl.innerHTML = '⚠️ <strong>画像解析中:</strong> AIが画像を解析して説明テキストを抽出しています。結果が表示されるまでしばらくお待ちください。';
+          alertEl.style.display = 'flex';
+        }
         await processImageFile(item);
       } else if (item.type.startsWith('text/') || item.name.endsWith('.txt') || item.name.endsWith('.md')) {
         await processTextFile(item);
@@ -959,6 +1063,10 @@ async function handleUniversalItem(item, isDirectInput = false) {
     } else if (typeof item === 'string') {
       const trimmed = item.trim();
       if (/^https?:\/\/[^\s]+$/.test(trimmed)) {
+        if (alertEl) {
+          alertEl.innerHTML = '⚠️ <strong>リンク解析中:</strong> AIがWebページの本文やメタデータを解析しています。しばらくお待ちください。';
+          alertEl.style.display = 'flex';
+        }
         await processUrl(trimmed);
       } else if (trimmed.length > 0) {
         await processRawText(trimmed, isDirectInput);
@@ -969,6 +1077,7 @@ async function handleUniversalItem(item, isDirectInput = false) {
     alert('アセットの処理中にエラーが発生しました: ' + err.message);
   } finally {
     if (spinner) spinner.classList.add('hidden');
+    if (alertEl) alertEl.style.display = 'none';
     renderUniversalAssets();
   }
 }
@@ -984,7 +1093,8 @@ async function processImageFile(file) {
     mimeType: file.type,
     localUrl: localUrl,
     analysis: '解析中...',
-    status: 'analyzing'
+    status: 'analyzing',
+    locked: false
   };
 
   state.universalAssets.push(asset);
@@ -1023,7 +1133,8 @@ async function processUrl(url) {
     value: url,
     title: 'リンク解析中...',
     content: '',
-    status: 'analyzing'
+    status: 'analyzing',
+    locked: false
   };
 
   state.universalAssets.push(asset);
@@ -1052,7 +1163,8 @@ async function processTextFile(file) {
     type: 'text',
     name: file.name,
     content: '読み込み中...',
-    status: 'analyzing'
+    status: 'analyzing',
+    locked: false
   };
 
   state.universalAssets.push(asset);
@@ -1081,7 +1193,8 @@ async function processRawText(text, isDirectInput = false) {
     type: 'text',
     name: `${prefix} (${truncatedName})`,
     content: text,
-    status: 'done'
+    status: 'done',
+    locked: false
   };
 
   state.universalAssets.push(asset);
@@ -1089,15 +1202,26 @@ async function processRawText(text, isDirectInput = false) {
 }
 
 function removeUniversalAsset(id) {
+  if (state.locked.universal) return;
   const idx = state.universalAssets.findIndex(a => a.id === id);
   if (idx !== -1) {
     const asset = state.universalAssets[idx];
+    if (asset.locked) return;
     if (asset.type === 'image' && asset.localUrl) {
       URL.revokeObjectURL(asset.localUrl);
     }
     state.universalAssets.splice(idx, 1);
   }
   renderUniversalAssets();
+}
+
+function toggleUniversalAssetLock(id) {
+  if (state.locked.universal) return;
+  const asset = state.universalAssets.find(a => a.id === id);
+  if (asset) {
+    asset.locked = !asset.locked;
+    renderUniversalAssets();
+  }
 }
 
 function renderUniversalAssets() {
@@ -1115,7 +1239,7 @@ function renderUniversalAssets() {
 
   state.universalAssets.forEach(asset => {
     const card = document.createElement('div');
-    card.className = `ui-asset-card ${asset.status}`;
+    card.className = `ui-asset-card ${asset.status} ${asset.locked ? 'is-locked' : ''}`;
     card.dataset.id = asset.id;
 
     let thumbHtml = '';
@@ -1169,15 +1293,41 @@ function renderUniversalAssets() {
           <div class="ui-asset-title">${esc(title)}</div>
           <div class="ui-asset-meta">${esc(meta)}</div>
         </div>
-        <button class="ui-asset-remove" title="削除">✕</button>
+        <div class="ui-asset-actions">
+          <button class="ui-asset-lock" title="${asset.locked ? 'ロックを解除する' : 'ロックしてクリアから保護'}">${asset.locked ? '🔒' : '🔓'}</button>
+          <button class="ui-asset-remove" title="削除">✕</button>
+        </div>
       </div>
       ${detailHtml}
     `;
 
-    card.querySelector('.ui-asset-remove').addEventListener('click', (e) => {
-      e.stopPropagation();
-      removeUniversalAsset(asset.id);
-    });
+    const lockBtn = card.querySelector('.ui-asset-lock');
+    if (state.locked.universal) {
+      lockBtn.disabled = true;
+      lockBtn.style.opacity = 0.3;
+      lockBtn.style.cursor = 'not-allowed';
+      lockBtn.title = '万能インプット全体がロックされているため変更できません';
+    } else {
+      lockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleUniversalAssetLock(asset.id);
+      });
+    }
+
+    const removeBtn = card.querySelector('.ui-asset-remove');
+    if (asset.locked || state.locked.universal) {
+      removeBtn.disabled = true;
+      removeBtn.style.opacity = 0.3;
+      removeBtn.style.cursor = 'not-allowed';
+      removeBtn.title = state.locked.universal 
+        ? '万能インプット全体がロックされているため削除できません'
+        : 'ロックされているため削除できません';
+    } else {
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeUniversalAsset(asset.id);
+      });
+    }
 
     listEl.appendChild(card);
   });
@@ -1196,10 +1346,12 @@ function initUniversalIntake() {
   dropzone.parentNode.appendChild(fileInput);
 
   dropzone.addEventListener('click', () => {
+    if (state.locked.universal) return;
     fileInput.click();
   });
 
   fileInput.addEventListener('change', (e) => {
+    if (state.locked.universal) return;
     if (e.target.files) {
       Array.from(e.target.files).forEach(file => handleUniversalItem(file));
     }
@@ -1207,15 +1359,18 @@ function initUniversalIntake() {
 
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
+    if (state.locked.universal) return;
     dropzone.classList.add('ui-dragover');
   });
 
   dropzone.addEventListener('dragleave', () => {
+    if (state.locked.universal) return;
     dropzone.classList.remove('ui-dragover');
   });
 
   dropzone.addEventListener('drop', (e) => {
     e.preventDefault();
+    if (state.locked.universal) return;
     dropzone.classList.remove('ui-dragover');
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach(file => handleUniversalItem(file));
@@ -1228,6 +1383,7 @@ function initUniversalIntake() {
   });
 
   dropzone.addEventListener('paste', (e) => {
+    if (state.locked.universal) return;
     const clipboardData = e.clipboardData || window.clipboardData;
     
     if (clipboardData.files && clipboardData.files.length > 0) {
@@ -1251,6 +1407,7 @@ function initUniversalIntake() {
   const textInput = $('ui-text-input');
   const btnAdd = $('ui-btn-add');
   const triggerAdd = () => {
+    if (state.locked.universal) return;
     if (!textInput) return;
     const value = textInput.value.trim();
     if (value) {
@@ -1260,6 +1417,7 @@ function initUniversalIntake() {
   };
   if (textInput) {
     textInput.addEventListener('keydown', (e) => {
+      if (state.locked.universal) return;
       if (e.key === 'Enter') {
         e.preventDefault();
         triggerAdd();
@@ -1269,6 +1427,7 @@ function initUniversalIntake() {
   if (btnAdd) {
     btnAdd.addEventListener('click', (e) => {
       e.preventDefault();
+      if (state.locked.universal) return;
       triggerAdd();
     });
   }
@@ -1276,12 +1435,14 @@ function initUniversalIntake() {
   const clearBtn = $('btn-clear-universal-intake');
   if (clearBtn) {
     clearBtn.addEventListener('click', () => {
-      state.universalAssets.forEach(asset => {
+      if (state.locked.universal) return;
+      const toRemove = state.universalAssets.filter(asset => !asset.locked);
+      toRemove.forEach(asset => {
         if (asset.type === 'image' && asset.localUrl) {
           URL.revokeObjectURL(asset.localUrl);
         }
       });
-      state.universalAssets = [];
+      state.universalAssets = state.universalAssets.filter(asset => asset.locked);
       renderUniversalAssets();
     });
   }
@@ -1402,6 +1563,19 @@ function init() {
 
   // 万能インプット（ユニバーサル・インテーク）初期化
   initUniversalIntake();
+
+  // ロックボタンのイベントリスナー設定
+  document.querySelectorAll('.btn-lock').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const section = btn.dataset.section;
+      if (section && state.locked.hasOwnProperty(section)) {
+        state.locked[section] = !state.locked[section];
+        updateLockUI(section);
+      }
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);

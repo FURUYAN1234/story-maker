@@ -363,6 +363,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.6 — 2026-05-22
+- **Item Locking, Reset Integration & Universal Input Processing Indicator / 項目ロック・リセット連携 & 万能インプット解析時AI稼働状況アニメーション**: Implemented individual lock buttons for each input field (genre, theme, era, worldview, target, ending, perspective) to allow users to freeze specific settings during random generation. Integrated lock states with the master reset button to clear all locks automatically. Fixed an issue where the global processing indicator (yellow progress bar) failed to animate during heavy AI tasks, such as universal input asset scraping and image analysis. Also resolved code syntax errors and removed obsolete NBP code references from comments. / 各入力項目（ジャンル、テーマ、時代、世界観、ターゲット、結末、語り口）に個別ロックボタンを実装し、ランダム生成時に特定の選択を固定できるように改善。全リセット時にはロック状態も同時に解除されることを明記。万能インプットの画像解析やスクレイピングなど、AIが重い処理を実行している際も上部の黄色い稼働状況アニメーションバーが正しく動作し、稼働中であることが視覚的に伝わるように改善。その他、マージ時の構文エラー解消、コメント内の他プロジェクト由来の固有名詞 `NBP` をクリーンアップ。
+
 ### v3.2.5 — 2026-05-22
 - **API Key Lock Fix & Memory Transition / APIキー保存確定の不具合修正とメモリ保持への差し戻し**: Reverted API key sessionStorage retention so that page reload properly initializes (clears) the key. Fixed an issue where saving/locking the API key did not persist the locked state properly. / リロード時にAPIキーが確実に初期化（消去）されるよう、sessionStorageによるキーの一時保持処理を完全に廃止しました。また、APIキー入力時の保存（確定）ボタン押下後に、APIキーが正しくロックされず再入力を求められる不具合を修正しました。
 

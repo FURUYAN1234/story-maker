@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.2.5</title>
+  <title>Story Maker v3.2.6</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.6</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -19,7 +19,8 @@
       <input type="password" id="apikey" placeholder="Gemini または OpenAI のAPIキーを入力">
       <button id="key-save">保存</button>
       <button id="key-edit" class="hidden">編集</button>
-      <button id="btn-switch-api" class="btn-switch-api" title="APIエンジンを切り替え（キーは両方保持されます）">🔄 API切替</button>
+      <button id="btn-switch-api" class="btn-switch-api" title="設定内容は保持したまま、APIエンジン（Gemini / OpenAI）のみを切り替えます">🔄 API切替</button>
+      <button id="btn-reload" class="btn-reload" title="ページ全体を再読み込みします（入力した設定内容やAPIキーはすべてクリアされます）">🔄 リロード</button>
     </div>
     <div class="api-notice">
       🔑 APIキー取得:
@@ -28,6 +29,8 @@
       <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="api-link api-link-openai">OpenAI API</a>
       <span class="api-link-sep">—</span>
       <span class="api-notice-security">⚠️ キーはメモリ内のみ保持・ページを閉じると消去・外部送信一切なし</span>
+      <span class="api-link-sep">|</span>
+      <span class="api-notice-security">🔄「API切替」は入力内容やキーを保持したままAPIのみを切り替えます</span>
     </div>
   </div>
 
@@ -46,8 +49,7 @@
           <button class="btn-all-random" id="btn-all-random">
             <span class="icon">🎲</span> 全項目ランダム
           </button>
-          <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️</button>
-          <button class="btn-util" id="btn-reload" title="再読み込み">🔄</button>
+          <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️ 全リセット</button>
         </div>
 
         <!-- 🎬 Generate Button（メインアクション・最上部配置） -->
@@ -64,6 +66,7 @@
         <div class="s-label">
           <span>📄 出力モード</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="mode" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-mode">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="mode" title="クリア">🗑️</button>
           </div>
@@ -89,6 +92,7 @@
         <div class="s-label">
           <span>💡 テーマ / シード</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="theme" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-theme">🎲 ランダム</button>
             <button class="btn-rnd" id="btn-today-news" title="今日のニュースキーワードを取得">🌐 ニュース</button>
             <button class="btn-section-clear" data-section="theme" title="クリア">🗑️</button>
@@ -108,6 +112,7 @@
         <div class="s-label">
           <span>👥 登場人物</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="chars" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-chars-content" title="現在の人数を維持して、全キャラの名前・役割・性格・メモをランダム化">🎲 内容ランダム</button>
             <button class="btn-rnd" id="btn-rand-chars-all" title="人数(1~4名)もランダムに決定し、全キャラの内容もランダム化">🎲 人数＋内容ランダム</button>
             <button class="btn-section-clear" data-section="chars" title="クリア">🗑️</button>
@@ -148,6 +153,7 @@
         <div class="s-label">
           <span>🗺️ ジャンル</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="genre" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-genre">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="genre" title="クリア">🗑️</button>
           </div>
@@ -166,6 +172,7 @@
         <div class="s-label">
           <span>🌍 世界観・雰囲気</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="worldview" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-worldview">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="worldview" title="クリア">🗑️</button>
           </div>
@@ -184,6 +191,7 @@
         <div class="s-label">
           <span>🎯 ターゲット層</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="target" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-target">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="target" title="クリア">🗑️</button>
           </div>
@@ -202,6 +210,7 @@
         <div class="s-label">
           <span>🕰️ 時代設定</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="era" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-era">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="era" title="クリア">🗑️</button>
           </div>
@@ -220,6 +229,7 @@
         <div class="s-label">
           <span>🏁 オチの型</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="ending" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-ending">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="ending" title="クリア">🗑️</button>
           </div>
@@ -238,6 +248,7 @@
         <div class="s-label">
           <span>🎙️ 語り口</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="narr" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-narr">🎲 ランダム</button>
             <button class="btn-section-clear" data-section="narr" title="クリア">🗑️</button>
           </div>
@@ -256,6 +267,7 @@
         <div class="s-label">
           <span>📁 万能インプット</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="universal" title="この項目をロックして全リセットから保護">🔓</button>
             <button class="btn-section-clear" id="btn-clear-universal-intake" title="クリア">🗑️</button>
           </div>
         </div>
@@ -282,6 +294,7 @@
         <div class="s-label">
           <span>📎 補足メモ</span>
           <div class="s-label-actions">
+            <button class="btn-lock" data-section="supplement" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-section-clear" data-section="supplement" title="クリア">🗑️</button>
           </div>
         </div>

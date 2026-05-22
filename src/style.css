@@ -68,6 +68,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .btn-switch-api.openai-mode{border-color:rgba(16,163,127,.4);color:var(--openai)}
 .btn-switch-api.openai-mode:hover{border-color:var(--gemini);color:var(--gemini);box-shadow:0 4px 16px rgba(66,133,244,.2)}
 
+/* リロードボタン */
+.btn-reload{padding:7px 14px;background:none;border:2px solid var(--border2);border-radius:var(--radius-xs);font-size:12px;font-weight:800;cursor:pointer;font-family:var(--font-sans);transition:var(--transition);white-space:nowrap;color:var(--text2);position:relative;overflow:hidden;letter-spacing:.04em}
+.btn-reload:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 16px rgba(139,108,255,.2)}
+.btn-reload:active{transform:translateY(0) scale(.97)}
+
 /* 切替アニメーション */
 @keyframes switchFlash{0%{box-shadow:0 0 0 0 rgba(139,108,255,.4)}50%{box-shadow:0 0 20px 4px rgba(139,108,255,.3)}100%{box-shadow:0 0 0 0 rgba(139,108,255,0)}}
 .banner-switch-flash{animation:switchFlash .5s ease-out}
@@ -87,12 +92,65 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* Panel Actions */
 .panel-top-actions{display:flex;gap:8px}
-.btn-all-random{flex:1;padding:11px;background:none;border:2px dashed var(--border2);border-radius:var(--radius);font-size:12px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--font-sans);display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--transition)}
+.btn-all-random{flex:1.4;padding:11px 6px;background:none;border:2px dashed var(--border2);border-radius:var(--radius);font-size:11px;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--font-sans);display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--transition)}
 .btn-all-random:hover{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--accent-glow);transform:translateY(-1px)}
 .btn-util{padding:11px 14px;background:none;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text3);cursor:pointer;transition:var(--transition)}
 .btn-util:hover{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,.08)}
-.btn-util:last-child:hover{border-color:var(--gemini);color:var(--gemini);background:var(--gemini-glow)}
+.panel-top-actions .btn-util {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 11px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
 .divider{border:none;height:1px;background:var(--border);margin:2px 0}
+
+/* ロック状態のスタイル定義 */
+.s-section.is-locked {
+  border-left: 3px solid var(--accent);
+  background: rgba(139, 92, 246, 0.03);
+  padding-left: 8px;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  transition: var(--transition);
+}
+.s-section.is-locked .chip,
+.s-section.is-locked input,
+.s-section.is-locked textarea,
+.s-section.is-locked select,
+.s-section.is-locked .ci-dropzone,
+.s-section.is-locked .ui-dropzone,
+.s-section.is-locked .ui-input-row,
+.s-section.is-locked .ui-asset-list,
+.s-section.is-locked button:not(.btn-lock) {
+  pointer-events: none !important;
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+.btn-lock {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+}
+.btn-lock:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text2);
+}
+.btn-lock.locked {
+  color: var(--accent2) !important;
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
 
 /* 生成中ロック */
 .settings-panel.generating{pointer-events:none;opacity:.5;transition:opacity .3s}
@@ -1308,5 +1366,43 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   white-space: pre-wrap;
   width: 100%;
 }
+
+/* アセットアクション用コンテナ */
+.ui-asset-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* アセット個別ロックボタン */
+.ui-asset-lock {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text3);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.ui-asset-lock:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text2);
+}
+
+/* アセット個別ロック状態のカード装飾 */
+.ui-asset-card.is-locked {
+  border-left: 3px solid var(--accent);
+  background: rgba(139, 92, 246, 0.03);
+}
+.ui-asset-card.is-locked .ui-asset-lock {
+  color: var(--accent2);
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+
 
 

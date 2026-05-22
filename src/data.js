@@ -2,7 +2,7 @@
 // data.js — Story Maker v2.4.4
 // ============================================================
 
-// テキスト生成用モデルリスト（NBP v2.26 TEXT_MODEL_IDS 準拠）
+// テキスト生成用モデルリスト
 export const GEMINI_MODELS = [
   { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
   { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
