@@ -156,9 +156,9 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
 
-      // 60秒タイムアウト
+      // 180秒タイムアウト（大容量テキスト・画像解析対応）
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: ${modelId} (60s)`)), 60000)
+        setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
       );
 
       const fetchPromise = _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType);
@@ -447,8 +447,9 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
 
+      // 180秒タイムアウト（大容量テキスト・画像解析対応）
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: ${modelId} (60s)`)), 60000)
+        setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
       );
 
       const fetchPromise = _callGeminiMultimodal(apiKey, modelId, prompt, images);

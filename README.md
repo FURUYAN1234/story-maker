@@ -411,6 +411,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.3.2 — 2026-05-22
+- **Fix JSON Parse Errors & Extend API Timeout in Style Analyzer / 作風解析エンジンのJSONパースエラー修正とAPIタイムアウト時間延長**:
+  - **Lookahead JSON Repair**: Enhanced the JSON repair state-machine by implementing token lookahead for commas. This ensures that unescaped double quotes inside value strings (e.g. in reproduction prompts) followed by commas are correctly treated as string content rather than misidentified as JSON delimiters, preventing JSON parse failures. / カンマ直後のトークンの先読みロジックを実装することでJSON修復エンジンを高度化。AIが生成した値の中にあるエスケープされていないダブルクォーテーションの誤判定を防ぎ、パースエラー（解析エラー：AIの応答からJSONを抽出できませんでした等）を完全に解消しました。
+  - **Timeout Extension**: Extended the vision and multimodal API timeouts from 60 seconds to 180 seconds to ensure large texts (e.g. over 15k characters) and multiple images can be parsed without encountering network timeout errors. / 画像認識およびマルチモーダルAPIのタイムアウト時間を60秒から180秒へ大幅に延長。大容量テキスト（1.5万字超）や複数画像の同時解析時におけるネットワークタイムアウトエラーを防止しました。
+  - **Prompt Reinforcement**: Reinforced the system prompt to explicitly restrict the AI from outputting raw double quotes inside JSON values, suggesting brackets (『』 or 「」) instead. / AIがJSONの値の中に生の二重引用符を出力するのを防ぐため、プロンプトを改訂し、二重山括弧（『』）や角括弧（「」）を推奨する指示を強化しました。
+
 ### v3.3.1 — 2026-05-22
 - **Copy & Download Auto-Sanitization for NBP Integration / コピー・ダウンロード時のヘッダー記号自動クレンジング**: 
   - **Auto-Sanitization**: Implemented client-side auto-sanitization upon copy and download. This automatically detects and removes unneeded bracket characters (\`【】\`) or bold Markdown markers (\`**\`) from the generated headers (\`Topic\`, \`Logline\`, \`Location\`, \`Outfit\`, \`Punchline\`, \`Scenario\`), ensuring plain-text format alignment for Nano Banana Pro. / コピーおよびダウンロードの実行時に、生成されたテキストのヘッダー項目（\`Topic\`, \`Logline\`, \`Location\`, \`Outfit\`, \`Punchline\`, \`Scenario\`）に含まれる不要な隅付き括弧（\`【】\`）や太字（\`**\`）のMarkdown記号を正規表現で自動検出し、プレーンテキスト形式に正規化するクレンジング処理を実装しました。

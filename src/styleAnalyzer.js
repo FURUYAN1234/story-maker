@@ -100,6 +100,7 @@ const ANALYSIS_PROMPT = `あなたはプロの文芸批評家・計量文体学�
 - 各項目は「一言」ではなく「具体的根拠を含む2〜3文」で記述すること
 - unique_featuresは最低5項目、具体的な用例を添えること
 - reproduction_promptは他のAIにそのままコピペして使える完成度にすること
+- 値の文字列内で二重引用符を使用する場合は、生のダブルクォーテーション（"）ではなく、必ず二重山括弧（『』）や角括弧（「」）を使用すること
 
 ## 分析対象テキスト:
 `;
@@ -435,11 +436,35 @@ function parseJsonWithRepair(raw) {
 
         // 判断基準：
         // もしこの文字列がキー名である場合、その後に ':' が続くはず。
-        // もしこの文字列が値である場合、その後に ',' または '}' または ']' が続くはず、
-        // または、JSON全体の末尾付近であれば何も続かないか、閉じ括弧のみ。
+        // もしこの文字列が値である場合、その後に ',' または '}' または ']' が続くはず。
         let isRealEnd = false;
-        if (nextValidChar === ':' || nextValidChar === ',' || nextValidChar === '}' || nextValidChar === ']' || nextValidChar === '') {
+        if (nextValidChar === ':') {
           isRealEnd = true;
+        } else if (nextValidChar === '}' || nextValidChar === ']' || nextValidChar === '') {
+          isRealEnd = true;
+        } else if (nextValidChar === ',') {
+          // カンマの場合、さらにその次の有効な文字を先読みする
+          let afterCommaChar = '';
+          let afterCommaIdx = nextIdx + 1;
+          while (afterCommaIdx < fixed.length) {
+            const c = fixed[afterCommaIdx];
+            if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
+              afterCommaChar = c;
+              break;
+            }
+            afterCommaIdx++;
+          }
+          
+          // カンマの後に続くべき有効な文字：
+          // - 次のキー名または文字列の開始: '"'
+          // - オブジェクトや配列の入れ子の開始: '{', '['
+          // - 数値の開始: '-', '0'-'9'
+          // - boolean/null の開始: 't', 'f', 'n'
+          // - オブジェクトや配列の終了（末尾カンマの場合）: '}', ']'
+          const validJsonStartChars = ['"', '{', '[', '-', 't', 'f', 'n', '}', ']'];
+          if (validJsonStartChars.includes(afterCommaChar) || (afterCommaChar >= '0' && afterCommaChar <= '9')) {
+            isRealEnd = true;
+          }
         }
 
         if (isRealEnd) {
