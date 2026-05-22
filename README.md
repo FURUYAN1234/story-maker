@@ -363,6 +363,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.2.5 — 2026-05-22
+- **API Key Lock Fix & Memory Transition / APIキー保存確定の不具合修正とメモリ保持への差し戻し**: Reverted API key sessionStorage retention so that page reload properly initializes (clears) the key. Fixed an issue where saving/locking the API key did not persist the locked state properly. / リロード時にAPIキーが確実に初期化（消去）されるよう、sessionStorageによるキーの一時保持処理を完全に廃止しました。また、APIキー入力時の保存（確定）ボタン押下後に、APIキーが正しくロックされず再入力を求められる不具合を修正しました。
+
 ### v3.2.4 — 2026-05-22
 - **Universal Intake Bug Fixes & UX Improvements / 万能インプット（ユニバーサル・インテーク）の不具合修正とUX改善**: Fixed API key reset issue on reload by using `sessionStorage` to temporarily retain keys. Fixed text asset limitation to allow short direct inputs (>0 chars). Improved CORS scraping failures and missing key states for images with user-friendly warnings, while preventing UI error texts from polluting the prompt during generation. / リロード時にAPIキーが消失する不具合を `sessionStorage` による一時保持で解決。テキストアセット登録時の文字数制限を緩和し、短い手動入力も登録可能に改善。Webリンクの解析失敗（CORSエラー）や画像解析の失敗（APIキー未設定時）のUI表現を分かりやすく修正し、エラー状態のアセットが生成時のプロンプトを汚染（エラーUI文字がそのままAIに入力される問題）しないよう除外ロジックを追加しました。
 

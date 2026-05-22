@@ -28,10 +28,10 @@ const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 
 // ─── 状態 ───
 const state = {
-  apiKey: sessionStorage.getItem('api_key') || '',
-  apiProvider: sessionStorage.getItem('api_provider') || 'gemini', // 'gemini' | 'openai'
-  geminiKey: sessionStorage.getItem('gemini_key') || '',         // Geminiキーの保持
-  openaiKey: sessionStorage.getItem('openai_key') || '',         // OpenAIキーの保持
+  apiKey: '',
+  apiProvider: 'gemini', // 'gemini' | 'openai'
+  geminiKey: '',         // Geminiキーの保持
+  openaiKey: '',         // OpenAIキーの保持
   mode: '4koma',
   genre: null, genreCategory: null,
   era: null, eraCategory: null,
@@ -130,12 +130,6 @@ function switchApi() {
     state.apiKey = state.geminiKey; // 保存済みGeminiキーを復元
   }
   
-  // sessionStorage に同期
-  sessionStorage.setItem('api_key', state.apiKey);
-  sessionStorage.setItem('api_provider', state.apiProvider);
-  sessionStorage.setItem('gemini_key', state.geminiKey);
-  sessionStorage.setItem('openai_key', state.openaiKey);
-  
   // キーがあればロック状態、なければ編集状態
   const b = $('banner');
   if (state.apiKey) {
@@ -184,12 +178,6 @@ function saveKey() {
     state.geminiKey = v;
   }
   
-  // sessionStorage に同期
-  sessionStorage.setItem('api_key', state.apiKey);
-  sessionStorage.setItem('api_provider', state.apiProvider);
-  sessionStorage.setItem('gemini_key', state.geminiKey);
-  sessionStorage.setItem('openai_key', state.openaiKey);
-  
   updateBanner();
   $('banner').classList.add('locked');
   $('key-save').classList.add('hidden');
@@ -203,15 +191,11 @@ function editKey() {
   $('apikey').value = '';
   $('apikey').focus();
   
-  // 編集/クリア時にsessionStorageの該当キーもクリア
   state.apiKey = '';
-  sessionStorage.removeItem('api_key');
   if (state.apiProvider === 'openai') {
     state.openaiKey = '';
-    sessionStorage.removeItem('openai_key');
   } else {
     state.geminiKey = '';
-    sessionStorage.removeItem('gemini_key');
   }
   updateBanner();
 }
