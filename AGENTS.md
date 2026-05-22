@@ -104,3 +104,12 @@ Unless the user explicitly says to modify the current app itself, the following 
 ### 4. Knowledge Sync（記憶の共有化）
 - 迷ったら推測する前に `docs/` を読む。
 - 深刻なバグ修正、新たなプラットフォーム固有の仕様（Vite、HF Spaces、GH Pagesなど）を発見した場合、単にコードを直して終わりにせず、必ず `docs/troubleshooting.md` 等に事象と対策を書き残す。
+
+### 5. 仕様の勝手な拡大解釈・未指示機能の追加の厳禁
+- ユーザーの意図をAI側で勝手に解釈・推測して、指示されていない仕様や機能（特にセッション維持、ストレージ保存、不要なUI調整など）を追加することを厳禁とする。
+- バグ修正時は「指摘された不具合の解消」のみにフォーカスし、ユーザーからの明示的な指示がない限り、余分な機能を追加しない。
+
+### 6. リリース時のGitHub Draft管理の徹底
+- `npm run deploy` や GitHub リリース作成の際、必ず事前に `gh release list` 等で不要な下書き（Draft）リリースが残っていないかを確認する。
+- 不要な Draft リリースが存在する場合は、リリース発行前にすべて削除し、Releasesページの表示順や最新バージョンの表記がデタラメになるのを防ぐ。
+
