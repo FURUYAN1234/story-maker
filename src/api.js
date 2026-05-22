@@ -28,14 +28,18 @@ export const diagnoseConnection = async (apiKey) => {
 /**
  * Gemini API呼び出し（単一モデル）
  */
-async function _callGemini(apiKey, model, prompt) {
+async function _callGemini(apiKey, model, prompt, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const generationConfig = { maxOutputTokens: 8192, temperature: 1.0 };
+  if (options.responseMimeType) {
+    generationConfig.responseMimeType = options.responseMimeType;
+  }
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 8192, temperature: 1.0 },
+      generationConfig,
       // Google検索グラウンディング: AIが事実確認を必要と判断した場合に裏でGoogle検索を実行
       tools: [{ googleSearch: {} }],
       safetySettings: [
@@ -81,8 +85,12 @@ async function _callGemini(apiKey, model, prompt) {
 /**
  * Gemini Vision API呼び出し（画像付き・単一モデル）
  */
-async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType) {
+async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const generationConfig = { maxOutputTokens: 8192, temperature: 0.3 };
+  if (options.responseMimeType) {
+    generationConfig.responseMimeType = options.responseMimeType;
+  }
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -93,7 +101,7 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType) {
           { inlineData: { mimeType, data: imageBase64 } }
         ]
       }],
-      generationConfig: { maxOutputTokens: 8192, temperature: 0.3 },
+      generationConfig,
       safetySettings: [
         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -138,9 +146,9 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType) {
  * モデル優先順位は画像認識に最適化された優先順位に準拠
  * gemini-3系はアニメ画像で PROHIBITED_CONTENT を返すため後方に配置
  */
-export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
+export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
   if (apiKey.trim().startsWith("sk-")) {
-    return _callOpenAIVision(apiKey.trim(), prompt, imageBase64, mimeType, onFallback);
+    return _callOpenAIVision(apiKey.trim(), prompt, imageBase64, mimeType, onFallback, options);
   }
 
   // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
@@ -161,7 +169,7 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
         setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
       );
 
-      const fetchPromise = _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType);
+      const fetchPromise = _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType, options);
       const text = await Promise.race([fetchPromise, timeoutPromise]);
       return { text, usedModel: modelId };
     } catch (err) {
@@ -186,9 +194,9 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
   throw new Error(errorMsg);
 }
 
-export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback) {
+export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback, options = {}) {
   if (apiKey.trim().startsWith("sk-")) {
-    return _callOpenAI(apiKey.trim(), prompt, onFallback);
+    return _callOpenAI(apiKey.trim(), prompt, onFallback, options);
   }
 
   const allModels = [initialModel, ...GEMINI_MODELS.map(m => m.value).filter(m => m !== initialModel)];
@@ -196,7 +204,7 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback)
   for (const modelId of allModels) {
       try {
           if (modelId !== initialModel && onFallback) onFallback(modelId);
-          const text = await _callGemini(apiKey, modelId, prompt);
+          const text = await _callGemini(apiKey, modelId, prompt, options);
           return { text, usedModel: modelId };
       } catch (err) {
           console.warn(`Model ${modelId} failed:`, err.message);
@@ -233,7 +241,7 @@ const OPENAI_TEXT_MODELS = [
   "gpt-4o-mini",     // Backup
 ];
 
-async function _callOpenAI(apiKey, prompt, onFallback) {
+async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
   for (const modelId of OPENAI_TEXT_MODELS) {
     try {
       if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
@@ -248,6 +256,7 @@ async function _callOpenAI(apiKey, prompt, onFallback) {
           messages: [{ role: "user", content: prompt }],
           temperature: 1.0,
           max_tokens: 8192,
+          response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
 
@@ -275,7 +284,7 @@ const OPENAI_VISION_MODELS = [
   "gpt-4o-mini",     // Backup
 ];
 
-async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback) {
+async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
   const imageUrl = `data:${mimeType};base64,${imageBase64}`;
   
   for (const modelId of OPENAI_VISION_MODELS) {
@@ -300,6 +309,7 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
           ],
           temperature: 0.3,
           max_tokens: 8192,
+          response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
 
@@ -325,19 +335,24 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
 /**
  * Gemini マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
  */
-async function _callGeminiMultimodal(apiKey, model, prompt, images) {
+async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const parts = [{ text: prompt }];
   images.forEach(img => {
     parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
   });
 
+  const generationConfig = { maxOutputTokens: 8192, temperature: 0.4 };
+  if (options.responseMimeType) {
+    generationConfig.responseMimeType = options.responseMimeType;
+  }
+
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts }],
-      generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
+      generationConfig,
       safetySettings: [
         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -378,7 +393,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images) {
 /**
  * OpenAI マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
  */
-async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback) {
+async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options = {}) {
   const OPENAI_VISION_MODELS = ["gpt-4o", "gpt-4o-mini"];
   
   for (const modelId of OPENAI_VISION_MODELS) {
@@ -404,6 +419,7 @@ async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback) {
           messages: [{ role: "user", content }],
           temperature: 0.4,
           max_tokens: 8192,
+          response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
 
@@ -429,9 +445,9 @@ async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback) {
 /**
  * 複合マルチモーダル解析API呼び出し（複数画像＋テキスト）
  */
-export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallback) {
+export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallback, options = {}) {
   if (apiKey.trim().startsWith("sk-")) {
-    return _callOpenAIMultimodal(apiKey.trim(), prompt, images, onFallback);
+    return _callOpenAIMultimodal(apiKey.trim(), prompt, images, onFallback, options);
   }
 
   // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
@@ -452,7 +468,7 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
         setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
       );
 
-      const fetchPromise = _callGeminiMultimodal(apiKey, modelId, prompt, images);
+      const fetchPromise = _callGeminiMultimodal(apiKey, modelId, prompt, images, options);
       const text = await Promise.race([fetchPromise, timeoutPromise]);
       return { text, usedModel: modelId };
     } catch (err) {

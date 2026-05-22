@@ -411,6 +411,13 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.3.3 — 2026-05-22
+- **Update Style Analyzer Engine Title & Explanation Polish / 「超強引！作風解析エンジン」への名称修正と説明文言のブラッシュアップ**:
+  - **Title and UX Polish**: Renamed the Style Analyzer to "超強引！作風解析エンジン" (Super Forced! Style Analyzer Engine) across the UI, prompt guidelines, and footer to clearly convey the tool's ability to analyze any input. / 画像やテキスト、極端に短い文章からでも超強引に想像して作風を解析する仕様に合わせて、UI、プロンプト、フッターの表記を「超強引！作風解析エンジン — Super Forced! Style Analyzer Engine」に統一・ブラッシュアップしました。
+  - **Instruction Enrichment**: Enriched the drop zone explanations to explicitly clarify that AI will fill 100% of the analysis items using rich imagination even for files with no text (image-only) or very short inputs. / 「ストーリー生成前でも作風解析は可能」「どんな資料でも強引に全項目を補完」する旨の詳細な説明・ヒントをドロップゾーンやバナー等に追加しました。
+  - **API-Level JSON Response Enforcement & Short Input Parser Robustness**: Enforced JSON mode (`{ responseMimeType: 'application/json' }`) at the Gemini API level for Style Analyzer requests, and upgraded the JSON matcher to extract object patterns using recursive brace-matching to ensure short inputs (like single phrases) never crash the parser. / Gemini APIに対してレスポンスMIMEタイプに `application/json` を明示的に指定し、短文解析時（「あっちょんぶりけ」等）のパース処理において波括弧のネストを考慮した堅牢なJSON抽出処理を実装することで、パースエラーの発生を強固に予防しました。
+  - **Wait Message Refinement**: Adjusted the expected wait time warning message for Gemini multimodal requests to "1-3 minutes" to align with actual API response timings. / API通信中の待機警告メッセージの目安時間を、実際の稼働実態に合わせて「1分〜3分程度」へ調整しました。
+
 ### v3.3.2 — 2026-05-22
 - **Fix JSON Parse Errors & Extend API Timeout in Style Analyzer / 作風解析エンジンのJSONパースエラー修正とAPIタイムアウト時間延長**:
   - **Lookahead JSON Repair**: Enhanced the JSON repair state-machine by implementing token lookahead for commas. This ensures that unescaped double quotes inside value strings (e.g. in reproduction prompts) followed by commas are correctly treated as string content rather than misidentified as JSON delimiters, preventing JSON parse failures. / カンマ直後のトークンの先読みロジックを実装することでJSON修復エンジンを高度化。AIが生成した値の中にあるエスケープされていないダブルクォーテーションの誤判定を防ぎ、パースエラー（解析エラー：AIの応答からJSONを抽出できませんでした等）を完全に解消しました。

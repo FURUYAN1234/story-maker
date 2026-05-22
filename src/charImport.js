@@ -333,7 +333,9 @@ export function initCharImport(state, renderChars, getApiKey) {
           apiKey,
           CHAR_ANALYSIS_PROMPT,
           base64,
-          file.type
+          file.type,
+          undefined,
+          { responseMimeType: 'application/json' }
         );
 
         // JSONパース

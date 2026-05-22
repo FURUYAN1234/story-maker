@@ -1,5 +1,5 @@
 // ============================================================
-// styleAnalyzer.js — 作風解析エンジン (β版)
+// styleAnalyzer.js — 超強引！作風解析エンジン (β版)
 // テキストをドロップ→AIで作風パラメータ抽出→JSON/コピー→リライト
 // ============================================================
 import { callGenerativeAI, callGenerativeAIMultimodal } from './api.js';
@@ -101,6 +101,10 @@ const ANALYSIS_PROMPT = `あなたはプロの文芸批評家・計量文体学�
 - unique_featuresは最低5項目、具体的な用例を添えること
 - reproduction_promptは他のAIにそのままコピペして使える完成度にすること
 - 値の文字列内で二重引用符を使用する場合は、生のダブルクォーテーション（"）ではなく、必ず二重山括弧（『』）や角括弧（「」）を使用すること
+- **画像のみの入力、あるいは情報が少ない入力に対する指示**:
+  - 入力されたテキストが短い単語・一文のみである場合、または画像（イラスト）のみの入力である場合は、その言葉や絵の空気感から想起される背景、世界観、感情、言外のニュアンス、またはポップカルチャーや文化的背景を最大限に想像・補完してください。
+  - 特に画像のみの解析時におけるテキスト固有の項目（文体、語彙、セリフ、修辞、テンポ等）については、「もしこのイラストを描いた作者が文章を執筆するならば、どのような文体、語彙、テンポ、語り口にするか」を想像力をフルに働かせて具体的に推測・補完してください。
+  - 情報不足を理由にした「判定不可」「画像のみのため解析不能」「不明」といった出力や簡素すぎる記述は絶対に禁止します。エンターテインメントとしての面白さを重視し、すべての項目を具体的かつクリエイティブな想像力で詳細に埋めてください。
 
 ## 分析対象テキスト:
 `;
@@ -373,6 +377,48 @@ function updateImageList() {
   });
 }
 
+// テキストから最初の有効なJSONオブジェクトを、波括弧のネストを考慮して抽出する
+function extractFirstJsonObject(text) {
+  const startIdx = text.indexOf('{');
+  if (startIdx === -1) return null;
+
+  let braceCount = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = startIdx; i < text.length; i++) {
+    const char = text[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === '{') {
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0) {
+          return text.slice(startIdx, i + 1);
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 // ============================================================
 // JSON修復パーサー
 // AIが返すJSONにありがちな構文エラーを修復してパースする
@@ -547,14 +593,14 @@ async function runAnalysis() {
   const reflectResultWrap = $('sa-reflect-result-wrap');
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>AIが作風を解析中...';
-  resultEl.textContent = '解析中です...しばらくお待ちください（30秒〜1分）';
+  btn.innerHTML = '<span class="spinner"></span>AIが超強引に作風を解析中...';
+  resultEl.textContent = '超強引に解析中です...しばらくお待ちください（1分〜3分程度）';
   resultWrap.classList.remove('hidden');
   reflectWrap.classList.add('hidden');
   reflectResultWrap.classList.add('hidden');
 
   // API稼働中表示
-  showApiActivity('🔬 作風解析中...');
+  showApiActivity('🔬 超強引！作風解析中...');
 
   try {
     // テキストを結合（ドロップされたファイル + 直貼りテキスト）（最大100,000文字）
@@ -584,7 +630,7 @@ async function runAnalysis() {
     } else if (hasImages && !hasText) {
       fullPrompt = ANALYSIS_PROMPT.replace(
         'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下のテキスト群を精密に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。',
-        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下の添付画像（イラスト・挿絵等）を分析し、この作者のビジュアル面の「作風」をパラメータとして抽出してください。テキスト固有の項目（sentence_style等）は画像から推測できる範囲で記述し、不明な場合は「画像のみのため判定不可」と記載すること。\n\n## 画像分析指示:\n- 色彩傾向・構図・タッチ・雰囲気・ライティング等を詳細に分析すること\n- 画像のトーン（暖色系/寒色系/モノクロ等）を tone に反映すること'
+        'あなたはプロの文芸批評家・計量文体学の専門家です。\n以下の添付画像（イラスト・挿絵等）を詳細に分析し、この作者のビジュアル面およびそこから想像される文体を含めた「作風」をパラメータとして抽出してください。\n\n## 重要：テキスト固有の項目（sentence_style、vocabulary、dialogue、rhetoric、narrative_voice、structure、emotional_architecture等）の扱いについて:\n- イラストの色彩、構図、タッチ、ライティング、キャラクターの表情、空気感、世界観から、「もしこのイラストを描いた作者が小説やストーリーなどの文章を執筆するならば、どのような文体、語彙、テンポ、セリフ回し、語り口、感情設計にするか」を想像力を限界まで働かせてシミュレーションし、クリエイティブに補完してください。\n- 全ての項目について、「画像のみのため判定不可」「分析不能」「不明」「該当なし」といったエスケープ用の表記は絶対に禁止します。AIのクリエイティビティを発揮し、必ず具体的な想定値や詳細な解説テキストで全項目を完全に埋めてください。\n\n## 画像分析指示:\n- 色彩傾向・構図・タッチ・雰囲気・ライティング・描かれているオブジェクトやキャラクターの状況等を詳細に分析すること\n- 画像のトーン（暖色系/寒色系/モノクロ等）を tone に反映すること'
       );
     }
 
@@ -601,27 +647,33 @@ async function runAnalysis() {
       const result = await callGenerativeAIMultimodal(apiKey, fullPrompt, droppedImages, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      });
+      }, { responseMimeType: 'application/json' });
       text = result.text;
     } else {
       const result = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      });
+      }, { responseMimeType: 'application/json' });
       text = result.text;
     }
 
     // JSONブロック抽出
     let rawJson = '';
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      rawJson = jsonMatch[1];
+    const jsonObject = extractFirstJsonObject(text);
+    if (jsonObject) {
+      rawJson = jsonObject;
     } else {
-      const braceMatch = text.match(/\{[\s\S]*\}/);
-      if (braceMatch) {
-        rawJson = braceMatch[0];
+      // フォールバック: 従来の正規表現マッチを試す
+      const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        rawJson = jsonMatch[1];
       } else {
-        throw new Error('AIの応答からJSONを抽出できませんでした');
+        const braceMatch = text.match(/\{[\s\S]*\}/);
+        if (braceMatch) {
+          rawJson = braceMatch[0];
+        } else {
+          throw new Error('AIの応答からJSONを抽出できませんでした');
+        }
       }
     }
 
@@ -640,7 +692,7 @@ async function runAnalysis() {
     resultEl.classList.add('sa-error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🔬 作風解析を実行';
+    btn.innerHTML = '🔬 超強引！作風解析を実行';
     hideApiActivity();
   }
 }

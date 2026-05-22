@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v3.3.2
+// main.js — v3.3.3
 // ============================================================
 import './style.css';
 import {
@@ -804,7 +804,7 @@ async function generate() {
 
   out.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
   if (alertEl) {
-    alertEl.innerHTML = '⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数十秒〜1分程度かかる場合があります。結果が表示されるまでお待ちください。';
+    alertEl.innerHTML = '⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は1分〜3分程度かかる場合があります。結果が表示されるまでお待ちください。';
     alertEl.style.display = 'flex';
   }
   
