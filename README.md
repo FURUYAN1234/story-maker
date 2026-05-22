@@ -13,18 +13,22 @@
 
 ---
 
-## 💡 Concept: Breaking Away from Predictable AI Stories / コンセプト：AI特有の「予定調和」からの脱却
-The core insight: AI outputs converge toward "average" stories when inputs have low entropy. This app injects entropy through multiple independent axes, generating narratives that are statistically improbable to repeat.
-基本となる考え方：AIの出力は、入力のエントロピー（不確実性）が低いと「平均的」な物語に収束しがちです。本システムは、単純なプロンプトのラッパーツールとは異なり、決定論的なミドルウェアパイプライン（多軸ランダム化と反復防止プロンプトエンジン）を用いることで、既存の特定作品の模倣・盗用ではなく、高次元の意味的制御に基づきオリジナルの物語構造を自律的に生成します。
-
----
-
 ## 🚀 Core Features / 主要機能
 - **Dual API Engine Architecture / デュアルAPIエンジン対応**: Dynamically routes requests to Google Gemini or OpenAI (GPT-4o) based on your API key prefix (`sk-`). Enjoy Gemini's large context processing or OpenAI's high-nuance narrative generation effortlessly. / 入力されたAPIキーのプレフィックス（`sk-`）を自動判別し、Google GeminiとOpenAI（GPT-4o等）へ動的にリクエストを振り分けます。Geminiの巨大コンテキスト処理と、OpenAIの繊細な心理描写・プロット構築力をシームレスに使い分けることが可能です。
 - **Local RAG Integration / 完全ローカルRAG辞書の統合**: Implemented a standalone, zero-cost RAG system that injects specific world-building details (props, era-specific terminology, sensory elements) into the prompt based on the user's selected worldview, era, and theme. This forces the AI to ground its narrative in concrete details rather than abstract tropes, significantly improving world authenticity. / 外部サービス不要・完全無料のローカルRAG（検索拡張生成）システムを実装。ユーザーが選択した世界観・時代・テーマに基づき、専用辞書から具体的なディテール（小道具・通貨・歴史用語・匂いなど）をプロンプトに動的注入。AI特有の「抽象的でフワッとした描写」を防ぎ、物語の解像度と世界観の説得力を劇的に向上させます。
 - **Google Search Grounding / Google検索グラウンディング対応**: Enabled Gemini's native Search Grounding tool for text generation. When the AI determines that factual accuracy is necessary (e.g., historical events, scientific terms, real-world locations), it will automatically perform a Google search and incorporate the findings into the story. / Geminiエンジンのテキスト生成においてGoogle検索グラウンディングを有効化。時代考証や専門知識が必要なテーマが選ばれた際、AIが自律的にGoogle検索を実行して事実確認を行い、正確な知識をベースにした物語を執筆できるようになりました。
 - **Multiple Output Modes / 複数の出力モード**: Supports 14 distinct modes including 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), short stories (~3,000 chars), novellas (~4,000 chars), full-length novels (~100,000 chars via prompt generation), scenarios, essays, and poems. / 4コマ漫画ネタ（起承転結＋セリフ案）、短編・中編小説、プロンプト生成による長編小説（〜10万字）、エッセイ、詩など、14種の出力モードに対応。
 - **Character Sheet OCR Import / キャラクターシート自動認識**: Drag & drop character sheet images onto the drop zone to auto-extract character data via Gemini Vision API. Supports multiple images. / キャラクターシート画像をドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理に対応。
+- **Universal Intake (β) / 万能インプット (β版)**: Dropping images, URLs, text files (.txt/.md), or pasting direct text into the intake zone feeds multiple assets into prompt compilation. Uses Gemini Vision for images and web proxy scraping for URLs, blending diverse sources seamlessly. / 画像・URL・テキストファイル等をドラッグ＆ドロップまたはペーストするだけで、多様な情報リソースをストーリー生成時のコンテキストとしてプロンプトに動的注入します。
+- **Today's News Keywords / 今日のニュースキーワード取得**: Integrates Gemini's Search Grounding to fetch today's major Japanese news headlines across balanced categories and generate narrative keywords. Click the "🌐 ニュース" button to auto-fill the theme with fresh, AI-extracted news. / Geminiの検索グラウンディングを利用し、今日の主要ニュースからAIが物語のキーフレーズをバランスよく自動抽出。ワンクリックでカスタムテーマ欄を設定します。
+- **Individual Input Locking / 個別入力ロック機能**: Freeze specific setting fields (genre, theme, era, worldview, etc.) to protect them during random generation or master reset, enabling granular control over randomized creative paths. / 各入力項目（ジャンル、テーマ、時代、世界観など）の個別固定（ロック）が可能。「🎲全項目ランダム」生成時にもお気に入りの設定を保護できます。
+- **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
+- **Smart Gender Sync / スマート性別同期**: The character's Sex field and Name are bidirectionally linked. Changing the sex automatically generates a fitting name, and entering a name automatically infers the sex, ensuring consistency with minimal effort. / キャラクターの「性別」と「名前」が双方向に連動。性別を変えると適した名前が自動調整され、名前を手入力すると性別が自動推論されるため、一貫性のあるキャラ設定を支援します。
+- **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
+- **AI 4koma Scenario Link / AI 4koma シナリオ連携 (STEP2)**: Generates scenarios in Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / Nano Banana 2 and ChatGPT Images 2.0 Powered Super AI 4-koma System のSTEP2入力欄にそのまま貼り付け可能なフォーマットで出力。
+- **Style Analyzer Engine (β) / 作風解析エンジン (β版)**: Drop text files (.txt/.md) from any author and the AI performs deep computational stylistics analysis — extracting 50+ parameters covering rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, and more. Results are available in two formats: human-readable text (copy) and structured JSON for direct injection into other AI novel tools (ChatGPT, Claude, etc.). Includes a "Rewrite" function that applies the extracted style to your generated story while preserving the plot. / 自筆の文章のテキストファイルをドロップするだけで、AIが修辞技法・文体・語彙・描写・セリフ・感情設計等50以上のパラメータを深層分析。結果は人間用テキスト（コピー）と他のAI小説ツールに直接投入可能な構造化JSONの2形式で提供。解析した作風を生成済みストーリーに適用する「リライト」機能も搭載。
+
+---mini Vision API. Supports multiple images. / キャラクターシート画像をドラッグ＆ドロップするだけで、Gemini Vision APIが自動認識してキャラクター情報を抽出。複数枚同時処理に対応。
 - **One-Shot Full Random / 全ランダム一発生成**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1ボタンで全項目をランダム設定して即生成。
 - **Smart Gender Sync / スマート性別同期**: The character's Sex field and Name are bidirectionally linked. Changing the sex automatically generates a fitting name, and entering a name automatically infers the sex, ensuring consistency with minimal effort. / キャラクターの「性別」と「名前」が双方向に連動。性別を変えると適した名前が自動調整され、名前を手入力すると性別が自動推論されるため、一貫性のあるキャラ設定を支援します。
 - **Random Theme Seeding / ランダムテーマシード**: Combines base event + modifier + adjunct for unpredictable story seeds. / 基本イベント＋修飾語＋状況語を確率的に組み合わせ、予期せぬ物語の種を生成。
@@ -164,18 +168,25 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 A unified asset injection pipeline that accepts various content types (images, web links, documents, and manual text) and dynamic embeds context into prompt generation.
 画像、Webリンク、文書ファイル、直接入力などの多種多様なアセットを一つのインターフェースで受領し、ストーリー生成のコンテキストとして動的にプロンプトへ注入する機能です。
 
+- **Operational Value & Benefits / 導入メリット**:
+  - **Multi-Source Context Synthesis / 多元情報の統合**: Allows users to blend visual cues from character sheets, factual details from real-time web articles, and structural drafts from local text files simultaneously. The AI naturally synthesizes these distinct elements into a cohesive narrative. / 手元のキャラシート画像、インスピレーション元のWebページ、下書きのテキストといった全く異なる情報源を1つのストーリー生成へシームレスに調和させ、深みのあるストーリーを生み出します。
+  - **Fault-Tolerant Engine / 耐障害設計**: If a URL scrape fails due to CORS or an image analysis is blocked by missing API keys, the system automatically bypasses the faulty asset, ensuring prompt generation proceeds without polluting the prompt with UI error strings. / 解析エラーやアクセス制限（CORSエラーなど）が発生したアセットを自動検知してプロンプト構築から排除するため、生成処理が途中で停滞したり、エラーテキストがプロンプトに入り込んでAIの出力を汚染したりするのを防ぎます。
 - **Multi-Format Ingestion / 多彩なフォーマット受領**:
   - **Images (画像)**: Automatically processes characters, illustrations, or product sheets. Uses Gemini Vision API to convert visual cues (outfit, facial expressions, actions, objects, specific brands) into a 100-250 characters textual summary. / キャラクター設定シートや製品イラストなどをドロップすると、Gemini Vision APIが自動でビジュアル要素（服装、表情、物体、ブランド、看板文字など）を抽出し、100〜250文字の解説要約としてテキスト化します。
-  - **Web Links (URL)**: Resolves CORS scraping limitations using public proxies (Codetabs & Allorigins fallback). Automatically strips boilerplate code (`<script>`, `<style>`, `nav`, `footer`, etc.) and digests the core metadata and text body up to 3,000 characters. / Webサイトのリンクを入力すると、CORSプロキシを経由して本文をスクレイピング。不要なスクリプトやナビゲーションを除去した上で、最大3000文字のコンテキストデータを抽出します。
+  - **Web Links (URL)**: Resolves CORS scraping limitations using public proxies (Codetabs & Allorigins fallback). Automatically strips boilerplate code (`<script>`, `<style>`, `nav`, `footer`, etc.) and digests the core metadata and text body up to 3,000 characters. / Webサイト of URLを入力すると、CORSプロキシを経由して本文をスクレイピング。不要なスクリプトやナビゲーションを除去した上で、最大3000文字のコンテキストデータを抽出します。
   - **Text Documents (文書ドロップ)**: Instantly processes local `.txt` or `.md` files via FileReader API (UTF-8 encoding). / ローカルのテキストファイル（.txt / .md）をドロップするだけで、即座にアセットとして登録します。
 - **Asset Control / アセット制御システム**:
   - Each item supports independent locking (locking freezes the asset status during random generation) and individual deletion. / 投入したアセットは個別にロック（全ランダム生成でのクリアから保護）および個別削除が可能です。
-  - OBSTACLE-FREE GENERATION: Built-in validation filters out error state assets (e.g., scraping failure messages) from prompt construction to prevent prompt pollution. / 解析エラーになったアセット（CORS拒否等）がプロンプトへ混入するのを防ぐ物理除外ガードを搭載。
+  - OBSTACLE-FREE GENERATION: Built-in validation filters out error state assets (e.g., scraping failure messages) from prompt construction to prevent prompt pollution. / 解析エラーになったアセットがプロンプトへ混入するのを防ぐ物理除外ガードを搭載。
 
 ### 9. Style Analyzer Engine / 作風解析エンジン詳細仕様
 Deep computational stylistics analysis tool that evaluates user-provided texts and clones the target writing style onto the generated story plot.
 自筆の文章や好きな作家のテキストを解析し、その文体や修辞特徴を深層分析して、生成したストーリーのプロット（構成）を維持したまま文章をその作風へと「リライト」するエンジンです。
 
+- **Operational Value & Benefits / 導入メリット**:
+  - **Rhetorical Fingerprinting / 文体の客観的分析**: Deconstructs target text patterns into structured data, making it easier for writers to study other styles or ensure their own work remains linguistically consistent. / 自筆・他者の文章構造（修辞、語彙、文長など）を50以上の指標で視覚的・客観的に可視化し、自身の文体の癖を把握したり、他作家のスタイルを分析・学習したりするのを助けます。
+  - **Zero-Data-Loss Writing / プロット維持型変換**: The "Style Rewrite" engine converts prose styles without losing a single plot point (Ki-sho-ten-ketsu structure). This resolves a major pain point where AI rewrites typically alter the plot or omit character actions. / 「この作風でリライト実行」機能は、元の起承転結プロットを完全に固定した上で、描写表現とトーンのみを選択した作風に入れ替えます。AIにありがちな「リライトすると話の内容やキャラの行動まで勝手に変わってしまう」という問題を解決します。
+  - **Portability / 外部連携性**: Structured JSON reports can be exported and directly loaded into ChatGPT, Claude, or other LLMs to replicate the analyzed writing style on external platforms. / 解析結果を構造化JSONとして保存し、ChatGPTやClaude等の外部AIチャットツールに「この文体で執筆して」と直接命令として投入することが可能です。
 - **50+ Parameter Analysis / 50以上のパラメータ解析**:
   - Dropping a text sample triggers deep stylistic parsing covering Rhetoric (metaphors, repetition), Syntax (average sentence length, ending verbs), Vocabulary (parts of speech, density of abstract words), Dialogue balance, and Emotional arc. / テキストをドロップして解析を実行すると、AIが修辞技法、構文（文長、体言止め比率）、語彙の偏り、会話比率、感情曲線など50以上の文体特徴を深層分析します。
 - **Dual Format Output / 2形式のレポート出力**:
@@ -183,6 +194,26 @@ Deep computational stylistics analysis tool that evaluates user-provided texts a
   - **Structured JSON (構造化JSON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) to command writing cloning. / 外部ツール（ChatGPT / Claude等）にそのままコピー＆ペーストして作風クローンを指示できる、高度に定義された構造化JSON出力。
 - **Plot-Preserving Rewrite / 構成維持型リライト機能**:
   - Implements the "Rewrite with Style" feature. It takes the original generated story, maps its core plot points, and uses the saved style parameters to rewrite the draft. Changes style, voice, and sensory details while retaining 100% of the original story progression (Ki-sho-ten-ketsu structure). / 解析した文体を、上の出力エリアに生成されたストーリーに適用して「リライト」を実行。ストーリー展開（起承転結）を完全に保ったまま、文章表現・描写・語り口のみを解析した作風へとコンバートします。
+
+### 10. Today's News Keywords / 今日のニュースキーワード取得詳細仕様
+Leverages Google Gemini's Search Grounding to fetch the latest real-time Japanese news headlines and extract multi-category narrative keywords to feed the story generator.
+Google Geminiの検索グラウンディング（Search Grounding）ツールを利用して、リアルタイムの日本の主要ニュースから、創作の刺激となる多角的なキーワードを自動抽出し、カスタムテーマとしてセットする機能です。
+
+- **Operational Value & Benefits / 導入メリット**:
+  - **Real-Time Synergy / リアルタイム性の融合**: Automatically grounds fictional settings in active, real-world events. Writers can effortlessly craft topical stories that resonate with current social conversations. / 現実社会のホットな話題や時事ニュースを即座に創作プロットの切り口として取り込み、トレンドを反映した社会的共感性の高い物語を容易に生み出すことができます。
+  - **Curation Diversity & Balance / 偏りのないキュレーション**: The search agent is strictly instructed to pull keywords across social, international, business, entertainment, sports, and science categories. This breaks the LLM's natural tendency to overfocus on high-tech topics like AI or IT. / AIに対して社会、国際、経済、エンタメ、科学などの各ジャンルからバランスよくキーワードを集めるよう指示しており、AIが「IT・AI」などの一部のトピックに偏ったネタばかりを選ぶのを防ぎ、多様性に富んだ物語の種を供給します。
+- **Interactive Execution / インタラクティブな実行フロー**:
+  - Requires a valid API key. When the "🌐 ニュース" button is clicked, the app sends a semantic search request to the Gemini engine, processes the headlines, format them as comma-separated values, and fills the "Theme" field automatically. / 有効なAPIキーを設定した状態で「🌐 ニュース」ボタンをクリックすると、AIがWeb検索を介して最新ニュースを見出しとして収集・構造化し、テーマ入力欄へカンマ区切りで自動展開します。
+
+### 11. Individual Input Locking Spec / 個別入力ロック機能詳細仕様
+Granular interface freeze mechanism that allows writers to lock down specific fields, protecting them from random generation or reset operations.
+特定の入力フィールドを個別に固定（ロック）し、一括ランダム生成や全リセットといった操作による予期せぬ値の上書きから保護するためのインターフェース制御機能です。
+
+- **Operational Value & Benefits / 導入メリット**:
+  - **Granular Control in Randomization / 意図的なランダム性の制御**: Enables an iterative brainstorming workflow. Writers can lock down their established characters and worldview while letting the engine randomize themes, eras, and endings to discover unexpected scenarios. / 「登場人物や世界観だけは固定し、他のテーマやオチ、ジャンルだけをランダムに変更して色々なアイデアを出したい」といった、意図的な部分固定ランダム生成が可能になり、効率的なシナリオハンティングをサポートします。
+  - **Safe Reset / 安全な一括クリアガード**: Protects highly customized assets (such as visual data in the Universal Intake or complex character sheets) during a reset operation, eliminating the anxiety of accidental data loss. / 万能インプットにドロップした多数のアセットや、作り込んだキャラクターシートなど、再入力に時間のかかる重要なカスタム情報を保持したまま他のパラメータのみを一掃し、安全に次の試行に移ることができます。
+- **Toggle Lock Interface / トグルロックインターフェース**:
+  - Every setting section features a lock button (`🔓`/`🔒`). When toggled to locked (`🔒`), the field becomes read-only and ignores all global operations, including "One-Shot Full Random" (`🎲 全項目ランダム`), specific section randomizer, and "Reset All" (`🗑️ 全リセット`). / 各入力セクションに配置された「🔓/🔒」トグルボタンをクリックしてロック状態にすると、その欄への入力やランダム変更が完全に抑止され、「🎲 全項目ランダム」や「🗑️ 全リセット」時にも影響を受けずに設定値が維持されます。
 
 ---
 
@@ -465,6 +496,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 - **Character UI Overhaul**: Separated the "Sex" (性別) attribute from the Detailed Memo into its own dedicated input field alongside Name and Role. Added dropdown options for 男性, 女性, 無性, 回答無し, and custom text.
 - **Enhanced Gender Sync**: Updated the bidirectional gender synchronization logic to automatically update the Sex field based on Name inferences, and vice versa.
 - **AI Vision Parsing**: Updated the character sheet OCR extraction prompt to recognize the sex attribute separately.
+
+### v3.2.8 — 2026-05-22
+- **Specification Documentation & Cleanup**: Added specifications for "Today's News Keywords" and "Individual Input Locking" functions to `README.md`. Removed obsolete development scripts and local test files to secure the release. Synchronized 4koma scenario modes with NBP parser format. / `README.md`に「今日のニュースキーワード取得」および「個別入力ロック機能」の詳細仕様を追加。不要な開発スクリプトや一時ファイルをクリーンアップし、デプロイ安全性を確保。4コマシナリオのフォーマットとNBPパーサー仕様を完全同期。
 
 ### v2.9.1 — 2026-04-30
 - **Security Audit & Cleanup**: Performed pre-deployment security audit (confirmed no hardcoded credentials and zero `localStorage` API key leakage). Removed obsolete development artifacts (`diff.txt`, `gitlog.txt`, `pkg_log.txt`) from root. / デプロイ前セキュリティ監査を実施（ハードコードなし、localStorageへのAPIキー漏洩ゼロを確認）。ルートディレクトリから不要な開発時一時ファイル群を削除しクリーンアップ。
