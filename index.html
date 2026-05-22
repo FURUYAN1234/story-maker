@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.2.9</title>
-  <script type="module" crossorigin src="./assets/index-CeD4mcx-.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-U5WQb4Er.css">
+  <title>Story Maker v3.2.10</title>
+  <script type="module" crossorigin src="./assets/index-B7CVCd9b.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-fjHRoQcB.css">
 </head>
 <body>
 
   <!-- 🚀 Header / Control Bar (API Settings) -->
   <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.9</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.2.10</span> <span class="title-sub">— AI物語メーカー</span></h1>
   </header>
 
   <div id="banner" class="banner">
@@ -95,7 +95,6 @@
           <div class="s-label-actions">
             <button class="btn-lock" data-section="theme" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-theme">🎲 ランダム</button>
-            <button class="btn-rnd" id="btn-today-news" title="今日のニュースキーワードを取得">🌐 ニュース</button>
             <button class="btn-section-clear" data-section="theme" title="クリア">🗑️</button>
           </div>
         </div>
@@ -378,6 +377,7 @@
 
           <div class="sa-direct-input-wrap">
             <textarea id="sa-direct-text" class="sa-direct-textarea" placeholder="または、解析したい文章を直接ここに貼り付けることも可能です..."></textarea>
+            <button id="btn-sa-add-text" class="sa-btn-add-text" disabled>確定追加</button>
           </div>
         </div>
 
