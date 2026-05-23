@@ -237,8 +237,10 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 // ============================================================
 
 const OPENAI_TEXT_MODELS = [
-  "gpt-4o",          // Primary
-  "gpt-4o-mini",     // Backup
+  "gpt-4.1",       // Primary: 高品質・1Mコンテキスト
+  "gpt-4.1-mini",  // Backup 1: コスト効率・高速
+  "gpt-4.1-nano",  // Backup 2: 最軽量・最速
+  "gpt-4o",        // Fallback: 安定実績
 ];
 
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
@@ -280,8 +282,9 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
 }
 
 const OPENAI_VISION_MODELS = [
-  "gpt-4o",          // Primary
-  "gpt-4o-mini",     // Backup
+  "gpt-4.1",       // Primary: Vision対応・高品質
+  "gpt-4o",        // Backup 1: Vision安定実績
+  "gpt-4.1-mini",  // Backup 2: コスト効率
 ];
 
 async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
@@ -394,7 +397,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
  * OpenAI マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
  */
 async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options = {}) {
-  const OPENAI_VISION_MODELS = ["gpt-4o", "gpt-4o-mini"];
+  const OPENAI_VISION_MODELS = ["gpt-4.1", "gpt-4o", "gpt-4.1-mini"];
   
   for (const modelId of OPENAI_VISION_MODELS) {
     try {
