@@ -496,3 +496,209 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
   throw new Error(errorMsg);
 }
 
+/**
+ * OpenAI APIストリーミング呼び出し
+ */
+async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = {}) {
+  for (const modelId of OPENAI_TEXT_MODELS) {
+    try {
+      if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
+      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 1.0,
+          max_tokens: 8192,
+          stream: true,
+          response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
+        })
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(`OpenAI HTTP ${resp.status} - ${errData.error?.message || resp.statusText}`);
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          
+          let lines = buffer.split("\n");
+          buffer = lines.pop();
+          
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith("data: ")) continue;
+            
+            const dataStr = trimmed.slice(6);
+            if (dataStr === "[DONE]") break;
+            
+            try {
+              const json = JSON.parse(dataStr);
+              const content = json.choices?.[0]?.delta?.content || "";
+              if (content) {
+                onChunk({ text: content, isThought: false });
+              }
+            } catch (e) {
+              // パーシャルなJSONのパースエラーは無視
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
+      return { usedModel: modelId };
+    } catch (err) {
+      console.warn(`Model ${modelId} stream failed:`, err.message);
+      continue;
+    }
+  }
+  throw new Error("全モデル接続失敗: OpenAI API Keyが無効か、使用回数の上限に達しています。");
+}
+
+/**
+ * Gemini APIストリーミング呼び出し
+ */
+async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  const generationConfig = { maxOutputTokens: 8192, temperature: 1.0 };
+  
+  if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3"))) {
+    generationConfig.thinkingConfig = {
+      thinkingBudget: 2048
+    };
+  }
+  
+  if (options.responseMimeType) {
+    generationConfig.responseMimeType = options.responseMimeType;
+  }
+  
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig,
+      tools: [{ googleSearch: {} }],
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+      ]
+    }),
+  });
+
+  if (!resp.ok) {
+    const et = await resp.text();
+    let errMsg = `Gemini HTTP ${resp.status}`;
+    try {
+        const errJson = JSON.parse(et);
+        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+    } catch (e) {
+        errMsg += ` — ${et.slice(0, 300)}`;
+    }
+    throw new Error(errMsg);
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      
+      let lines = buffer.split("\n");
+      buffer = lines.pop();
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        
+        const dataStr = trimmed.slice(6);
+        try {
+          const json = JSON.parse(dataStr);
+          const parts = json.candidates?.[0]?.content?.parts;
+          if (parts) {
+            for (const part of parts) {
+              const text = part.text || part.thought || "";
+              const isThought = !!part.thought;
+              if (text) {
+                onChunk({ text, isThought });
+              }
+            }
+          }
+        } catch (e) {
+          // パーシャルなJSONのパースエラーは無視
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/**
+ * Gemini / OpenAI ストリーミング呼び出し（フォールバック付き）
+ */
+export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChunk, onFallback, options = {}) {
+  if (apiKey.trim().startsWith("sk-")) {
+    return _callOpenAIStream(apiKey.trim(), prompt, onChunk, onFallback, options);
+  }
+
+  const allModels = [initialModel, ...GEMINI_MODELS.map(m => m.value).filter(m => m !== initialModel)];
+
+  for (const modelId of allModels) {
+      try {
+          if (modelId !== initialModel && onFallback) onFallback(modelId);
+          await _callGeminiStream(apiKey, modelId, prompt, onChunk, options);
+          return { usedModel: modelId };
+      } catch (err) {
+          console.warn(`Model ${modelId} stream failed:`, err.message);
+          
+          if (err.message.includes("400") || err.message.toLowerCase().includes("bad request") || err.message.toLowerCase().includes("thinking_config")) {
+            try {
+              console.log(`Retrying model ${modelId} without thinkingConfig...`);
+              await _callGeminiStream(apiKey, modelId, prompt, onChunk, { ...options, disableThinkingConfig: true });
+              return { usedModel: modelId };
+            } catch (retryErr) {
+              console.warn(`Model ${modelId} stream retry failed:`, retryErr.message);
+            }
+          }
+          continue;
+      }
+  }
+
+  // --- ALL MODELS FAILED: RUN DIAGNOSIS ---
+  console.log("All models failed. Running diagnosis...");
+  const diagnosis = await diagnoseConnection(apiKey);
+  console.error("DIAGNOSIS RESULT:", diagnosis);
+
+  let errorMsg = `全モデル接続失敗: ${diagnosis}\n`;
+  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+      errorMsg = "【API制限】割り当てられた使用回数の上限に達しました。(429 Quota Exceeded)\nしばらく時間を置いてから再試行するか、課金プランを確認してください。";
+  } else if (diagnosis.includes("API Error: API key not valid") || diagnosis.includes("403")) {
+      errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
+  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+      errorMsg = "【コンテンツ制限】安全フィルターによりブロックされました。言い回しを変更してください。";
+  } else if (diagnosis.includes("404")) {
+      errorMsg = "【モデル未検出】使用可能なモデルが見つかりませんでした。APIキーが古いか、モデルが廃止されています。";
+  }
+
+  throw new Error(errorMsg);
+}

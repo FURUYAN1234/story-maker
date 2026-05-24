@@ -159,7 +159,12 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Progress Tracking / 進捗表示**: Each chapter completion message includes progress: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. / 各章完了時の確認メッセージに「全◯章中 / 残り◯章」を明記。長編執筆中の全体進捗が常に把握可能に。
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 
-### 8. Universal Intake Spec / 万能インプット（ユニバーサル・インテーク）詳細仕様
+
+---
+
+## 🛠️ System Feature Specifications / システム機能詳細仕様
+
+### 1. Universal Intake Spec / 万能インプット（ユニバーサル・インテーク）詳細仕様
 A unified asset injection pipeline that accepts various content types (images, web links, documents, and manual text) and dynamic embeds context into prompt generation.
 画像、Webリンク、文書ファイル、直接入力などの多種多様なアセットを一つのインターフェースで受領し、ストーリー生成のコンテキストとして動的にプロンプトへ注入する機能です。
 
@@ -174,14 +179,14 @@ A unified asset injection pipeline that accepts various content types (images, w
   - Each item supports independent locking (locking freezes the asset status during random generation) and individual deletion. / 投入したアセットは個別にロック（全ランダム生成でのクリアから保護）および個別削除が可能です。
   - OBSTACLE-FREE GENERATION: Built-in validation filters out error state assets (e.g., scraping failure messages) from prompt construction to prevent prompt pollution. / 解析エラーになったアセットがプロンプトへ混入するのを防ぐ物理除外ガードを搭載。
 
-### 9. Style Analyzer Engine / 作風解析エンジン詳細仕様
+### 2. Style Analyzer Engine / 超強引！作風解析エンジン詳細仕様
 Deep computational stylistics analysis tool that evaluates user-provided texts and clones the target writing style onto the generated story plot.
 自筆の文章や好きな作家のテキストを解析し、その文体や修辞特徴を深層分析して、生成したストーリーのプロット（構成）を維持したまま文章をその作風へと「リライト」するエンジンです。
 
 - **Operational Value & Benefits / 導入メリット**:
   - **Rhetorical Fingerprinting / 文体の客観的分析**: Deconstructs target text patterns into structured data, making it easier for writers to study other styles or ensure their own work remains linguistically consistent. / 自筆・他者の文章構造（修辞、語彙、文長など）を50以上の指標で視覚的・客観的に可視化し、自身の文体の癖を把握したり、他作家のスタイルを分析・学習したりするのを助けます。
   - **Zero-Data-Loss Writing / プロット維持型変換**: The "Style Rewrite" engine converts prose styles without losing a single plot point (Ki-sho-ten-ketsu structure). This resolves a major pain point where AI rewrites typically alter the plot or omit character actions. / 「この作風でリライト実行」機能は、元の起承転結プロットを完全に固定した上で、描写表現とトーンのみを選択した作風に入れ替えます。AIにありがちな「リライトすると話の内容やキャラの行動まで勝手に変わってしまう」という問題を解決します。
-  - **Portability / 外部連携性**: Structured JSON reports can be exported and directly loaded into ChatGPT, Claude, or other LLMs to replicate the analyzed writing style on external platforms. / 解析結果を構造化JSONとして保存し、ChatGPTやClaude等の外部AIチャットツールに「この文体で執筆して」と直接命令として投入することが可能です。
+  - **Portability / 外部連携性**: Structured JSON reports can be exported and directly loaded into ChatGPT, Claude, or other LLMs to replicate the analyzed writing style on external platforms. / 解析結果を構造化JSONとして保存し、ChatGPTやClaude等の外部AIチャットツールに「この文体で執筆して」と直接命令として投入することが可能です。また、生成した作風JSONは AI 4-koma System のSTEP1に直接ドラッグ＆ドロップして適用することも可能です。
 - **50+ Parameter Analysis / 50以上のパラメータ解析**:
   - Dropping a text sample triggers deep stylistic parsing covering Rhetoric (metaphors, repetition), Syntax (average sentence length, ending verbs), Vocabulary (parts of speech, density of abstract words), Dialogue balance, and Emotional arc. / テキストをドロップして解析を実行すると、AIが修辞技法、構文（文長、体言止め比率）、語彙の偏り、会話比率、感情曲線など50以上の文体特徴を深層分析します。
 - **Dual Format Output / 2形式のレポート出力**:
@@ -189,8 +194,10 @@ Deep computational stylistics analysis tool that evaluates user-provided texts a
   - **Structured JSON (構造化JSON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) or dragged and dropped into AI 4-koma System's STEP1. / 外部ツール（ChatGPT / Claude等）にそのままコピー＆ペーストして作風クローンを指示できるほか、AI 4-koma System のSTEP1に直接ドラッグ＆ドロップして適用可能な構造化JSON出力。
 - **Plot-Preserving Rewrite / 構成維持型リライト機能**:
   - Implements the "Rewrite with Style" feature. It takes the original generated story, maps its core plot points, and uses the saved style parameters to rewrite the draft. Changes style, voice, and sensory details while retaining 100% of the original story progression (Ki-sho-ten-ketsu structure). / 解析した文体を、上の出力エリアに生成されたストーリーに適用して「リライト」を実行。ストーリー展開（起承転結）を完全に保ったまま、文章表現・描写・語り口のみを解析した作風へとコンバートします。
+- **Style Rewrite Progress Sync / 作風リライト時の進捗・ストリーミング同期**:
+  - Rewriting now clears the log window and displays simulation step logs (rhythm check, vocabulary mapping) followed by a live character counter during text compilation. / 作風リライト処理がストリーミング通信化され、実行時に進捗窓が自動リセットされ、リライト待機中の適用シミュレーションログおよび執筆中の文字数が進捗窓内にリアルタイム同期表示されます。
 
-### 10. Today's News Keywords / 今日のニュースキーワード取得詳細仕様
+### 3. Today's News Keywords / 今日のニュースキーワード取得詳細仕様
 Leverages Google Gemini's Search Grounding to fetch the latest real-time Japanese news headlines and extract multi-category narrative keywords to feed the story generator.
 Google Geminiの検索グラウンディング（Search Grounding）ツールを利用して、リアルタイムの日本の主要ニュースから、創作の刺激となる多角的なキーワードを自動抽出し、カスタムテーマとしてセットする機能です。
 
@@ -198,9 +205,9 @@ Google Geminiの検索グラウンディング（Search Grounding）ツールを
   - **Real-Time Synergy / リアルタイム性の融合**: Automatically grounds fictional settings in active, real-world events. Writers can effortlessly craft topical stories that resonate with current social conversations. / 現実社会のホットな話題や時事ニュースを即座に創作プロットの切り口として取り込み、トレンドを反映した社会的共感性の高い物語を容易に生み出すことができます。
   - **Curation Diversity & Balance / 偏りのないキュレーション**: The search agent is strictly instructed to pull keywords across social, international, business, entertainment, sports, and science categories. This breaks the LLM's natural tendency to overfocus on high-tech topics like AI or IT. / AIに対して社会、国際、経済、エンタメ、科学などの各ジャンルからバランスよくキーワードを集めるよう指示しており、AIが「IT・AI」などの一部のトピックに偏ったネタばかりを選ぶのを防ぎ、多様性に富んだ物語の種を供給します。
 - **Interactive Execution / インタラクティブな実行フロー**:
-  - Requires a valid API key. When the "🌐 ニュース" button is clicked, the app sends a semantic search request to the Gemini engine, processes the headlines, format them as comma-separated values, and fills the "Theme" field automatically. / 有効なAPIキーを設定した状態で「🌐 ニュース」ボタンをクリックすると、AIがWeb検索を介して最新ニュースを見出しとして収集・構造化し、テーマ入力欄へカンマ区切りで自動展開します。
+  - Requires a valid API key. When the "🌐 ニュース" button is clicked, the app sends a semantic search request to the Gemini engine, processes the headlines, format them as comma-separated values, and appends the new keywords to the custom theme field with a comma, preventing overwriting existing inputs. / 有効なAPIキーを設定した状態で「🌐 ニュース」ボタンをクリックすると、AIがWeb検索を介して最新ニュースを見出しとして収集・構造化し、テーマ入力欄へ既存の入力を上書きせず、カンマ（`, `）で繋げて追記します。
 
-### 11. Individual Input Locking Spec / 個別入力ロック機能詳細仕様
+### 4. Individual Input Locking Spec / 個別入力ロック機能詳細仕様
 Granular interface freeze mechanism that allows writers to lock down specific fields, protecting them from random generation or reset operations.
 特定の入力フィールドを個別に固定（ロック）し、一括ランダム生成や全リセットといった操作による予期せぬ値の上書きから保護するためのインターフェース制御機能です。
 
@@ -210,7 +217,22 @@ Granular interface freeze mechanism that allows writers to lock down specific fi
 - **Toggle Lock Interface / トグルロックインターフェース**:
   - Every setting section features a lock button (`🔓`/`🔒`). When toggled to locked (`🔒`), the field becomes read-only and ignores all global operations, including "One-Shot Full Random" (`🎲 全項目ランダム`), specific section randomizer, and "Reset All" (`🗑️ 全リセット`). / 各入力セクションに配置された「🔓/🔒」トグルボタンをクリックしてロック状態にすると、その欄への入力やランダム変更が完全に抑止され、「🎲 全項目ランダム」や「🗑️ 全リセット」時にも影響を受けずに設定値が維持されます。
 
+### 5. AI Progress & Thought Log Window Spec / AI進捗・思考ログ窓詳細仕様
+A visual status console and parser framework that exposes the LLM's internal cognitive process (Chain of Thought) and live writing metrics to the user.
+LLMの内部思考プロセス（Chain of Thought）およびリアルタイムな執筆状況を可視化し、進捗の不透明さやフリーズ感を解消するためのコンソール型表示・解析システムです。
+
+- **Operational Value & Benefits / 導入メリット**:
+  - **Zero-Freeze Visibility / フリーズ感の完全な払拭**: API接続時の通信待機中も、約3秒ごとにダミーの内部計算ログ（起承転結妥当性の検証、感情落差比率のシミュレーション等）が出力され、AIが裏で動いている様子がリアルタイムに伝わります。
+  - **Cognitive Process Transparency / 思考プロセスの透明化**: AIが思考した内容（`<thought>`タグ内）を自動的に分離・抽出し、専用のスクロール領域に「思考プロセス」として流し込みます。AIがどのようなプロットを立て、自己採点を行ったかを直接デバッグ・確認できます。
+  - **Interactive Character Counter / リアルタイム執筆カウント**: 本文の執筆が開始されると、ストリーミング通信と連動して「・現在文字数: XXX文字」と文字数がカウントアップされ、執筆の進捗度がビジュアルで分かります。
+- **Exclusive Scoreboard Layout / 排他表示型自己採点スコアボード**:
+  - Displays progress bars and passing badges representing the AI's self-verified scores (Plot Recovery, Structure, Constraint compliance).
+  - To maximize log visibility and prevent UI clutter inside the 200px fixed-height console, the scoreboard is completely hidden during active generation while the API warning bar (yellow) is visible. Upon successful generation, the warning bar disappears, and the finalized self-grading scoreboard (green passing bars) instantly populates the top of the progress log. / AIの自己検証結果（伏線回収・構造・制約）を可視化する合格グラフ（緑のバー）。進行ログの表示領域（高さ200px）を圧迫しないよう、生成中は黄色の警告バーを表示しスコアボードは非表示にします。完了時に警告バーが消え、合格確定したグラフが上部に一括表示される排他表示レイアウトを採用しています。
+- **Robust Empty Output Prevention / 空白出力バグの完全な解消**:
+  - Implemented an automatic rescue logic in the thought log parsing (CoT extraction) where the entire text is treated as the story body if no output markers (e.g., 'Topic:') are detected. Furthermore, a double-layered empty output prevention guardrail has been introduced to forcibly restore text from the raw response if the final parsed output is 50 characters or less, resolving the blank output bug completely. / 長編小説モードのプロンプト生成など、文中に分離キーワード（`Topic:` 等）が含まれない場合に出力が空になるバグを修正。キーワード未検出時はテキスト全体を本文とみなし、さらに最終出力が50文字未満の場合は全体テキスト（`totalText`）から本文を強制救出するフェールセーフを実装し、空白出力バグを完全に解消しました。
+
 ---
+
 
 ## 💻 Tech Stack / 技術スタック
 - **Frontend**: Vite + Vanilla HTML/CSS/JS (Lightweight frontend / 軽量フロントエンド構成)
@@ -412,6 +434,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 ---
 
 ## 📝 Changelog / 更新履歴
+
+### v3.3.6 — 2026-05-24
+- **AI Progress & Thought Log Window Integration / AI進捗・思考ログ窓の統合**: Added a sticky visual console window at the top of the app. It displays real-time connection statuses, procedural wait simulation logs, model fallbacks, raw thought processes (CoT / `<thought>` tag extraction), and live writing progress indicators. / 画面上部に常設された固定コンソール領域を実装。APIの接続待機プロセス、計算シミュレーション、モデルフォールバック、AIの思考プロセス（CoT / `<thought>`タグの分離抽出とリアルタイム表示）、および執筆進捗（リアルタイム文字数カウント）を視覚的に流し込みます。
+- **Self-Grading Scoreboard with Exclusive Display / 自己採点スコアボードと排他表示**: Implemented a parser that evaluates AI-generated quality metrics (Plot Recovery, Structure, Constraint compliance) and visualizes them as progress bars and passing badges. Hides during generation to prevent screen clutter and appears instantly alongside the final story. / AIが出力した自己採点（「伏線回収度」「起承転結の構造」「制約遵守度」）をパースし、達成度を合格バッジ（緑のバー）でビジュアル表示。通信待機中のAPI警告バーと完全な排他表示を実装し、執筆完了時に一括表示されるようレイアウトを最適化しました。
+- **Style Rewrite Progress Sync / 作風リライト時の進捗・ストリーミング同期**: Upgraded the style rewrite engine to support real-time progress logging and text streaming (`callGenerativeAIStream`). Rewriting now clears the log window and displays simulation step logs (rhythm check, vocabulary mapping) followed by a live character counter during text compilation. / 作風リライト処理をストリーミング通信化。実行時に進捗窓を自動リセットし、リライト待機中の適用シミュレーションログおよび執筆中の文字数を進捗窓内にリアルタイム同期表示します。
+- **Robust Null-Story / Empty Output Prevention / 空白出力バグの完全な解消**: Resolved an issue where outputs without specific structure keywords (e.g. prompt generation in long novel mode) resulted in empty stories. If no keywords are matched, the parser defaults to treating the entire response as the story body. Added a double-gate rescue fallback that restores the raw `totalText` if the final output is less than 50 characters, ensuring no text is lost. / 長編小説モードのプロンプト生成など、文中に分離キーワードが含まれない場合に出力が空になるバグを修正。キーワード未検出時はテキスト全体を本文とみなし、さらに最終出力が50文字未満の場合は全体テキスト（`totalText`）から本文を強制救出するフェールセーフを実装しました。
 
 ### v3.3.4 — 2026-05-22
 - **Nano Banana Pro Link Integration / Nano Banana Proへの連携説明文追加**: Added an explanation to the Style Analyzer JSON output section indicating that generated style JSON files can be directly dragged and dropped into AI 4-koma System's STEP1 drop zone. / 作風解析エンジンのJSON出力結果エリアおよびREADMEに、生成した作風JSONファイルが AI 4-koma System のSTEP1（ドロップエリア）に直接連携可能であることを明記する説明文を追加しました。

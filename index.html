@@ -3,40 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.3.5</title>
+  <title>Story Maker v3.3.6</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 
-  <!-- 🚀 Header / Control Bar (API Settings) -->
-  <header class="title-bar">
-    <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.3.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
-  </header>
+  <!-- 🚀 Sticky Header Wrapper (タイトルバーと進捗窓をセットで上部固定) -->
+  <div class="fixed-header-wrapper">
+    <!-- 🚀 Header / Control Bar (API Settings) -->
+    <header class="title-bar">
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.3.6</span> <span class="title-sub">— AI物語メーカー</span></h1>
+    </header>
 
-  <div id="banner" class="banner">
-    <div class="banner-row">
-      <div class="banner-label" id="engine-label">⚠ API未設定</div>
-      <input type="password" id="apikey" placeholder="Gemini または OpenAI のAPIキーを入力">
-      <button id="key-save">保存</button>
-      <button id="key-edit" class="hidden">編集</button>
-      <button id="btn-switch-api" class="btn-switch-api" title="設定内容は保持したまま、APIエンジン（Gemini / OpenAI）のみを切り替えます">🔄 API切替</button>
-      <button id="btn-reload" class="btn-reload" title="ページ全体を再読み込みします（入力した設定内容やAPIキーはすべてクリアされます）">🔄 リロード</button>
-    </div>
-    <div class="api-notice">
-      🔑 APIキー取得:
-      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="api-link api-link-gemini">Gemini API</a>
-      <span class="api-link-sep">/</span>
-      <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="api-link api-link-openai">OpenAI API</a>
-      <span class="api-link-sep">—</span>
-      <span class="api-notice-security">⚠️ キーはメモリ内のみ保持・ページを閉じると消去・外部送信一切なし</span>
-      <span class="api-link-sep">|</span>
-      <span class="api-notice-security">🔄「API切替」は入力内容やキーを保持したままAPIのみを切り替えます</span>
-    </div>
-  </div>
+    <div id="banner" class="banner">
+      <div class="banner-row">
+        <div class="banner-label" id="engine-label">⚠ API未設定</div>
+        <input type="password" id="apikey" placeholder="Gemini または OpenAI のAPIキーを入力">
+        <button id="key-save">保存</button>
+        <button id="key-edit" class="hidden">編集</button>
+        <button id="btn-switch-api" class="btn-switch-api" title="設定内容は保持したまま、APIエンジン（Gemini / OpenAI）のみを切り替えます">🔄 API切替</button>
+        <button id="btn-reload" class="btn-reload" title="ページ全体を再読み込みします（入力した設定内容やAPIキーはすべてクリアされます）">🔄 リロード</button>
+      </div>
+      <div class="api-notice">
+        🔑 APIキー取得:
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="api-link api-link-gemini">Gemini API</a>
+        <span class="api-link-sep">/</span>
+        <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="api-link api-link-openai">OpenAI API</a>
+        <span class="api-link-sep">—</span>
+        <span class="api-notice-security">⚠️ キーはメモリ内のみ保持・ページを閉じると消去・外部送信一切なし</span>
+        <span class="api-link-sep">|</span>
+        <span class="api-notice-security">🔄「API切替」は入力内容やキーを保持したままAPIのみを切り替えます</span>
+      </div>
 
-  <!-- 黄色の警告表示 -->
-  <div class="global-alert-yellow" id="global-alert" style="display: none;">
-    ⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数十秒〜1分程度かかる場合があります。結果が表示されるまでお待ちください。
+      <!-- 📡 AI進捗ログ窓 (常設) -->
+      <div id="progress-window" class="progress-window">
+        <div class="progress-header">
+          <span class="progress-status-icon">📡</span>
+          <span class="progress-title" id="progress-title-text">AI進捗・思考ログ: 待機中</span>
+        </div>
+
+        <!-- 黄色の警告表示 (進捗窓の内部・上部に移動して段下がりを防止) -->
+        <div class="global-alert-yellow" id="global-alert" style="display: none;">
+          ⚠️ <strong>注意:</strong> AIが思考している間（API通信中）は数秒〜数十秒かかる場合があります。結果が表示されるまでお待ちください。
+        </div>
+
+        <div class="thought-score-board" id="thought-score-board" style="display: none;"></div>
+        <div class="progress-content" id="progress-content">
+          <pre id="progress-log" class="progress-log">AIの生成開始を待っています...</pre>
+        </div>
+      </div>
+    </div>
   </div>
 
   <main class="main-wrap">
@@ -318,6 +334,7 @@
         </div>
       </div>
       <div id="tag-row" class="tag-row"></div>
+
       <div id="output" class="output-box empty text-selectable">
         <div class="guide">
           <h3>はじめ方</h3>

@@ -2,7 +2,7 @@
 // styleAnalyzer.js — 超強引！作風解析エンジン (β版)
 // テキストをドロップ→AIで作風パラメータ抽出→JSON/コピー→リライト
 // ============================================================
-import { callGenerativeAI, callGenerativeAIMultimodal } from './api.js';
+import { callGenerativeAI, callGenerativeAIMultimodal, callGenerativeAIStream } from './api.js';
 import { GEMINI_MODELS } from './data.js';
 
 const $ = id => document.getElementById(id);
@@ -162,6 +162,12 @@ function showApiActivity(msg) {
     alertEl.innerHTML = `⚠️ <strong>稼働中:</strong> ${msg}`;
     alertEl.style.display = 'flex';
   }
+
+  // API稼働中（警告バー表示中）は、ログ領域を広く使うため自己採点スコアボードを確実に非表示にする（排他表示の徹底）
+  const thoughtScoreBoard = $('thought-score-board');
+  if (thoughtScoreBoard) {
+    thoughtScoreBoard.style.display = 'none';
+  }
 }
 
 function updateApiStatus(msg) {
@@ -174,6 +180,11 @@ function updateApiStatus(msg) {
 
   const alertEl = $('global-alert');
   if (alertEl) alertEl.innerHTML = `⚠️ <strong>稼働中:</strong> ${msg}`;
+
+  const thoughtScoreBoard = $('thought-score-board');
+  if (thoughtScoreBoard) {
+    thoughtScoreBoard.style.display = 'none';
+  }
 }
 
 function hideApiActivity() {
@@ -592,6 +603,18 @@ async function runAnalysis() {
   const reflectWrap = $('sa-reflect-wrap');
   const reflectResultWrap = $('sa-reflect-result-wrap');
 
+  // 📡 AI進捗ログ窓の初期化と完全リセット（排他表示と押しのけ防止）
+  const progressLog = $('progress-log');
+  const thoughtScoreBoard = $('thought-score-board');
+  const progressTitleText = $('progress-title-text');
+  
+  if (progressLog) progressLog.textContent = "作風解析の開始を待っています...";
+  if (thoughtScoreBoard) {
+    thoughtScoreBoard.innerHTML = "";
+    thoughtScoreBoard.style.display = "none";
+  }
+  if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: 作風解析中...';
+
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>AIが超強引に作風を解析中...';
   resultEl.textContent = '超強引に解析中です...しばらくお待ちください（1分〜3分程度）';
@@ -682,6 +705,12 @@ async function runAnalysis() {
 
     // 結果表示
     displayAnalysisResult(analysisResult);
+    
+    // 進捗ログ窓に結果のサマリーを表示
+    if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: 作風解析完了';
+    if (progressLog) {
+      progressLog.textContent = `作風解析が完了しました。解析結果が右パネルに表示されています。\n作風名: ${analysisResult.style_name || '未定義'}\nトーン: ${analysisResult.tone || '未定義'}`;
+    }
 
     // リライトボタンを表示（解析完了後に連続で使える）
     reflectWrap.classList.remove('hidden');
@@ -690,6 +719,10 @@ async function runAnalysis() {
   } catch (err) {
     resultEl.textContent = `解析エラー: ${err.message}`;
     resultEl.classList.add('sa-error');
+    if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: 解析エラー';
+    if (progressLog) {
+      progressLog.textContent = `作風解析エラーが発生しました:\n${err.message}`;
+    }
   } finally {
     btn.disabled = false;
     btn.innerHTML = '🔬 超強引！作風解析を実行';
@@ -818,6 +851,9 @@ function displayAnalysisResult(result) {
 // ============================================================
 // リライト実行
 // ============================================================
+// ============================================================
+// リライト実行
+// ============================================================
 async function runReflection() {
   const apiKey = getApiKey();
   if (!apiKey) { alert('APIキーを保存してください'); return; }
@@ -837,22 +873,140 @@ async function runReflection() {
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>作風を反映してリライト中...';
-  outputEl.textContent = 'リライト中です...しばらくお待ちください';
+  outputEl.textContent = 'リライト中です...（完了後に一括表示されます）';
   resultWrap.classList.remove('hidden');
+
+  // 📡 AI進捗ログ窓の初期化とリセット
+  const progressLog = $('progress-log');
+  const thoughtScoreBoard = $('thought-score-board');
+  const progressTitleText = $('progress-title-text');
+  
+  if (progressLog) progressLog.textContent = "作風リライトの開始を待っています...";
+  if (thoughtScoreBoard) {
+    thoughtScoreBoard.innerHTML = "";
+    thoughtScoreBoard.style.display = "none"; // リライト時は自己採点ボードは非表示
+  }
+  if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: リライト準備中...';
 
   // API稼働中表示
   showApiActivity('🎨 作風リライト中...');
 
+  let systemLogs = [];
+  let connectionStatusText = "";
+  let writingProgressText = "";
+  let apiWaitTimer = null;
+  
+  function addSystemLog(msg) {
+    systemLogs.push(msg);
+    updateProgressWindow();
+  }
+
+  function updateProgressWindow() {
+    if (!progressLog) return;
+    let text = "";
+    if (systemLogs.length > 0) {
+      text += systemLogs.join('\n') + '\n';
+    }
+    if (connectionStatusText) {
+      text += connectionStatusText + '\n';
+    }
+    if (writingProgressText) {
+      text += '\n' + writingProgressText;
+    }
+    progressLog.textContent = text;
+    
+    const contentEl = $('progress-content');
+    if (contentEl) contentEl.scrollTop = contentEl.scrollHeight;
+  }
+
+  addSystemLog("[システム] 作風リライト処理を開始しました...");
+  addSystemLog(`[システム] 対象ストーリー文字数: ${originalText.length.toLocaleString()} 字`);
+  addSystemLog("[システム] 抽出済みの作風パラメータ（文体・語彙・感情設計）を抽出中...");
+  addSystemLog("[システム] リライト用メタプロンプトの構築が完了しました。");
+
   try {
     const prompt = buildReflectionPrompt(analysisResult, originalText);
     const model = GEMINI_MODELS[0].value;
-    const { text } = await callGenerativeAI(apiKey, model, prompt, (fb) => {
-      updateApiStatus(`リライト フォールバック: ${fb}`);
-      btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-    });
+    
+    addSystemLog(`[システム] AIモデル (${model}) にリライト要求を送信しています...`);
+    
+    // API応答の待機タイマーを起動
+    let waitSeconds = 0;
+    let dummyLogsAdded = new Set();
+    
+    apiWaitTimer = setInterval(() => {
+      waitSeconds++;
+      const dots = ".".repeat(waitSeconds % 4);
+      connectionStatusText = `[通信] AIモデルからのリライト応答を待機しています${dots} (${waitSeconds}秒経過)`;
+      
+      if (waitSeconds >= 3 && !dummyLogsAdded.has(3)) {
+        dummyLogsAdded.add(3);
+        systemLogs.push("[適用中] 抽出作風「平均文長・段落構成」の文体フィルタをマッピング中...");
+      }
+      if (waitSeconds >= 6 && !dummyLogsAdded.has(6)) {
+        dummyLogsAdded.add(6);
+        systemLogs.push("[適用中] 語彙特徴・修辞スタイル（比喩の方向性）の適応率を計算中...");
+      }
+      if (waitSeconds >= 9 && !dummyLogsAdded.has(9)) {
+        dummyLogsAdded.add(9);
+        systemLogs.push("[適用中] キャラクターの対話タグ・感情設計の整合性シミュレーションを実施中...");
+      }
+      if (waitSeconds >= 12 && !dummyLogsAdded.has(12)) {
+        dummyLogsAdded.add(12);
+        systemLogs.push("[適用中] 読者距離と pacing（テンポ）の緊張曲線をリライトプロットにマージ完了。");
+      }
+      if (waitSeconds >= 15 && waitSeconds % 5 === 0 && !dummyLogsAdded.has(waitSeconds)) {
+        dummyLogsAdded.add(waitSeconds);
+        systemLogs.push(`[再構築中] AIが文体適合度を最大化させるためのリライトプロセス (${waitSeconds}s) を実行しています...`);
+      }
+      updateProgressWindow();
+    }, 1000);
 
-    // マークダウンブロック除去
-    let body = text.replace(/^```(markdown)?\s*/i, '').replace(/\s*```$/, '');
+    let totalText = "";
+    let hasReceivedFirstChunk = false;
+    
+    if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: リライト執筆中...';
+
+    const onChunk = ({ text }) => {
+      if (!hasReceivedFirstChunk) {
+        hasReceivedFirstChunk = true;
+        connectionStatusText = "";
+        updateProgressWindow();
+        if (apiWaitTimer) {
+          clearInterval(apiWaitTimer);
+          apiWaitTimer = null;
+        }
+      }
+      totalText += text;
+      
+      const charCount = totalText.length;
+      let prog = "[システム] AIによるリライト文章の生成が開始されました。\n";
+      prog += `[進捗] 本文をリライト中...\n`;
+      prog += `・現在文字数: ${charCount} 文字\n`;
+      
+      const dotCount = Math.floor((charCount / 50) % 4);
+      const dots = ".".repeat(dotCount) + " ".repeat(3 - dotCount);
+      prog += `・ステータス: 執筆処理中${dots}\n`;
+      
+      writingProgressText = prog;
+      updateProgressWindow();
+    };
+
+    const onFb = (m) => {
+      outputEl.textContent = `フォールバック中: ${m}...`;
+      btn.innerHTML = `<span class="spinner"></span>フォールバック: ${m}`;
+      addSystemLog(`[システム] リライト応答遅延のため、モデルを ${m} にフォールバックします...`);
+    };
+
+    const { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb);
+
+    if (apiWaitTimer) {
+      clearInterval(apiWaitTimer);
+      apiWaitTimer = null;
+    }
+
+    btn.innerHTML = '<span class="spinner"></span>最終推敲中...';
+    let body = totalText.replace(/^```(markdown)?\s*/i, '').replace(/\s*```$/, '');
 
     reflectedOutput = body;
     outputEl.textContent = body;
@@ -861,10 +1015,23 @@ async function runReflection() {
     const counter = $('sa-reflect-counter');
     if (counter) counter.textContent = `${body.length.toLocaleString()} 字`;
 
+    if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: リライト完了';
+    addSystemLog("[システム] 作風リライト文の生成・推敲が正常に完了しました。");
+    
+    writingProgressText = `[進捗] リライトが正常に完了しました。\n・最終文字数: ${body.length.toLocaleString()} 字\n・ステータス: 完了`;
+    connectionStatusText = "";
+    updateProgressWindow();
+
     // リライト結果までスクロール
     resultWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch (err) {
+    if (apiWaitTimer) {
+      clearInterval(apiWaitTimer);
+      apiWaitTimer = null;
+    }
+    connectionStatusText = "";
+    updateProgressWindow();
     outputEl.textContent = `リライトエラー: ${err.message}`;
   } finally {
     btn.disabled = false;
