@@ -611,5 +611,7 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 - **Output Panel Scroll**: Added `max-height` and `overflow-y: auto` to the output box, enabling in-frame scrolling for long stories. The OUTPUT header (title, character count, copy/download buttons) remains always visible. / OUTPUT欄に`max-height`と枠内スクロールを追加。長文でもヘッダー（タイトル・字数・コピー/保存ボタン）が常に表示される設計に変更。
 
 
+---
+
 Developed by **FURU**
 
