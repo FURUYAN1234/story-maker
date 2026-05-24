@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v3.3.6
+// main.js — v3.3.7
 // ============================================================
 import './style.css';
 import {
@@ -869,9 +869,17 @@ async function generate() {
   if (!key) { alert('APIキーを保存してください'); $('apikey').focus(); return; }
   const btn = $('btn-generate'), out = $('output'), tagRow = $('tag-row'), ctr = $('char-counter');
   
+  // 新規ストーリー生成開始時に、右側パネルを最上部（OUTPUT欄）にスクロールしてフォーカスを戻す
+  const outputPanel = $('output-panel');
+  if (outputPanel) {
+    outputPanel.scrollTop = 0;
+  }
+  
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>構築中...';
   $('settings').classList.add('generating');
+  const saSection = $('sa-section');
+  if (saSection) saSection.classList.add('generating');
   const alertEl = $('global-alert');
   
   // 📡 AI進捗ログ窓の初期化と完全リセット
@@ -912,7 +920,13 @@ async function generate() {
     
     const { plotRecovery, structure, constraint } = scores;
     
-    if (!forceShow && plotRecovery === null && structure === null && constraint === null) {
+    // 生成中 (forceShow === false) は、パースしたスコアがあっても絶対に表示しない（排他表示の徹底）
+    if (!forceShow) {
+      board.style.display = 'none';
+      return;
+    }
+    
+    if (plotRecovery === null && structure === null && constraint === null) {
       board.style.display = 'none';
       return;
     }
@@ -1317,6 +1331,7 @@ async function generate() {
     if (alertEl) alertEl.style.display = 'none';
   }
   
+  if (saSection) saSection.classList.remove('generating');
   $('settings').classList.remove('generating');
   btn.disabled = false;
   btn.textContent = 'ストーリー生成';

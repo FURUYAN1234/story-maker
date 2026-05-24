@@ -138,6 +138,8 @@ function showApiActivity(msg) {
   // 左パネルの生成ボタンに表示
   const settingsPanel = $('settings');
   if (settingsPanel) settingsPanel.classList.add('generating');
+  const saSection = $('sa-section');
+  if (saSection) saSection.classList.add('generating');
   const genBtn = document.querySelector('.btn-generate');
   if (genBtn) {
     genBtn._origText = genBtn.textContent;
@@ -190,6 +192,8 @@ function updateApiStatus(msg) {
 function hideApiActivity() {
   const settingsPanel = $('settings');
   if (settingsPanel) settingsPanel.classList.remove('generating');
+  const saSection = $('sa-section');
+  if (saSection) saSection.classList.remove('generating');
   const genBtn = document.querySelector('.btn-generate');
   if (genBtn) {
     genBtn.disabled = false;
