@@ -435,6 +435,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.1 — 2026-05-25
+- **Thought Tag Leakage & Hybrid Parser Fix / AI思考プロセス（thoughtタグ）のリーク防止とハイブリッドパーサーの判定改善**:
+  - Improved the CoT (Chain of Thought) parsing regex to correctly match and strip all `<thought>` tags (using `/<thought[^>]*>/i`) from the generated text, preventing raw AI thought processes from leaking into user-visible outputs. / AIの内部思考プロセス（`<thought>`タグ等）が生成結果の本文中に混入してリークする問題を防ぐため、 thought タグの除去・パース用正規表現を `/<thought[^>]*>/i` に強化・改善しました。
+  - Fixed a hybrid parser bug where thought process fragments containing certain keywords (e.g. `【完】`) were mistakenly identified as the boundary of the main story. Removed misleading keywords from the parsing fallback to ensure stable text extraction across all modes (long, diary, etc.). / ハイブリッドパーサーが `【完】` などのキーワードに過剰反応して思考プロセスの残骸を小説の本文開始/終了と誤認識していた不具合を修正。判定を厳格化し、長編や日記などの多様な生成モードにおいて常に欠落やリークのない安定したストーリー出力を保証しました。
+
 ### v3.4.0 — 2026-05-25
 - **Gemini API Model Deprecation Fix & Error Protection Deployment / Gemini APIモデル非推奨化対応およびエラー防止策のデプロイ**:
   - Replaced legacy/deprecated Gemini models (`gemini-2.0-flash`, `gemini-3-flash-preview` etc.) in both text and vision configurations with stable alternatives (`gemini-3.5-flash` as primary, `gemini-1.5-pro` and `gemini-1.5-flash` as fallbacks) to prevent 404 connection errors. / テキスト・画像認識・マルチモーダルAPIの全てにおいて、非推奨化された旧モデル設定を廃止し、最新の `gemini-3.5-flash` および安定した `gemini-1.5-pro` / `gemini-1.5-flash` への切り替えと自動フォールバックを実装しました。

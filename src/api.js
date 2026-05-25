@@ -40,23 +40,28 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  const requestBody = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig,
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    ]
+  };
+
+  // JSON出力モード時はGoogle検索グラウンディングを無効化（API制限・バッドリクエスト防止）
+  if (generationConfig.responseMimeType !== 'application/json' && !options.disableGoogleSearch) {
+    requestBody.tools = [{ googleSearch: {} }];
+  }
+
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig,
-        // Google検索グラウンディング: AIが事実確認を必要と判断した場合に裏でGoogle検索を実行
-        tools: [{ googleSearch: {} }],
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-        ]
-      }),
+      body: JSON.stringify(requestBody),
     });
     
     clearTimeout(timeoutId);
@@ -198,13 +203,31 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
     'gemini-2.5-flash',                 // Legacy fallback
   ];
 
+  const errors = [];
+  let isSafetyBlocked = false;
+  let isQuotaExceeded = false;
+  let isAuthError = false;
+
   for (const modelId of IMAGE_MODEL_IDS) {
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
       const text = await _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType, options);
       return { text, usedModel: modelId };
     } catch (err) {
-      console.warn(`Vision model ${modelId} failed:`, err.message);
+      const msg = err.message || '';
+      console.warn(`Vision model ${modelId} failed:`, msg);
+      errors.push(`${modelId}: ${msg}`);
+      
+      const lowerMsg = msg.toLowerCase();
+      if (lowerMsg.includes("safety") || lowerMsg.includes("prohibited") || lowerMsg.includes("block")) {
+        isSafetyBlocked = true;
+      }
+      if (lowerMsg.includes("quota") || lowerMsg.includes("429") || lowerMsg.includes("limit")) {
+        isQuotaExceeded = true;
+      }
+      if (lowerMsg.includes("api key") || lowerMsg.includes("403") || lowerMsg.includes("invalid")) {
+        isAuthError = true;
+      }
       continue;
     }
   }
@@ -213,13 +236,15 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
   const diagnosis = await diagnoseConnection(apiKey);
   console.error("VISION DIAGNOSIS:", diagnosis);
 
-  let errorMsg = `全モデルでの画像認識に失敗: ${diagnosis}`;
-  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
-    errorMsg = "【API制限】使用回数の上限に達しました。しばらく時間を置いてから再試行してください。";
-  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+  let errorMsg = `全モデルでの画像認識に失敗: ${diagnosis}\n`;
+  if (isSafetyBlocked || diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
     errorMsg = "【コンテンツ制限】画像が安全フィルターによりブロックされました。別の画像をお試しください。";
-  } else if (diagnosis.includes("API key not valid") || diagnosis.includes("403")) {
+  } else if (isQuotaExceeded || diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+    errorMsg = "【API制限】使用回数の上限に達しました。しばらく時間を置いてから再試行してください。";
+  } else if (isAuthError || diagnosis.includes("API key not valid") || diagnosis.includes("403")) {
     errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
+  } else {
+    errorMsg += `\n[各モデルのエラー詳細]\n${errors.join('\n')}`;
   }
 
   throw new Error(errorMsg);
@@ -239,14 +264,31 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   ]);
   const allModels = Array.from(uniqueModels);
 
+  const errors = [];
+  let isSafetyBlocked = false;
+  let isQuotaExceeded = false;
+  let isAuthError = false;
+
   for (const modelId of allModels) {
       try {
           if (modelId !== initialModel && onFallback) onFallback(modelId);
           const text = await _callGemini(apiKey, modelId, prompt, options);
           return { text, usedModel: modelId };
       } catch (err) {
-          console.warn(`Model ${modelId} failed:`, err.message);
-          // 429(Rate Limit) or Quota => 待機すべきだが今回は次のモデルへ
+          const msg = err.message || '';
+          console.warn(`Model ${modelId} failed:`, msg);
+          errors.push(`${modelId}: ${msg}`);
+          
+          const lowerMsg = msg.toLowerCase();
+          if (lowerMsg.includes("safety") || lowerMsg.includes("prohibited") || lowerMsg.includes("block")) {
+            isSafetyBlocked = true;
+          }
+          if (lowerMsg.includes("quota") || lowerMsg.includes("429") || lowerMsg.includes("limit")) {
+            isQuotaExceeded = true;
+          }
+          if (lowerMsg.includes("api key") || lowerMsg.includes("403") || lowerMsg.includes("invalid")) {
+            isAuthError = true;
+          }
           continue;
       }
   }
@@ -257,14 +299,16 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   console.error("DIAGNOSIS RESULT:", diagnosis);
 
   let errorMsg = `全モデル接続失敗: ${diagnosis}\n`;
-  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
-      errorMsg = "【API制限】割り当てられた使用回数の上限に達しました。(429 Quota Exceeded)\nしばらく時間を置いてから再試行するか、課金プランを確認してください。";
-  } else if (diagnosis.includes("API Error: API key not valid") || diagnosis.includes("403")) {
-      errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
-  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+  if (isSafetyBlocked || diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
       errorMsg = "【コンテンツ制限】安全フィルターによりブロックされました。言い回しを変更してください。";
+  } else if (isQuotaExceeded || diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+      errorMsg = "【API制限】割り当てられた使用回数の上限に達しました。(429 Quota Exceeded)\nしばらく時間を置いてから再試行するか、課金プランを確認してください。";
+  } else if (isAuthError || diagnosis.includes("API Error: API key not valid") || diagnosis.includes("403")) {
+      errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
   } else if (diagnosis.includes("404")) {
       errorMsg = "【モデル未検出】使用可能なモデルが見つかりませんでした。APIキーが古いか、モデルが廃止されています。";
+  } else {
+      errorMsg += `\n[各モデルのエラー詳細]\n${errors.join('\n')}`;
   }
 
   throw new Error(errorMsg);
@@ -518,13 +562,31 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
     'gemini-2.5-flash',
   ];
 
+  const errors = [];
+  let isSafetyBlocked = false;
+  let isQuotaExceeded = false;
+  let isAuthError = false;
+
   for (const modelId of IMAGE_MODEL_IDS) {
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
       const text = await _callGeminiMultimodal(apiKey, modelId, prompt, images, options);
       return { text, usedModel: modelId };
     } catch (err) {
-      console.warn(`Vision model ${modelId} failed:`, err.message);
+      const msg = err.message || '';
+      console.warn(`Vision model ${modelId} failed:`, msg);
+      errors.push(`${modelId}: ${msg}`);
+      
+      const lowerMsg = msg.toLowerCase();
+      if (lowerMsg.includes("safety") || lowerMsg.includes("prohibited") || lowerMsg.includes("block")) {
+        isSafetyBlocked = true;
+      }
+      if (lowerMsg.includes("quota") || lowerMsg.includes("429") || lowerMsg.includes("limit")) {
+        isQuotaExceeded = true;
+      }
+      if (lowerMsg.includes("api key") || lowerMsg.includes("403") || lowerMsg.includes("invalid")) {
+        isAuthError = true;
+      }
       continue;
     }
   }
@@ -533,13 +595,15 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
   const diagnosis = await diagnoseConnection(apiKey);
   console.error("VISION DIAGNOSIS:", diagnosis);
 
-  let errorMsg = `全モデルでの画像認識に失敗: ${diagnosis}`;
-  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
-    errorMsg = "【API制限】使用回数の上限に達しました。しばらく時間を置いてから再試行してください。";
-  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+  let errorMsg = `全モデルでの画像認識に失敗: ${diagnosis}\n`;
+  if (isSafetyBlocked || diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
     errorMsg = "【コンテンツ制限】画像が安全フィルターによりブロックされました。別の画像をお試しください。";
-  } else if (diagnosis.includes("API key not valid") || diagnosis.includes("403")) {
+  } else if (isQuotaExceeded || diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+    errorMsg = "【API制限】使用回数の上限に達しました。しばらく時間を置いてから再試行してください。";
+  } else if (isAuthError || diagnosis.includes("API key not valid") || diagnosis.includes("403")) {
     errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
+  } else {
+    errorMsg += `\n[各モデルのエラー詳細]\n${errors.join('\n')}`;
   }
 
   throw new Error(errorMsg);
@@ -639,22 +703,28 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const controller = new AbortController();
   let timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  const requestBody = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig,
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    ]
+  };
+
+  // JSON出力モード時はGoogle検索グラウンディングを無効化（API制限・バッドリクエスト防止）
+  if (generationConfig.responseMimeType !== 'application/json' && !options.disableGoogleSearch) {
+    requestBody.tools = [{ googleSearch: {} }];
+  }
+
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig,
-        tools: [{ googleSearch: {} }],
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-        ]
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!resp.ok) {
@@ -738,21 +808,40 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
   ]);
   const allModels = Array.from(uniqueModels);
 
+  const errors = [];
+  let isSafetyBlocked = false;
+  let isQuotaExceeded = false;
+  let isAuthError = false;
+
   for (const modelId of allModels) {
       try {
           if (modelId !== initialModel && onFallback) onFallback(modelId);
           await _callGeminiStream(apiKey, modelId, prompt, onChunk, options);
           return { usedModel: modelId };
       } catch (err) {
-          console.warn(`Model ${modelId} stream failed:`, err.message);
+          const msg = err.message || '';
+          console.warn(`Model ${modelId} stream failed:`, msg);
+          errors.push(`${modelId}: ${msg}`);
           
-          if (err.message.includes("400") || err.message.toLowerCase().includes("bad request") || err.message.toLowerCase().includes("thinking_config")) {
+          const lowerMsg = msg.toLowerCase();
+          if (lowerMsg.includes("safety") || lowerMsg.includes("prohibited") || lowerMsg.includes("block")) {
+            isSafetyBlocked = true;
+          }
+          if (lowerMsg.includes("quota") || lowerMsg.includes("429") || lowerMsg.includes("limit")) {
+            isQuotaExceeded = true;
+          }
+          if (lowerMsg.includes("api key") || lowerMsg.includes("403") || lowerMsg.includes("invalid")) {
+            isAuthError = true;
+          }
+          
+          if (msg.includes("400") || lowerMsg.includes("bad request") || lowerMsg.includes("thinking_config")) {
             try {
               console.log(`Retrying model ${modelId} without thinkingConfig...`);
               await _callGeminiStream(apiKey, modelId, prompt, onChunk, { ...options, disableThinkingConfig: true });
               return { usedModel: modelId };
             } catch (retryErr) {
               console.warn(`Model ${modelId} stream retry failed:`, retryErr.message);
+              errors.push(`${modelId} (retry): ${retryErr.message}`);
             }
           }
           continue;
@@ -765,14 +854,16 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
   console.error("DIAGNOSIS RESULT:", diagnosis);
 
   let errorMsg = `全モデル接続失敗: ${diagnosis}\n`;
-  if (diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
-      errorMsg = "【API制限】割り当てられた使用回数の上限に達しました。(429 Quota Exceeded)\nしばらく時間を置いてから再試行するか、課金プランを確認してください。";
-  } else if (diagnosis.includes("API Error: API key not valid") || diagnosis.includes("403")) {
-      errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
-  } else if (diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
+  if (isSafetyBlocked || diagnosis.includes("SAFETY") || diagnosis.includes("PROHIBITED")) {
       errorMsg = "【コンテンツ制限】安全フィルターによりブロックされました。言い回しを変更してください。";
+  } else if (isQuotaExceeded || diagnosis.includes("Quota exceeded") || diagnosis.includes("429")) {
+      errorMsg = "【API制限】割り当てられた使用回数の上限に達しました。(429 Quota Exceeded)\nしばらく時間を置いてから再試行するか、課金プランを確認してください。";
+  } else if (isAuthError || diagnosis.includes("API Error: API key not valid") || diagnosis.includes("403")) {
+      errorMsg = "【認証エラー】APIキーが無効です。正しいキーを設定してください。";
   } else if (diagnosis.includes("404")) {
       errorMsg = "【モデル未検出】使用可能なモデルが見つかりませんでした。APIキーが古いか、モデルが廃止されています。";
+  } else {
+      errorMsg += `\n[各モデルのエラー詳細]\n${errors.join('\n')}`;
   }
 
   throw new Error(errorMsg);

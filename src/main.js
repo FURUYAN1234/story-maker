@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v3.4.0
+// main.js — v3.4.1
 // ============================================================
 import './style.css';
 import {
@@ -787,8 +787,8 @@ function gatherSettings() {
 }
 
 function parseStream(totalText) {
-  const thoughtStartRegex = /<thought>/i;
-  const thoughtEndRegex = /<\/thought>/i;
+  const thoughtStartRegex = /<thought[^>]*>/i;
+  const thoughtEndRegex = /<\/thought[^>]*>/i;
   
   const startMatch = totalText.match(thoughtStartRegex);
   const endMatch = totalText.match(thoughtEndRegex);
@@ -815,19 +815,15 @@ function parseStream(totalText) {
     }
   } else {
     // タグがない場合のハイブリッドパース（プロット設計や自己採点を経過ログに流す）
-    const keywords = ["topic:", "logline:", "location:", "outfit:", "punchline:", "scenario:", "タイトル:", "【完】", "【続く】"];
+    const keywords = ["topic:", "logline:", "location:", "outfit:", "punchline:", "scenario:", "タイトル:"];
     
     let firstKeywordIdx = -1;
     
     for (const kw of keywords) {
       let regex;
-      if (kw === "【完】" || kw === "【続く】") {
-        regex = new RegExp(kw);
-      } else {
-        const escapedKw = kw.replace(":", "").trim();
-        // 行頭（行の先頭、または改行の直後）にあるキーワードのみにマッチさせ、思考中の文章内誤爆を防ぐ
-        regex = new RegExp(`(?:^|\\n)\\s*${escapedKw}\\s*[:：]`, "i");
-      }
+      const escapedKw = kw.replace(":", "").trim();
+      // 行頭（行の先頭、または改行の直後）にあるキーワードのみにマッチさせ、思考中の文章内誤爆を防ぐ
+      regex = new RegExp(`(?:^|\\n)\\s*${escapedKw}\\s*[:：]`, "i");
       
       const match = totalText.match(regex);
       if (match) {

@@ -674,13 +674,13 @@ async function runAnalysis() {
       const result = await callGenerativeAIMultimodal(apiKey, fullPrompt, droppedImages, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      }, { responseMimeType: 'application/json' });
+      }, { responseMimeType: 'application/json', timeoutMs: 90000 });
       text = result.text;
     } else {
       const result = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      }, { responseMimeType: 'application/json' });
+      }, { responseMimeType: 'application/json', timeoutMs: 90000 });
       text = result.text;
     }
 
