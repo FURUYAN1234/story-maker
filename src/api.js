@@ -34,49 +34,68 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig,
-      // Google検索グラウンディング: AIが事実確認を必要と判断した場合に裏でGoogle検索を実行
-      tools: [{ googleSearch: {} }],
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-      ]
-    }),
-  });
-  if (!resp.ok) {
-    const et = await resp.text();
-    let errMsg = `Gemini HTTP ${resp.status}`;
-    try {
-        const errJson = JSON.parse(et);
-        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
-    } catch (e) {
-        errMsg += ` — ${et.slice(0, 300)}`;
-    }
-    throw new Error(errMsg);
-  }
-  const data = await resp.json();
 
-  if (data.promptFeedback?.blockReason) {
-    throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
-  }
+  // 25秒タイムアウトの設定
+  const timeoutMs = options.timeoutMs || 25000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (data.candidates?.[0]?.content?.parts) {
-    const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
-    if (!text) {
-        const reason = data.candidates[0].finishReason || "UNKNOWN";
-        throw new Error(`Empty response (FinishReason: ${reason}).`);
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig,
+        // Google検索グラウンディング: AIが事実確認を必要と判断した場合に裏でGoogle検索を実行
+        tools: [{ googleSearch: {} }],
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ]
+      }),
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!resp.ok) {
+      const et = await resp.text();
+      let errMsg = `Gemini HTTP ${resp.status}`;
+      try {
+          const errJson = JSON.parse(et);
+          if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+      } catch (e) {
+          errMsg += ` — ${et.slice(0, 300)}`;
+      }
+      throw new Error(errMsg);
     }
-    return text;
+    const data = await resp.json();
+
+    if (data.promptFeedback?.blockReason) {
+      throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
+    }
+
+    if (data.candidates?.[0]?.content?.parts) {
+      const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
+      if (!text) {
+          const reason = data.candidates[0].finishReason || "UNKNOWN";
+          throw new Error(`Empty response (FinishReason: ${reason}).`);
+      }
+      return text;
+    }
+    if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
+    throw new Error("No response candidates (Unknown Model Refusal)");
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Timeout: ${model} (${timeoutMs / 1000}s)`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
-  throw new Error("No response candidates (Unknown Model Refusal)");
 }
 
 /**
@@ -91,52 +110,71 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, o
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inlineData: { mimeType, data: imageBase64 } }
+
+  // 60秒タイムアウト（画像解析対応）
+  const timeoutMs = options.timeoutMs || 60000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType, data: imageBase64 } }
+          ]
+        }],
+        generationConfig,
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
         ]
-      }],
-      generationConfig,
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-      ]
-    }),
-  });
-  if (!resp.ok) {
-    const et = await resp.text();
-    let errMsg = `Gemini HTTP ${resp.status}`;
-    try {
-        const errJson = JSON.parse(et);
-        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
-    } catch (e) {
-        errMsg += ` — ${et.slice(0, 300)}`;
-    }
-    throw new Error(errMsg);
-  }
-  const data = await resp.json();
+      }),
+    });
+    
+    clearTimeout(timeoutId);
 
-  if (data.promptFeedback?.blockReason) {
-    throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
-  }
-
-  if (data.candidates?.[0]?.content?.parts) {
-    const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
-    if (!text) {
-        const reason = data.candidates[0].finishReason || "UNKNOWN";
-        throw new Error(`Empty response (FinishReason: ${reason}).`);
+    if (!resp.ok) {
+      const et = await resp.text();
+      let errMsg = `Gemini HTTP ${resp.status}`;
+      try {
+          const errJson = JSON.parse(et);
+          if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+      } catch (e) {
+          errMsg += ` — ${et.slice(0, 300)}`;
+      }
+      throw new Error(errMsg);
     }
-    return text;
+    const data = await resp.json();
+
+    if (data.promptFeedback?.blockReason) {
+      throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
+    }
+
+    if (data.candidates?.[0]?.content?.parts) {
+      const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
+      if (!text) {
+          const reason = data.candidates[0].finishReason || "UNKNOWN";
+          throw new Error(`Empty response (FinishReason: ${reason}).`);
+      }
+      return text;
+    }
+    if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
+    throw new Error("No response candidates (Unknown Model Refusal)");
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Timeout: ${model} vision (${timeoutMs / 1000}s)`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
-  throw new Error("No response candidates (Unknown Model Refusal)");
 }
 
 /**
@@ -151,26 +189,19 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
     return _callOpenAIVision(apiKey.trim(), prompt, imageBase64, mimeType, onFallback, options);
   }
 
-  // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
+  // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    'gemini-2.5-pro',                   // Primary: 画像認識実績あり・フィルター寛容
-    'gemini-2.5-flash',                 // Backup 1: 高速・画像対応
-    'gemini-3-flash-preview',           // Backup 2: Preview版、アニメ画像でフィルター注意
-    'gemini-2.5-flash-lite',            // Fallback 1: 軽量
-    'gemini-3.1-flash-lite-preview',    // Fallback 2: 最終保険
+    'gemini-3.5-flash',                 // Primary: 最新の安定かつ高速モデル
+    'gemini-1.5-pro',                   // Backup 1: 高精細・フィルター寛容・超安定
+    'gemini-1.5-flash',                 // Backup 2: 高速・安定
+    'gemini-2.5-pro',                   // Legacy fallback
+    'gemini-2.5-flash',                 // Legacy fallback
   ];
 
   for (const modelId of IMAGE_MODEL_IDS) {
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
-
-      // 180秒タイムアウト（大容量テキスト・画像解析対応）
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
-      );
-
-      const fetchPromise = _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType, options);
-      const text = await Promise.race([fetchPromise, timeoutPromise]);
+      const text = await _callGeminiVision(apiKey, modelId, prompt, imageBase64, mimeType, options);
       return { text, usedModel: modelId };
     } catch (err) {
       console.warn(`Vision model ${modelId} failed:`, err.message);
@@ -199,7 +230,14 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
     return _callOpenAI(apiKey.trim(), prompt, onFallback, options);
   }
 
-  const allModels = [initialModel, ...GEMINI_MODELS.map(m => m.value).filter(m => m !== initialModel)];
+  // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
+  const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
+  const uniqueModels = new Set([
+    initialModel,
+    ...fallbackTargets,
+    ...GEMINI_MODELS.map(m => m.value)
+  ]);
+  const allModels = Array.from(uniqueModels);
 
   for (const modelId of allModels) {
       try {
@@ -350,47 +388,65 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
     generationConfig.responseMimeType = options.responseMimeType;
   }
 
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig,
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-      ]
-    }),
-  });
-  if (!resp.ok) {
-    const et = await resp.text();
-    let errMsg = `Gemini HTTP ${resp.status}`;
-    try {
-        const errJson = JSON.parse(et);
-        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
-    } catch (e) {
-        errMsg += ` — ${et.slice(0, 300)}`;
-    }
-    throw new Error(errMsg);
-  }
-  const data = await resp.json();
+  // 60秒タイムアウト（複数画像解析対応）
+  const timeoutMs = options.timeoutMs || 60000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (data.promptFeedback?.blockReason) {
-    throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
-  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig,
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ]
+      }),
+    });
+    
+    clearTimeout(timeoutId);
 
-  if (data.candidates?.[0]?.content?.parts) {
-    const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
-    if (!text) {
-        const reason = data.candidates[0].finishReason || "UNKNOWN";
-        throw new Error(`Empty response (FinishReason: ${reason}).`);
+    if (!resp.ok) {
+      const et = await resp.text();
+      let errMsg = `Gemini HTTP ${resp.status}`;
+      try {
+          const errJson = JSON.parse(et);
+          if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+      } catch (e) {
+          errMsg += ` — ${et.slice(0, 300)}`;
+      }
+      throw new Error(errMsg);
     }
-    return text;
+    const data = await resp.json();
+
+    if (data.promptFeedback?.blockReason) {
+      throw new Error(`Blocked by Safety Filter: ${data.promptFeedback.blockReason}`);
+    }
+
+    if (data.candidates?.[0]?.content?.parts) {
+      const text = data.candidates[0].content.parts.map(p => p.text || '').join('');
+      if (!text) {
+          const reason = data.candidates[0].finishReason || "UNKNOWN";
+          throw new Error(`Empty response (FinishReason: ${reason}).`);
+      }
+      return text;
+    }
+    if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
+    throw new Error("No response candidates (Unknown Model Refusal)");
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Timeout: ${model} multimodal (${timeoutMs / 1000}s)`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  if (data.error) throw new Error(`Gemini API Error: ${data.error.message}`);
-  throw new Error("No response candidates (Unknown Model Refusal)");
 }
 
 /**
@@ -453,26 +509,19 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
     return _callOpenAIMultimodal(apiKey.trim(), prompt, images, onFallback, options);
   }
 
-  // 画像付きリクエスト用モデルリスト（フィルター寛容モデル優先）
+  // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
+    'gemini-3.5-flash',
+    'gemini-1.5-pro',
+    'gemini-1.5-flash',
     'gemini-2.5-pro',
     'gemini-2.5-flash',
-    'gemini-3-flash-preview',
-    'gemini-2.5-flash-lite',
-    'gemini-3.1-flash-lite-preview',
   ];
 
   for (const modelId of IMAGE_MODEL_IDS) {
     try {
       if (onFallback && modelId !== IMAGE_MODEL_IDS[0]) onFallback(modelId);
-
-      // 180秒タイムアウト（大容量テキスト・画像解析対応）
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: ${modelId} (180s)`)), 180000)
-      );
-
-      const fetchPromise = _callGeminiMultimodal(apiKey, modelId, prompt, images, options);
-      const text = await Promise.race([fetchPromise, timeoutPromise]);
+      const text = await _callGeminiMultimodal(apiKey, modelId, prompt, images, options);
       return { text, usedModel: modelId };
     } catch (err) {
       console.warn(`Vision model ${modelId} failed:`, err.message);
@@ -575,7 +624,7 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
   const generationConfig = { maxOutputTokens: 8192, temperature: 1.0 };
   
-  if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3"))) {
+  if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3") || model.includes("gemini-3.5"))) {
     generationConfig.thinkingConfig = {
       thinkingBudget: 2048
     };
@@ -585,71 +634,90 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
   
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig,
-      tools: [{ googleSearch: {} }],
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-      ]
-    }),
-  });
-
-  if (!resp.ok) {
-    const et = await resp.text();
-    let errMsg = `Gemini HTTP ${resp.status}`;
-    try {
-        const errJson = JSON.parse(et);
-        if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
-    } catch (e) {
-        errMsg += ` — ${et.slice(0, 300)}`;
-    }
-    throw new Error(errMsg);
-  }
-
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let buffer = "";
+  // 25秒タイムアウト設定（データ無受信でタイムアウト）
+  const timeoutMs = options.timeoutMs || 25000;
+  const controller = new AbortController();
+  let timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      
-      let lines = buffer.split("\n");
-      buffer = lines.pop();
-      
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig,
+        tools: [{ googleSearch: {} }],
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ]
+      }),
+    });
+
+    if (!resp.ok) {
+      clearTimeout(timeoutId);
+      const et = await resp.text();
+      let errMsg = `Gemini HTTP ${resp.status}`;
+      try {
+          const errJson = JSON.parse(et);
+          if (errJson.error && errJson.error.message) errMsg += ` — ${errJson.error.message}`;
+      } catch (e) {
+          errMsg += ` — ${et.slice(0, 300)}`;
+      }
+      throw new Error(errMsg);
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    try {
+      while (true) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
         
-        const dataStr = trimmed.slice(6);
-        try {
-          const json = JSON.parse(dataStr);
-          const parts = json.candidates?.[0]?.content?.parts;
-          if (parts) {
-            for (const part of parts) {
-              const text = part.text || part.thought || "";
-              const isThought = !!part.thought;
-              if (text) {
-                onChunk({ text, isThought });
+        let lines = buffer.split("\n");
+        buffer = lines.pop();
+        
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data: ")) continue;
+          
+          const dataStr = trimmed.slice(6);
+          try {
+            const json = JSON.parse(dataStr);
+            const parts = json.candidates?.[0]?.content?.parts;
+            if (parts) {
+              for (const part of parts) {
+                const text = part.text || part.thought || "";
+                const isThought = !!part.thought;
+                if (text) {
+                  onChunk({ text, isThought });
+                }
               }
             }
+          } catch (e) {
+            // パーシャルなJSONのパースエラーは無視
           }
-        } catch (e) {
-          // パーシャルなJSONのパースエラーは無視
         }
       }
+    } finally {
+      reader.releaseLock();
     }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Timeout: ${model} stream (${timeoutMs / 1000}s)`);
+    }
+    throw err;
   } finally {
-    reader.releaseLock();
+    clearTimeout(timeoutId);
   }
 }
 
@@ -661,7 +729,14 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
     return _callOpenAIStream(apiKey.trim(), prompt, onChunk, onFallback, options);
   }
 
-  const allModels = [initialModel, ...GEMINI_MODELS.map(m => m.value).filter(m => m !== initialModel)];
+  // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
+  const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
+  const uniqueModels = new Set([
+    initialModel,
+    ...fallbackTargets,
+    ...GEMINI_MODELS.map(m => m.value)
+  ]);
+  const allModels = Array.from(uniqueModels);
 
   for (const modelId of allModels) {
       try {

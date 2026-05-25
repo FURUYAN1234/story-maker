@@ -1,14 +1,13 @@
 // ============================================================
-// data.js — Story Maker v3.3.7
+// data.js — Story Maker v3.4.0
 // ============================================================
 
 // テキスト生成用モデルリスト
 export const GEMINI_MODELS = [
-  { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
-  { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-  { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite' },
-  { value: 'gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash-Lite (Preview)' }
+  { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+  { value: 'gemini-flash-latest', label: 'Gemini Flash (Latest)' },
+  { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+  { value: 'gemini-pro-latest', label: 'Gemini Pro (Latest)' }
 ];
 
 export const MODES = [
