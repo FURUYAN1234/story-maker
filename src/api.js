@@ -331,6 +331,33 @@ let lastSuccessfulGeminiModel = null;
 let lastSuccessfulOpenAIModel = null;
 let lastSuccessfulOpenAIVisionModel = null;
 
+// 動的取得した利用可能なモデルリストのキャッシュ
+let availableOpenAIModels = null;
+
+/**
+ * OpenAIの利用可能モデルを動的に取得する
+ */
+async function fetchAvailableOpenAIModels(apiKey) {
+  if (availableOpenAIModels) return availableOpenAIModels;
+  try {
+    const response = await fetch("https://api.openai.com/v1/models", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      availableOpenAIModels = data.data.map(m => m.id);
+      console.log("[OpenAI] Dynamically fetched available models:", availableOpenAIModels);
+      return availableOpenAIModels;
+    }
+  } catch (e) {
+    console.warn("[OpenAI] Failed to fetch available models:", e.message);
+  }
+  return null;
+}
+
 const OPENAI_TEXT_MODELS = [
   "gpt-4o",
   "gpt-4o-mini",
@@ -342,11 +369,19 @@ const OPENAI_TEXT_MODELS = [
 ];
 
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
+  // 動的モデルフィルタリング
+  let activeTextModels = OPENAI_TEXT_MODELS;
+  const allowedModels = await fetchAvailableOpenAIModels(apiKey);
+  if (allowedModels && allowedModels.length > 0) {
+    activeTextModels = OPENAI_TEXT_MODELS.filter(m => allowedModels.includes(m));
+    if (activeTextModels.length === 0) activeTextModels = OPENAI_TEXT_MODELS;
+  }
+
   const models = [];
   if (lastSuccessfulOpenAIModel) {
     models.push(lastSuccessfulOpenAIModel);
   }
-  models.push(...OPENAI_TEXT_MODELS);
+  models.push(...activeTextModels);
   const uniqueModels = Array.from(new Set(models));
 
   const startModel = uniqueModels[0];
@@ -399,11 +434,19 @@ const OPENAI_VISION_MODELS = [
 async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
   const imageUrl = `data:${mimeType};base64,${imageBase64}`;
   
+  // 動的モデルフィルタリング
+  let activeVisionModels = OPENAI_VISION_MODELS;
+  const allowedModels = await fetchAvailableOpenAIModels(apiKey);
+  if (allowedModels && allowedModels.length > 0) {
+    activeVisionModels = OPENAI_VISION_MODELS.filter(m => allowedModels.includes(m));
+    if (activeVisionModels.length === 0) activeVisionModels = OPENAI_VISION_MODELS;
+  }
+
   const models = [];
   if (lastSuccessfulOpenAIVisionModel) {
     models.push(lastSuccessfulOpenAIVisionModel);
   }
-  models.push(...OPENAI_VISION_MODELS);
+  models.push(...activeVisionModels);
   const uniqueModels = Array.from(new Set(models));
 
   const startModel = uniqueModels[0];
