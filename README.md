@@ -435,6 +435,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.2
+- chore: Sync Gemini API models to latest stable version.
+
 ### v3.4.1 — 2026-05-25
 - **Thought Tag Leakage & Hybrid Parser Fix / AI思考プロセス（thoughtタグ）のリーク防止とハイブリッドパーサーの判定改善**:
   - Improved the CoT (Chain of Thought) parsing regex to correctly match and strip all `<thought>` tags (using `/<thought[^>]*>/i`) from the generated text, preventing raw AI thought processes from leaking into user-visible outputs. / AIの内部思考プロセス（`<thought>`タグ等）が生成結果の本文中に混入してリークする問題を防ぐため、 thought タグの除去・パース用正規表現を `/<thought[^>]*>/i` に強化・改善しました。

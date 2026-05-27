@@ -196,11 +196,12 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    'gemini-3.5-flash',                 // Primary: 最新の安定かつ高速モデル
-    'gemini-1.5-pro',                   // Backup 1: 高精細・フィルター寛容・超安定
-    'gemini-1.5-flash',                 // Backup 2: 高速・安定
-    'gemini-2.5-pro',                   // Legacy fallback
-    'gemini-2.5-flash',                 // Legacy fallback
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash"
   ];
 
   const errors = [];
@@ -555,11 +556,12 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    'gemini-3.5-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
-    'gemini-2.5-pro',
-    'gemini-2.5-flash',
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash"
   ];
 
   const errors = [];
