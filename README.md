@@ -435,6 +435,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.3
+- chore: Sync Gemini & OpenAI API models to latest stable version.
+
 ### v3.4.2
 - chore: Sync Gemini API models to latest stable version.
 
