@@ -435,6 +435,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.2 — 2026-05-28
+- **Style Rewrite Robustness & OpenAI API Compatibility Fix / 作風解析リライト機能の堅牢化とOpenAI API互換性の修正**:
+  - Replaced the direct injection of raw JSON style parameters with a formatted, human-readable text block. Removed the `reproduction_prompt` field from style analyzer data to prevent prompt confusion (competing instructions) in OpenAI models. / OpenAI API等の外部エンジンにおいてモデル競合（プロンプト内プロンプトによる誤認）を引き起こしていた `reproduction_prompt` の注入を廃止し、スタイルパラメータを人間が読みやすい整形プレーンテキスト形式で渡すように改善しました。
+  - Reinforced rewrite prompt guardrails by explicitly prohibiting noun-only fragments (excessive noun-based endings) and instructing models to treat style parameters as guidelines rather than absolute commands. Added concrete character range targets to stabilize text density. / 体言止めの過剰適用によって文章が名詞だらけ（崩壊）になるのを防ぐため、プロット維持や自然な日本語の優先を指示するガードレールを強化しました。また、文字数範囲の数値指定を追加しました。
+
 ### v3.4.1 — 2026-05-25
 - **Thought Tag Leakage & Hybrid Parser Fix / AI思考プロセス（thoughtタグ）のリーク防止とハイブリッドパーサーの判定改善**:
   - Improved the CoT (Chain of Thought) parsing regex to correctly match and strip all `<thought>` tags (using `/<thought[^>]*>/i`) from the generated text, preventing raw AI thought processes from leaking into user-visible outputs. / AIの内部思考プロセス（`<thought>`タグ等）が生成結果の本文中に混入してリークする問題を防ぐため、 thought タグの除去・パース用正規表現を `/<thought[^>]*>/i` に強化・改善しました。

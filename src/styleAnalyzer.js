@@ -112,18 +112,153 @@ const ANALYSIS_PROMPT = `あなたはプロの文芸批評家・計量文体学�
 // ============================================================
 // 作風反映プロンプト（生成後リライト方式）
 // ============================================================
-function buildReflectionPrompt(styleJson, originalText) {
-  return `あなたはプロの小説家です。以下の「元のテキスト」を、指定された「作風パラメータ」に完全に従ってリライトしてください。
 
-## 絶対遵守ルール:
-1. 物語のプロット（起承転結）、登場人物、設定は一切変更しない
-2. 文体・語彙・描写方法・セリフ回しのみを作風パラメータに合わせて変換する
-3. 文字数は元のテキストの80%〜120%の範囲に収める
-4. タイトルがあればそのまま維持する
-5. リライト結果のみを出力し、解説や注釈は一切付けない
+/**
+ * 作風JSONからリライト用の人間可読テキストを生成する。
+ * reproduction_promptは「AI向け再現指示」であり、リライトプロンプトに含めると
+ * モデルが二重指示に引きずられて暴走するため、意図的に除外する。
+ */
+function _formatStyleForRewrite(styleJson) {
+  const lines = [];
+  const add = (label, val) => { if (val) lines.push(`【${label}】${val}`); };
+  const sub = (label, val) => { if (val) lines.push(`  ・${label}: ${val}`); };
+
+  add('作風名', styleJson.style_name);
+  add('トーン', styleJson.tone);
+
+  // 語りの視点
+  if (typeof styleJson.narrative_voice === 'object' && styleJson.narrative_voice) {
+    lines.push('【語りの視点】');
+    sub('人称', styleJson.narrative_voice.person);
+    sub('距離感', styleJson.narrative_voice.distance);
+    sub('信頼度', styleJson.narrative_voice.reliability);
+    sub('介入度', styleJson.narrative_voice.intrusion);
+  } else {
+    add('語りの視点', styleJson.narrative_voice);
+  }
+
+  // 文体
+  if (styleJson.sentence_style) {
+    lines.push('【文体】');
+    sub('平均文長', styleJson.sentence_style.avg_length || styleJson.sentence_style.length);
+    sub('文長変動', styleJson.sentence_style.length_variation);
+    sub('文末パターン', styleJson.sentence_style.ending_patterns || styleJson.sentence_style.ending);
+    sub('リズム', styleJson.sentence_style.rhythm);
+    sub('段落長', styleJson.sentence_style.paragraph_length);
+    sub('段落構成', styleJson.sentence_style.paragraph_structure);
+  }
+
+  // 語彙
+  if (styleJson.vocabulary) {
+    lines.push('【語彙】');
+    sub('レベル', styleJson.vocabulary.level);
+    sub('情報密度', styleJson.vocabulary.density);
+    sub('レジスター', styleJson.vocabulary.register);
+    sub('特徴', styleJson.vocabulary.quirks);
+    sub('外来語', styleJson.vocabulary.foreign_words);
+    sub('古語/現代語', styleJson.vocabulary.archaic_modern);
+  }
+
+  // 修辞技法
+  if (styleJson.rhetoric) {
+    lines.push('【修辞技法】');
+    sub('比喩スタイル', styleJson.rhetoric.metaphor_style);
+    sub('比喩素材', styleJson.rhetoric.metaphor_source);
+    sub('反復技法', styleJson.rhetoric.repetition);
+    sub('アイロニー', styleJson.rhetoric.irony_level);
+    sub('ユーモア', styleJson.rhetoric.humor_type);
+    sub('その他', styleJson.rhetoric.other_techniques);
+  }
+
+  // 描写フォーカス
+  if (styleJson.description_focus) {
+    lines.push('【描写フォーカス】');
+    sub('視覚', styleJson.description_focus.visual);
+    sub('聴覚', styleJson.description_focus.auditory);
+    sub('触覚', styleJson.description_focus.tactile);
+    sub('嗅覚/味覚', styleJson.description_focus.olfactory_gustatory);
+    sub('運動感覚', styleJson.description_focus.kinesthetic);
+    sub('空間把握', styleJson.description_focus.spatial);
+    sub('心理描写', styleJson.description_focus.psychological_depth || styleJson.description_focus.psychological);
+    sub('Show:Tell', styleJson.description_focus.show_tell_ratio);
+  }
+
+  // セリフ
+  if (styleJson.dialogue) {
+    lines.push('【セリフ】');
+    sub('文体', styleJson.dialogue.style);
+    sub('機能', styleJson.dialogue.function);
+    sub('タグ', styleJson.dialogue.tag_style);
+    sub('方言', styleJson.dialogue.dialect_sociolect);
+    sub('サブテキスト', styleJson.dialogue.subtext);
+  }
+
+  // 構造
+  if (styleJson.structure) {
+    lines.push('【構造】');
+    sub('テンポ', styleJson.structure.pacing);
+    sub('場面転換', styleJson.structure.scene_transition);
+    sub('時制', styleJson.structure.time_handling);
+    sub('緊張曲線', styleJson.structure.tension_curve);
+    sub('冒頭パターン', styleJson.structure.opening_style);
+    sub('結末パターン', styleJson.structure.closing_style);
+  }
+
+  // 感情設計
+  if (styleJson.emotional_architecture) {
+    lines.push('【感情設計】');
+    sub('主要感情', styleJson.emotional_architecture.dominant_emotions);
+    sub('振り幅', styleJson.emotional_architecture.emotional_range);
+    sub('カタルシス', styleJson.emotional_architecture.catharsis_method);
+    sub('読者距離', styleJson.emotional_architecture.reader_distance);
+  }
+
+  add('テーマ傾向', styleJson.themes_tendency);
+  add('文学的影響', styleJson.literary_influences);
+
+  // 固有の特徴（箇条書き変換）
+  if (styleJson.unique_features?.length) {
+    lines.push('【固有の特徴】');
+    styleJson.unique_features.forEach(f => lines.push(`  ・${f}`));
+  }
+
+  // 回避パターン（箇条書き変換）
+  if (styleJson.anti_patterns?.length) {
+    lines.push('【回避パターン（この作風では避けるべき表現）】');
+    styleJson.anti_patterns.forEach(f => lines.push(`  ・${f}`));
+  }
+
+  // reproduction_promptは意図的に除外（二重プロンプト暴走防止）
+
+  return lines.join('\n');
+}
+
+function buildReflectionPrompt(styleJson, originalText) {
+  // 作風パラメータを人間可読な形式に整形（JSON丸投げ防止）
+  const formattedStyle = _formatStyleForRewrite(styleJson);
+
+  // 元テキストの文字数を事前計算（目安指示に使用）
+  const originalLength = originalText.length;
+  const minLength = Math.floor(originalLength * 0.8);
+  const maxLength = Math.ceil(originalLength * 1.2);
+
+  return `あなたはプロの小説家です。以下の「元のテキスト」を、指定された「作風パラメータ」のエッセンスを取り入れてリライトしてください。
+
+## 最重要ルール（絶対遵守・違反厳禁）:
+1. **物語の完全保持**: プロット（起承転結）、登場人物、セリフの内容、設定、事件の順序は一切変更しない。リライトとは「同じ物語を別の文体で語り直す」ことであり、物語の骨格を壊すことではない。
+2. **文章として成立させる**: リライト結果は必ず「小説・物語」として完全に成立する連続した散文であること。単語の羅列、名詞だけの断片、箇条書き、詩のような体言止めの連続は絶対に禁止する。
+3. **文字数の厳守**: 元のテキストは${originalLength.toLocaleString()}字です。リライト結果は${minLength.toLocaleString()}字〜${maxLength.toLocaleString()}字の範囲に収めること。この範囲を逸脱した場合は失敗とみなす。
+4. **タイトル保持**: タイトルがあればそのまま維持する。
+5. **出力制限**: リライト結果の本文のみを出力する。メタ解説、注釈、「以下はリライト結果です」等の前置きは一切付けない。
+
+## 作風パラメータの適用方針:
+- 以下の作風パラメータは「方向性の指針」として参考にすること。極端な値があっても、それを100%忠実に再現しようとして物語を破壊してはならない。
+- 例えば「体言止め40%」と記載されていても、全文を体言止めの名詞だけにしてはならない。あくまで「体言止めを多めに取り入れる」程度に留め、文章の流れと可読性を最優先する。
+- 「Show:Tell比率 10:0」と記載されていても、最低限の説明文（Tell）は物語の理解に必要なため、完全排除はしない。
+- 作風パラメータの各項目は「この方向性に寄せる」というガイドラインであり、物語の可読性・完成度を犠牲にしてまで厳密に従う必要はない。
 
 ## 作風パラメータ:
-${JSON.stringify(styleJson, null, 2)}
+${formattedStyle}
 
 ## 元のテキスト:
 ${originalText}
