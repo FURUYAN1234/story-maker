@@ -196,8 +196,6 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-2.5-flash",
     "gemini-2.5-pro",
     "gemini-1.5-pro",
@@ -256,8 +254,8 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
     return _callOpenAI(apiKey.trim(), prompt, onFallback, options);
   }
 
-  // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
-  const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
+  // 自動的に gemini-1.5-pro (または gemini-1.5-flash) へフォールバックするロジックを優先的に差し込む
+  const fallbackTargets = ['gemini-1.5-pro', 'gemini-1.5-flash'];
   
   const modelList = [];
   if (lastSuccessfulGeminiModel) {
@@ -634,8 +632,6 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-2.5-flash",
     "gemini-2.5-pro",
     "gemini-1.5-pro",
@@ -888,8 +884,8 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
     return _callOpenAIStream(apiKey.trim(), prompt, onChunk, onFallback, options);
   }
 
-  // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
-  const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
+  // 自動的に gemini-1.5-pro (または gemini-1.5-flash) へフォールバックするロジックを優先的に差し込む
+  const fallbackTargets = ['gemini-1.5-pro', 'gemini-1.5-flash'];
 
   const modelList = [];
   if (lastSuccessfulGeminiModel) {

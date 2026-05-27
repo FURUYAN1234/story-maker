@@ -1002,7 +1002,8 @@ async function runReflection() {
       addSystemLog(`[システム] リライト応答遅延のため、モデルを ${m} にフォールバックします...`);
     };
 
-    const { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb);
+    // リライトは重いタスクのため、タイムアウトを60秒に延長
+    const { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb, { timeoutMs: 60000 });
 
     if (apiWaitTimer) {
       clearInterval(apiWaitTimer);
