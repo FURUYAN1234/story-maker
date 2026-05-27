@@ -435,6 +435,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.4 (2026-05-28)
+- ** [Fix] ** OpenAI/Gemini API接続時における無効・未解放モデル優先によるフォールバック遅延バグの修正。一度接続に成功したモデルをキャッシュして2回目以降に最優先で呼び出す「成功モデルキャッシュ機能」を導入し、OpenAIの優先順位を `gpt-4o` 先頭に最適化。 / Fixed a bug where invalid or unreleased models were prioritized, causing excessive fallback delays. Introduced a "successful model cache" to immediately reuse the working model on subsequent requests, and optimized OpenAI model priority with `gpt-4o` first.
+
 ### v3.4.3
 - chore: Sync Gemini & OpenAI API models to latest stable version.
 

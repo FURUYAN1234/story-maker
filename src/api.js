@@ -258,11 +258,16 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 
   // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
   const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
-  const uniqueModels = new Set([
-    initialModel,
-    ...fallbackTargets,
-    ...GEMINI_MODELS.map(m => m.value)
-  ]);
+  
+  const modelList = [];
+  if (lastSuccessfulGeminiModel) {
+    modelList.push(lastSuccessfulGeminiModel);
+  }
+  modelList.push(initialModel);
+  modelList.push(...fallbackTargets);
+  modelList.push(...GEMINI_MODELS.map(m => m.value));
+
+  const uniqueModels = new Set(modelList);
   const allModels = Array.from(uniqueModels);
 
   const errors = [];
@@ -270,10 +275,12 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   let isQuotaExceeded = false;
   let isAuthError = false;
 
+  const startModel = allModels[0];
   for (const modelId of allModels) {
       try {
-          if (modelId !== initialModel && onFallback) onFallback(modelId);
+          if (modelId !== startModel && onFallback) onFallback(modelId);
           const text = await _callGemini(apiKey, modelId, prompt, options);
+          lastSuccessfulGeminiModel = modelId;
           return { text, usedModel: modelId };
       } catch (err) {
           const msg = err.message || '';
@@ -319,20 +326,33 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 // OpenAI API呼び出しロジック
 // ============================================================
 
+// 一度接続成功したモデルのキャッシュ（フォールバック遅延防止）
+let lastSuccessfulGeminiModel = null;
+let lastSuccessfulOpenAIModel = null;
+let lastSuccessfulOpenAIVisionModel = null;
+
 const OPENAI_TEXT_MODELS = [
+  "gpt-4o",
+  "gpt-4o-mini",
   "gpt-5.5",
   "gpt-5.5-instant",
   "gpt-5.4",
   "gpt-5.4-mini",
-  "gpt-5.4-nano",
-  "gpt-4o",
-  "gpt-4o-mini"
+  "gpt-5.4-nano"
 ];
 
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
-  for (const modelId of OPENAI_TEXT_MODELS) {
+  const models = [];
+  if (lastSuccessfulOpenAIModel) {
+    models.push(lastSuccessfulOpenAIModel);
+  }
+  models.push(...OPENAI_TEXT_MODELS);
+  const uniqueModels = Array.from(new Set(models));
+
+  const startModel = uniqueModels[0];
+  for (const modelId of uniqueModels) {
     try {
-      if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
+      if (modelId !== startModel && onFallback) onFallback(modelId);
       const resp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -357,6 +377,7 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
       const text = data.choices?.[0]?.message?.content || "";
       if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
 
+      lastSuccessfulOpenAIModel = modelId;
       return { text, usedModel: modelId };
     } catch (err) {
       console.warn(`Model ${modelId} failed:`, err.message);
@@ -368,18 +389,27 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
 }
 
 const OPENAI_VISION_MODELS = [
+  "gpt-4o",
+  "gpt-4o-mini",
   "gpt-5.5",
   "gpt-5.4",
-  "gpt-4o",
   "gpt-5.4-mini"
 ];
 
 async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
   const imageUrl = `data:${mimeType};base64,${imageBase64}`;
   
-  for (const modelId of OPENAI_VISION_MODELS) {
+  const models = [];
+  if (lastSuccessfulOpenAIVisionModel) {
+    models.push(lastSuccessfulOpenAIVisionModel);
+  }
+  models.push(...OPENAI_VISION_MODELS);
+  const uniqueModels = Array.from(new Set(models));
+
+  const startModel = uniqueModels[0];
+  for (const modelId of uniqueModels) {
     try {
-      if (modelId !== OPENAI_VISION_MODELS[0] && onFallback) onFallback(modelId);
+      if (modelId !== startModel && onFallback) onFallback(modelId);
       const resp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -412,6 +442,7 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
       const text = data.choices?.[0]?.message?.content || "";
       if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
 
+      lastSuccessfulOpenAIVisionModel = modelId;
       return { text, usedModel: modelId };
     } catch (err) {
       console.warn(`Vision Model ${modelId} failed:`, err.message);
@@ -619,9 +650,17 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
  * OpenAI APIストリーミング呼び出し
  */
 async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = {}) {
-  for (const modelId of OPENAI_TEXT_MODELS) {
+  const models = [];
+  if (lastSuccessfulOpenAIModel) {
+    models.push(lastSuccessfulOpenAIModel);
+  }
+  models.push(...OPENAI_TEXT_MODELS);
+  const uniqueModels = Array.from(new Set(models));
+
+  const startModel = uniqueModels[0];
+  for (const modelId of uniqueModels) {
     try {
-      if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
+      if (modelId !== startModel && onFallback) onFallback(modelId);
       const resp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -678,6 +717,7 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
         reader.releaseLock();
       }
 
+      lastSuccessfulOpenAIModel = modelId;
       return { usedModel: modelId };
     } catch (err) {
       console.warn(`Model ${modelId} stream failed:`, err.message);
@@ -807,11 +847,16 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
 
   // 自動的に gemini-1.5-pro (または gemini-pro-latest) へフォールバックするロジックを優先的に差し込む
   const fallbackTargets = ['gemini-1.5-pro', 'gemini-pro-latest'];
-  const uniqueModels = new Set([
-    initialModel,
-    ...fallbackTargets,
-    ...GEMINI_MODELS.map(m => m.value)
-  ]);
+
+  const modelList = [];
+  if (lastSuccessfulGeminiModel) {
+    modelList.push(lastSuccessfulGeminiModel);
+  }
+  modelList.push(initialModel);
+  modelList.push(...fallbackTargets);
+  modelList.push(...GEMINI_MODELS.map(m => m.value));
+
+  const uniqueModels = new Set(modelList);
   const allModels = Array.from(uniqueModels);
 
   const errors = [];
@@ -819,10 +864,12 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
   let isQuotaExceeded = false;
   let isAuthError = false;
 
+  const startModel = allModels[0];
   for (const modelId of allModels) {
       try {
-          if (modelId !== initialModel && onFallback) onFallback(modelId);
+          if (modelId !== startModel && onFallback) onFallback(modelId);
           await _callGeminiStream(apiKey, modelId, prompt, onChunk, options);
+          lastSuccessfulGeminiModel = modelId;
           return { usedModel: modelId };
       } catch (err) {
           const msg = err.message || '';
