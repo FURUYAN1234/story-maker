@@ -559,9 +559,11 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
+    'gemini-3.5-flash',
     'gemini-1.5-pro',
+    'gemini-1.5-flash',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
   ];
 
   const errors = [];
@@ -690,7 +692,7 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
   const generationConfig = { maxOutputTokens: 8192, temperature: 1.0 };
   
-  if (!options.disableThinkingConfig && model.includes("gemini-2.0")) {
+  if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3") || model.includes("gemini-3.5"))) {
     generationConfig.thinkingConfig = {
       thinkingBudget: 2048
     };
