@@ -435,6 +435,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.9 — 2026-05-28
+- **Fix System-Wide Process Termination & Version Sync / システムプロセス強制終了バグの修正とバージョン同期**:
+  - Removed `taskkill /F /IM node.exe` from `start_Story_app.bat` to prevent the startup script from killing unrelated Node.js applications (such as VOICEVOX or other dev servers) running in the background. / `start_Story_app.bat` から、起動時にバックグラウンドで動いている無関係な Node.js アプリ（VOICEVOX や他の開発サーバーなど）を巻き込んで強制終了させていた `taskkill` 処理を削除し、安全にローカルサーバーを起動できるよう改善しました。
+  - Synced all version strings to `v3.4.9`. / バージョン表記を `v3.4.9` に一括同期しました。
+
 ### v3.4.8 — 2026-05-28
 - **Robust JSON Parser for Technical Blogs & OpenAI API / 技術ブログ等に対するJSONパースの頑健化とOpenAI対応**:
   - Replaced the fragile `inString`-based state machine in `extractFirstJsonObject` with a simple and robust boundary search using `indexOf('{')` and `lastIndexOf('}')` to prevent truncation of valid JSON responses that contain double quotes inside values. / 文字列値内に生のダブルクォーテーションや中括弧が含まれる場合に、従来の `inString` ステートマシンが区切り文字と誤認して不完全なJSONを切り出してしまっていたバグを解消するため、`indexOf` / `lastIndexOf` を用いた境界抽出ロジックに修正しました。
