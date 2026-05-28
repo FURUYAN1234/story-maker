@@ -435,10 +435,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
-### v3.4.4 — 2026-05-28
-- **Robust JSON Extraction & Parser Error Fix / JSON抽出・修復パースエラーの修正**:
+### v3.4.8 — 2026-05-28
+- **Robust JSON Parser for Technical Blogs & OpenAI API / 技術ブログ等に対するJSONパースの頑健化とOpenAI対応**:
   - Replaced the fragile `inString`-based state machine in `extractFirstJsonObject` with a simple and robust boundary search using `indexOf('{')` and `lastIndexOf('}')` to prevent truncation of valid JSON responses that contain double quotes inside values. / 文字列値内に生のダブルクォーテーションや中括弧が含まれる場合に、従来の `inString` ステートマシンが区切り文字と誤認して不完全なJSONを切り出してしまっていたバグを解消するため、`indexOf` / `lastIndexOf` を用いた境界抽出ロジックに修正しました。
   - Rewrote the repair mechanism in `parseJsonWithRepair` and `parseCharacterJson` to safely escape raw newline and tab control characters inside string values without corrupting existing valid escapes and quote boundaries. / `parseJsonWithRepair` および `parseCharacterJson` 内の修復処理を再設計し、エスケープシーケンスやクォート構造を破壊することなく、値内の実際の改行・タブ等の制御文字のみを安全に `\n` / `\t` に自動エスケープする堅牢な処理へと刷新しました。
+  - Introduced key-boundary based JSON parser (`robustParseJson`) to slice and rebuild JSON fields based on known keys, completely avoiding parse errors even when unescaped quotes or raw newlines are included in values. This robust logic is shared across Gemini and OpenAI pipelines. / 既知のキー名（`style_name` 等）の出現位置に基づいて値を自動スライスし、値の中の生ダブルクォートや生改行を安全にエスケープした上でJSONオブジェクトを再構築する `robustParseJson` を導入。この頑健なパースロジックをGeminiおよびOpenAIの共通パイプラインに適用しました。
+  - Configured `temperature: 0.1` for style analysis to drastically reduce format deviations from AI models. / 作風解析時のAPIオプションに `temperature: 0.1` を設定し、AIの出力のブレを最小限に抑えるよう最適化。
 
 ### v3.4.3 — 2026-05-28
 - **Gemini Fallback Story Truncation & Hybrid Recovery Bug Fix / Geminiフォールバックストーリー欠落バグとハイブリッド救出処理の修正**:
