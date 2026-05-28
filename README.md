@@ -435,6 +435,16 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.4.4 — 2026-05-28
+- **Robust JSON Extraction & Parser Error Fix / JSON抽出・修復パースエラーの修正**:
+  - Replaced the fragile `inString`-based state machine in `extractFirstJsonObject` with a simple and robust boundary search using `indexOf('{')` and `lastIndexOf('}')` to prevent truncation of valid JSON responses that contain double quotes inside values. / 文字列値内に生のダブルクォーテーションや中括弧が含まれる場合に、従来の `inString` ステートマシンが区切り文字と誤認して不完全なJSONを切り出してしまっていたバグを解消するため、`indexOf` / `lastIndexOf` を用いた境界抽出ロジックに修正しました。
+  - Rewrote the repair mechanism in `parseJsonWithRepair` and `parseCharacterJson` to safely escape raw newline and tab control characters inside string values without corrupting existing valid escapes and quote boundaries. / `parseJsonWithRepair` および `parseCharacterJson` 内の修復処理を再設計し、エスケープシーケンスやクォート構造を破壊することなく、値内の実際の改行・タブ等の制御文字のみを安全に `\n` / `\t` に自動エスケープする堅牢な処理へと刷新しました。
+
+### v3.4.3 — 2026-05-28
+- **Gemini Fallback Story Truncation & Hybrid Recovery Bug Fix / Geminiフォールバックストーリー欠落バグとハイブリッド救出処理の修正**:
+  - Fixed a bug where index prioritisation of `Topic:` and `タイトル:` in fallback recovery logic was incorrectly truncating the main story text when both tags were present in the native thought process. Corrected the start index logic to select the minimum index (earliest occurrence) of either tag. / `useNativeThought` 時に `Topic:` と `タイトル:` の両方が存在する場合にインデックス優先判定が誤って後方のタグを選び、本文をすべて切り捨ててしまう（文字数が41字程度になる）バグを修正。より小さい（最初に出現する）インデックスを正しく `startIdx` に選定するように改善しました。
+  - Enhanced the hybrid parse fallback recovery logic for cases where `useNativeThought` is `false` by allowing keyword-based slicing of `totalText` and cleaning leftover thought tags to prevent tag leakage. / `useNativeThought` が `false` の時の救出フォールバックにおいても、`totalText` の中に `Topic:` や `タイトル:` が含まれていればそこからスライスし、なければ `thought` タグを完全に除去して本文を救出する頑健なロジックへと拡張しました。
+
 ### v3.4.2 — 2026-05-28
 - **Style Rewrite Robustness & OpenAI API Compatibility Fix / 作風解析リライト機能の堅牢化とOpenAI API互換性の修正**:
   - Replaced the direct injection of raw JSON style parameters with a formatted, human-readable text block. Removed the `reproduction_prompt` field from style analyzer data to prevent prompt confusion (competing instructions) in OpenAI models. / OpenAI API等の外部エンジンにおいてモデル競合（プロンプト内プロンプトによる誤認）を引き起こしていた `reproduction_prompt` の注入を廃止し、スタイルパラメータを人間が読みやすい整形プレーンテキスト形式で渡すように改善しました。

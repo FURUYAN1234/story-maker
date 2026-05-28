@@ -48,6 +48,48 @@ function fileToBase64(file) {
   });
 }
 
+// 文字列値内の制御文字（生改行、生タブ）を安全にエスケープする
+function escapeControlCharsInStrings(jsonStr) {
+  let result = '';
+  let inString = false;
+  
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i];
+    
+    if (inString) {
+      if (char === '\\') {
+        result += char;
+        if (i + 1 < jsonStr.length) {
+          result += jsonStr[i + 1];
+          i++;
+        }
+      } else if (char === '"') {
+        inString = false;
+        result += char;
+      } else if (char === '\n') {
+        result += '\\n';
+      } else if (char === '\r') {
+        result += '\\n';
+        if (i + 1 < jsonStr.length && jsonStr[i + 1] === '\n') {
+          i++;
+        }
+      } else if (char === '\t') {
+        result += '\\t';
+      } else {
+        result += char;
+      }
+    } else {
+      if (char === '"') {
+        inString = true;
+        result += char;
+      } else {
+        result += char;
+      }
+    }
+  }
+  return result;
+}
+
 /**
  * AIレスポンスからJSONを安全にパース
  */
@@ -57,7 +99,25 @@ function parseCharacterJson(text) {
   // JSON配列部分だけを抽出
   const match = cleaned.match(/\[[\s\S]*\]/);
   if (!match) throw new Error('AIの応答からキャラクター情報を抽出できませんでした');
-  return JSON.parse(match[0]);
+  
+  let raw = match[0];
+  
+  // まず素直にパースを試行
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.warn('キャラクターJSON初回パース失敗、修復を試行:', err.message);
+  }
+  
+  // 修復処理
+  let fixed = escapeControlCharsInStrings(raw);
+  fixed = fixed.replace(/,\s*([\]}])/g, '$1'); // 末尾カンマ除去
+  
+  try {
+    return JSON.parse(fixed);
+  } catch (err) {
+    throw new Error(`AIの応答JSONの解析に失敗しました。元のエラー: ${err.message}`);
+  }
 }
 
 /**

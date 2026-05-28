@@ -1,5 +1,5 @@
 // ============================================================
-// main.js — v3.4.2
+// main.js — v3.4.4
 // ============================================================
 import './style.css';
 import {
@@ -1217,7 +1217,10 @@ async function generate() {
         } else {
           const topicIdx = nativeThoughtText.indexOf("Topic:");
           const titleIdx = nativeThoughtText.indexOf("タイトル:");
-          const startIdx = topicIdx !== -1 ? topicIdx : (titleIdx !== -1 ? titleIdx : -1);
+          const indices = [];
+          if (topicIdx !== -1) indices.push(topicIdx);
+          if (titleIdx !== -1) indices.push(titleIdx);
+          const startIdx = indices.length > 0 ? Math.min(...indices) : -1;
           if (startIdx !== -1) {
             finalStory = nativeThoughtText.slice(startIdx);
           } else {
@@ -1225,8 +1228,19 @@ async function generate() {
           }
         }
       } else {
-        // ハイブリッドパースでの救出：キーワードがヒットせず totalText がすべて thought になってしまった場合
-        finalStory = totalText;
+        // ハイブリッドパースでの救出：キーワードがヒットせず totalText がすべて thought になった場合
+        const topicIdx = totalText.indexOf("Topic:");
+        const titleIdx = totalText.indexOf("タイトル:");
+        const indices = [];
+        if (topicIdx !== -1) indices.push(topicIdx);
+        if (titleIdx !== -1) indices.push(titleIdx);
+        const startIdx = indices.length > 0 ? Math.min(...indices) : -1;
+        if (startIdx !== -1) {
+          finalStory = totalText.slice(startIdx);
+        } else {
+          // タグそのものを除去して救出を試みる
+          finalStory = totalText.replace(/<\/?thought[^>]*>/gi, '');
+        }
       }
     }
     

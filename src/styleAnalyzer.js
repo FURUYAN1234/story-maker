@@ -100,7 +100,7 @@ const ANALYSIS_PROMPT = `あなたはプロの文芸批評家・計量文体学�
 - 各項目は「一言」ではなく「具体的根拠を含む2〜3文」で記述すること
 - unique_featuresは最低5項目、具体的な用例を添えること
 - reproduction_promptは他のAIにそのままコピペして使える完成度にすること
-- 値の文字列内で二重引用符を使用する場合は、生のダブルクォーテーション（"）ではなく、必ず二重山括弧（『』）や角括弧（「」）を使用すること
+- 【最重要】値の文字列内で二重引用符を使用する場合は、生の半角ダブルクォーテーション（"）を出力することを完全に禁止します。もし引用やコードブロックなどで二重引用符を出力する必要がある場合は、必ず全角の二重引用符（””）か二重山括弧（『』）に置換して出力してください。生の半角ダブルクォーテーション（"）は、JSONのキー名と値の囲み記号としてのみしか使用してはなりません。値の文字列の中に生の半角ダブルクォーテーション（"）が混入するとJSONの構文エラーになるため、このルールは絶対に遵守してください。
 - **画像のみの入力、あるいは情報が少ない入力に対する指示**:
   - 入力されたテキストが短い単語・一文のみである場合、または画像（イラスト）のみの入力である場合は、その言葉や絵の空気感から想起される背景、世界観、感情、言外のニュアンス、またはポップカルチャーや文化的背景を最大限に想像・補完してください。
   - 特に画像のみの解析時におけるテキスト固有の項目（文体、語彙、セリフ、修辞、テンポ等）については、「もしこのイラストを描いた作者が文章を執筆するならば、どのような文体、語彙、テンポ、語り口にするか」を想像力をフルに働かせて具体的に推測・補完してください。
@@ -250,6 +250,7 @@ function buildReflectionPrompt(styleJson, originalText) {
 3. **文字数の厳守**: 元のテキストは${originalLength.toLocaleString()}字です。リライト結果は${minLength.toLocaleString()}字〜${maxLength.toLocaleString()}字の範囲に収めること。この範囲を逸脱した場合は失敗とみなす。
 4. **タイトル保持**: タイトルがあればそのまま維持する。
 5. **出力制限**: リライト結果の本文のみを出力する。メタ解説、注釈、「以下はリライト結果です」等の前置きは一切付けない。
+6. **物語の体裁の維持と自然な融合（ぶつ切りの解説挿入の禁止）**: 作風パラメータに「読者への問いかけ」「解説の挿入」「ツッコミ」等の指示がある場合、それらを小説のストーリーの中に唐突な「現実のPCやIT製品のブログ解説記事（例:『PCを処分する際、データをそのまま放置していませんか？』等）」としてそのままぶつ切りで挿入し、小説としての体裁を崩してはならない。作風（語り口、比喩のスタイル、ツッコミのトーン）は、必ず**小説内の事象（例: 電脳戦国世界での出来事や、登場人物の行動・運命）に引き寄せて、物語の一部として自然に溶け込ませて適用すること**。例えば、現実の製品名（EaseUS BitWiper等）やIT用語を比喩（例:「まるでSSDのウェアレベリングのように...」）や電脳世界の用語としてストーリー内に取り入れることは歓迎されるが、物語の文脈を無視して無関係な現実世界のブログ記事の地の文をそのまま挿入することは厳禁である。
 
 ## 作風パラメータの適用方針:
 - 以下の作風パラメータは「方向性の指針」として参考にすること。極端な値があっても、それを100%忠実に再現しようとして物語を破壊してはならない。
@@ -531,42 +532,223 @@ function updateImageList() {
 function extractFirstJsonObject(text) {
   const startIdx = text.indexOf('{');
   if (startIdx === -1) return null;
+  const endIdx = text.lastIndexOf('}');
+  if (endIdx === -1 || endIdx < startIdx) return null;
+  return text.slice(startIdx, endIdx + 1);
+}
 
-  let braceCount = 0;
+// 文字列値内の制御文字（生改行、生タブ）を安全にエスケープする
+function escapeControlCharsInStrings(jsonStr) {
+  let result = '';
   let inString = false;
-  let escape = false;
-
-  for (let i = startIdx; i < text.length; i++) {
-    const char = text[i];
-
-    if (escape) {
-      escape = false;
-      continue;
-    }
-
-    if (char === '\\') {
-      escape = true;
-      continue;
-    }
-
-    if (char === '"') {
-      inString = !inString;
-      continue;
-    }
-
-    if (!inString) {
-      if (char === '{') {
-        braceCount++;
-      } else if (char === '}') {
-        braceCount--;
-        if (braceCount === 0) {
-          return text.slice(startIdx, i + 1);
+  
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i];
+    
+    if (inString) {
+      if (char === '\\') {
+        result += char;
+        if (i + 1 < jsonStr.length) {
+          result += jsonStr[i + 1];
+          i++;
         }
+      } else if (char === '"') {
+        inString = false;
+        result += char;
+      } else if (char === '\n') {
+        result += '\\n';
+      } else if (char === '\r') {
+        result += '\\n';
+        if (i + 1 < jsonStr.length && jsonStr[i + 1] === '\n') {
+          i++;
+        }
+      } else if (char === '\t') {
+        result += '\\t';
+      } else {
+        result += char;
+      }
+    } else {
+      if (char === '"') {
+        inString = true;
+        result += char;
+      } else {
+        result += char;
       }
     }
   }
+  return result;
+}
 
-  return null;
+// 既知のすべてのキー名の一覧（ネストされたキーも含む）
+const ALL_KEYS = [
+  "style_name", "tone", "narrative_voice", "person", "distance", "reliability", "intrusion",
+  "sentence_style", "avg_length", "length_variation", "ending_patterns", "rhythm", "paragraph_length", "paragraph_structure",
+  "vocabulary", "level", "density", "register", "quirks", "foreign_words", "archaic_modern",
+  "rhetoric", "metaphor_style", "metaphor_source", "repetition", "irony_level", "humor_type", "other_techniques",
+  "description_focus", "visual", "auditory", "tactile", "olfactory_gustatory", "kinesthetic", "spatial", "psychological_depth", "show_tell_ratio",
+  "dialogue", "style", "function", "tag_style", "dialect_sociolect", "subtext",
+  "structure", "pacing", "scene_transition", "time_handling", "tension_curve", "opening_style", "closing_style",
+  "emotional_architecture", "dominant_emotions", "emotional_range", "catharsis_method", "reader_distance",
+  "themes_tendency", "literary_influences", "unique_features", "anti_patterns", "reproduction_prompt"
+];
+
+// キー境界ベースでJSONをスライス＆再構築する最終兵器パーサー
+function robustParseJson(raw) {
+  let fixed = raw.trim();
+
+  // コメントの除去
+  fixed = fixed.replace(/\/\/[^\n]*/g, '');
+  fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const keyMatches = [];
+  ALL_KEYS.forEach(key => {
+    const regex = new RegExp(`"${key}"\\s*:`, 'g');
+    let match;
+    while ((match = regex.exec(fixed)) !== null) {
+      keyMatches.push({
+        key: key,
+        start: match.index,
+        end: match.index + match[0].length
+      });
+    }
+  });
+
+  keyMatches.sort((a, b) => a.start - b.start);
+
+  if (keyMatches.length === 0) {
+    return JSON.parse(fixed);
+  }
+
+  const parsedObj = {};
+
+  for (let i = 0; i < keyMatches.length; i++) {
+    const currentKeyInfo = keyMatches[i];
+    const nextKeyInfo = keyMatches[i + 1];
+    
+    const valStart = currentKeyInfo.end;
+    let valEnd = nextKeyInfo ? nextKeyInfo.start : fixed.length;
+    
+    let valText = fixed.slice(valStart, valEnd).trim();
+    
+    // もしこれが最後のキーである場合、JSON全体の閉じ括弧 '}' を取り除く
+    if (!nextKeyInfo) {
+      const lastBraceIdx = valText.lastIndexOf('}');
+      if (lastBraceIdx !== -1) {
+        valText = valText.slice(0, lastBraceIdx).trim();
+      }
+    }
+
+    // 前後の不要なカンマや改行、空白をクリーンアップ
+    valText = valText.replace(/^[,\s\r\n\t]+|[,\s\r\n\t]+$/g, '');
+    
+    if (valText.startsWith('[') && valText.endsWith(']')) {
+      let inner = valText.slice(1, -1).trim();
+      const parsedElements = [];
+      
+      const matches = inner.split(/",\s*"/);
+      matches.forEach((el, idx) => {
+        let cleanEl = el.trim();
+        if (idx === 0 && cleanEl.startsWith('"')) cleanEl = cleanEl.slice(1);
+        if (idx === matches.length - 1 && cleanEl.endsWith('"')) cleanEl = cleanEl.slice(0, -1);
+        
+        cleanEl = cleanEl.replace(/"/g, '\\"');
+        cleanEl = cleanEl.replace(/\r?\n/g, '\\n').replace(/\t/g, '\\t');
+        parsedElements.push(cleanEl);
+      });
+      
+      parsedObj[currentKeyInfo.key] = parsedElements;
+    } 
+    else {
+      let isString = false;
+      if (valText.startsWith('"')) {
+        valText = valText.slice(1);
+        isString = true;
+      }
+      if (valText.endsWith('"')) {
+        valText = valText.slice(0, -1);
+      }
+      
+      if (isString) {
+        valText = valText.replace(/"/g, '\\"');
+        valText = valText.replace(/\r?\n/g, '\\n').replace(/\t/g, '\\t');
+      }
+      
+      parsedObj[currentKeyInfo.key] = valText;
+    }
+  }
+
+  const finalJson = {
+    style_name: parsedObj.style_name || "",
+    tone: parsedObj.tone || "",
+    narrative_voice: {
+      person: parsedObj.person || "",
+      distance: parsedObj.distance || "",
+      reliability: parsedObj.reliability || "",
+      intrusion: parsedObj.intrusion || ""
+    },
+    sentence_style: {
+      avg_length: parsedObj.avg_length || "",
+      length_variation: parsedObj.length_variation || "",
+      ending_patterns: parsedObj.ending_patterns || "",
+      rhythm: parsedObj.rhythm || "",
+      paragraph_length: parsedObj.paragraph_length || "",
+      paragraph_structure: parsedObj.paragraph_structure || ""
+    },
+    vocabulary: {
+      level: parsedObj.level || "",
+      density: parsedObj.density || "",
+      register: parsedObj.register || "",
+      quirks: parsedObj.quirks || "",
+      foreign_words: parsedObj.foreign_words || "",
+      archaic_modern: parsedObj.archaic_modern || ""
+    },
+    rhetoric: {
+      metaphor_style: parsedObj.metaphor_style || "",
+      metaphor_source: parsedObj.metaphor_source || "",
+      repetition: parsedObj.repetition || "",
+      irony_level: parsedObj.irony_level || "",
+      humor_type: parsedObj.humor_type || "",
+      other_techniques: parsedObj.other_techniques || ""
+    },
+    description_focus: {
+      visual: parsedObj.visual || "",
+      auditory: parsedObj.auditory || "",
+      tactile: parsedObj.tactile || "",
+      olfactory_gustatory: parsedObj.olfactory_gustatory || "",
+      kinesthetic: parsedObj.kinesthetic || "",
+      spatial: parsedObj.spatial || "",
+      psychological_depth: parsedObj.psychological_depth || "",
+      show_tell_ratio: parsedObj.show_tell_ratio || ""
+    },
+    dialogue: {
+      style: parsedObj.style || "",
+      function: parsedObj.function || "",
+      tag_style: parsedObj.tag_style || "",
+      dialect_sociolect: parsedObj.dialect_sociolect || "",
+      subtext: parsedObj.subtext || ""
+    },
+    structure: {
+      pacing: parsedObj.pacing || "",
+      scene_transition: parsedObj.scene_transition || "",
+      time_handling: parsedObj.time_handling || "",
+      tension_curve: parsedObj.tension_curve || "",
+      opening_style: parsedObj.opening_style || "",
+      closing_style: parsedObj.closing_style || ""
+    },
+    emotional_architecture: {
+      dominant_emotions: parsedObj.dominant_emotions || "",
+      emotional_range: parsedObj.emotional_range || "",
+      catharsis_method: parsedObj.catharsis_method || "",
+      reader_distance: parsedObj.reader_distance || ""
+    },
+    themes_tendency: parsedObj.themes_tendency || "",
+    literary_influences: parsedObj.literary_influences || "",
+    unique_features: Array.isArray(parsedObj.unique_features) ? parsedObj.unique_features : [],
+    anti_patterns: Array.isArray(parsedObj.anti_patterns) ? parsedObj.anti_patterns : [],
+    reproduction_prompt: parsedObj.reproduction_prompt || ""
+  };
+
+  return finalJson;
 }
 
 // ============================================================
@@ -583,118 +765,15 @@ function parseJsonWithRepair(raw) {
 
   let fixed = raw.trim();
 
-  // 1. JSONコメント除去: // ... や /* ... */
+  // 1. 文字列値内の制御文字（生改行・生タブ）のエスケープ
+  fixed = escapeControlCharsInStrings(fixed);
+
+  // 2. JSONコメント除去: // ... や /* ... */
   fixed = fixed.replace(/\/\/[^\n]*/g, '');
   fixed = fixed.replace(/\/\*[\s\S]*?\*\//g, '');
 
-  // 2. シングルクォートをダブルクォートに変換（キー名のみ、値内のアポストロフィは除外）
+  // 3. シングルクォートをダブルクォートに変換（キー名のみ、値内のアポストロフィは除外）
   fixed = fixed.replace(/(\{|,)\s*'([^']+)'\s*:/g, '$1"$2":');
-
-  // 3. 制御文字やエスケープされていないダブルクォートを修復するためのステートマシン
-  let result = '';
-  let inString = false;
-  let currentString = '';
-
-  for (let i = 0; i < fixed.length; i++) {
-    const char = fixed[i];
-
-    if (!inString) {
-      if (char === '"') {
-        inString = true;
-        currentString = '';
-      } else {
-        result += char;
-      }
-    } else {
-      // 文字列の内部
-      if (char === '\\') {
-        // エスケープ文字
-        if (i + 1 < fixed.length) {
-          const nextChar = fixed[i + 1];
-          currentString += '\\' + nextChar;
-          i++; // 次の文字を消費
-        } else {
-          currentString += '\\';
-        }
-      } else if (char === '"') {
-        // ダブルクォートを発見。これが本当の終了クォートか、それとも文字列内の生のクォートか判定する。
-        // 判断のために、このダブルクォートの後の有効な次の文字（スペース・改行以外の文字）を確認する。
-        let nextValidChar = '';
-        let nextIdx = i + 1;
-        while (nextIdx < fixed.length) {
-          const c = fixed[nextIdx];
-          if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
-            nextValidChar = c;
-            break;
-          }
-          nextIdx++;
-        }
-
-        // 判断基準：
-        // もしこの文字列がキー名である場合、その後に ':' が続くはず。
-        // もしこの文字列が値である場合、その後に ',' または '}' または ']' が続くはず。
-        let isRealEnd = false;
-        if (nextValidChar === ':') {
-          isRealEnd = true;
-        } else if (nextValidChar === '}' || nextValidChar === ']' || nextValidChar === '') {
-          isRealEnd = true;
-        } else if (nextValidChar === ',') {
-          // カンマの場合、さらにその次の有効な文字を先読みする
-          let afterCommaChar = '';
-          let afterCommaIdx = nextIdx + 1;
-          while (afterCommaIdx < fixed.length) {
-            const c = fixed[afterCommaIdx];
-            if (c !== ' ' && c !== '\t' && c !== '\r' && c !== '\n') {
-              afterCommaChar = c;
-              break;
-            }
-            afterCommaIdx++;
-          }
-          
-          // カンマの後に続くべき有効な文字：
-          // - 次のキー名または文字列の開始: '"'
-          // - オブジェクトや配列の入れ子の開始: '{', '['
-          // - 数値の開始: '-', '0'-'9'
-          // - boolean/null の開始: 't', 'f', 'n'
-          // - オブジェクトや配列の終了（末尾カンマの場合）: '}', ']'
-          const validJsonStartChars = ['"', '{', '[', '-', 't', 'f', 'n', '}', ']'];
-          if (validJsonStartChars.includes(afterCommaChar) || (afterCommaChar >= '0' && afterCommaChar <= '9')) {
-            isRealEnd = true;
-          }
-        }
-
-        if (isRealEnd) {
-          // 本物の終了クォート。これまでの文字列を処理して出力に加える。
-          // 文字列内の改行やタブなどの制御文字をエスケープ
-          let processed = currentString
-            .replace(/\t/g, '\\t')
-            .replace(/\r\n/g, '\\n')
-            .replace(/\r/g, '\\n')
-            .replace(/\n/g, '\\n');
-
-          result += '"' + processed + '"';
-          inString = false;
-        } else {
-          // 生のダブルクォート（文字列の途中）。エスケープして文字列に蓄積する。
-          currentString += '\\"';
-        }
-      } else {
-        currentString += char;
-      }
-    }
-  }
-
-  // 万が一、文字列が閉じられないまま終わった場合は閉じる
-  if (inString) {
-    let processed = currentString
-      .replace(/\t/g, '\\t')
-      .replace(/\r\n/g, '\\n')
-      .replace(/\r/g, '\\n')
-      .replace(/\n/g, '\\n');
-    result += '"' + processed + '"';
-  }
-
-  fixed = result;
 
   // 4. 末尾カンマ除去: },] や },} の前のカンマ
   fixed = fixed.replace(/,\s*([\]}])/g, '$1');
@@ -703,14 +782,18 @@ function parseJsonWithRepair(raw) {
   try {
     return JSON.parse(fixed);
   } catch (secondErr) {
-    console.warn('JSON修復パース失敗、第2段階修復を試行:', secondErr.message);
-    // 最終手段: より攻撃的な修復
+    console.warn('JSON修復パース失敗、キー境界ベースの頑健なパースに移行します:', secondErr.message);
     try {
-      // 文字列値内のエスケープされていないバックスラッシュを処理
-      let aggressive = fixed.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
-      return JSON.parse(aggressive);
+      // 最終兵器: キー境界ベースのパース＆再構築
+      return robustParseJson(fixed);
     } catch (thirdErr) {
-      throw new Error(`AIの応答JSONの解析に失敗しました。元のエラー: ${thirdErr.message}`);
+      console.warn('キー境界パースも失敗、最後の攻撃的修復を試行:', thirdErr.message);
+      try {
+        let aggressive = fixed.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+        return JSON.parse(aggressive);
+      } catch (fourthErr) {
+        throw new Error(`AIの応答JSONの解析に失敗しました。元のエラー: ${fourthErr.message}`);
+      }
     }
   }
 }
@@ -809,13 +892,13 @@ async function runAnalysis() {
       const result = await callGenerativeAIMultimodal(apiKey, fullPrompt, droppedImages, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      }, { responseMimeType: 'application/json', timeoutMs: 90000 });
+      }, { responseMimeType: 'application/json', timeoutMs: 90000, temperature: 0.1 });
       text = result.text;
     } else {
       const result = await callGenerativeAI(apiKey, model, fullPrompt, (fb) => {
         updateApiStatus(`フォールバック: ${fb}`);
         btn.innerHTML = `<span class="spinner"></span>フォールバック: ${fb}`;
-      }, { responseMimeType: 'application/json', timeoutMs: 90000 });
+      }, { responseMimeType: 'application/json', timeoutMs: 90000, temperature: 0.1 });
       text = result.text;
     }
 
