@@ -1220,7 +1220,22 @@ async function runReflection() {
       addSystemLog(`[システム] リライト応答遅延のため、モデルを ${m} にフォールバックします...`);
     };
 
-    const { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb);
+    let { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb);
+
+    let loopCount = 0;
+    while (loopCount < 3) {
+      if (totalText.trim().endsWith('【完】')) break;
+      
+      loopCount++;
+      addSystemLog(`[システム] 文字数上限到達による切断を検知。続きを自動リクエスト中... (${loopCount}/3)`);
+      connectionStatusText = `[通信] 続きを生成しています... (${loopCount}/3)`;
+      updateProgressWindow();
+      
+      const continuePrompt = `${prompt}\n\n【ここまでの出力】\n${totalText}\n\n※文字数上限（トークンオーバー）で出力が途切れています。上記の続きの文字から、そのまま物語を再開してください。これまでの文章の繰り返しや前置きは一切不要です。続きのみを生成し、必ず最後は「【完】」で締めくくってください。`;
+      
+      const nextResult = await callGenerativeAIStream(apiKey, usedModel, continuePrompt, onChunk, onFb);
+      usedModel = nextResult.usedModel;
+    }
 
     if (apiWaitTimer) {
       clearInterval(apiWaitTimer);

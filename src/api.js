@@ -31,7 +31,7 @@ export const diagnoseConnection = async (apiKey) => {
 async function _callGemini(apiKey, model, prompt, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const generationConfig = { 
-    maxOutputTokens: 8192, 
+     
     temperature: options.temperature !== undefined ? options.temperature : 1.0 
   };
   if (options.responseMimeType) {
@@ -115,7 +115,7 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
 async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const generationConfig = { 
-    maxOutputTokens: 8192, 
+     
     temperature: options.temperature !== undefined ? options.temperature : 0.3 
   };
   if (options.responseMimeType) {
@@ -440,7 +440,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
   });
 
   const generationConfig = { 
-    maxOutputTokens: 8192, 
+     
     temperature: options.temperature !== undefined ? options.temperature : 0.4 
   };
   if (options.responseMimeType) {
@@ -704,7 +704,7 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
  */
 async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
-  const generationConfig = { maxOutputTokens: 8192, temperature: 1.0 };
+  const generationConfig = {  temperature: 1.0 };
   
   if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3") || model.includes("gemini-3.5"))) {
     generationConfig.thinkingConfig = {

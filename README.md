@@ -435,6 +435,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.5.2 — 2026-05-28
+- **Auto-Continue Loop for Ultra-Long Narratives / 超長文生成時の自動継続（オートコンティニュー）ループ実装**:
+  - Implemented an automatic loop mechanism in `main.js` and `styleAnalyzer.js` to seamlessly resume output when hitting the strict 8,192 token limit of LLM APIs. The system now automatically fetches and appends the rest of the story behind the scenes without user intervention. / LLMの出力上限（8192トークン等）に到達して物語が途切れてしまう問題を解決するため、自動的に続きを要求してシームレスに結合するオートコンティニューループ機構を実装しました。
+  - Fixed a bug where generated footer text was duplicated during style rewrite processing. / 作風リライト処理時に生成済みフッターが二重に処理されてしまうバグを修正しました。
+
 ### v3.5.0 — 2026-05-28
 - **Eliminate AI-hallucinated Preview Models & Standardize Stable API Configs / 実在しない架空のプレビューモデル名の完全排除と実在モデルへの正常化**:
   - Completely cleaned up and standardized API model configurations by removing legacy preview model names. Synced default settings to active, stable production models (`gemini-2.0-flash`, `gpt-4o`, `gpt-4o-mini`). / AIエージェントが過去に勝手に想像して埋め込んでいた実在しない架空のプレビューモデル名をソースコードおよび設定ファイルから完全に一掃・根絶し、実在する最新の安定モデル（`gemini-2.0-flash` や `gpt-4o` など）に正常化しました。
