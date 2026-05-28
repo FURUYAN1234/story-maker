@@ -202,11 +202,9 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
   const IMAGE_MODEL_IDS = [
-    'gemini-3.5-flash',                 // Primary: 最新の安定かつ高速モデル
-    'gemini-1.5-pro',                   // Backup 1: 高精細・フィルター寛容・超安定
-    'gemini-1.5-flash',                 // Backup 2: 高速・安定
-    'gemini-2.5-pro',                   // Legacy fallback
-    'gemini-2.5-flash',                 // Legacy fallback
+    'gemini-2.0-flash',                 // Primary: 最新の安定かつ高速モデル (画像解析対応)
+    'gemini-1.5-flash',                 // Backup 1: 高速・安定
+    'gemini-1.5-pro',                   // Backup 2: 高精細・フィルター寛容・超安定
   ];
 
   const errors = [];
@@ -325,10 +323,8 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 // ============================================================
 
 const OPENAI_TEXT_MODELS = [
-  "gpt-4.1",       // Primary: 高品質・1Mコンテキスト
-  "gpt-4.1-mini",  // Backup 1: コスト効率・高速
-  "gpt-4.1-nano",  // Backup 2: 最軽量・最速
-  "gpt-4o",        // Fallback: 安定実績
+  "gpt-4o",        // Primary: 安定実績
+  "gpt-4o-mini",   // Fallback: コスト効率・高速
 ];
 
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
@@ -370,9 +366,8 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
 }
 
 const OPENAI_VISION_MODELS = [
-  "gpt-4.1",       // Primary: Vision対応・高品質
-  "gpt-4o",        // Backup 1: Vision安定実績
-  "gpt-4.1-mini",  // Backup 2: コスト効率
+  "gpt-4o",        // Primary: Vision安定実績
+  "gpt-4o-mini",   // Fallback: コスト効率
 ];
 
 async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
@@ -506,7 +501,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
  * OpenAI マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
  */
 async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options = {}) {
-  const OPENAI_VISION_MODELS = ["gpt-4.1", "gpt-4o", "gpt-4.1-mini"];
+  const OPENAI_VISION_MODELS = ["gpt-4o", "gpt-4o-mini"];
   
   for (const modelId of OPENAI_VISION_MODELS) {
     try {
