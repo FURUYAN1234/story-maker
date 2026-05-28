@@ -673,3 +673,10 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 Developed by **FURU**
 
+
+## ChangeLog
+
+### v3.5.3 — 2026-05-28
+* **Feature**: Gemini APIフォールバックチェーンの最適化（Gemini 2.5系列の追加対応および、UI用モデルリストとの分離によるフォールバック精度の向上）
+* **Fix**: `data.js` の `GEMINI_MODELS` リストから `gemini-1.5-pro` を削除し、`gemini-2.5-flash` および `gemini-2.5-pro` を追加。
+

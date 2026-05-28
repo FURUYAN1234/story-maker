@@ -271,8 +271,7 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   ];
   const uniqueModels = new Set([
     initialModel,
-    ...fallbackTargets,
-    ...GEMINI_MODELS.map(m => m.value)
+    ...fallbackTargets
   ]);
   const allModels = Array.from(uniqueModels);
 
@@ -827,8 +826,7 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
   ];
   const uniqueModels = new Set([
     initialModel,
-    ...fallbackTargets,
-    ...GEMINI_MODELS.map(m => m.value)
+    ...fallbackTargets
   ]);
   const allModels = Array.from(uniqueModels);
 
