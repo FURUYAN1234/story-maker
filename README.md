@@ -550,6 +550,9 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 - **Local RAG Integration / 完全ローカルRAG（検索拡張生成）辞書の統合**: Implemented a standalone, zero-cost RAG system that injects specific world-building details (props, era-specific terminology, sensory elements) into the prompt based on the user's selected worldview, era, and theme. This forces the AI to ground its narrative in concrete details rather than abstract tropes, significantly improving world authenticity. / 外部サービス不要・完全無料のローカルRAG（検索拡張生成）システムを実装。ユーザーが選択した世界観・時代・テーマに基づき、専用辞書から具体的なディテール（小道具・通貨・歴史用語・匂いなど）をプロンプトに動的注入。AI特有の「抽象的でフワッとした描写」を防ぎ、物語の解像度と世界観の説得力を劇的に向上させます。
 - **Google Search Grounding (Gemini) / Google検索グラウンディング対応**: Enabled Gemini's native Search Grounding tool for text generation. When the AI determines that factual accuracy is necessary (e.g., historical events, scientific terms, real-world locations), it will automatically perform a Google search and incorporate the findings into the story. / Geminiエンジンのテキスト生成においてGoogle検索グラウンディングを有効化。時代考証や専門知識が必要なテーマが選ばれた際、AIが自律的にGoogle検索を実行して事実確認を行い、正確な知識をベースにした物語を執筆できるようになりました。
 
+### v3.5.1 — 2026-05-28
+- **Release Correction (Fail Forward) / リリース修正（前進的復旧）**: Bumped patch version to v3.5.1 to resolve tag conflict in remote repository, following the fail-forward release protocol. / タグ競合問題を解消するため、Fail-Forwardリリースプロトコルに従いシステムバージョンを v3.5.1 に繰り上げて再デプロイを実施。
+
 ### v3.5.0 — 2026-05-28
 - **Model Update & Fallback optimization / モデル更新とフォールバック最適化**: Updated the model priorities and dynamic fallback targets to modern engines (gemini-3.5-flash, gemini-2.5-flash, gemini-2.5-pro, gpt-4.1, gpt-4.1-mini, etc.) across the API client (`api.js`). Enhanced thinking mode detection to support next-generation engines. / APIクライアント（`api.js`）における画像解析・テキスト生成用の推奨モデル優先順位およびフォールバックターゲットを最新のモデル群（gemini-3.5-flash, gemini-2.5-flash, gemini-2.5-pro, gpt-4.1, gpt-4.1-mini 等）に更新。また、次世代エンジンに対応した思考モード判定ロジックの最適化を実施。
 
