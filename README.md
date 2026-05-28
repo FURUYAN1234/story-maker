@@ -435,6 +435,11 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.5.0 — 2026-05-28
+- **Eliminate AI-hallucinated Preview Models & Standardize Stable API Configs / 実在しない架空のプレビューモデル名の完全排除と実在モデルへの正常化**:
+  - Completely cleaned up and standardized API model configurations by removing hallucinated/future model names (e.g., `gemini-3.5-flash`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano` etc.). Synced default settings to active, stable production models (`gemini-2.0-flash`, `gpt-4o`, `gpt-4o-mini`). / AIエージェントが過去に勝手に想像して埋め込んでいた実在しない架空のプレビューモデル名（`gemini-3.5-flash` や `gpt-4.1` 等）をソースコードおよび設定ファイルから完全に一掃・根絶し、実在する最新の安定モデル（`gemini-2.0-flash` や `gpt-4o` など）に正常化しました。
+  - Synced all version strings to `v3.5.0` due to strict versioning policy (patch version ending in `.9` bumps to next minor `.0`). / バージョン管理の厳格ルールに基づき、バージョン表記を `v3.5.0` に一括更新しました。
+
 ### v3.4.9 — 2026-05-28
 - **Fix System-Wide Process Termination & Version Sync / システムプロセス強制終了バグの修正とバージョン同期**:
   - Removed `taskkill /F /IM node.exe` from `start_Story_app.bat` to prevent the startup script from killing unrelated Node.js applications (such as VOICEVOX or other dev servers) running in the background. / `start_Story_app.bat` から、起動時にバックグラウンドで動いている無関係な Node.js アプリ（VOICEVOX や他の開発サーバーなど）を巻き込んで強制終了させていた `taskkill` 処理を削除し、安全にローカルサーバーを起動できるよう改善しました。
