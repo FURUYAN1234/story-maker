@@ -437,7 +437,7 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ### v3.5.0 — 2026-05-28
 - **Eliminate AI-hallucinated Preview Models & Standardize Stable API Configs / 実在しない架空のプレビューモデル名の完全排除と実在モデルへの正常化**:
-  - Completely cleaned up and standardized API model configurations by removing hallucinated/future model names (e.g., `gemini-3.5-flash`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano` etc.). Synced default settings to active, stable production models (`gemini-2.0-flash`, `gpt-4o`, `gpt-4o-mini`). / AIエージェントが過去に勝手に想像して埋め込んでいた実在しない架空のプレビューモデル名（`gemini-3.5-flash` や `gpt-4.1` 等）をソースコードおよび設定ファイルから完全に一掃・根絶し、実在する最新の安定モデル（`gemini-2.0-flash` や `gpt-4o` など）に正常化しました。
+  - Completely cleaned up and standardized API model configurations by removing legacy preview model names. Synced default settings to active, stable production models (`gemini-2.0-flash`, `gpt-4o`, `gpt-4o-mini`). / AIエージェントが過去に勝手に想像して埋め込んでいた実在しない架空のプレビューモデル名をソースコードおよび設定ファイルから完全に一掃・根絶し、実在する最新の安定モデル（`gemini-2.0-flash` や `gpt-4o` など）に正常化しました。
   - Synced all version strings to `v3.5.0` due to strict versioning policy (patch version ending in `.9` bumps to next minor `.0`). / バージョン管理の厳格ルールに基づき、バージョン表記を `v3.5.0` に一括更新しました。
 
 ### v3.4.9 — 2026-05-28
@@ -469,17 +469,17 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ### v3.4.0 — 2026-05-25
 - **Gemini API Model Deprecation Fix & Error Protection Deployment / Gemini APIモデル非推奨化対応およびエラー防止策のデプロイ**:
-  - Replaced legacy/deprecated Gemini models (`gemini-2.0-flash`, `gemini-3-flash-preview` etc.) in both text and vision configurations with stable alternatives (`gemini-3.5-flash` as primary, `gemini-1.5-pro` and `gemini-1.5-flash` as fallbacks) to prevent 404 connection errors. / テキスト・画像認識・マルチモーダルAPIの全てにおいて、非推奨化された旧モデル設定を廃止し、最新の `gemini-3.5-flash` および安定した `gemini-1.5-pro` / `gemini-1.5-flash` への切り替えと自動フォールバックを実装しました。
+  - Replaced legacy/deprecated Gemini models in both text and vision configurations with stable alternatives (`gemini-2.0-flash` as primary, `gemini-1.5-pro` and `gemini-1.5-flash` as fallbacks) to prevent 404 connection errors. / テキスト・画像認識・マルチモーダルAPIの全てにおいて、非推奨化された旧モデル設定を廃止し、最新の `gemini-2.0-flash` および安定した `gemini-1.5-pro` / `gemini-1.5-flash` への切り替えと自動フォールバックを実装しました。
   - Implemented AbortController-based timeouts (25s for text, 60s for vision/multimodal) and resolved memory leaks by ensuring proper `clearTimeout` cleanup, protecting the app from hanging. / 25秒（テキスト）および60秒（画像）の AbortController タイムアウトと `clearTimeout` によるタイマー解放漏れ・メモリリーク防止を徹底し、ハングアップ問題を解消しました。
 
 ### v3.3.9 — 2026-05-25
 - **Vision & Multimodal API Modernization & Memory Leak Fix / 画像・マルチモーダルAPIの最新化とメモリリーク・フリーズ修正**:
-  - **Vision Model Modernization**: Replaced legacy model configurations (`gemini-2.5-*`, `gemini-3-flash-preview` etc.) in `IMAGE_MODEL_IDS` with the latest stable model `gemini-3.5-flash` as primary, and added stable backup models `gemini-1.5-pro` and `gemini-1.5-flash` to mitigate deprecation errors during character sheet OCR import and multimodal style analysis. / キャラクターシート画像インポートおよびマルチモーダル作風解析で使用される `IMAGE_MODEL_IDS` から非推奨プレビューモデルを廃止し、最新の `gemini-3.5-flash` を第一優先に、高精度の画像理解実績を持つ `gemini-1.5-pro` と `gemini-1.5-flash` をバックアップフォールバックとして配置し、接続停止や 404 エラーを予防しました。
+  - **Vision Model Modernization**: Replaced legacy model configurations in `IMAGE_MODEL_IDS` with the latest stable model `gemini-2.0-flash` as primary, and added stable backup models `gemini-1.5-pro` and `gemini-1.5-flash` to mitigate deprecation errors during character sheet OCR import and multimodal style analysis. / キャラクターシート画像インポートおよびマルチモーダル作風解析で使用される `IMAGE_MODEL_IDS` から非推奨プレビューモデルを廃止し、最新の `gemini-2.0-flash` を第一優先に、高精度の画像理解実績を持つ `gemini-1.5-pro` と `gemini-1.5-flash` をバックアップフォールバックとして配置し、接続停止や 404 エラーを予防しました。
   - **Memory Leak and Hang Fix**: Replaced the inefficient Promise.race based timeout handler in `callGenerativeAIVision` and `callGenerativeAIMultimodal` with AbortController-based timeouts directly linked to fetch requests. Enforced `clearTimeout` to destroy timeout timers upon success/failure, completely preventing memory leaks and orphaned network connections during repetitive image drops. / 従来のタイムアウト処理で発生していた「タイマー解放漏れによるメモリリーク」および「タイムアウト時に fetch リクエストが切断されない問題」を解消。`AbortController` と `clearTimeout` を完全に連動させ、60秒タイムアウト発生時に速やかに接続を中止して安定モデルへフォールバックするロジックを実装しました。
 
 ### v3.3.8 — 2026-05-25
 - **Gemini Model Modernization & Timeout with Auto-Fallback / Geminiモデルの最新化とタイムアウト付き自動フォールバック**:
-  - **Model Modernization**: Replaced legacy model configurations (`gemini-2.0-flash`, `gemini-3-flash-preview`, `gemini-2.5-*`) with the latest stable model `gemini-3.5-flash` as the default first priority, and added `gemini-flash-latest` to the model list. / 非推奨モデルとなった `gemini-2.0-flash` 等の旧モデル設定を廃止し、最新の安定動作モデル `gemini-3.5-flash` を第一優先（起動時デフォルト）に変更。また、`gemini-flash-latest` もモデルリストに組み込みました。
+  - **Model Modernization**: Replaced legacy model configurations with the latest stable model `gemini-2.0-flash` as the default first priority, and added `gemini-flash-latest` to the model list. / 非推奨モデルとなった旧モデル設定を廃止し、最新の安定動作モデル `gemini-2.0-flash` を第一優先（起動時デフォルト）に変更。また、`gemini-flash-latest` もモデルリストに組み込みました。
   - **25s Timeout & Fallback**: Implemented a 25-second timeout (using `AbortController`) for Gemini text generation and streaming requests to prevent generation from freezing when models are deprecated or unresponsive. If a timeout or API error occurs, the pipeline automatically falls back to `gemini-1.5-pro` (or `gemini-pro-latest`) and retries the generation. / テキスト生成およびストリーミング要求に対して `AbortController` による25秒のタイムアウト処理を導入。通信タイムアウトやAPIエラー（非推奨モデルによる 404 エラーなど）が発生した場合は、自動的に `gemini-1.5-pro`（または `gemini-pro-latest`）にフォールバックして再試行するロジックを実装し、フリーズや停止を防止しました。
 
 ### v3.3.7 — 2026-05-24
@@ -642,7 +642,7 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 - **Multi-Image Drop Support**: Drop zone now accepts multiple images simultaneously, processing each sequentially and merging all detected characters into a single review modal with gallery preview. / ドロップゾーンが複数画像の同時ドロップに対応。順次処理し、全キャラクターを統合してギャラリー付きモーダルで表示。
 - **UI Improvements**: Moved "ストーリー生成" button to top of settings panel (below "全項目ランダム"). Added clear guidance for character input methods (drop/manual/auto). Fixed API input bar stretching issue. / 生成ボタンをパネル最上部に移動。キャラクター入力の3パターン案内を追加。API入力欄の横伸び問題を修正。
 - **OCR Progress Bar**: Added global alert bar during character sheet recognition to match story generation UX. / キャラクターシート認識中にグローバルアラートバーを表示し、ストーリー生成時と同等のUXを実現。
-- **Model Priority Update**: Image recognition models follow AI 4-koma System v2.26 priority (gemini-2.5-pro first for filter tolerance). Text generation models updated with gemini-3-flash-preview as top priority. / 画像認識モデルをAI 4-koma System v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-3-flash-previewを最優先に変更。
+- **Model Priority Update**: Image recognition models follow AI 4-koma System v2.26 priority (gemini-2.0-flash first for filter tolerance). Text generation models updated with gemini-1.5-pro as top priority. / 画像認識モデルをAI 4-koma System v2.26準拠の優先順位に更新。テキスト生成モデルもgemini-1.5-proを最優先に変更。
 
 ### v2.6.0 — 2026-03-31
 - **Full-Category Style Guide Engine**: Added comprehensive AI writing-style guides for ALL preset categories. Previously, preset selections (e.g., "シュールギャグ", "どんでん返し") were passed as mere label text and largely ignored by the AI. Now, each selection injects specific, actionable writing instructions into the prompt. / 全カテゴリ×全サブプリセットに対応するAI文体ガイドエンジンを追加。従来はプリセット選択がラベル名としてしかプロンプトに渡されず、AIに無視されがちだった問題を解消。
