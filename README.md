@@ -81,6 +81,13 @@ AIが意識的に選択・組み合わせる**6種の落差技法**を提供：
 5. **Tension & Release / 緊張と緩和**: Place intentional calm before maximum impact / クライマックス直前に意図的な静寂を挟む
 6. **Normalcy Return / 常識の提示**: Place one sane perspective amid chaos to highlight abnormality / 異常の中に正気の視点を置いて異常さを際立たせる
 
+- **Active Character Roster / サブキャラ追跡**: Tracks supporting characters' current locations and statuses in the internal memo to prevent them from disappearing in later chapters. / サブキャラクターの現在地と状況を毎章の内部メモとして記録し、終盤での消失を防ぐ。
+- **Pacing Enforcement / 描写密度の強制**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / クライマックスや会話劇において五感描写や肉体的痛覚を強制的に挿入させ、展開の「駆け足」を防止する。
+- **Dynamic Chekhov's Gun / 動的チェーホフの銃**: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 序盤に無関係に見えるアイテムや習慣を配置し、終盤の致命的な突破口として反転回収させる動的伏線。
+- **Scale Declaration / 規模宣言**: The generated master prompt displays the total planned chapter count and estimated character count at the top (e.g., 「全12章構成 / 予定総文字数：約15万字」), so users know the full scope before beginning. / 生成されるマスター指示書の冒頭に全章数と予定総文字数を明示。分割執筆開始前に全体規模が把握可能に。
+- **State Separation & Context Panel / 状態の完全分離と文脈パネル**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 小説本文とAIの構造メモ（目的・伏線等）を内部状態レベルで完全に分離。メモは折りたたみ可能な専用パネルへルーティングされ、AI特有の空のマークダウン記号なども強力にクレンジング除去されるため、エクスポートされるテキストには純粋な小説本文のみが含まれます。
+- **Local Timestamped Export / ローカル時刻での厳密なファイル管理**: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 全てのテキスト・JSON保存のファイル名において、UTCズレのない日本時間（ローカル時刻）の完全な数字14桁（`YYYYMMDDHHmmss`）を強制。長期間にわたる連載執筆時の時系列ソートの一貫性を保証します。
+
 ### 2. Motif Recurrence / モチーフの回帰
 
 Inspired by the comedy technique "Tendon" (天丼 — repeating the same gag pattern with variations until it explodes), generalized for all genres.
@@ -158,6 +165,8 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Scale Declaration / 規模宣言**: The generated master prompt displays the total planned chapter count and estimated character count at the top (e.g., 「全12章構成 / 予定総文字数：約15万字」), so users know the full scope before beginning. / 生成されるマスター指示書の冒頭に全章数と予定総文字数を明示。分割執筆開始前に全体規模が把握可能に。
 - **Progress Tracking / 進捗表示**: Each chapter completion message includes progress: 「第3章（全12章中）の執筆が完了しました。続けて第4章を執筆しますか？（残り9章）」. / 各章完了時の確認メッセージに「全◯章中 / 残り◯章」を明記。長編執筆中の全体進捗が常に把握可能に。
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
+- **State Separation & Context Panel / 状態の完全分離と文脈パネル**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 小説本文とAIの構造メモ（目的・伏線等）を内部状態レベルで完全に分離。メモは折りたたみ可能な専用パネルへルーティングされ、AI特有の空のマークダウン記号なども強力にクレンジング除去されるため、エクスポートされるテキストには純粋な小説本文のみが含まれます。
+- **Local Timestamped Export / ローカル時刻での厳密なファイル管理**: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 全てのテキスト・JSON保存のファイル名において、UTCズレのない日本時間（ローカル時刻）の完全な数字14桁（`YYYYMMDDHHmmss`）を強制。長期間にわたる連載執筆時の時系列ソートの一貫性を保証します。
 
 
 ---
@@ -435,6 +444,12 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 
 ## 📝 Changelog / 更新履歴
 
+### v3.5.5 — 2026-05-29
+- **Long Novel Mode Bug Fixes & UI Improvements / 長編小説モードのバグ修正とUI改善**:
+  - Fixed a critical UI freeze bug in Long Novel Mode caused by a missing variable declaration (`panel is not defined`) during the "Generating..." state. / 長編小説モード開始時に「構築中...」のままUIがフリーズする致命的なバグ（変数の未定義エラー）を修正しました。
+  - Fixed a CSS bug where the "Pause" button was visually disabled (`pointer-events: none`) during text streaming, allowing users to correctly queue a pause request at any time. / 文字が流れている最中（生成中）に一時停止ボタンがクリック不可になっていたCSSのバグを修正し、いつでも一時停止の予約ができるようにしました。
+  - Added a descriptive note explaining that the pause function completes the current chapter before stopping. / 一時停止ボタンを押しても即座には止まらず、現在執筆中の章が書き終わるまで処理が継続する旨の注意書きをUIに追記しました。
+
 ### v3.5.2 — 2026-05-28
 - **Auto-Continue Loop for Ultra-Long Narratives / 超長文生成時の自動継続（オートコンティニュー）ループ実装**:
   - Implemented an automatic loop mechanism in `main.js` and `styleAnalyzer.js` to seamlessly resume output when hitting the strict 8,192 token limit of LLM APIs. The system now automatically fetches and appends the rest of the story behind the scenes without user intervention. / LLMの出力上限（8192トークン等）に到達して物語が途切れてしまう問題を解決するため、自動的に続きを要求してシームレスに結合するオートコンティニューループ機構を実装しました。
@@ -675,6 +690,12 @@ Developed by **FURU**
 
 
 ## ChangeLog
+
+### v3.5.4 — 2026-05-29
+* **Feature**: 長編小説モードにおける「状態の完全分離と文脈パネル」を実装。小説本文とAIの構造メモ（目的・伏線等）を状態レベルで完全に分離し、エクスポートされるテキストにメタノイズが混入しないよう改善。
+* **Feature**: 全てのテキスト・JSON保存のファイル名をUTCズレのないローカル時刻（日本時間）14桁（YYYYMMDDHHmmss）に統一し、ファイル名の整合性と完全一致を担保。
+* **Fix**: AIが出力しがちな空の見出し（`#`）や不要な区切り線（`---`）をクレンジングで完全除去する処理を強化し、長編生成時のフォーマット揺れを解消。
+* **UI**: 長編パネルの「目標」を「目安」に変更し、文字数指定設定の文言を「AIおまかせ」に近いマイルドな表現に最適化。
 
 ### v3.5.3 — 2026-05-28
 * **Feature**: Gemini APIフォールバックチェーンの最適化（Gemini 2.5系列の追加対応および、UI用モデルリストとの分離によるフォールバック精度の向上）

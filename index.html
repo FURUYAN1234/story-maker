@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.5.3</title>
+  <title>Story Maker v3.5.5</title>
   <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.5.3</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.5.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
@@ -92,14 +92,6 @@
           <input type="text" class="custom-input" id="mode-custom" placeholder="プリセットにない形式を入力" autocomplete="off">
           <button class="custom-clear-btn hidden" id="mode-custom-clear">✕</button>
           <button class="custom-rnd-btn" id="mode-custom-rnd">🎲 生成</button>
-        </div>
-        <div class="charcount-option">
-          <label><input type="checkbox" id="charcount-check"> 文字数を指定する（どの形式にも適用）</label>
-          <div id="charcount-wrap" class="hidden">
-            <input type="number" id="char-count" value="2000" step="500" min="500" max="6000" title="目標文字数">
-            <span>文字程度</span>
-            <p id="charcount-hint" class="hint-text text-muted">※直接生成で途切れない安全な文字数は約6,000字です</p>
-          </div>
         </div>
       </section>
 
@@ -325,15 +317,83 @@
 
     <!-- 📺 Output Display -->
     <article class="output-panel" id="output-panel">
-      <div class="output-header">
-        <div class="output-title">OUTPUT</div>
-        <div id="char-counter" class="char-counter">0 字</div>
-        <div class="output-actions">
-          <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
-          <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>
+      <!-- 📌 追従ヘッダーラッパー -->
+      <div class="output-sticky-header">
+        <div class="output-header">
+          <div class="output-title">OUTPUT</div>
+          <div id="char-counter" class="char-counter">0 字</div>
+          <div class="output-actions">
+            <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
+            <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>
+          </div>
+        </div>
+        <div id="tag-row" class="tag-row"></div>
+
+        <!-- 📖 長編小説コントロールパネル（長編モード時のみ表示） -->
+        <div id="long-novel-panel" class="long-novel-panel hidden">
+          <div class="long-novel-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="long-novel-icon">📖</span>
+              <span class="long-novel-title" id="long-novel-title">長編小説モード</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <span class="ln-warning-text">※生成中にブラウザが「応答なし」になる場合がありますが、AIの長考処理中のためそのまま待機してください。</span>
+              <span class="ln-warning-text">※一時停止を押しても即座には止まらず、現在執筆中の章が書き終わるまで処理が継続します。</span>
+            </div>
+          </div>
+          
+          <!-- 作品情報バー -->
+          <div class="long-novel-info" id="long-novel-info">
+            <div class="long-novel-meta">
+              <span class="ln-work-title" id="ln-work-title">—</span>
+            </div>
+            <div class="long-novel-stats">
+              <span class="ln-stat">📊 進捗: <strong id="ln-progress">0 / 0 章</strong></span>
+              <span class="ln-stat">📝 小説本文: <strong id="ln-char-count">0</strong> 字</span>
+              <span class="ln-stat">🎯 目標: <strong id="ln-target">—</strong></span>
+            </div>
+            <!-- プログレスバー -->
+            <div class="ln-progress-bar-bg">
+              <div class="ln-progress-bar-fill" id="ln-progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <!-- 章制御ボタン -->
+          <div class="long-novel-actions">
+            <button id="btn-ln-pause" class="btn-ln-next" disabled>
+              ⏸ 一時停止
+            </button>
+            <button id="btn-ln-abort" class="btn-ln-abort hidden">
+              ⏹ ここで中断
+            </button>
+          </div>
+
+          <!-- 📋 小説本文パート（コピー/TXT） -->
+          <div class="ln-section" id="ln-novel-section">
+            <div class="ln-section-header">
+              <span class="ln-section-label">📋 小説本文</span>
+              <div class="ln-section-actions">
+                <button id="btn-ln-copy-novel" class="btn-ln-action" title="小説本文をコピー">📋 コピー</button>
+                <button id="btn-ln-save-novel" class="btn-ln-action" title="小説本文を.txt保存">📄 .txt保存</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 📝 文脈メモ・指示パート（折りたたみ） -->
+          <div class="ln-section" id="ln-memo-section">
+            <div class="ln-section-header ln-section-toggle" id="ln-memo-toggle">
+              <span class="ln-section-label">📝 文脈メモ・伏線管理 <span class="ln-toggle-arrow" id="ln-memo-arrow">▶</span></span>
+              <div class="ln-section-actions">
+                <button id="btn-ln-copy-memo" class="btn-ln-action" title="メモをコピー">📋 コピー</button>
+                <button id="btn-ln-save-memo" class="btn-ln-action" title="メモを.txt保存">📄 .txt保存</button>
+              </div>
+            </div>
+            <div class="ln-memo-content hidden" id="ln-memo-content">
+              <pre class="ln-memo-text" id="ln-memo-text">（まだメモはありません）</pre>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="tag-row" class="tag-row"></div>
 
       <div id="output" class="output-box empty text-selectable">
         <div class="guide">

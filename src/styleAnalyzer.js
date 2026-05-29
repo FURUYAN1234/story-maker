@@ -1291,7 +1291,8 @@ function copyAnalysis() {
 }
 
 function makeTimestamp() {
-  return new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
+  const now = new Date();
+  return `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
 }
 
 function saveAnalysisJson() {
@@ -1398,10 +1399,28 @@ export function updateAnalyzeButtonState() {
   const hasTexts = droppedTexts.length > 0;
   const hasImages = droppedImages.length > 0;
   const directTextEl = $('sa-direct-text');
-  const hasDirectText = directTextEl && directTextEl.value.trim().length > 0;
+  const directText = directTextEl ? directTextEl.value : '';
+  const hasDirectText = directText.trim().length > 0;
+  
   // テキスト（ドロップ or 直貼り）または画像のいずれかがあればOK
   const hasInput = hasTexts || hasImages || hasDirectText;
+
+  // OpenAPI向けの容量チェック
+  let totalLen = directText.length;
+  droppedTexts.forEach(t => totalLen += (t.content ? t.content.length : 0));
+  const engineEl = document.getElementById('api-engine');
+  const isOpenAI = engineEl && engineEl.value === 'openai';
+
+  if (isOpenAI && totalLen > 80000) {
+    btn.disabled = true;
+    btn.textContent = '⚠ 文字数超過 (OpenAI制限)';
+    btn.title = 'OpenAIモデルの入力上限を超える可能性が高いため実行できません。テキストを削るか、Geminiをご利用ください。';
+    return;
+  }
+
   btn.disabled = !(apiKey && hasInput);
+  btn.textContent = '🔬 超強引！作風解析を実行';
+  btn.title = '';
 }
 
 export function updateReflectButtonState() {

@@ -38,8 +38,8 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
 
-  // 25秒タイムアウトの設定
-  const timeoutMs = options.timeoutMs || 25000;
+  // タイムアウトの設定 (長編・OpenAI対応のため180秒)
+  const timeoutMs = options.timeoutMs || 180000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -123,7 +123,7 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, o
   }
 
   // 60秒タイムアウト（画像解析対応）
-  const timeoutMs = options.timeoutMs || 60000;
+  const timeoutMs = options.timeoutMs || 180000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -447,7 +447,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
   }
 
   // 60秒タイムアウト（複数画像解析対応）
-  const timeoutMs = options.timeoutMs || 60000;
+  const timeoutMs = options.timeoutMs || 180000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -633,12 +633,21 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
   for (const modelId of OPENAI_TEXT_MODELS) {
     try {
       if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
+      
+      const controller = new AbortController();
+      let onAbort = null;
+      if (options.signal) {
+        onAbort = () => controller.abort();
+        options.signal.addEventListener('abort', onAbort);
+      }
+      
       const resp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
+        signal: controller.signal,
         body: JSON.stringify({
           model: modelId,
           messages: [{ role: "user", content: prompt }],
@@ -687,10 +696,16 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
         }
       } finally {
         reader.releaseLock();
+        if (options.signal && onAbort) {
+          options.signal.removeEventListener('abort', onAbort);
+        }
       }
 
       return { usedModel: modelId };
     } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error(`Aborted: ${modelId} stream`);
+      }
       console.warn(`Model ${modelId} stream failed:`, err.message);
       continue;
     }
@@ -716,9 +731,15 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   }
   
   // 25秒タイムアウト設定（データ無受信でタイムアウト）
-  const timeoutMs = options.timeoutMs || 25000;
+  const timeoutMs = options.timeoutMs || 180000;
   const controller = new AbortController();
   let timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  let onAbort = null;
+  if (options.signal) {
+    onAbort = () => controller.abort();
+    options.signal.addEventListener('abort', onAbort);
+  }
 
   const requestBody = {
     contents: [{ parts: [{ text: prompt }] }],
@@ -800,11 +821,14 @@ async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
     }
   } catch (err) {
     if (err.name === 'AbortError') {
-      throw new Error(`Timeout: ${model} stream (${timeoutMs / 1000}s)`);
+      throw new Error(`Aborted: ${model} stream (${timeoutMs / 1000}s timeout or user abort)`);
     }
     throw err;
   } finally {
     clearTimeout(timeoutId);
+    if (options.signal && onAbort) {
+      options.signal.removeEventListener('abort', onAbort);
+    }
   }
 }
 

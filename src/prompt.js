@@ -587,3 +587,321 @@ export function generateRandomTheme() {
   if (Math.random() < 0.35) base += ' ' + rnd(THEME_ADJUNCTS);
   return base;
 }
+
+// ============================================================
+// 長編小説モード: アプリ内マルチターン章別生成
+// main.js から直接呼び出される。buildPrompt() の既存 long 分岐は使わない。
+// ============================================================
+
+/**
+ * 長編小説の設定情報を共通で抽出するヘルパー
+ */
+function extractLongNovelSettings(s) {
+  const genre = s.genreCustom || s.genre || 'コメディ';
+  const theme = s.themeCustom || s.theme || 'ランダム';
+  const worldview = s.worldviewCustom || s.worldview || '現代日本';
+  const era = s.eraCustom || s.era || '現代';
+  const target = s.targetCustom || s.target || '全年齢';
+  const ending = s.endingCustom || s.ending || '意外な結末';
+  const narr = s.narrCustom || s.narration || '三人称・客観';
+
+  let charDesc;
+  if (!s.characters || s.characters.length === 0) {
+    charDesc = '・未設定（AIが自由に2〜3人の個性的なキャラを設定すること）';
+  } else {
+    charDesc = s.characters.map((c, i) => {
+      const name = c.name || `(AI命名:キャラ${i + 1})`;
+      const role = c.role || '未定';
+      const sexInfo = c.sex ? `性別:${c.sex}, ` : '';
+      const personality = c.personality || '未定';
+      const detail = c.note ? ` [${c.note}]` : '';
+      return `${i + 1}. ${name} (${role}) — ${sexInfo}性格:${personality}${detail}`;
+    }).join('\n');
+  }
+
+  const supplement = s.supplement ? `\n【追加指示】\n${s.supplement}` : '';
+
+  const eraRule = (era && !['現代', 'ランダム', ''].includes(era))
+    ? '\n\n【時代考証ルール（厳守）】\n・時代設定「' + era + '」の語彙・風俗・技術水準を厳守すること。\n・その時代に存在しない概念・道具・言い回しを使わないこと。\n・登場人物の詳細メモに時代不適合な現代表現があっても、時代に即した表現に自動で読み替えること。'
+    : '';
+
+  const genreGuide = lookupGuide(genre, GENRE_STYLE_GUIDES);
+  const endingGuide = lookupGuide(ending, ENDING_STYLE_GUIDES);
+  const worldviewGuide = lookupGuide(worldview, WORLDVIEW_STYLE_GUIDES);
+  const targetGuide = lookupGuide(target, TARGET_STYLE_GUIDES);
+  const narrGuide = lookupGuide(narr, NARR_STYLE_GUIDES);
+  let allCategoryGuides = '';
+  if (genreGuide) allCategoryGuides += `\n\n【ジャンル文体指定：${genre}】\n${genreGuide}`;
+  if (endingGuide) allCategoryGuides += `\n\n【結末演出指定：${ending}】\n${endingGuide}`;
+  if (worldviewGuide) allCategoryGuides += `\n\n【世界観演出指定：${worldview}】\n${worldviewGuide}`;
+  if (targetGuide) allCategoryGuides += `\n\n【ターゲット層文体指定：${target}】\n${targetGuide}`;
+  if (narrGuide) allCategoryGuides += `\n\n【語り口指定：${narr}】\n${narrGuide}`;
+
+  // 文字数から章数と1章あたりの目安を計算
+  const targetTotal = s.charCount || null;
+  let chapterGuidance;
+  if (targetTotal) {
+    const estChapters = Math.min(Math.max(Math.round(targetTotal / 10000), 5), 15);
+    const perChapter = Math.round(targetTotal / estChapters);
+    chapterGuidance = `全${estChapters}章構成（目安）、各章約${Math.round(perChapter / 1000)}千字、予定総文字数：約${Math.round(targetTotal / 10000)}万字`;
+  } else {
+    chapterGuidance = '10万字以上を目安に、物語の内容に最適な章数と文字数をAI自身が自由に設計してください（推奨: 8〜12章、各章8千〜1万5千字）';
+  }
+
+  return { genre, theme, worldview, era, target, ending, narr, charDesc, supplement, eraRule, allCategoryGuides, chapterGuidance };
+}
+
+// 長編小説で共通の品質ルール文字列
+const LONG_NOVEL_QUALITY_RULES = `
+【伏線・構成ルール（各章で厳守）】
+1. 伏線の事前配置：後半で重要な要素は、必ず序盤〜前半の章に自然に言及・暗示しておくこと。後半で唐突に新設定を投入することを禁止。
+2. シーンの駆動力（GMC+S）：各場面に「目的（Goal）」「動機（Motivation）」「障害（Conflict）」「賭け金（Stakes）」を明確に設定すること。
+3. キャラクターの物語的機能：全登場人物に物語を動かす明確な役割を持たせること。傍観者禁止。
+4. 結末の着地：最終章は主人公が具体的な意志・行動・決断を示す形で閉じること。葛藤→抵抗→それでも選ぶという段階を経ること。
+5. 設定の必然性：特殊な要素は主人公の背景やテーマと必ず接続させること。
+6. Show, Don't Tell：感情を直接語で説明せず、五感を通じた身体的反応として描写すること。
+7. サブテキストの徹底：セリフに裏の感情を隠し、読者に真意を推測させること。
+8. 別れと関係性の重み：重要な別離には感情的重みを描写すること。
+9. 文体の緩急：高熱量文体（短文連続・体言止め）、静謐文体（長文・余白）、冷徹文体（客観描写）を場面に応じて使い分け、同系統3段落連続を禁止。
+10. 感情落差の設計：各章に最低1回、置換・誇張・逆転・不条理・緊張と緩和のいずれかの落差技法を仕込むこと。
+11. モチーフの回帰：象徴的要素を複数章で異なる文脈で再登場させ、最終章の感情的ピークと接続させること。
+12. 描写密度の強制：クライマックスや重要対話には五感描写と内面描写を挟み、テンポを意図的に遅らせること。
+13. 五感バランス：視覚偏重を禁止。聴覚・触覚・嗅覚・体内感覚を必ず組み合わせること。
+14. 比喩素材の世界観準拠：使い古された定型比喩を避け、世界観に由来する素材で比喩を構築すること。
+15. キャラクター知識境界の遵守：キャラが知り得ない情報を言及・推測させることを厳禁。
+
+【AIっぽさ完全排除】
+1. 語彙：「最適化」「本質的」「効果的」等のビジネス用語、「羅針盤」「土台」等の陳腐な比喩は禁止。
+2. リズム：同じ語尾の連続禁止。短文と長文でリズムに緩急をつけること。前置き宣言・要約・締めの挨拶は一切不要。
+3. 事なかれ主義禁止：安全クッションや両論併記を排除し、堂々と言い切ること。
+4. 記号：過度な箇条書き・見出し・アスタリスク・カッコの乱用を禁止。
+
+【品質ゲート（各章出力前の自己検証 — 検証結果自体は出力に含めないこと）】
+□ Setup-Payoff構造 □ 感情落差の十分性 □ モチーフの回帰 □ 文体の緩急
+□ 全キャラの物語的機能 □ GMC+Sの明確性 □ 五感バランス □ 比喩の独自性 □ キャラ知識境界`;
+
+/**
+ * 長編小説の第1章生成用プロンプトを構築する
+ * @param {object} s - gatherSettings() の戻り値
+ * @returns {{ prompt: string, tags: string[] }}
+ */
+export function buildLongNovelInitPrompt(s) {
+  const cfg = extractLongNovelSettings(s);
+
+  const prompt = `あなたはプロのベストセラー小説家です。以下の設定に基づき、本格的な長編小説の**第1章**を執筆してください。
+このアプリケーションが章ごとに指示を出します。あなたは指示された1章分のみを全力で書いてください。
+
+【基本設定】
+・ジャンル: ${cfg.genre}
+・テーマ: ${cfg.theme}
+・時代: ${cfg.era}
+・世界観・雰囲気: ${cfg.worldview}
+・語り口: ${cfg.narr}
+・ターゲット層: ${cfg.target}
+・結末の方向性: ${cfg.ending}
+
+【想定規模（目安 — 物語の自然な流れを最優先し、厳密に守る必要はない）】
+${cfg.chapterGuidance}
+
+【登場人物】
+${cfg.charDesc}
+
+【プロット設計の指示（第1章執筆前に内部で実行すること）】
+1. 物語全体を貫く「ログライン（核となる1文要約）」を設定
+2. チェーホフの銃（動的伏線）：序盤に一見無関係な要素を配置し、終盤で回収する仕掛けを1つ以上設計
+3. 15ビート構造に基づく全章プロット（各章1行あらすじ）を設計：
+   Setup → Inciting Incident → Deviation → Midpoint → Build-up → Payoff
+${LONG_NOVEL_QUALITY_RULES}
+${cfg.eraRule}${cfg.allCategoryGuides}${cfg.supplement}
+
+【出力フォーマット（厳守）】
+以下の順序で出力してください。余計な挨拶・前置き・説明は一切不要です。
+
+1. 【作品ヘッダー情報】（以下の形式で正確に出力すること）
+タイトル: （魅力的なタイトル）
+ログライン: （物語の核となる1文要約）
+全構成: 全N章
+予定総文字数: 約XX万字
+あらすじ: （3〜4行で簡潔に）
+【プロット概要】
+第1章: （1行あらすじ）
+第2章: （1行あらすじ）
+...（全章分を記載）
+
+2. 区切り線 ---
+
+3. # 第1章: （章タイトル）
+（本文 — 数千〜1万字規模で出し惜しみなく執筆すること）
+
+4. 区切り線 ---
+
+5. 文脈維持メモ（以下の3項目を必ず出力すること）
+【回収待ち伏線メモ】チェーホフの銃を含む、現在残っている謎や伏線の一覧
+【モチーフ＆サブキャラ追跡メモ】回帰モチーフの状態と、サブキャラの現在地・状況
+【次章のシーン設計（GMC+S）】次章のGoal/Motivation/Conflict/Stakes
+
+★★★ 文脈維持メモまで出力したら出力を停止してください。「続けますか？」等の質問は不要です（アプリが自動制御します）。★★★`;
+
+  // タグ生成
+  const tags = ['長編小説', cfg.genre, cfg.theme, cfg.era].filter(Boolean);
+  return { prompt, tags };
+}
+
+/**
+ * 長編小説の第2章以降の継続生成プロンプトを構築する
+ * @param {number} chapterNum - これから書く章番号（2〜）
+ * @param {number} totalChapters - AIが設計した全章数
+ * @param {object} settings - gatherSettings() の戻り値
+ * @param {string} previousSummary - 3章以上前の章のサマリー（要約文）
+ * @param {string} recentChaptersFull - 直近2章分の全文
+ * @param {string} allContextMemos - 全章の文脈維持メモ結合
+ * @param {boolean} isLastChapter - 最終章かどうか
+ * @returns {string} プロンプト文字列
+ */
+export function buildLongNovelContinuePrompt(chapterNum, totalChapters, settings, previousSummary, recentChaptersFull, allContextMemos, isLastChapter) {
+  const cfg = extractLongNovelSettings(settings);
+
+  let lastChapterInstruction = '';
+  if (isLastChapter) {
+    lastChapterInstruction = `
+★★★ これは最終章（第${chapterNum}章 / 全${totalChapters}章）です。以下を必ず実行してください ★★★
+・全ての伏線（チェーホフの銃を含む）を完全に回収すること
+・全てのモチーフを最終的な形で登場させ、感情的ピークと接続させること
+・主人公の決断と行動で物語を着地させること（葛藤→抵抗→選択の段階を経ること）
+・全てのサブキャラクターの結末を描写すること（フェードアウト禁止）
+・本文の最後に「【完】」を付けること`;
+  }
+
+  const prompt = `あなたは引き続きプロのベストセラー小説家です。以下の文脈を踏まえ、**第${chapterNum}章**（全${totalChapters}章中）を執筆してください。
+
+【基本設定（参照用）】
+・ジャンル: ${cfg.genre} / テーマ: ${cfg.theme} / 時代: ${cfg.era}
+・世界観: ${cfg.worldview} / 語り口: ${cfg.narr} / ターゲット: ${cfg.target}
+・結末の方向性: ${cfg.ending}
+${cfg.supplement}
+
+【これまでの物語の要約（古い章）】
+${previousSummary || '（第1章から開始のためなし）'}
+
+【直近の章の全文】
+${recentChaptersFull}
+
+【全章の文脈維持メモ（伏線・モチーフ・設計）】
+${allContextMemos}
+${lastChapterInstruction}
+${LONG_NOVEL_QUALITY_RULES}
+${cfg.eraRule}${cfg.allCategoryGuides}
+
+【出力フォーマット（厳守）】
+1. # 第${chapterNum}章: （章タイトル）
+   （本文 — 数千〜1万字規模で出し惜しみなく執筆すること）
+
+2. 区切り線 ---
+
+${isLastChapter ? `3. 「【完】」を出力して終了` : `3. 文脈維持メモ（以下の3項目を必ず出力すること）
+【回収待ち伏線メモ】現在残っている謎や伏線の一覧
+【モチーフ＆サブキャラ追跡メモ】回帰モチーフの状態とサブキャラの現在地
+【次章のシーン設計（GMC+S）】次章のGoal/Motivation/Conflict/Stakes`}
+
+★★★ 出力が完了したら停止してください。「続けますか？」等の質問は不要です。★★★`;
+
+  return prompt;
+}
+
+/**
+ * 長編小説の再現用マスター指示書を生成する（付録として末尾に添付）
+ * @param {object} settings - gatherSettings() の戻り値
+ * @param {object} headerInfo - AIが出力したヘッダー情報 {title, logline, totalChapters, targetChars, synopsis, plotOutline}
+ * @param {object} appState - アプリケーション状態 (state)
+ * @returns {string} 指示書テキスト
+ */
+export function buildLongNovelInstructionSheet(settings, headerInfo, appState) {
+  const cfg = extractLongNovelSettings(settings);
+
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  
+  let engineName = 'Unknown';
+  let modelName = 'Unknown';
+  let chapterCount = 0;
+  let estimatedTokens = 0;
+
+  if (appState) {
+    if (appState.engine === 'gemini') {
+      engineName = 'Google Gemini API';
+      modelName = appState.geminiModel || 'gemini-1.5-pro';
+    } else if (appState.engine === 'openai') {
+      engineName = 'OpenAI API';
+      modelName = appState.openaiModel || 'gpt-4o-mini';
+    }
+    
+    // ループ回数（章数）と文字数ベースの概算トークン数の算出
+    if (appState.longNovel) {
+      chapterCount = appState.longNovel.chapters ? appState.longNovel.chapters.length : 0;
+      const textLen = appState.longNovel.cleanText ? appState.longNovel.cleanText.length : 0;
+      const memoLen = appState.longNovel.memoText ? appState.longNovel.memoText.length : 0;
+      // 日本語1文字≒約1.2〜1.5トークン換算。プロンプト文脈保持分も考慮し、累積でざっくり計算
+      estimatedTokens = Math.floor((textLen + memoLen) * 1.5) + (chapterCount * 2000); 
+    }
+  }
+
+  return `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 再現用マスター指示書（この設定で他のAIでも生成できます）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【監査用メタデータ】
+・生成システム: Story Maker v3.5.4
+・利用エンジン: ${engineName} (${modelName})
+・生成完了日時: ${timestamp}
+・出力モード: 長編小説モード
+・生成パラメータ: Temperature 1.0 (Creative)
+・生成ループ回数: 完了章数 ${chapterCount} 章
+・推定消費トークン: 約 ${estimatedTokens.toLocaleString()} Tokens (テキスト長ベース概算)
+
+以下のプロンプトをChatGPT、Claude、Gemini等のAIに貼り付けることで、
+同じ設定の長編小説を別のAIでも1章ずつ対話形式で生成できます。
+
+--- ここからコピー ---
+
+あなたはプロのベストセラー小説家です。以下の設定で長編小説を1章ずつ執筆してください。
+
+■ 作品情報
+タイトル: ${headerInfo.title || '（AIが決定）'}
+ログライン: ${headerInfo.logline || '（AIが決定）'}
+全構成: ${headerInfo.totalChapters ? `全${headerInfo.totalChapters}章` : '（AIが決定）'}
+予定総文字数: ${headerInfo.targetChars || '（AIが決定）'}
+
+■ 基本設定
+・ジャンル: ${cfg.genre}
+・テーマ: ${cfg.theme}
+・時代: ${cfg.era}
+・世界観・雰囲気: ${cfg.worldview}
+・語り口: ${cfg.narr}
+・ターゲット層: ${cfg.target}
+・結末の方向性: ${cfg.ending}
+
+■ 登場人物
+${cfg.charDesc}
+${cfg.supplement}
+
+■ あらすじ
+${headerInfo.synopsis || '（上記設定に基づきAIが設計）'}
+
+■ プロット概要
+${headerInfo.plotOutline || '（上記設定に基づきAIが設計）'}
+
+■ 執筆ルール
+・1章ずつ書いて停止し、「続けますか？」と確認すること
+・各章の末尾に【回収待ち伏線メモ】【モチーフ＆サブキャラ追跡メモ】【次章のシーン設計（GMC+S）】を残すこと
+・Show, Don't Tell を徹底し、五感描写と身体的反応で感情を表現すること
+・各章に感情落差（逆転・置換・誇張等）を最低1回仕込むこと
+・伏線は序盤に配置し、後半で回収すること（唐突な新設定禁止）
+・文体の緩急（高熱量/静謐/冷徹）を使い分け、同系統3段落連続を禁止
+・最終章で全伏線を回収し、主人公の決断で着地させること
+
+では、まず【作品ヘッダー情報】を出力し、第1章を執筆してください。
+
+--- ここまでコピー ---
+`;
+}
+

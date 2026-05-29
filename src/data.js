@@ -17,7 +17,7 @@ export const MODES = [
   { value: 'short_short', label: 'ショート(〜1000字)' },
   { value: 'novel', label: '短編小説(〜3000字)' },
   { value: 'medium', label: '中編小説(〜4000字)' },
-  { value: 'long', label: '長編小説(10万字〜/プロンプト生成)' },
+  { value: 'long', label: '長編小説(数万字/全章＋指示書)' },
   { value: 'scenario', label: '脚本/台本' },
   { value: 'manga', label: 'ストーリー漫画' },
   { value: 'essay', label: 'エッセイ' },

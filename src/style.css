@@ -310,7 +310,7 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .tag-model{font-size:9px;color:var(--text3);border-color:var(--border)}
 .tag-warn{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
 
-.output-box{max-width:100%;flex:0 0 auto;margin-bottom:16px;word-break:break-word;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-size:15px;line-height:2;white-space:pre-wrap;min-height:200px;max-height:calc(100vh - 280px);overflow-y:auto;font-family:var(--font-serif);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.output-box{max-width:100%;flex:0 0 auto;margin-bottom:16px;word-break:break-word;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-size:15px;line-height:2;white-space:pre-wrap;min-height:200px;font-family:var(--font-serif);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .output-box pre { white-space: pre-wrap; word-break: break-all; overflow-x: hidden; }
 .output-box.empty{color:var(--text2);font-size:13px;font-family:var(--font-sans);line-height:1.8;white-space:normal}
 .error-msg{color:var(--danger);font-weight:600;display:flex;align-items:center;gap:8px}
@@ -1735,3 +1735,316 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .sa-beta-section.generating * {
   cursor: wait !important;
 }
+
+/* 📌 追従ヘッダーラッパー（OUTPUTヘッダー・タグ・長編パネルを全て固定） */
+.output-sticky-header {
+  position: sticky;
+  top: -24px; /* Counteract output-panel's 24px padding */
+  z-index: 20;
+  background: var(--bg); /* Hide scrolling text underneath */
+  margin: -24px -24px 0 -24px;
+  padding: 24px 24px 16px 24px;
+}
+
+/* ============================================================
+   📖 長編小説コントロールパネル
+   ============================================================ */
+.long-novel-panel {
+  background: linear-gradient(135deg, rgba(139,108,255,.06), rgba(66,133,244,.04));
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(139,108,255,.08);
+  animation: lnPanelIn .4s ease;
+}
+@keyframes lnPanelIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.long-novel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.long-novel-icon {
+  font-size: 22px;
+}
+.long-novel-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent2);
+  letter-spacing: .04em;
+}
+.ln-warning-text {
+  font-size: 10px;
+  color: var(--danger);
+  opacity: 0.8;
+  font-weight: 600;
+  background: rgba(248,113,113,0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* 作品情報 */
+.long-novel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.long-novel-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ln-work-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  background: linear-gradient(135deg, #fff 30%, var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.long-novel-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.ln-stat {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ln-stat strong {
+  color: var(--text);
+  font-family: monospace;
+}
+
+/* プログレスバー */
+.ln-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.ln-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--success));
+  background-size: 200% 100%;
+  border-radius: 3px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  animation: lnBarShimmer 3s ease-in-out infinite;
+}
+@keyframes lnBarShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* アクションボタン群 */
+.long-novel-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 次の章を生成ボタン */
+.btn-ln-next {
+  flex: 1;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ln-next::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+  transition: left .5s;
+}
+.btn-ln-next:hover::before { left: 100%; }
+.btn-ln-next:hover {
+  opacity: .9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139,108,255,.3);
+}
+.btn-ln-next:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-ln-next:disabled::before { display: none; }
+
+/* 中断ボタン */
+.btn-ln-abort {
+  padding: 12px 20px;
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+.btn-ln-abort:hover {
+  border-color: #fbbf24;
+  color: #fbbf24;
+  background: rgba(251,191,36,.06);
+}
+
+/* 全文保存ボタン */
+.btn-ln-save {
+  padding: 12px 20px;
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+.btn-ln-save:hover {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(52,211,153,.06);
+}
+
+/* 完了状態 */
+.long-novel-panel.ln-completed {
+  border-color: var(--success);
+  background: linear-gradient(135deg, rgba(52,211,153,.06), rgba(16,163,127,.04));
+}
+.long-novel-panel.ln-completed .long-novel-title {
+  color: var(--success);
+}
+.long-novel-panel.ln-completed .ln-progress-bar-fill {
+  animation: none;
+  background: var(--success);
+}
+
+
+/* コピーボタンの上限警告 */
+.copy-limit-warning {
+  font-size: 10px;
+  color: #fbbf24;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* セクション分離（小説パート / メモパート） */
+.ln-section {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,.15);
+  overflow: hidden;
+}
+.ln-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid var(--border);
+}
+.ln-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ln-section-actions {
+  display: flex;
+  gap: 6px;
+}
+.btn-ln-action {
+  padding: 4px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-ln-action:hover {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border-color: var(--border-accent);
+}
+.btn-ln-action:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+.btn-ln-action.ln-copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* メモ窓の折りたたみ */
+.ln-section-toggle {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ln-section-toggle:hover {
+  background: rgba(255,255,255,.04);
+}
+.ln-toggle-arrow {
+  font-size: 10px;
+  color: var(--text3);
+  transition: transform .2s ease;
+  display: inline-block;
+}
+.ln-toggle-arrow.open {
+  transform: rotate(90deg);
+}
+
+/* メモ内容 */
+.ln-memo-content {
+  padding: 10px 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.ln-memo-text {
+  font-size: 11px;
+  font-family: var(--font-sans);
+  color: var(--text3);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  margin: 0;
+}
+
+

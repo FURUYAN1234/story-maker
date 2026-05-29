@@ -17,7 +17,7 @@ import {
   PERSONALITY_ORIGINALS, ROLE_ORIGINALS,
 } from './data.js';
 import { callGenerativeAI, callGenerativeAIStream, callGenerativeAIVision } from './api.js';
-import { buildPrompt, generateRandomTheme } from './prompt.js';
+import { buildPrompt, generateRandomTheme, buildLongNovelInitPrompt, buildLongNovelContinuePrompt, buildLongNovelInstructionSheet } from './prompt.js';
 import { initCharImport } from './charImport.js';
 import { initStyleAnalyzer, updateAnalyzeButtonState, updateReflectButtonState, updateStyleAnalyzerSectionState } from './styleAnalyzer.js';
 import { version as APP_VERSION } from '../package.json';
@@ -43,6 +43,19 @@ const state = {
   characters: [], charIdCounter: 0,
   lastTitle: '',
   universalAssets: [], // 万能インプットで投入されたアセットリスト
+  // 長編小説モードのセッション状態
+  longNovel: {
+    active: false,         // 長編セッションが進行中か
+    totalChapters: 0,      // AIが設計した全章数
+    currentChapter: 0,     // 現在完了した章数
+    chapters: [],          // 各章データ [{title, body, contextMemo}]
+    headerInfo: null,      // 作品ヘッダー情報 {title, logline, totalChapters, targetChars, synopsis, plotOutline}
+    settings: null,        // 生成開始時の設定スナップショット
+    usedModel: null,       // 使用中のモデル
+    fullText: '',          // AIの生の全応答（内部用）
+    cleanText: '',         // 純粋な小説本文のみ（OUTPUT表示用）
+    memoText: '',          // 文脈メモ蓄積（メモ窓表示用）
+  },
   locked: {
     mode: false,
     theme: false,
@@ -429,12 +442,25 @@ function initMode() {
   container.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       if (state.locked.mode) return;
+      
+      const isLongNovelSelected = chip.dataset.v === 'long';
+      if (isLongNovelSelected && state.longNovel && state.longNovel.chapters && state.longNovel.chapters.length > 0) {
+        if (confirm('前の長編小説データが残っています。クリアして一から新しい作品の準備をしますか？\n（キャンセルすると以前のデータを保持します）')) {
+          resetLongNovelState();
+          document.getElementById('long-novel-panel').classList.add('hidden');
+          const outBox = document.getElementById('output');
+          if (outBox) {
+            outBox.className = 'output-box empty';
+            outBox.textContent = 'AIの思考を待っています...（しばらくお待ちください）';
+          }
+        }
+      }
+
       container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       state.mode = chip.dataset.v;
       $('mode-custom').value = chip.textContent;
       updateClear('mode-custom-clear', chip.textContent);
-      updateCharCountLimit(state.mode);
     });
   });
   $('btn-rand-mode').addEventListener('click', () => {
@@ -444,7 +470,6 @@ function initMode() {
     container.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.v === selected.value));
     $('mode-custom').value = selected.label;
     updateClear('mode-custom-clear', selected.label);
-    updateCharCountLimit(state.mode);
   });
   $('mode-custom-rnd').addEventListener('click', () => {
     if (state.locked.mode) return;
@@ -461,40 +486,8 @@ function initMode() {
     if (v) {
       container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       state.mode = null;
-      updateCharCountLimit(null);
     }
   });
-  $('charcount-check').addEventListener('change', () => {
-    if (state.locked.mode) return;
-    $('charcount-wrap').classList.toggle('hidden', !$('charcount-check').checked);
-  });
-  
-  $('char-count').addEventListener('input', (e) => {
-    if (state.locked.mode) return;
-    const max = parseInt(e.target.max) || 6000;
-    const val = parseInt(e.target.value);
-    if (val > max) e.target.value = max;
-  });
-}
-
-function updateCharCountLimit(modeValue) {
-  const input = $('char-count');
-  const hint = $('charcount-hint');
-  if (!input || !hint) return;
-  
-  if (modeValue === 'long') {
-    input.max = "300000";
-    input.step = "10000";
-    input.value = "100000";
-    hint.textContent = "※長編モードでは、長編小説をAIに各章ごと分割執筆させるための『専用指示書』を生成します。";
-    hint.style.color = "#4caf50";
-  } else {
-    input.max = "4000";
-    input.step = "500";
-    if (parseInt(input.value) > 4000) input.value = "2000";
-    hint.textContent = "※直接生成で途切れない安全な文字数は約4,000字までです";
-    hint.style.color = "#aaa";
-  }
 }
 
 
@@ -780,7 +773,7 @@ function gatherSettings() {
     endingCustom: $('ending-custom').value.trim(),
     narration: state.narration || '',
     narrCustom: $('narr-custom').value.trim(),
-    charCount: $('charcount-check').checked ? parseInt($('char-count').value) || null : null,
+    charCount: null,
     supplement: $('supplement').value.trim(),
     universalAssets: state.universalAssets || [],
   };
@@ -1019,6 +1012,30 @@ async function generate() {
 
   addSystemLog("[システム] ローカルRAG（検索拡張生成）ナレッジ辞書を参照中...");
   addSystemLog("[システム] ストーリープロンプトのセマンティック階層を構築中...");
+
+  // 長編小説モード: 専用の章別生成エンジンに委譲
+  if (settings.mode === 'long') {
+    if (state.longNovel && state.longNovel.chapters && state.longNovel.chapters.length > 0) {
+      if (!confirm('前の長編小説データが残っています。クリアして一から（第1章から）書き直しますか？\n（※これまでの本文は失われます）')) {
+        btn.disabled = false;
+        $('settings').classList.remove('generating');
+        return;
+      }
+    }
+    addSystemLog("[システム] 長編小説モードを検出。章別生成エンジンを起動します...");
+    try {
+      await generateLongNovelFirstChapter(settings, btn, out, tagRow, ctr);
+    } catch (err) {
+      console.error(err);
+      out.innerHTML = `<span class="error-msg">⚠ 長編小説の初期化でエラーが発生しました: ${err.message}</span>`;
+    } finally {
+      $('settings').classList.remove('generating');
+      btn.disabled = false;
+      btn.textContent = 'ストーリー生成';
+    }
+    return;
+  }
+
   const { prompt, tags } = buildPrompt(settings);
   addSystemLog("[システム] プロンプトのバリデーションとトークン最適化が完了しました。");
   
@@ -1369,6 +1386,7 @@ async function generate() {
 // 全ランダム & リセット
 // ============================================================
 async function allRandom() {
+  if (state.longNovel && state.longNovel.active) return;
   if (!state.locked.mode) {
     const selectedMode = rnd(MODES);
     state.mode = selectedMode.value;
@@ -1399,7 +1417,25 @@ async function allRandom() {
 
 
 function resetAll() {
-  if (!confirm('全ての設定（APIキー以外）をリセットしますか？')) return;
+  const isLongNovelGenerating = state.longNovel && state.longNovel.active;
+  const msg = isLongNovelGenerating 
+    ? '長編小説のデータも含め、全ての設定（APIキー以外）を完全にリセットしますか？\n（現在進行中の長編データは失われます）' 
+    : '全ての設定（APIキー以外）をリセットしますか？';
+  
+  if (!confirm(msg)) return;
+
+  // 常に長編小説の状態とUIをリセットする
+  resetLongNovelState();
+  const lnPanel = document.getElementById('long-novel-panel');
+  if (lnPanel) {
+    lnPanel.classList.add('hidden');
+    lnPanel.classList.remove('ln-completed', 'ln-generating');
+  }
+  const outBox = document.getElementById('output');
+  if (outBox) {
+    outBox.className = 'output-box empty text-selectable';
+    outBox.textContent = '出力結果がここに表示されます...';
+  }
   
   // 全てのロック状態を解除
   const sections = ['mode', 'theme', 'chars', 'genre', 'worldview', 'target', 'era', 'ending', 'narr', 'supplement', 'universal'];
@@ -1444,12 +1480,9 @@ function resetAll() {
   // 4. Reset UI - Chars
   renderChars();
   
-  // 5. Reset UI - Supplement & Charcount
+  // 5. Reset UI - Supplement
   $('supplement').value = '';
   updateClear('supplement-clear', '');
-  $('charcount-check').checked = false;
-  $('charcount-wrap').classList.add('hidden');
-  $('char-count').value = '400';
   
   // 6. Reset UI - Output
   $('output').className = 'output-box empty';
@@ -1982,7 +2015,8 @@ function init() {
     const blob = new Blob([t], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    const ts = new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
+    const now = new Date();
+    const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
     a.download = (state.lastTitle || 'story') + '_' + ts + '.txt';
     a.click();
   });
@@ -2102,3 +2136,765 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ============================================================
+// 📖 長編小説モード: コアエンジン
+// ============================================================
+
+// コピペ上限文字数（ブラウザのクリップボード制限目安）
+const COPY_CHAR_LIMIT = 500000;
+
+/**
+ * 長編セッション状態をリセットする
+ */
+function resetLongNovelState() {
+  if (state.longNovel && state.longNovel.abortController) {
+    state.longNovel.abortController.abort();
+  }
+  setLongNovelGenerating(false);
+
+  state.longNovel = {
+    active: false,
+    isPaused: false,
+    totalChapters: 0,
+    currentChapter: 0,
+    chapters: [],
+    headerInfo: null,
+    settings: null,
+    usedModel: null,
+    fullText: '',
+    cleanText: '',
+    memoText: '',
+  };
+  // UIロックの解除
+  document.querySelector('.settings-panel')?.classList.remove('generating');
+  
+  // メモ窓もリセット
+  const memoText = document.getElementById('ln-memo-text');
+  if (memoText) memoText.textContent = '（まだメモはありません）';
+  const memoContent = document.getElementById('ln-memo-content');
+  if (memoContent) memoContent.classList.add('hidden');
+  const arrow = document.getElementById('ln-memo-arrow');
+  if (arrow) arrow.classList.remove('open');
+}
+
+/**
+ * AIの出力から作品ヘッダー情報を解析する
+ */
+function parseHeaderInfo(text) {
+  const info = { title: '', logline: '', totalChapters: 0, targetChars: '', synopsis: '', plotOutline: '' };
+  // タイトル
+  const titleM = text.match(/タイトル[:：]\s*(.+)/);
+  if (titleM) info.title = titleM[1].trim();
+  // ログライン
+  const logM = text.match(/ログライン[:：]\s*(.+)/);
+  if (logM) info.logline = logM[1].trim();
+  // 全構成
+  const chapM = text.match(/全構成[:：]\s*全(\d+)章/);
+  if (chapM) info.totalChapters = parseInt(chapM[1], 10);
+  // 予定総文字数
+  const charM = text.match(/予定総文字数[:：]\s*(.+)/);
+  if (charM) info.targetChars = charM[1].trim();
+  // あらすじ（複数行対応）
+  const synM = text.match(/あらすじ[:：]\s*([\s\S]+?)(?=\n(?:【|#|第\d|---|\n))/);
+  if (synM) info.synopsis = synM[1].trim();
+  // プロット概要（全体を取得）
+  const plotM = text.match(/【プロット概要】\s*([\s\S]+?)(?=\n---|\n# 第)/);
+  if (plotM) info.plotOutline = plotM[1].trim();
+  return info;
+}
+
+/**
+ * 章テキストから文脈維持メモを抽出する
+ */
+function extractContextMemo(text) {
+  // ---以降の文脈維持メモを探す
+  const markers = ['【回収待ち伏線メモ】', '【モチーフ＆サブキャラ追跡メモ】', '【次章のシーン設計'];
+  let memoStart = -1;
+  for (const marker of markers) {
+    const idx = text.indexOf(marker);
+    if (idx !== -1 && (memoStart === -1 || idx < memoStart)) {
+      memoStart = idx;
+    }
+  }
+  if (memoStart === -1) return { body: text.trim(), memo: '' };
+
+  // メモの前の本文を取得
+  let body = text.substring(0, memoStart).trim();
+
+  // 末尾の---や空の#などを除去（AIが出力しがちなフォーマット揺れ対策）
+  body = body.replace(/\n---\s*$/, '').trim();
+  body = body.replace(/\n(?:---+|#+)\s*\n/g, '\n\n');
+  body = body.replace(/(?:\n|^)(?:---+|#+)\s*$/g, '');
+  body = body.replace(/\n{3,}/g, '\n\n').trim();
+
+  const memo = text.substring(memoStart).trim();
+  return { body, memo };
+}
+
+/**
+ * 章テキストから章タイトルを抽出する
+ */
+function extractChapterTitle(text) {
+  const m = text.match(/# 第\d+章[:：]?\s*(.+)/);
+  return m ? m[1].trim() : '';
+}
+
+/**
+ * 長編モード中の左側パネルの全コントロールをロックする
+ */
+function lockLeftPanel() {
+  const panel = document.getElementById('settings');
+  if (!panel) return;
+  panel.classList.add('generating');
+  // 物理的にもクリック不能にする
+  panel.style.pointerEvents = 'none';
+  panel.style.opacity = '0.65';
+  
+  // 入力要素をすべて無効化
+  const els = panel.querySelectorAll('button, select, input, textarea');
+  els.forEach(el => {
+    if (el.id === 'btn-ln-abort' || el.id === 'btn-ln-next') return;
+    if (!el.hasAttribute('data-ln-locked')) {
+      el.setAttribute('data-ln-locked', el.disabled ? 'true' : 'false');
+      el.disabled = true;
+    }
+  });
+
+  const btn = document.getElementById('btn-generate');
+  if (btn) {
+    btn.textContent = '🔒 長編進行中';
+    btn.disabled = true;
+  }
+}
+
+/**
+ * 長編モード終了時・エラー時に左側パネルのロックを解除する
+ */
+function unlockLeftPanel() {
+  const panel = document.getElementById('settings');
+  if (!panel) return;
+  panel.classList.remove('generating');
+  panel.style.pointerEvents = '';
+  panel.style.opacity = '';
+  
+  const els = panel.querySelectorAll('button, select, input, textarea');
+  els.forEach(el => {
+    if (el.getAttribute('data-ln-locked') === 'false') {
+      el.disabled = false;
+    }
+    el.removeAttribute('data-ln-locked');
+  });
+
+  const btn = document.getElementById('btn-generate');
+  if (btn) {
+    btn.textContent = 'ストーリー生成';
+    btn.disabled = false;
+  }
+}
+
+/**
+ * 長編パネルの生成中/待機中状態を切り替える
+ * 生成中: 次の章ボタン非活性化
+ * 待機中: updateLongNovelPanel() が適切に活性化を制御
+ */
+function setLongNovelGenerating(isGenerating) {
+  const panel = document.getElementById('long-novel-panel');
+  const btnPause = document.getElementById('btn-ln-pause');
+  const btnAbort = document.getElementById('btn-ln-abort');
+  // コピー・TXTボタン（小説本文 + メモ）
+  const actionBtns = [
+    document.getElementById('btn-ln-copy-novel'),
+    document.getElementById('btn-ln-save-novel'),
+    document.getElementById('btn-ln-copy-memo'),
+    document.getElementById('btn-ln-save-memo'),
+  ];
+  if (!panel) return;
+
+  if (isGenerating) {
+    panel.classList.add('ln-generating');
+    // 中断ボタンは生成中も押せるようにするためロックしない、かつ確実に表示する
+    if (btnAbort) { 
+      btnAbort.disabled = false; 
+      btnAbort.style.opacity = '1'; 
+      btnAbort.classList.remove('hidden');
+    }
+    actionBtns.forEach(b => { if (b) { b.disabled = true; b.style.opacity = '0.3'; } });
+  } else {
+    panel.classList.remove('ln-generating');
+    // 中断ボタンのロック解除（元々ロックしていないが念のため）
+    if (btnAbort) { btnAbort.disabled = false; btnAbort.style.opacity = ''; }
+    actionBtns.forEach(b => { if (b) { b.disabled = false; b.style.opacity = ''; } });
+  }
+}
+
+/**
+ * 長編コントロールパネルのUI更新
+ */
+function updateLongNovelPanel() {
+  const ln = state.longNovel;
+  const panel = document.getElementById('long-novel-panel');
+  const titleEl = document.getElementById('ln-work-title');
+  const progressEl = document.getElementById('ln-progress');
+  const charCountEl = document.getElementById('ln-char-count');
+  const targetEl = document.getElementById('ln-target');
+  const progressBar = document.getElementById('ln-progress-bar');
+  const btnPause = document.getElementById('btn-ln-pause');
+  const btnAbort = document.getElementById('btn-ln-abort');
+
+  if (!panel) return;
+
+  // パネル表示
+  panel.classList.remove('hidden');
+
+  // 作品タイトル
+  titleEl.textContent = ln.headerInfo?.title || '生成中...';
+
+  // 進捗
+  progressEl.textContent = `${ln.currentChapter} / ${ln.totalChapters} 章`;
+
+  // 文字数（純粋な小説本文のみ）
+  const totalChars = ln.cleanText.length;
+  charCountEl.textContent = totalChars.toLocaleString();
+
+  // 目安
+  targetEl.textContent = '数万字';
+
+  // プログレスバー
+  const pct = ln.totalChapters > 0 ? Math.round((ln.currentChapter / ln.totalChapters) * 100) : 0;
+  progressBar.style.width = `${pct}%`;
+
+  // 完了判定
+  const isComplete = ln.currentChapter >= ln.totalChapters;
+
+  // 一時停止ボタン
+  if (isComplete) {
+    if (btnPause) { btnPause.disabled = true; btnPause.textContent = '✅ 全章完了'; }
+    panel.classList.add('ln-completed');
+    panel.classList.remove('ln-generating');
+    unlockLeftPanel();
+    // 全章完了なら中断ボタンも非活性化
+    if (btnAbort) { btnAbort.disabled = true; btnAbort.style.opacity = '0.3'; }
+  } else {
+    if (btnPause) {
+      btnPause.disabled = false;
+      if (ln.isPaused) {
+        btnPause.textContent = '▶️ 生成を再開';
+      } else {
+        btnPause.textContent = '⏸ 一時停止';
+      }
+    }
+    panel.classList.remove('ln-completed');
+  }
+
+  // 中断ボタン表示
+  if (btnAbort) {
+    btnAbort.classList.remove('hidden');
+    btnAbort.disabled = false;
+  }
+
+  // 小説コピーボタンの上限チェック
+  const copyBtn = document.getElementById('btn-ln-copy-novel');
+  if (copyBtn) {
+    if (totalChars > COPY_CHAR_LIMIT) {
+      copyBtn.disabled = true;
+      copyBtn.title = `クリップボードの容量制限（${Math.floor(COPY_CHAR_LIMIT/10000)}万字）を超えるためコピーできません。TXT保存を使用してください。`;
+      copyBtn.textContent = '⚠ 容量超過 (ブラウザ制限につきコピー不可)';
+    } else {
+      copyBtn.disabled = false;
+      copyBtn.title = '小説本文をコピー';
+      copyBtn.textContent = '📋 コピー';
+    }
+  }
+}
+
+/**
+ * 小説本文をTXTファイルとして保存する
+ */
+function saveLongNovelAsTxt() {
+  const ln = state.longNovel;
+  if (!ln.cleanText) return;
+  downloadAsText(ln.cleanText, ln.headerInfo?.title || '長編小説', '本文');
+}
+
+/**
+ * メモ・指示書をTXTファイルとして保存する
+ */
+function saveLongNovelMemoAsTxt() {
+  const ln = state.longNovel;
+  let content = ln.memoText || '';
+  // 指示書が未追加なら追加する
+  if (ln.settings && ln.headerInfo) {
+    const sheet = buildLongNovelInstructionSheet(ln.settings, ln.headerInfo, state);
+    if (!content.includes('再現用マスター指示書')) {
+      content += (content ? '\n\n' : '') + sheet;
+    }
+  }
+  if (!content) return;
+  downloadAsText(content, ln.headerInfo?.title || '長編小説', 'メモ・指示書');
+}
+
+/**
+ * テキストをTXTファイルとしてダウンロードするヘルパー
+ */
+function downloadAsText(content, title, suffix) {
+  const now = new Date();
+  const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+  const fileName = `${title}_${suffix}_${ts}.txt`;
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * メモ窓のテキスト表示を更新する
+ */
+function updateMemoPanel() {
+  const ln = state.longNovel;
+  const memoEl = document.getElementById('ln-memo-text');
+  if (memoEl) {
+    memoEl.textContent = ln.memoText || '（まだメモはありません）';
+  }
+}
+
+/**
+ * コピー操作のヘルパー（成功時にボタンをフラッシュ）
+ */
+async function copyTextToClipboard(text, btnId) {
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✅ コピーしました';
+      btn.classList.add('ln-copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('ln-copied');
+      }, 2000);
+    }
+  } catch (e) {
+    console.error('Copy failed:', e);
+  }
+}
+
+/**
+ * 長編小説の第1章を生成する（generate()から呼ばれる）
+ */
+async function generateLongNovelFirstChapter(settings, btn, out, tagRow, ctr) {
+  const key = state.apiKey;
+  if (!key) {
+    out.innerHTML = '<span class="error-msg">⚠ APIキーが設定されていません。</span>';
+    btn.textContent = '✨ 生成する';
+    btn.disabled = false;
+    document.querySelector('.settings-panel')?.classList.remove('generating');
+    return;
+  }
+
+  // 長編セッション初期化
+  resetLongNovelState();
+  state.longNovel.active = true;
+  state.longNovel.settings = JSON.parse(JSON.stringify(settings));
+
+  // プロンプト生成
+  const { prompt, tags } = buildLongNovelInitPrompt(settings);
+
+  // タグ表示
+  if (tagRow) {
+    tagRow.innerHTML = '';
+    const aiTag = key.startsWith('sk-') ? '<span class="tag tag-openai">ChatGPT</span>' : '<span class="tag tag-gemini">Gemini</span>';
+    tagRow.innerHTML = aiTag + '<span class="tag">📖 長編小説</span>' + tags.map(t => `<span class="tag">${t}</span>`).join('');
+  }
+
+  // UI: OUTPUTボックスの準備
+  out.className = 'output-box text-selectable';
+  out.textContent = '📖 長編小説の第1章を生成中...（プロット設計→第1章執筆）';
+
+  const model = GEMINI_MODELS[0].value;
+  state.longNovel.usedModel = model;
+
+  // 左側パネルの完全ロック
+  lockLeftPanel();
+
+  // 長編パネルを「生成中」状態で即表示
+  state.longNovel.totalChapters = 10; // 仮の章数（AIの応答で上書き）
+  updateLongNovelPanel();
+  setLongNovelGenerating(true);
+
+  // 長時間待ち対策用タイマー
+  let seconds = 0;
+  const timerId = setInterval(() => {
+    if (!state.longNovel.active) {
+      clearInterval(timerId);
+      return;
+    }
+    seconds++;
+    btn.textContent = `⏳ AIが考え中... (${seconds}秒経過)`;
+  }, 1000);
+
+  const controller = new AbortController();
+  state.longNovel.abortController = controller;
+
+  try {
+    // APIコール（ストリーミング）— 引数順: apiKey, model, prompt, onChunk, onFallback
+    let fullResponse = '';
+
+    const result = await callGenerativeAIStream(
+      key, model, prompt,
+      ({ text, isThought }) => {
+        if (!state.longNovel.active) return;
+        if (!isThought) {
+          fullResponse += text;
+          // リアルタイムで出力表示（ヘッダー＋第1章が段階的に見える）
+          out.textContent = fullResponse;
+          out.scrollIntoView(false);
+          // 文字カウンタをリアルタイム更新
+          if (ctr) ctr.textContent = `${fullResponse.length.toLocaleString()} 字`;
+          // パネルの文字数もリアルタイム更新
+          const charCountEl = document.getElementById('ln-char-count');
+          if (charCountEl) charCountEl.textContent = fullResponse.length.toLocaleString();
+        }
+      },
+      (m) => {
+        btn.innerHTML = `<span class="spinner"></span>フォールバック: ${m}`;
+      },
+      { signal: controller.signal }
+    );
+
+    if (!state.longNovel.active) return;
+
+    // ヘッダー情報の解析
+    const headerInfo = parseHeaderInfo(fullResponse);
+    state.longNovel.headerInfo = headerInfo;
+    state.longNovel.totalChapters = headerInfo.totalChapters || 10;
+
+    // 第1章の本文と文脈メモを分離
+    const chapterMatch = fullResponse.match(/(# 第1章[\s\S]*)/);
+    const chapterRaw = chapterMatch ? chapterMatch[1] : fullResponse;
+    const { body, memo } = extractContextMemo(chapterRaw);
+
+    // ヘッダー部分（タイトル〜あらすじ）を取得
+    const headerText = chapterMatch 
+      ? fullResponse.substring(0, chapterMatch.index).trim() 
+      : '';
+
+    state.longNovel.chapters.push({
+      title: extractChapterTitle(chapterRaw),
+      body: body,
+      contextMemo: memo,
+    });
+    state.longNovel.currentChapter = 1;
+    state.longNovel.fullText = fullResponse;
+
+    // cleanText: ヘッダー + 純粋な小説本文のみ（メモ除外）
+    state.longNovel.cleanText = headerText + (headerText ? '\n\n' : '') + body;
+    // memoText: 文脈メモを蓄積
+    state.longNovel.memoText = memo ? `--- 第1章の文脈メモ ---\n${memo}` : '';
+
+    // OUTPUT表示: 純粋な小説本文のみ
+    out.textContent = state.longNovel.cleanText;
+    out.scrollIntoView(false);
+    if (ctr) ctr.textContent = `${state.longNovel.cleanText.length.toLocaleString()} 字`;
+
+    // メモ窓を更新
+    updateMemoPanel();
+
+    // 生成完了: パネル更新
+    setLongNovelGenerating(false);
+    updateLongNovelPanel();
+
+    // 長編モード進行中のため、左側パネルはロックしたままにする
+    lockLeftPanel();
+
+    // フルオート進行判定
+    const ln = state.longNovel;
+    if (ln.currentChapter < ln.totalChapters && !ln.isPaused) {
+      setTimeout(() => {
+        if (ln.active && !ln.isPaused && ln.currentChapter < ln.totalChapters) {
+          generateLongNovelNextChapter();
+        }
+      }, 2000); // ユーザーが完了を視認するための2秒待機
+    }
+
+  } catch (err) {
+    if (!state.longNovel.active) return;
+    out.innerHTML = `<span class="error-msg">⚠ エラー: ${err.message || err}</span>`;
+    setLongNovelGenerating(false);
+    resetLongNovelState();
+    unlockLeftPanel();
+  } finally {
+    clearInterval(timerId);
+  }
+}
+
+/**
+ * 長編小説の次の章を生成する
+ */
+async function generateLongNovelNextChapter() {
+  const ln = state.longNovel;
+  if (!ln.active || ln.currentChapter >= ln.totalChapters) return;
+
+  const key = state.apiKey;
+  if (!key) return;
+
+  const nextChapter = ln.currentChapter + 1;
+  const isLast = nextChapter >= ln.totalChapters;
+
+  const panel = document.getElementById('long-novel-panel');
+  const btnPause = document.getElementById('btn-ln-pause');
+  const out = document.getElementById('output');
+  const ctr = document.querySelector('.char-counter');
+
+  // UI: 生成中状態
+  setLongNovelGenerating(true);
+  if (btnPause) {
+    btnPause.disabled = false;
+    btnPause.innerHTML = `<span class="spinner"></span> ⏸ 第${nextChapter}章生成中...`;
+  }
+
+  // 文脈データの構築
+  // 直近2章の全文
+  const recentChapters = ln.chapters.slice(-2).map((c, i) => {
+    const chNum = ln.currentChapter - 1 + i;
+    return `# 第${chNum + 1}章: ${c.title}\n${c.body}`;
+  }).join('\n\n---\n\n');
+
+  // 3章以上前のサマリー
+  let previousSummary = '';
+  if (ln.chapters.length > 2) {
+    previousSummary = ln.chapters.slice(0, -2).map((c, i) => {
+      return `第${i + 1}章「${c.title}」: （約${c.body.length}字）`;
+    }).join('\n');
+  }
+
+  // 全章の文脈維持メモ結合
+  const allMemos = ln.chapters.map((c, i) => {
+    return `--- 第${i + 1}章の文脈メモ ---\n${c.contextMemo || '（なし）'}`;
+  }).join('\n\n');
+
+  // プロンプト生成
+  const prompt = buildLongNovelContinuePrompt(
+    nextChapter, ln.totalChapters, ln.settings,
+    previousSummary, recentChapters, allMemos, isLast
+  );
+
+  const controller = new AbortController();
+  ln.abortController = controller;
+
+  try {
+    let chapterResponse = '';
+
+    await callGenerativeAIStream(
+      key, ln.usedModel || GEMINI_MODELS[0].value, prompt,
+      ({ text, isThought }) => {
+        if (!ln.active) return;
+        if (!isThought) {
+          chapterResponse += text;
+          // OUTPUTに追記表示（cleanTextベースで、生成中のチャプターをリアルタイム追記）
+          out.textContent = ln.cleanText + '\n\n---\n\n' + chapterResponse;
+          out.scrollIntoView(false);
+          // 文字カウンタをリアルタイム更新
+          const totalLen = ln.cleanText.length + chapterResponse.length;
+          if (ctr) ctr.textContent = `${totalLen.toLocaleString()} 字`;
+          const charCountEl = document.getElementById('ln-char-count');
+          if (charCountEl) charCountEl.textContent = totalLen.toLocaleString();
+        }
+      },
+      (m) => {
+        btnNext.innerHTML = `<span class="spinner"></span>フォールバック: ${m}`;
+      },
+      { signal: controller.signal }
+    );
+
+    if (!state.longNovel.active) return;
+
+    // 章データの保存（小説本文 / メモを分離）
+    const { body, memo } = extractContextMemo(chapterResponse);
+    ln.chapters.push({
+      title: extractChapterTitle(chapterResponse),
+      body: body,
+      contextMemo: memo,
+    });
+    ln.currentChapter = nextChapter;
+    ln.fullText += '\n\n---\n\n' + chapterResponse;
+
+    // cleanText: 純粋な小説本文のみ追記（メモ除外）
+    ln.cleanText += '\n\n---\n\n' + body;
+    // memoText: メモを蓄積
+    if (memo) {
+      ln.memoText += (ln.memoText ? '\n\n' : '') + `--- 第${nextChapter}章の文脈メモ ---\n${memo}`;
+    }
+
+    // OUTPUT表示: 純粋な小説本文のみ
+    out.textContent = ln.cleanText;
+    out.scrollIntoView(false);
+    if (ctr) ctr.textContent = `${ln.cleanText.length.toLocaleString()} 字`;
+
+    // 最終章の場合: 指示書をメモ窓に追加（小説本文には入れない）
+    if (isLast && ln.settings && ln.headerInfo) {
+      const sheet = buildLongNovelInstructionSheet(ln.settings, ln.headerInfo, state);
+      ln.memoText += '\n\n' + sheet;
+    }
+
+    // メモ窓を更新
+    updateMemoPanel();
+
+    // パネル更新
+    setLongNovelGenerating(false);
+    updateLongNovelPanel();
+
+    // フルオート進行判定
+    if (ln.currentChapter < ln.totalChapters && !ln.isPaused) {
+      setTimeout(() => {
+        if (ln.active && !ln.isPaused && ln.currentChapter < ln.totalChapters) {
+          generateLongNovelNextChapter();
+        }
+      }, 2000); // ユーザーが完了を視認するための2秒待機
+    }
+
+  } catch (err) {
+    if (!ln.active) return;
+    out.textContent = ln.fullText + `\n\n⚠ 第${nextChapter}章の生成でエラーが発生しました: ${err.message || err}`;
+    setLongNovelGenerating(false);
+    if (btnPause) {
+      btnPause.disabled = false;
+      btnPause.textContent = `📖 第${nextChapter}章を再試行`;
+    }
+  } finally {
+    clearInterval(timerId);
+  }
+}
+
+/**
+ * 長編小説を中断して現在の状態を保存する
+ */
+function abortLongNovel() {
+  const ln = state.longNovel;
+  if (!ln.active) return;
+  ln.active = false;
+  
+  if (ln.abortController) {
+    ln.abortController.abort();
+  }
+
+  // 指示書をメモ窓に追加（小説本文には入れない）
+  if (ln.settings && ln.headerInfo) {
+    const sheet = buildLongNovelInstructionSheet(ln.settings, ln.headerInfo, state);
+    ln.memoText += (ln.memoText ? '\n\n' : '') + sheet;
+    updateMemoPanel();
+  }
+
+  // 完了状態にする
+  ln.totalChapters = ln.currentChapter; // 現在章を最終章扱い
+  updateLongNovelPanel();
+
+  const panel = document.getElementById('long-novel-panel');
+  panel?.classList.add('ln-completed');
+  const titleEl = document.getElementById('long-novel-title');
+  if (titleEl) titleEl.textContent = `長編小説モード（第${ln.currentChapter}章で中断）`;
+
+  // UIロック解除
+  unlockLeftPanel();
+
+  // 中断後: 一時停止・中断ボタンを完全非活性化、コピー/TXTのみ有効
+  const btnPause = document.getElementById('btn-ln-pause');
+  const btnAbort = document.getElementById('btn-ln-abort');
+  if (btnPause) { btnPause.disabled = true; btnPause.textContent = '⏹ 中断済み'; }
+  if (btnAbort) { btnAbort.disabled = true; btnAbort.style.opacity = '0.3'; }
+}
+
+// 長編コントロールパネルのイベントリスナー（DOMContentLoaded時に登録）
+document.addEventListener('DOMContentLoaded', () => {
+  // 一時停止 / 再開ボタン
+  const btnPause = document.getElementById('btn-ln-pause');
+  if (btnPause) {
+    btnPause.addEventListener('click', () => {
+      const ln = state.longNovel;
+      if (ln.isPaused) {
+        // 再開処理
+        ln.isPaused = false;
+        btnPause.textContent = '⏸ 一時停止';
+        btnPause.disabled = true; // 次の章生成中に再度押されるのを防ぐ
+        generateLongNovelNextChapter();
+      } else {
+        // 停止予約処理
+        ln.isPaused = true;
+        btnPause.textContent = '⏸ 停止予約中...';
+        btnPause.disabled = true;
+      }
+    });
+  }
+
+  // 中断ボタン
+  const btnAbort = document.getElementById('btn-ln-abort');
+  if (btnAbort) {
+    btnAbort.addEventListener('click', () => {
+      if (confirm('現在の進捗で生成を中断しますか？\n（ここまでの全文はコピー・TXT保存が可能です）')) {
+        abortLongNovel();
+      }
+    });
+  }
+
+  // 📋 小説本文コピーボタン
+  const btnCopyNovel = document.getElementById('btn-ln-copy-novel');
+  if (btnCopyNovel) {
+    btnCopyNovel.addEventListener('click', () => {
+      copyTextToClipboard(state.longNovel.cleanText, 'btn-ln-copy-novel');
+    });
+  }
+
+  // 📄 小説本文TXT保存ボタン
+  const btnSaveNovel = document.getElementById('btn-ln-save-novel');
+  if (btnSaveNovel) {
+    btnSaveNovel.addEventListener('click', () => {
+      saveLongNovelAsTxt();
+    });
+  }
+
+  // 📋 メモコピーボタン
+  const btnCopyMemo = document.getElementById('btn-ln-copy-memo');
+  if (btnCopyMemo) {
+    btnCopyMemo.addEventListener('click', () => {
+      // メモ + 指示書を合わせてコピー
+      const ln = state.longNovel;
+      let content = ln.memoText || '';
+      if (ln.settings && ln.headerInfo) {
+        const sheet = buildLongNovelInstructionSheet(ln.settings, ln.headerInfo, state);
+        if (!content.includes('再現用マスター指示書')) {
+          content += (content ? '\n\n' : '') + sheet;
+        }
+      }
+      copyTextToClipboard(content, 'btn-ln-copy-memo');
+    });
+  }
+
+  // 📄 メモTXT保存ボタン
+  const btnSaveMemo = document.getElementById('btn-ln-save-memo');
+  if (btnSaveMemo) {
+    btnSaveMemo.addEventListener('click', () => {
+      saveLongNovelMemoAsTxt();
+    });
+  }
+
+  // 📝 メモ窓の折りたたみトグル
+  const memoToggle = document.getElementById('ln-memo-toggle');
+  if (memoToggle) {
+    memoToggle.addEventListener('click', (e) => {
+      // ボタンのクリックは除外
+      if (e.target.closest('.btn-ln-action')) return;
+      const content = document.getElementById('ln-memo-content');
+      const arrow = document.getElementById('ln-memo-arrow');
+      if (content) content.classList.toggle('hidden');
+      if (arrow) arrow.classList.toggle('open');
+    });
+  }
+});
+
