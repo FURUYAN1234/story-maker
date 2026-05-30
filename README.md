@@ -167,6 +167,7 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 - **State Separation & Context Panel / 状態の完全分離と文脈パネル**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 小説本文とAIの構造メモ（目的・伏線等）を内部状態レベルで完全に分離。メモは折りたたみ可能な専用パネルへルーティングされ、AI特有の空のマークダウン記号なども強力にクレンジング除去されるため、エクスポートされるテキストには純粋な小説本文のみが含まれます。
 - **Local Timestamped Export / ローカル時刻での厳密なファイル管理**: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 全てのテキスト・JSON保存のファイル名において、UTCズレのない日本時間（ローカル時刻）の完全な数字14桁（`YYYYMMDDHHmmss`）を強制。長期間にわたる連載執筆時の時系列ソートの一貫性を保証します。
+- **AI Consistency Audit Engine / AI矛盾検査エンジン**: Implemented a recursive loop mechanism (check -> fix -> recheck) with a maximum of 8 iterations to ruthlessly eliminate logical paradoxes and setting inconsistencies during long-form continuous generation. Detailed audit logs are displayed to the user in real-time. / 長編連続生成中に発生する設定の破綻や論理的矛盾を検知し、安全上限8回まで「検査→修正→再検査」のループを回して徹底的に矛盾を排除するエンジンを搭載。何が矛盾しているかの詳細を進行ログにリアルタイム表示します。
 
 
 ---
@@ -690,6 +691,13 @@ Developed by **FURU**
 
 
 ## ChangeLog
+
+### v3.5.6 — 2026-05-30
+* **Feature**: AI矛盾検査エンジンの修正ループ安全上限を5回から8回へ引き上げ、修正処理が新たな連鎖的矛盾を生まないようプロンプトの制約（存在しないキャラクターや設定の勝手な追加禁止など）を強化。
+
+### v3.5.5 — 2026-05-30
+* **Feature**: 長編小説・短編など主要モード向けに「AI矛盾検査エンジン」を実装。各章生成完了時に矛盾がないか自己診断し、矛盾があれば修正と再検査をループ（最大試行回数8回）して論理破綻を排除。
+* **UI**: AI進捗ログ窓に、AIが検出した「重大な矛盾」および「軽微な指摘」の詳細内容をリアルタイムで出力し、内部の修正プロセスを可視化。
 
 ### v3.5.4 — 2026-05-29
 * **Feature**: 長編小説モードにおける「状態の完全分離と文脈パネル」を実装。小説本文とAIの構造メモ（目的・伏線等）を状態レベルで完全に分離し、エクスポートされるテキストにメタノイズが混入しないよう改善。

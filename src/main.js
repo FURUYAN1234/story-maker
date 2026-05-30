@@ -20,6 +20,7 @@ import { callGenerativeAI, callGenerativeAIStream, callGenerativeAIVision } from
 import { buildPrompt, generateRandomTheme, buildLongNovelInitPrompt, buildLongNovelContinuePrompt, buildLongNovelInstructionSheet } from './prompt.js';
 import { initCharImport } from './charImport.js';
 import { initStyleAnalyzer, updateAnalyzeButtonState, updateReflectButtonState, updateStyleAnalyzerSectionState } from './styleAnalyzer.js';
+import { auditAndFix, formatAuditResultForMemo } from './consistencyAudit.js';
 import { version as APP_VERSION } from '../package.json';
 
 const $ = id => document.getElementById(id);
@@ -444,6 +445,28 @@ function initMode() {
       if (state.locked.mode) return;
       
       const isLongNovelSelected = chip.dataset.v === 'long';
+      // 長編モードから別モードへ切替: 長編データが残っていればクリーンアップ
+      if (!isLongNovelSelected && state.longNovel && state.longNovel.chapters && state.longNovel.chapters.length > 0) {
+        if (confirm('長編小説データが残っています。クリアして新しい作品の準備をしますか？\n（キャンセルするとモードを切り替えずに元のまま続けます）')) {
+          resetLongNovelState();
+          const lnPanel = document.getElementById('long-novel-panel');
+          if (lnPanel) {
+            lnPanel.classList.add('hidden');
+            lnPanel.classList.remove('ln-completed', 'ln-generating');
+          }
+          unlockLeftPanel();
+          const outBox = document.getElementById('output');
+          if (outBox) {
+            outBox.className = 'output-box empty';
+            outBox.textContent = '出力結果がここに表示されます...';
+          }
+          const ctrEl = document.querySelector('.char-counter');
+          if (ctrEl) ctrEl.textContent = '0 字';
+        } else {
+          return; // キャンセル: モード切替を中止
+        }
+      }
+      // 長編モードを再度選択: 既存データのクリア確認
       if (isLongNovelSelected && state.longNovel && state.longNovel.chapters && state.longNovel.chapters.length > 0) {
         if (confirm('前の長編小説データが残っています。クリアして一から新しい作品の準備をしますか？\n（キャンセルすると以前のデータを保持します）')) {
           resetLongNovelState();
@@ -1036,6 +1059,17 @@ async function generate() {
     return;
   }
 
+  // 非長編モードでの生成開始時: 長編パネルが残っていれば自動クリーンアップ
+  if (state.longNovel && (state.longNovel.chapters?.length > 0 || state.longNovel.active)) {
+    resetLongNovelState();
+    const lnPanel = document.getElementById('long-novel-panel');
+    if (lnPanel) {
+      lnPanel.classList.add('hidden');
+      lnPanel.classList.remove('ln-completed', 'ln-generating');
+    }
+    unlockLeftPanel();
+  }
+
   const { prompt, tags } = buildPrompt(settings);
   addSystemLog("[システム] プロンプトのバリデーションとトークン最適化が完了しました。");
   
@@ -1289,6 +1323,31 @@ async function generate() {
                              .replace(/要するに[、，]?/g, '')
                              .replace(/\*\*([^*]+)\*\*/g, '$1')
                              .replace(/^###?\s+/gm, '');
+    }
+    
+    // ── 矛盾検査（4komaシナリオモードは除外）──
+    const SKIP_AUDIT_MODES = ['4koma_scenario'];
+    const shouldAudit = !SKIP_AUDIT_MODES.includes(settings.mode);
+    if (shouldAudit && finalStory && finalStory.trim().length > 100) {
+      btn.innerHTML = '<span class="spinner"></span>矛盾検査中...';
+      addSystemLog("[検査] AI矛盾検査エンジンを起動しています...");
+      if (progressTitleText) progressTitleText.textContent = 'AI進捗・思考ログ: 矛盾検査中...';
+      try {
+        const auditResult = await auditAndFix(key, finalStory, settings, {
+          onStatus: (msg) => addSystemLog(msg),
+          onFallback: onFb,
+        });
+        if (auditResult.wasFixed) {
+          finalStory = auditResult.text;
+        }
+        if (auditResult.remainingCriticalCount > 0) {
+          addSystemLog(`[検査] ⚠️ 重大な矛盾が${auditResult.remainingCriticalCount}件残存していますが、修正上限に達したため現状で続行します`);
+        }
+      } catch (auditErr) {
+        // 検査エラーは致命的ではないため、元テキストで続行
+        console.warn('矛盾検査でエラーが発生しましたが続行します:', auditErr.message);
+        addSystemLog(`[検査] 検査中にエラーが発生しました — 元のテキストで続行します`);
+      }
     }
     
     // タイトル抽出と整形
@@ -2579,12 +2638,48 @@ async function generateLongNovelFirstChapter(settings, btn, out, tagRow, ctr) {
     // 第1章の本文と文脈メモを分離
     const chapterMatch = fullResponse.match(/(# 第1章[\s\S]*)/);
     const chapterRaw = chapterMatch ? chapterMatch[1] : fullResponse;
-    const { body, memo } = extractContextMemo(chapterRaw);
+    let { body, memo } = extractContextMemo(chapterRaw);
 
     // ヘッダー部分（タイトル〜あらすじ）を取得
     const headerText = chapterMatch 
       ? fullResponse.substring(0, chapterMatch.index).trim() 
       : '';
+
+    // ── 第1章の矛盾検査 ──
+    let auditMemoEntry = '';
+    if (body && body.trim().length > 100) {
+      btn.textContent = '🔍 第1章 矛盾検査中...';
+      // 進捗ログ窓に検査ステータスを表示するヘルパー
+      const _auditLog = (msg) => {
+        console.log('[LN Audit Ch1]', msg);
+        const logEl = document.getElementById('progress-log');
+        if (logEl) {
+          logEl.textContent += '\n' + msg;
+          const contentEl = document.getElementById('progress-content');
+          if (contentEl) contentEl.scrollTop = contentEl.scrollHeight;
+        }
+      };
+      try {
+        const auditResult = await auditAndFix(key, body, state.longNovel.settings || settings, {
+          onStatus: _auditLog,
+          chapterNum: 1,
+        });
+        if (auditResult.wasFixed) {
+          body = auditResult.text;
+        }
+        if (auditResult.remainingCriticalCount > 0) {
+          _auditLog(`[検査] 第1章: 重大な矛盾が${auditResult.remainingCriticalCount}件残存 ⚠️`);
+        } else if (auditResult.wasFixed) {
+          _auditLog('[検査] 第1章: 矛盾修正が完了しました ✅');
+        }
+        if (auditResult.issues.length > 0) {
+          auditMemoEntry = formatAuditResultForMemo(auditResult.issues, 1);
+        }
+      } catch (auditErr) {
+        console.warn('第1章の矛盾検査でエラー:', auditErr.message);
+        _auditLog(`[検査] 第1章: 検査エラー — 元のテキストで続行します`);
+      }
+    }
 
     state.longNovel.chapters.push({
       title: extractChapterTitle(chapterRaw),
@@ -2598,6 +2693,10 @@ async function generateLongNovelFirstChapter(settings, btn, out, tagRow, ctr) {
     state.longNovel.cleanText = headerText + (headerText ? '\n\n' : '') + body;
     // memoText: 文脈メモを蓄積
     state.longNovel.memoText = memo ? `--- 第1章の文脈メモ ---\n${memo}` : '';
+    // 矛盾検査結果もメモに追記
+    if (auditMemoEntry) {
+      state.longNovel.memoText += (state.longNovel.memoText ? '\n\n' : '') + auditMemoEntry;
+    }
 
     // OUTPUT表示: 純粋な小説本文のみ
     out.textContent = state.longNovel.cleanText;
@@ -2717,7 +2816,47 @@ async function generateLongNovelNextChapter() {
     if (!state.longNovel.active) return;
 
     // 章データの保存（小説本文 / メモを分離）
-    const { body, memo } = extractContextMemo(chapterResponse);
+    let { body, memo } = extractContextMemo(chapterResponse);
+
+    // ── 第N章の矛盾検査 ──
+    let auditMemoEntry = '';
+    if (body && body.trim().length > 100) {
+      if (btnPause) btnPause.innerHTML = `🔍 第${nextChapter}章 矛盾検査中...`;
+      // 進捗ログ窓に検査ステータスを表示するヘルパー
+      const _auditLog = (msg) => {
+        console.log(`[LN Audit Ch${nextChapter}]`, msg);
+        const logEl = document.getElementById('progress-log');
+        if (logEl) {
+          logEl.textContent += '\n' + msg;
+          const contentEl = document.getElementById('progress-content');
+          if (contentEl) contentEl.scrollTop = contentEl.scrollHeight;
+        }
+      };
+      // 検査コンテキスト: 過去の章のメモと直近2章の全文を活用
+      try {
+        const auditResult = await auditAndFix(key, body, ln.settings, {
+          onStatus: _auditLog,
+          chapterNum: nextChapter,
+          allContextMemos: allMemos,
+          recentChaptersFull: recentChapters,
+        });
+        if (auditResult.wasFixed) {
+          body = auditResult.text;
+        }
+        if (auditResult.remainingCriticalCount > 0) {
+          _auditLog(`[検査] 第${nextChapter}章: 重大な矛盾が${auditResult.remainingCriticalCount}件残存 ⚠️`);
+        } else if (auditResult.wasFixed) {
+          _auditLog(`[検査] 第${nextChapter}章: 矛盾修正が完了しました ✅`);
+        }
+        if (auditResult.issues.length > 0) {
+          auditMemoEntry = formatAuditResultForMemo(auditResult.issues, nextChapter);
+        }
+      } catch (auditErr) {
+        console.warn(`第${nextChapter}章の矛盾検査でエラー:`, auditErr.message);
+        _auditLog(`[検査] 第${nextChapter}章: 検査エラー — 元のテキストで続行します`);
+      }
+    }
+
     ln.chapters.push({
       title: extractChapterTitle(chapterResponse),
       body: body,
@@ -2731,6 +2870,10 @@ async function generateLongNovelNextChapter() {
     // memoText: メモを蓄積
     if (memo) {
       ln.memoText += (ln.memoText ? '\n\n' : '') + `--- 第${nextChapter}章の文脈メモ ---\n${memo}`;
+    }
+    // 矛盾検査結果もメモに追記
+    if (auditMemoEntry) {
+      ln.memoText += (ln.memoText ? '\n\n' : '') + auditMemoEntry;
     }
 
     // OUTPUT表示: 純粋な小説本文のみ
