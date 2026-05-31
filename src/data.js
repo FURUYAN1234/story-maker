@@ -1,3 +1,11 @@
+// ============================================================
+// data.js — Story Maker v3.5.7
+// ============================================================
+
+// テキスト生成用モデルリスト
+export const GEMINI_MODELS = [
+  { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+  { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
   { value: 'gemini-flash-latest', label: 'Gemini Flash (Latest)' },
   { value: 'gemini-pro-latest', label: 'Gemini Pro (Latest)' }
