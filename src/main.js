@@ -2264,6 +2264,23 @@ function parseHeaderInfo(text) {
 }
 
 /**
+ * 長編本文に紛れた学術引用風の孤立マーカーを除去する。
+ * 4koma用の [EMOTION] などは長編本文には入らないため、数字脚注だけを対象にする。
+ */
+function sanitizeLongNovelBody(text) {
+  if (!text) return '';
+  return text
+    .replace(/(^|\n)\s*[\[［]\s*(?:\d{1,3}|[ivxlcdm]{1,8})\s*[\]］]\s*/gi, '$1')
+    .replace(/(^|[^\[［])[\[［]\s*(?:\d{1,3}|[ivxlcdm]{1,8})\s*[\]］](?=$|[\s、。！？,.!?」』）\)])/gi, '$1')
+    .replace(/[\(（]\s*注\s*\d{1,3}\s*[\)）]/g, '')
+    .replace(/(?:\n|^)\s*(?:参考文献|出典|脚注|注釈)\s*[:：][\s\S]*$/m, '')
+    .replace(/[ \t]+(?=[」』）\)])/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/**
  * 章テキストから文脈維持メモを抽出する
  */
 function extractContextMemo(text) {
@@ -2276,7 +2293,7 @@ function extractContextMemo(text) {
       memoStart = idx;
     }
   }
-  if (memoStart === -1) return { body: text.trim(), memo: '' };
+  if (memoStart === -1) return { body: sanitizeLongNovelBody(text), memo: '' };
 
   // メモの前の本文を取得
   let body = text.substring(0, memoStart).trim();
@@ -2286,6 +2303,7 @@ function extractContextMemo(text) {
   body = body.replace(/\n(?:---+|#+)\s*\n/g, '\n\n');
   body = body.replace(/(?:\n|^)(?:---+|#+)\s*$/g, '');
   body = body.replace(/\n{3,}/g, '\n\n').trim();
+  body = sanitizeLongNovelBody(body);
 
   const memo = text.substring(memoStart).trim();
   return { body, memo };
@@ -2680,6 +2698,7 @@ async function generateLongNovelFirstChapter(settings, btn, out, tagRow, ctr) {
         _auditLog(`[検査] 第1章: 検査エラー — 元のテキストで続行します`);
       }
     }
+    body = sanitizeLongNovelBody(body);
 
     state.longNovel.chapters.push({
       title: extractChapterTitle(chapterRaw),
@@ -2856,6 +2875,7 @@ async function generateLongNovelNextChapter() {
         _auditLog(`[検査] 第${nextChapter}章: 検査エラー — 元のテキストで続行します`);
       }
     }
+    body = sanitizeLongNovelBody(body);
 
     ln.chapters.push({
       title: extractChapterTitle(chapterResponse),
