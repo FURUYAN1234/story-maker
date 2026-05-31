@@ -317,6 +317,7 @@ ${fmt}${supplement}${eraRule}${allCategoryGuides}
 2. **【継続確認の義務】** 章を書き終えるごとに、必ず「第◯章（全◯章中）の執筆が完了しました。続けて第◯章を執筆しますか？（残り◯章）」と、全体の章数と残り章数を明記して私に尋ねてください。私が「はい」「続き」「お願い」等と明確に答えるまで、次の章の執筆を開始することを固く禁じます。
 3. **【文脈維持メモ（内部ログ）】** 長編執筆における設定崩壊や記憶忘れを防ぐため、毎回、章の終わりに（私への質問の直前に）、短く簡潔に以下のメモを残してください：
    - 【回収待ち伏線メモ】チェーホフの銃を含む、現在残っている謎や伏線
+   - 【人物ロスター更新メモ】必須登場人物とAI追加人物の役割・現在地・状態変化・新規追加人物の設定
    - 【モチーフ＆サブキャラ追跡メモ】回帰するモチーフの現在の状態と、主要キャラ以外のサブキャラクターの現在地・状況（終盤でのフェードアウトを防止するため）
    - 【次章のシーン設計（GMC+S）】次章における主人公の「目的（Goal）」、「動機（Motivation）」、「障害・葛藤（Conflict）」、「賭け金（Stakes）」
 4. **章の終わりは上記のメモと質問のみとし、自己分析、結論、根拠などの不要なメタデータは一切出力しないでください。**
@@ -331,7 +332,7 @@ ${fmt}${supplement}${eraRule}${allCategoryGuides}
 各章の出力は、必ず以下の順序で構成し、4の質問を出力した時点で**必ず停止**すること：
 1. 章の本文（数千文字規模で出し惜しみなく執筆）
 2. ---（区切り線）
-3. 文脈維持メモ（上記ルール3の3項目）
+3. 文脈維持メモ（上記ルール3の4項目）
 4. 「第◯章（全◯章中）の執筆が完了しました。続けて第◯章を執筆しますか？（残り◯章）」
 ★★★ ここで出力を停止。次の章を勝手に書き始めることは厳禁 ★★★
 
@@ -605,11 +606,16 @@ function extractLongNovelSettings(s) {
   const ending = s.endingCustom || s.ending || '意外な結末';
   const narr = s.narrCustom || s.narration || '三人称・客観';
 
+  const hasUserCharacters = Array.isArray(s.characters) && s.characters.length > 0;
   let charDesc;
-  if (!s.characters || s.characters.length === 0) {
-    charDesc = '・未設定（AIが自由に2〜3人の個性的なキャラを設定すること）';
+  if (!hasUserCharacters) {
+    charDesc = `【AI設計キャスト】
+・ユーザー指定の必須人物は未設定。
+・短編向けの2〜3人に固定せず、長編の規模・章数・テーマに見合う人数をAIが設計すること。
+・主人公、対立軸を担う人物、関係性を揺らす人物、舞台や事件を動かす脇役を必要に応じて追加してよい。
+・ただし人数を増やすだけの水増しは禁止。追加人物には必ず物語上の役割、欲望、弱点、主人公との関係、初登場予定章を持たせること。`;
   } else {
-    charDesc = s.characters.map((c, i) => {
+    const requiredCharacters = s.characters.map((c, i) => {
       const name = c.name || `(AI命名:キャラ${i + 1})`;
       const role = c.role || '未定';
       const sexInfo = c.sex ? `性別:${c.sex}, ` : '';
@@ -617,7 +623,20 @@ function extractLongNovelSettings(s) {
       const detail = c.note ? ` [${c.note}]` : '';
       return `${i + 1}. ${name} (${role}) — ${sexInfo}性格:${personality}${detail}`;
     }).join('\n');
+    charDesc = `【必須登場人物（ユーザー指定・作中登場ノルマ）】
+${requiredCharacters}
+
+【AI追加人物の扱い】
+・上記の人物数は上限ではない。指定人物は必ず登場させるノルマとして扱うこと。
+・長編の文章量、章数、テーマ、世界観に対して人物が不足する場合、長編シナリオエージェントとして追加人物を設計してよい。
+・追加人物は、必須登場人物の見せ場を奪うためではなく、葛藤・伏線・関係性・世界観の奥行きを増やすために配置すること。`;
   }
+
+  const characterRosterRule = `【長編人物ロスター運用ルール】
+・必須登場人物は、全体プロット上の役割と登場予定章を必ず内部設計すること。
+・AIが追加した人物は「AI追加人物」として扱い、名前、役割、性格/欲望、主人公や必須人物との関係、初登場章、現在地/状態を管理すること。
+・各章の文脈維持メモには、追加・変化した人物情報を【人物ロスター更新メモ】として必ず記録すること。
+・一度出したAI追加人物を後半で忘れないこと。退場・死亡・離脱・和解などの状態変化があれば、文脈維持メモに明記すること。`;
 
   const supplement = s.supplement ? `\n【追加指示】\n${s.supplement}` : '';
 
@@ -648,7 +667,7 @@ function extractLongNovelSettings(s) {
     chapterGuidance = '10万字以上を目安に、物語の内容に最適な章数と文字数をAI自身が自由に設計してください（推奨: 8〜12章、各章8千〜1万5千字）';
   }
 
-  return { genre, theme, worldview, era, target, ending, narr, charDesc, supplement, eraRule, allCategoryGuides, chapterGuidance };
+  return { genre, theme, worldview, era, target, ending, narr, charDesc, characterRosterRule, supplement, eraRule, allCategoryGuides, chapterGuidance };
 }
 
 // 長編小説で共通の品質ルール文字列
@@ -705,12 +724,14 @@ ${cfg.chapterGuidance}
 
 【登場人物】
 ${cfg.charDesc}
+${cfg.characterRosterRule}
 
 【プロット設計の指示（第1章執筆前に内部で実行すること）】
 1. 物語全体を貫く「ログライン（核となる1文要約）」を設定
 2. チェーホフの銃（動的伏線）：序盤に一見無関係な要素を配置し、終盤で回収する仕掛けを1つ以上設計
 3. 15ビート構造に基づく全章プロット（各章1行あらすじ）を設計：
    Setup → Inciting Incident → Deviation → Midpoint → Build-up → Payoff
+4. 必須登場人物とAI追加人物を含む人物ロスターを内部設計し、各人物の物語上の役割・初登場章・関係性の変化を管理
 ${LONG_NOVEL_QUALITY_RULES}
 ${cfg.eraRule}${cfg.allCategoryGuides}${cfg.supplement}
 
@@ -735,8 +756,9 @@ ${cfg.eraRule}${cfg.allCategoryGuides}${cfg.supplement}
 
 4. 区切り線 ---
 
-5. 文脈維持メモ（以下の3項目を必ず出力すること）
+5. 文脈維持メモ（以下の4項目を必ず出力すること）
 【回収待ち伏線メモ】チェーホフの銃を含む、現在残っている謎や伏線の一覧
+【人物ロスター更新メモ】必須登場人物とAI追加人物の役割・現在地・状態変化・新規追加人物の設定
 【モチーフ＆サブキャラ追跡メモ】回帰モチーフの状態と、サブキャラの現在地・状況
 【次章のシーン設計（GMC+S）】次章のGoal/Motivation/Conflict/Stakes
 
@@ -778,6 +800,7 @@ export function buildLongNovelContinuePrompt(chapterNum, totalChapters, settings
 ・ジャンル: ${cfg.genre} / テーマ: ${cfg.theme} / 時代: ${cfg.era}
 ・世界観: ${cfg.worldview} / 語り口: ${cfg.narr} / ターゲット: ${cfg.target}
 ・結末の方向性: ${cfg.ending}
+${cfg.characterRosterRule}
 ${cfg.supplement}
 
 【これまでの物語の要約（古い章）】
@@ -786,7 +809,7 @@ ${previousSummary || '（第1章から開始のためなし）'}
 【直近の章の全文】
 ${recentChaptersFull}
 
-【全章の文脈維持メモ（伏線・モチーフ・設計）】
+【全章の文脈維持メモ（伏線・人物ロスター・モチーフ・設計）】
 ${allContextMemos}
 ${lastChapterInstruction}
 ${LONG_NOVEL_QUALITY_RULES}
@@ -798,8 +821,9 @@ ${cfg.eraRule}${cfg.allCategoryGuides}
 
 2. 区切り線 ---
 
-${isLastChapter ? `3. 「【完】」を出力して終了` : `3. 文脈維持メモ（以下の3項目を必ず出力すること）
+${isLastChapter ? `3. 「【完】」を出力して終了` : `3. 文脈維持メモ（以下の4項目を必ず出力すること）
 【回収待ち伏線メモ】現在残っている謎や伏線の一覧
+【人物ロスター更新メモ】必須登場人物とAI追加人物の役割・現在地・状態変化・新規追加人物の設定
 【モチーフ＆サブキャラ追跡メモ】回帰モチーフの状態とサブキャラの現在地
 【次章のシーン設計（GMC+S）】次章のGoal/Motivation/Conflict/Stakes`}
 
@@ -882,6 +906,7 @@ export function buildLongNovelInstructionSheet(settings, headerInfo, appState) {
 
 ■ 登場人物
 ${cfg.charDesc}
+${cfg.characterRosterRule}
 ${cfg.supplement}
 
 ■ あらすじ
@@ -892,7 +917,7 @@ ${headerInfo.plotOutline || '（上記設定に基づきAIが設計）'}
 
 ■ 執筆ルール
 ・1章ずつ書いて停止し、「続けますか？」と確認すること
-・各章の末尾に【回収待ち伏線メモ】【モチーフ＆サブキャラ追跡メモ】【次章のシーン設計（GMC+S）】を残すこと
+・各章の末尾に【回収待ち伏線メモ】【人物ロスター更新メモ】【モチーフ＆サブキャラ追跡メモ】【次章のシーン設計（GMC+S）】を残すこと
 ・Show, Don't Tell を徹底し、五感描写と身体的反応で感情を表現すること
 ・各章に感情落差（逆転・置換・誇張等）を最低1回仕込むこと
 ・伏線は序盤に配置し、後半で回収すること（唐突な新設定禁止）

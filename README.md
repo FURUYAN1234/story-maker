@@ -16,6 +16,7 @@
 ---
 
 ## 🚀 Core Features / 主要機能
+- **Character Roster Management (Long Novels) / 長編向け人物ロスター管理**: Automatically designs and tracks supplementary characters necessary for long novel generation, preserving character consistency, tracking state changes, and maintaining clear relationships with required main characters across multiple chapters. / 長編小説の生成において、必須登場人物に加えて物語の規模に必要な追加人物（ロスター）をAIが自動設計し、全章にわたって役割・現在地・状態変化・関係性を厳密に追跡・管理することで、長編特有のキャラクターの破綻を防ぎます。
 - **Dual API Engine Architecture / デュアルAPIエンジン対応**: Dynamically routes requests to Google Gemini or OpenAI (GPT-4.1 / GPT-4o) based on your API key prefix (`sk-`). Enjoy Gemini's large context processing or OpenAI's high-nuance narrative generation effortlessly. / 入力されたAPIキーのプレフィックス（`sk-`）を自動判別し、Google GeminiとOpenAI（GPT-4.1やGPT-4o等）へ動的にリクエストを振り分けます。Geminiの巨大コンテキスト処理と、OpenAIの繊細な心理描写・プロット構築力をシームレスに使い分けることが可能です。
 - **Local RAG Integration / 完全ローカルRAG辞書の統合**: Implemented a standalone, zero-cost RAG system that injects specific world-building details (props, era-specific terminology, sensory elements) into the prompt based on the user's selected worldview, era, and theme. This forces the AI to ground its narrative in concrete details rather than abstract tropes, significantly improving world authenticity. / 外部サービス不要・完全無料のローカルRAG（検索拡張生成）システムを実装。ユーザーが選択した世界観・時代・テーマに基づき、専用辞書から具体的なディテール（小道具・通貨・歴史用語・匂いなど）をプロンプトに動的注入。AI特有の「抽象的でフワッとした描写」を防ぎ、物語の解像度と世界観の説得力を劇的に向上させます。
 - **Google Search Grounding / Google検索グラウンディング対応**: Enabled Gemini's native Search Grounding tool for text generation. When the AI determines that factual accuracy is necessary (e.g., historical events, scientific terms, real-world locations), it will automatically perform a Google search and incorporate the findings into the story. / Geminiエンジンのテキスト生成においてGoogle検索グラウンディングを有効化。時代考証や専門知識が必要なテーマが選ばれた際、AIが自律的にGoogle検索を実行して事実確認を行い、正確な知識をベースにした物語を執筆できるようになりました。
@@ -691,6 +692,9 @@ Developed by **FURU**
 
 
 ## ChangeLog
+
+### v3.5.8 — 2026-05-31
+* **Feature**: 長編小説の生成において、AIが全体プロットの規模に合わせて必須人物以外の「追加人物」を自動設計し、全章にわたって役割・現在地・関係性の変化を追跡・管理する「人物ロスター更新メモ」機能を追加。長編特有のキャラクターの役割崩壊を防止。
 
 ### v3.5.7 — 2026-05-31
 * **Fix**: 初期表示時にブラウザが `/favicon.ico` を要求して404エラーになる問題を修正（`favicon.svg` の追加およびリンク指定）。

@@ -2268,7 +2268,7 @@ function parseHeaderInfo(text) {
  */
 function extractContextMemo(text) {
   // ---以降の文脈維持メモを探す
-  const markers = ['【回収待ち伏線メモ】', '【モチーフ＆サブキャラ追跡メモ】', '【次章のシーン設計'];
+  const markers = ['【回収待ち伏線メモ】', '【人物ロスター更新メモ】', '【モチーフ＆サブキャラ追跡メモ】', '【次章のシーン設計'];
   let memoStart = -1;
   for (const marker of markers) {
     const idx = text.indexOf(marker);
