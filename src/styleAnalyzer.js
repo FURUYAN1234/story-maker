@@ -1220,7 +1220,7 @@ async function runReflection() {
       addSystemLog(`[システム] リライト応答遅延のため、モデルを ${m} にフォールバックします...`);
     };
 
-    let { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb);
+    let { usedModel } = await callGenerativeAIStream(apiKey, model, prompt, onChunk, onFb, { disableGoogleSearch: true });
 
     let loopCount = 0;
     while (loopCount < 3) {
@@ -1233,7 +1233,7 @@ async function runReflection() {
       
       const continuePrompt = `${prompt}\n\n【ここまでの出力】\n${totalText}\n\n※文字数上限（トークンオーバー）で出力が途切れています。上記の続きの文字から、そのまま物語を再開してください。これまでの文章の繰り返しや前置きは一切不要です。続きのみを生成し、必ず最後は「【完】」で締めくくってください。`;
       
-      const nextResult = await callGenerativeAIStream(apiKey, usedModel, continuePrompt, onChunk, onFb);
+      const nextResult = await callGenerativeAIStream(apiKey, usedModel, continuePrompt, onChunk, onFb, { disableGoogleSearch: true });
       usedModel = nextResult.usedModel;
     }
 

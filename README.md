@@ -164,7 +164,11 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Pacing Enforcement / 描写密度の強制**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / クライマックスや会話劇において五感描写や肉体的痛覚を強制的に挿入させ、展開の「駆け足」を防止する。
 - **Dynamic Chekhov's Gun / 動的チェーホフの銃**: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 序盤に無関係に見えるアイテムや習慣を配置し、終盤の致命的な突破口として反転回収させる動的伏線。
 - **Dynamic Scale & Full-Auto Generation / 動的規模設計と全自動生成**: The AI automatically determines the optimal chapter count and target length (tens of thousands of characters) based on the input theme. The writing process is fully automated, continuously generating chapter by chapter until completion without requiring manual prompts. / 入力テーマに基づき、AIが最適な章数と目標文字数（数万字規模）を動的に決定します。手動でのプロンプト入力は不要で、完結まで全自動で章ごとに連続生成されます。
-- **Graceful Pause Control / 安全な一時停止機能**: Features a pause toggle that allows users to halt the automated generation. To maintain narrative integrity, pausing does not interrupt mid-sentence; the engine will complete the current chapter before safely stopping. / 全自動生成を中断できる「一時停止」ボタンを搭載。物語の破綻を防ぐため即座には停止せず、現在執筆中の章を最後まで書き切ってから安全に待機状態に移行します。
+- **Graceful Pause Control / 安全な一時停止予約機能**: Features a pause reservation toggle during active generation. Pausing does not interrupt mid-sentence; it waits for the current chapter to finish and safely stops before the next chapter begins. / 全自動生成中の「一時停止」は即座の遮断ではなく、現在執筆中の章を最後まで書き切ってから安全に待機状態に移行する「予約」として機能します。
+- **Live Preview Scroll Optimization / ライブプレビューのスクロール最適化**: During long-novel generation, the visible manuscript auto-scrolls smoothly within its dedicated container without forcing page-level scroll jumps, while stripping context memos for a clean preview. / 長編生成中、メタ情報である文脈メモを自動除去したプレビューを表示しつつ、画面全体のガタつきを防ぐため小説本文枠内でのみ自動スクロール追従を行います。
+- **Final Chapter Optimization & State Retention / 最終章の最適化と完了状態維持**: The final chapter automatically strips premature final markers, splits at the true end, and maintains the manuscript scroll view cleanly after completion. / 最終章の生成時に、途中に入り込んだ不要な「完」マークを自動除去して正確に完結判定を行い、完了後も生成中のスクロール状態を綺麗に維持します。
+- **Live Status Header / ステータスバー常時表示**: The long-novel panel features a fixed live status row updating current phase, chapter progress, and character counts in real-time. / 長編パネル上部に、現在のフェーズ、章進捗、リアルタイム文字数を常時更新する固定ステータスバーを搭載。
+- **Robust Auto-Recovery / 強牢な自動修復**: If structural logic or continuity checks fail, the engine performs up to two complete chapter regenerations with explicit failure guidance before a fail-closed stop, significantly improving success rates for long novels. / 論理・整合性の検証に失敗した場合、破綻したまま保存せず、最大2回までチャプター全体の再生成と自動修復を試みることで、長編完遂率を大幅に向上させました。
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 - **State Separation & Context Panel / 状態の完全分離と文脈パネル**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 小説本文とAIの構造メモ（目的・伏線等）を内部状態レベルで完全に分離。メモは折りたたみ可能な専用パネルへルーティングされ、AI特有の空のマークダウン記号なども強力にクレンジング除去されるため、エクスポートされるテキストには純粋な小説本文のみが含まれます。
 - **Local Timestamped Export / ローカル時刻での厳密なファイル管理**: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 全てのテキスト・JSON保存のファイル名において、UTCズレのない日本時間（ローカル時刻）の完全な数字14桁（`YYYYMMDDHHmmss`）を強制。長期間にわたる連載執筆時の時系列ソートの一貫性を保証します。
@@ -693,6 +697,123 @@ Developed by **FURU**
 
 ## ChangeLog
 
+### v3.7.9 — 2026-06-02
+* **UX**: Long-novel manuscript output now keeps the same readable in-box scroll area after all chapters complete, instead of expanding the entire page into one huge manuscript column.
+
+### v3.7.8 — 2026-06-02
+* **Fix**: Long-novel audit repair now stops after two failed repair attempts per chapter and hands the chapter to whole-chapter regeneration, instead of spending many cycles trying to patch structurally broken prose.
+* **Prompt**: Long-novel rules now explicitly forbid non-final chapters from resolving the whole story with full victory, complete business recovery, total contract success, or final self-affirmation.
+
+### v3.7.7 — 2026-06-02
+* **Fix**: Long-novel memo extraction now treats partial management-marker fragments such as `【全章の` as memo/admin output, preventing them from being saved into the manuscript between chapters.
+* **Fix**: Long-novel live preview now sanitizes the extracted body before display, so incomplete admin headings are removed from both the visible manuscript box and the saved chapter body.
+* **Quality Gate**: Save-before-adoption checks now reject bracketed partial full-chapter/admin markers if they somehow remain in a chapter body.
+
+### v3.7.6 — 2026-06-02
+* **Fix**: Long-novel next-chapter prompts now prioritize the latest context memo and next-scene GMC+S over older outline text, preventing already-completed events from being replayed as new chapter events.
+* **Fix**: If a chapter fails the long-novel audit or save-quality gate, the app now retries by regenerating the whole chapter with explicit failure guidance before fail-closing, instead of endlessly trying to patch a structurally broken chapter.
+* **Improvement**: Long-novel audit and repair calls now use bounded timeout/model-attempt settings, reducing stalls when the provider returns weak or malformed inspection/fix output.
+
+### v3.7.5 — 2026-06-02
+* **Fix**: During long-novel live preview, the manuscript body now scrolls inside the novel display box instead of scrolling the entire right output column. The fixed progress/control area remains separate while the chapter text itself is readable.
+* **UX**: Long-novel live preview now auto-scrolls the manuscript box itself to the latest generated text, so the first chapter title no longer stays pinned while generation continues below.
+
+### v3.7.4 — 2026-06-02
+* **Fix**: Final long-novel chapters now strip premature final markers before auto-continuation and keep only the latest final marker when merging continuation text. This prevents raw continuation text from growing while the saved body remains stuck at the first too-short ending.
+* **Fix**: Final-chapter body/memo extraction now uses the last final marker as the split point, so continuation text after an early ending is not misclassified as management memo.
+
+### v3.7.3 — 2026-06-02
+* **UX**: Long-novel mode now shows a fixed live status line in the control panel with current phase, chapter number, chapter-local character count, total character count, and last update time, so progress remains visible even when the manuscript preview is not scrolled to the bottom.
+* **Fix**: Aborting a long-novel run now clears the generating/live-preview state immediately, preventing the UI from looking active after the user has interrupted generation.
+
+### v3.7.2 — 2026-06-02
+* **Fix**: Long-novel live preview now strips context memo /伏線管理 blocks before rendering the visible novel body, so management notes no longer appear in the main manuscript preview during generation.
+* **Fix**: Removed per-chunk `scrollIntoView` calls from long-novel streaming and disabled smooth scroll anchoring while live preview is active, preventing the lower-right output pane from violently jumping during long runs.
+
+### v3.7.1 — 2026-06-02
+* **Fix**: Long-novel generation now keeps the pause control clickable during active chapter generation. It works as a safe "pause after this chapter" reservation instead of disappearing or becoming a disabled progress label.
+* **Fix**: Chapter completion checks now log body length, raw length, memo-marker detection, and finish-marker detection before every auto-continuation request. The app no longer hides why it is requesting continuation.
+* **Fix**: First-chapter aborts no longer collapse the panel into `0 / 0` or "chapter 0 interrupted"; the panel keeps the planned chapter count and reports interruption during chapter 1.
+* **Fix**: Continuation prompts now pass only the partial chapter text and a strict continuation contract, instead of resending the full initial prompt and encouraging reset/replanning.
+* **Fix**: Continuation text is now inserted before the existing context memo, and a newer memo replaces the old one. This prevents appended prose from being discarded during body/memo extraction and fixes false "chapter body too short" stops after successful continuation.
+* **Improvement**: Long-novel chapter planning now aligns target length and chapter count around roughly 8,000 characters per chapter, so an 80,000-character long novel is planned as about 10 chapters.
+
+### v3.6.11 — 2026-06-02
+* **Fix**: Long-novel auto-continuation no longer returns to the outer normal-generation `finally` after chapter 1. Chapter 2+ generation is now awaited inside the long-novel chain, so the left panel and generate button are not restored as if the whole run had finished after chapter 1.
+* **Fix**: Added explicit progress logs when a chapter is saved and the next chapter starts, making chapter-chain failures visible instead of silently ending at chapter 1.
+
+### v3.6.10 — 2026-06-02
+* **Fix**: Long-novel generation no longer exposes the pause/resume control as an active "pause" button while a chapter is being written. The button is now a disabled progress indicator during generation, so accidental pause reservations cannot stop the run after chapter 1.
+* **Fix**: Long-novel completion checks no longer treat the initial `0 / 0` state as complete, and the first chapter header cannot reduce the run below the expected 10-chapter long-novel plan.
+* **UX**: Updated the long-novel warning text so users are directed to the explicit abort button for mid-generation stopping.
+
+### v3.6.9 — 2026-06-02
+* **Fix**: Antigravity側の途中修正後に長編生成フローへ未接続になっていた自動継続・最低文字数・保存前品質ゲートを再接続。短すぎる章、途中切れ章、管理情報混入章を保存前に停止する挙動を復旧。
+* **Fix**: 第2章以降の生成処理に残っていた未定義変数 `btnNext` と未定義 `timerId` 参照を修正し、次章生成中の停止・不安定化を防止。
+* **Fix**: 第1章/第2章以降の矛盾検査で、重大矛盾や検査APIエラーが発生しても元テキストで続行していた経路を再度 fail-closed 化。
+* **Fix**: 生成途中のメモコピー/メモTXT保存で `再現用マスター指示書` が付与され、本文や途中ログと混同される問題を修正。指示書は全章完了または明示中断後のみ付与。
+
+### v3.6.8 — 2026-06-02
+* **Fix**: 長編小説モードの古い最終章プロンプトに残っていた「全文結合出力」「コードブロック」「再現用マスター指示書」の出力指示を除去し、本文欄へ管理情報が混入する経路を遮断。
+* **Fix**: 第2章以降の監査で重大矛盾や検査APIエラーが残っても続行していた fail-open 経路を修正。長編では検査失敗・残存重大問題・本文破損を保存前に停止する fail-closed 動作へ統一。
+* **Fix**: 章完了判定を「メモ見出しの有無」だけでなく章本文の最低文字数と最終章の `【完】` 位置で判定するよう強化。短すぎる章や途中切れを自動継続または棄却する。
+* **Fix**: 次章生成中の未定義変数 `btnNext` 参照と未初期化 `timerId` による停止リスクを修正。
+* **Improvement**: 長編ストリーム生成で Google Search を無効化し、最大出力トークンとタイムアウトを長編向けに拡張。進捗パネルには予定総文字数を表示。
+
+### v3.6.6 — 2026-06-01
+* **Fix**: 長編小説の第2章以降（次章生成フロー）において、`validateFixedText`（品質ゲート）および `sanitizeText`（サニタイズ関数）が `auditAndFix` オプションおよび最終採用チェックで適用されていなかったバグを修正。第1章と同様に、第2章以降でも本文破損（1000文字未満、自己校正メタ、英語残骸など）を検知して即棄却（Fail-Closed）するよう安全性を強化。
+* **Fix**: `main.js` に `validateFixedText` の実体定義が欠落しており、長編小説生成フローで ReferenceError を吐いてクラッシュする致命的バグを修正。
+
+### v3.6.7 — 2026-06-02
+* **Feature**: 長編小説モードに自動継続ループを実装。1回のAPIコールの出力上限で途切れた場合、`isChapterFinished` 判定に基づき自動的に続きを要求・結合することで文字数不足（薄い原稿）の問題を解決。
+* **Fix**: 本文から消去されてしまう章見出し（`# 第N章`）を、保存・結合時に明示的に付与して結合するよう改善。
+* **Fix**: 最終章の末尾で `【完】` 以降に文脈メモや再現用マスター指示書などの管理情報が混ざる出力分離バグを修正。`【完】` の直後の改行以降を確実に `memo` へ退避するよう `extractContextMemo` を拡張。
+* **Improvement**: 進捗ログ窓に、各章の完了通知、執筆文字数、累積文字数、Story Bibleの更新状態、および全体の完了・最終文字数表示ログを出力するよう強化。
+* **Improvement**: 長編品質ルールに「同じモチーフ（水、影、名など）の反復描写の禁止」と「章ごとの固有の対立・山場の設計」を追加し、後半の描写のマンネリ化を防止。
+
+### v3.6.6 — 2026-06-01
+* **Fix**: 長編小説モードにおける文脈維持メモの残骸・英語自己校正チャッターの排除ロジックを強化。
+* **Improvement**: Google検索グラウンディング機能の制御を調整。
+
+### v3.6.5 — 2026-06-01
+* **Fix**: 長編章の保存前に fail-closed 品質ゲートを追加し、自己校正メタ、英語片、章見出し重複、半角記号、内部管理見出しが残る本文を完成稿へ採用しないよう強化。
+* **Fix**: 矛盾修正AIの返した修正候補を採用前に検査し、`修正する`、`OK`、`No, there is no other`、`Let's double check` などの本文破損を即棄却するよう改善。
+* **Fix**: 修正上限後に設定矛盾などの重大問題が残った章は Story Bible 更新と次章生成へ進ませず、保存を停止するよう変更。
+* **Improvement**: `電子基盤`、`嬉そう`、`激激突`、`ぷかか`、`伝わて`、`響きて`、`包まして`、`鈴木手人`、`因律` など、実生成で見つかった誤字・重複語の自動補正を追加。
+* **Improvement**: Story Bible 更新へ渡す矛盾検査メモから英語片や具体的な汚染箇所を圧縮し、監査記録が次章を再汚染しにくいよう調整。
+
+### v3.6.4 — 2026-06-01
+* **Fix**: 長編本文保存時に、非最終章の `【完】` を必ず除去し、最終章では本文末尾の一度だけに正規化するよう強化。
+* **Fix**: `Morris` などの英字残り、`人口筋肉`、`基班`、`確確信`、`高熱熱線`、`指先を指先を` などの校正残骸を保存前に自動補正。
+* **Improvement**: 長編プロンプトと矛盾検査に、終了記号、翻訳調の `および`、誤字・重複語・敬体混入の検出ルールを追加。
+* **Improvement**: 最終章の自動継続判定を、単なる `【完】` の有無ではなく本文末尾の独立行に限定し、途中混入で完了扱いにならないよう改善。
+
+### v3.6.3 — 2026-06-01
+* **Fix**: 長編最終章後の進捗ログが `Story Bible更新中...` で終わって見える問題を修正。Story Bible更新完了と全章生成完了ログを明示し、完了状態を一度だけ確定するよう改善。
+* **Fix**: 本文に漏れた `全章の文脈維持メモ`、`Story Bible`、`章要約` などの内部管理見出しを保存前に本文から除去するサニタイズを追加。
+* **Fix**: `And,` 型の英語片、日本語文中の半角カンマ・半角ピリオド、`指示されたゴースト・プログラム` のような翻訳調残骸を本文・メモ・Story Bible更新文から正規化。
+* **Improvement**: 長編章の自動増補判定を調整し、最低文字数目安に届かなかった場合は進捗ログへ未達を明示するよう改善。
+
+### v3.6.2 — 2026-06-01
+* **Fix**: 長編小説の次章生成に二重起動ガードと予約タイマー管理を追加し、同じ章番号が重複保存される問題を防止。
+* **Fix**: 長編本文サニタイズを強化し、英文の地の文、単独英単語修飾、`X of Y` 型の不自然な英語断片を保存前に除去・日本語化。
+* **Fix**: 章見出しを保存時に指定章番号へ正規化し、本文内の重複章見出しや他章見出しを混入させないよう改善。
+* **Improvement**: 長編プロンプトと矛盾検査に、別ルートの主人公名・能力名・組織名の混入検出と修正ルールを追加。
+
+### v3.6.1 — 2026-06-01
+* **Fix**: 長編小説本文に混入していた検索引用風マーカー（`[2, 7]`等）、文脈維持メモ見出し、句点前スペースを保存前サニタイズで除去するよう強化。
+* **Fix**: 長編ストリーミング生成ではGoogle検索グラウンディングを無効化し、本文・メモへの出典番号混入を根本から防止。
+* **Improvement**: 長編章本文が短すぎる場合に自動増補する改稿パスを追加し、各章を長編らしい密度へ近づけるよう改善。
+* **Improvement**: 初期の章別プロットを第2章以降のプロンプトへ固定注入し、Story Bibleが強くなっても全体構成から逸脱しにくくした。
+* **Improvement**: 長編完成稿では軽微な矛盾も自動修正対象にし、最終本文へ材質・左右・未説明道具などの不整合を残しにくくした。
+
+### v3.6.0 — 2026-06-01
+* **Feature**: 長編小説モードにStory Bible更新ループを追加。各章の矛盾検査後に、確定事実・人物状態・関係性・時系列・伏線・モチーフ・次章編集者ノートを再整理し、次章プロンプトへ長距離記憶として渡すよう改善。
+* **Feature**: 長編小説のストリーミング出力が途中で切れた場合、未完判定に基づいて最大4回まで自動継続する復旧ループを追加。
+* **Feature**: 長編小説プロンプトにもローカルRAG知識を注入し、ジャンル・時代・世界観の参照情報を長編生成に反映。
+* **Fix**: 第2章以降の直近章コンテキストで章番号がずれる可能性と、次章生成後に未定義タイマー参照で落ちる不具合を修正。
+* **Improvement**: OpenAI/Geminiの長編ストリーミング呼び出しで出力上限を拡張し、章本文が途中で切れにくくなるよう調整。
+
 ### v3.5.9 — 2026-05-31
 * **Fix**: 長編小説の本文に学術引用記号（[1]、(注1)など）が混入する問題を修正。プロンプトでの禁止指定に加え、JS側での除去処理（サニタイズ）を追加。
 
@@ -720,3 +841,19 @@ Developed by **FURU**
 * **Feature**: Gemini APIフォールバックチェーンの最適化（Gemini 2.5系列の追加対応および、UI用モデルリストとの分離によるフォールバック精度の向上）
 * **Fix**: `data.js` の `GEMINI_MODELS` リストから `gemini-1.5-pro` を削除し、`gemini-2.5-flash` および `gemini-2.5-pro` を追加。
 
+
+---
+
+## 📝 ChangeLog / 変更履歴
+
+### v3.8.0 (2026-06-02)
+- **長編モードの大規模改善**: 
+  - 生成中の「一時停止」を現在の章の完了を待ってから停止する予約方式に変更。
+  - ライブプレビューのスクロール追従を本文枠内に限定し、画面のガタつきを防止。
+  - 最新のコンテキストメモとGMC+Sを優先し、完了済みイベントの再演を防止。
+  - 最終章における「完」マークの最適化と完了状態のUIスクロール維持。
+  - 長編パネルに固定ライブステータス行を追加。
+  - 監査や保存ゲートでリジェクトされた場合、最大2回までのチャプター再生成による自動修復を実装。
+- バグ修正:
+  - 継続生成時の部分的な管理マーカーのサニタイズ漏れを修正。
+  - 初回チャプター中断時の表示バグを修正。

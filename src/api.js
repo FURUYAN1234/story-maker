@@ -34,6 +34,9 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
      
     temperature: options.temperature !== undefined ? options.temperature : 1.0 
   };
+  if (options.maxOutputTokens || options.maxTokens) {
+    generationConfig.maxOutputTokens = options.maxOutputTokens || options.maxTokens;
+  }
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
@@ -262,7 +265,7 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   }
 
   // 自動フォールバックロジックを最新の最適化リストに更新
-  const fallbackTargets = [
+  const fallbackTargets = Array.isArray(options.fallbackModels) ? options.fallbackModels : [
     "gemini-3.5-flash",
     "gemini-2.5-flash",
     "gemini-2.5-pro",
@@ -273,7 +276,12 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
     initialModel,
     ...fallbackTargets
   ]);
-  const allModels = Array.from(uniqueModels);
+  let allModels = Array.from(uniqueModels);
+  if (options.disableFallback) {
+    allModels = [initialModel];
+  } else if (Number.isFinite(options.maxModelAttempts) && options.maxModelAttempts > 0) {
+    allModels = allModels.slice(0, Math.max(1, Math.floor(options.maxModelAttempts)));
+  }
 
   const errors = [];
   let isSafetyBlocked = false;
@@ -350,7 +358,7 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
           model: modelId,
           messages: [{ role: "user", content: prompt }],
           temperature: 1.0,
-          max_tokens: 8192,
+          max_tokens: options.maxTokens || 8192,
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
@@ -652,7 +660,7 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
           model: modelId,
           messages: [{ role: "user", content: prompt }],
           temperature: 1.0,
-          max_tokens: 8192,
+          max_tokens: options.maxTokens || 8192,
           stream: true,
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
@@ -719,6 +727,9 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
 async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
   const generationConfig = {  temperature: 1.0 };
+  if (options.maxOutputTokens || options.maxTokens) {
+    generationConfig.maxOutputTokens = options.maxOutputTokens || options.maxTokens;
+  }
   
   if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3") || model.includes("gemini-3.5"))) {
     generationConfig.thinkingConfig = {

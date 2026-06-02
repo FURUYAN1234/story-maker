@@ -95,6 +95,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .panel-scroll{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .settings-panel.disabled-panel{opacity:0.4;pointer-events:none;filter:grayscale(80%)}
 .output-panel{min-width:0;padding:24px;display:flex;flex-direction:column;gap:16px;height:100%;overflow-y:auto;scroll-behavior:smooth}
+.output-panel.ln-live-preview,
+.output-panel.ln-novel-scroll{scroll-behavior:auto;overflow-y:auto;overflow-anchor:none}
+.output-panel.ln-live-preview .output-box,
+.output-panel.ln-novel-scroll .output-box{overflow-anchor:none}
 
 /* Global Alert */
 .global-alert-yellow {
@@ -311,6 +315,15 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .tag-warn{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
 
 .output-box{max-width:100%;flex:0 0 auto;margin-bottom:16px;word-break:break-word;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;font-size:15px;line-height:2;white-space:pre-wrap;min-height:200px;font-family:var(--font-serif);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.output-panel.ln-live-preview .output-box,
+.output-panel.ln-novel-scroll .output-box{
+  flex:0 0 auto;
+  height:clamp(420px, 48vh, 760px);
+  min-height:420px;
+  margin-bottom:16px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
 .output-box pre { white-space: pre-wrap; word-break: break-all; overflow-x: hidden; }
 .output-box.empty{color:var(--text2);font-size:13px;font-family:var(--font-sans);line-height:1.8;white-space:normal}
 .error-msg{color:var(--danger);font-weight:600;display:flex;align-items:center;gap:8px}
@@ -1745,6 +1758,36 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   margin: -24px -24px 0 -24px;
   padding: 24px 24px 16px 24px;
 }
+.output-panel.ln-live-preview .output-sticky-header,
+.output-panel.ln-novel-scroll .output-sticky-header {
+  position: static;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.output-panel:has(#long-novel-panel.ln-completed) {
+  scroll-behavior: auto;
+  overflow-y: auto;
+  overflow-anchor: none;
+}
+.output-panel:has(#long-novel-panel.ln-completed) .output-box {
+  overflow-anchor: none;
+  flex: 0 0 auto;
+  height: clamp(420px, 48vh, 760px);
+  min-height: 420px;
+  margin-bottom: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.output-panel:has(#long-novel-panel.ln-completed) .output-sticky-header {
+  position: static;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
 
 /* ============================================================
    📖 長編小説コントロールパネル
@@ -1825,6 +1868,28 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .ln-stat strong {
   color: var(--text);
   font-family: monospace;
+}
+.ln-live-status {
+  min-height: 26px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: rgba(0,0,0,.18);
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.ln-live-status.is-active {
+  color: var(--accent2);
+  border-color: rgba(167,139,250,.35);
+  background: rgba(139,108,255,.08);
+}
+.ln-live-status.is-error {
+  color: var(--danger);
+  border-color: rgba(248,113,113,.35);
+  background: rgba(248,113,113,.08);
 }
 
 /* プログレスバー */

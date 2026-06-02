@@ -1,5 +1,5 @@
 // ============================================================
-// consistencyAudit.js — AI矛盾検査エンジン v1.0
+// consistencyAudit.js — AI矛盾検査エンジン v1.1 (Optimized)
 // 生成テキストの設定矛盾を自動検出し、修正する。
 // 面白さ優先：明確な矛盾（設定不整合・時系列エラー）のみ検出。
 // 主観的な品質判断（「伏線が弱い」等）は対象外。
@@ -72,7 +72,7 @@ ${storyText}
  * @param {string} recentChaptersFull - 直近2章分の全文
  * @returns {string} 検査用プロンプト
  */
-export function buildChapterAuditPrompt(chapterBody, chapterNum, settings, allContextMemos, recentChaptersFull) {
+export function buildChapterAuditPrompt(chapterBody, chapterNum, settings, allContextMemos, recentChaptersFull, isLastChapter = false) {
   const charContext = _buildCharContext(settings);
   const eraContext = _buildEraContext(settings);
 
@@ -84,14 +84,15 @@ export function buildChapterAuditPrompt(chapterBody, chapterNum, settings, allCo
 - 意図的なフィクション設定（魔法、超能力、異世界ルール等）は矛盾ではない。
 - 矛盾が無ければ、空の配列 \`[]\` を返すこと。無理に矛盾を見つけようとしないこと。
 
-## 検出対象（これらのみ）
+## 検出対象（事実関係の矛盾のみ）
 1. **キャラクター不整合**: 名前・性別・外見・性格が前章と矛盾する（意図的な変身・変装を除く）
 2. **時系列エラー**: 前章との時間的な繋がりが不自然
-3. **時代考証違反**: 設定された時代に存在しない物・概念の使用
-4. **設定矛盾**: 前章で確立された設定との論理的不整合
+3. **時代考証違反**: 設定された時代に存在しない物・概念の使用（例：江戸時代にスマートフォン）
+4. **設定矛盾**: 前章で確立された設定との論理的不整合（「一人っ子」と述べたキャラに兄弟が登場するなど）
 5. **空間矛盾**: 前章終了時の所在地と本章冒頭の所在地が説明なく変わる
-6. **退場キャラの不整合**: 前章で退場したキャラが説明なく再登場
-7. **伏線の矛盾**: 文脈メモに記録された伏線・モチーフの扱いが矛盾する
+6. **退場キャラの不整合**: 前章で退場・死亡したキャラが説明なく再登場する
+7. **伏線の矛盾**: 文脈メモに記録された回収待ち伏線・設定・モチーフの扱いが矛盾する
+8. **別ルート混入**: 過去章・Story Bible・ユーザー設定に存在しない主人公名、能力名、組織名、初期候補設定の混入
 
 ## 入力情報
 
@@ -100,6 +101,9 @@ ${charContext}
 
 ### 時代・世界観設定:
 ${eraContext}
+
+### 終了記号ルール:
+この章は${isLastChapter ? '最終章です。本文の最後の独立行に一度だけ「【完】」が必要です。' : '最終章ではありません。「【完】」が本文に含まれている場合は設定矛盾として検出してください。'}
 
 ### 過去の章の文脈維持メモ:
 ${allContextMemos || '（第1章のため過去メモなし）'}
@@ -114,7 +118,7 @@ ${chapterBody}
 \`\`\`json
 [
   {
-    "type": "矛盾の種類",
+    "type": "矛盾の種類（キャラクター不整合/時系列エラー/時代考証違反/設定矛盾/空間矛盾/退場キャラの不整合/伏線の矛盾/別ルート混入）",
     "severity": "重大 or 軽微",
     "location": "矛盾が発生している箇所の引用（20字程度）",
     "description": "何がどう矛盾しているかの簡潔な説明"
@@ -154,16 +158,17 @@ ${longNovelContext.allContextMemos || ''}
 `;
   }
 
-  return `あなたはプロの小説家兼校閲者です。以下のテキストに含まれる矛盾箇所を修正してください。
+  return `あなたはプロの小説家兼校閲者です。以下のテキストに含まれる設定・事実関係の矛盾箇所を修正してください。
 
 ## 最重要ルール
 1. **物語の面白さ・テンポ・文体を絶対に損なわないこと**。矛盾の修正は最小限の変更で行う。
 2. **修正対象は指摘された矛盾箇所のみ**。矛盾と無関係な文章を書き換えてはならない。
-3. **文字数を大きく変えないこと**。元テキストの80%〜120%の範囲に収めること。
+3. **文字数を大きく変えないこと**。元テキストの90%〜110%の範囲に収めること。
 4. **プロット・展開・オチは一切変更しない**。矛盾する事実の記述のみを正しい設定に合わせて修正する。
 5. 修正結果の本文のみを出力する。メタ解説、注釈、「以下は修正結果です」等の前置きは一切付けない。
 6. **修正によって新しい矛盾を生まないこと**。矛盾箇所を直す際は、前後の章で確立された設定・数値・事実関係を必ず参照し、存在しないキャラクターや出来事を勝手に追加しないこと。
 7. **名前・固有名詞の正確性**: 修正時に既存キャラクターの名前を誤記したり、存在しない人物名を挿入したりしないこと。
+8. **自己校正メタの絶対禁止**: 「修正する」「修正後のテキスト」「OK」「おっと、見出しに」「No, there is no other」「Let's double check」など、あなたの判断過程・検査過程・修正ログを本文へ出力しないこと。修正済み本文だけを返すこと。
 
 ### ユーザー指定のキャラクター設定（正とする）:
 ${charContext}
@@ -259,8 +264,8 @@ export function formatAuditResultForMemo(issues, chapterNum) {
 
 // ============================================================
 // 統合関数: 検査 → 修正 → 再検査ループ
-// 重大矛盾は解消するまで修正を繰り返す（安全上限5回）。
-// 軽微な矛盾は記録のみで許容。
+// 重大矛盾は解消するまで修正を繰り返す（安全上限8回）。
+// 長編完成稿ではオプションにより軽微な矛盾も修正対象にできる。
 // ============================================================
 
 /**
@@ -271,11 +276,15 @@ export function formatAuditResultForMemo(issues, chapterNum) {
  * @param {object} options - オプション
  * @param {Function} [options.onStatus] - ステータス更新コールバック (message: string) => void
  * @param {Function} [options.onFallback] - モデルフォールバックコールバック
- * @param {number} [options.maxFixAttempts=5] - 修正の最大試行回数（安全上限）
+ * @param {number} [options.maxFixAttempts=8] - 修正の最大試行回数（安全上限）
  * @param {number} [options.chapterNum] - 章番号（長編時のみ）
  * @param {string} [options.allContextMemos] - 全章の文脈メモ（長編時のみ）
  * @param {string} [options.recentChaptersFull] - 直近2章の全文（長編時のみ）
- * @returns {Promise<{text: string, issues: Array, wasFixed: boolean, remainingCriticalCount: number}>}
+ * @param {boolean} [options.fixMinorIssues=false] - 軽微な矛盾も完成稿向けに修正する
+ * @param {boolean} [options.isLastChapter=false] - 長編時、この章が最終章かどうか
+ * @param {boolean} [options.failOnAuditError=false] - 検査API失敗時にスキップせず例外化する
+ * @param {Function} [options.validateFixedText] - 修正候補を採用前に検査する関数
+ * @returns {Promise<{text: string, issues: Array, wasFixed: boolean, remainingCriticalCount: number, remainingIssues: Array}>}
  */
 export async function auditAndFix(apiKey, text, settings, options = {}) {
   const {
@@ -285,6 +294,10 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
     chapterNum,
     allContextMemos,
     recentChaptersFull,
+    fixMinorIssues = false,
+    isLastChapter = false,
+    failOnAuditError = false,
+    validateFixedText,
   } = options;
 
   const model = GEMINI_MODELS[0].value;
@@ -294,6 +307,7 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
   let allIssues = []; // 全ループで検出された矛盾を蓄積
   let wasFixed = false;
   let lastCriticalCount = 0;
+  let lastIssues = [];
 
   for (let attempt = 0; attempt <= maxFixAttempts; attempt++) {
     // --- 検査 ---
@@ -307,7 +321,7 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
     if (isLongNovel) {
       auditPrompt = buildChapterAuditPrompt(
         currentText, chapterNum, settings,
-        allContextMemos, recentChaptersFull
+        allContextMemos, recentChaptersFull, isLastChapter
       );
     } else {
       auditPrompt = buildAuditPrompt(currentText, settings);
@@ -319,16 +333,25 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
         temperature: 0.1,
         responseMimeType: 'application/json',
         disableGoogleSearch: true,
+        maxTokens: 4096,
+        maxOutputTokens: 4096,
+        timeoutMs: isLongNovel ? 70000 : 120000,
+        maxModelAttempts: isLongNovel ? 2 : undefined,
       });
       auditResponse = result.text;
     } catch (err) {
       console.warn('矛盾検査APIコールが失敗しました:', err.message);
+      if (failOnAuditError) {
+        if (onStatus) onStatus(`[検査] 検査APIエラー — 保存を停止します`);
+        throw new Error(`矛盾検査APIエラー: ${err.message}`);
+      }
       if (onStatus) onStatus(`[検査] 検査APIエラー — スキップして続行します`);
-      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: 0 };
+      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: 0, remainingIssues: [] };
     }
 
     // --- 結果パース ---
     const issues = parseAuditResult(auditResponse);
+    lastIssues = issues;
     const criticalIssues = issues.filter(i => i.severity === '重大');
     const minorIssues = issues.filter(i => i.severity !== '重大');
     lastCriticalCount = criticalIssues.length;
@@ -347,16 +370,20 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
       }
     }
 
-    // 重大な矛盾がなければ検査完了
-    if (criticalIssues.length === 0) {
+    const issuesToFix = fixMinorIssues ? issues : criticalIssues;
+
+    // 修正対象の矛盾がなければ検査完了
+    if (issuesToFix.length === 0) {
       if (onStatus) {
         if (issues.length === 0) {
           onStatus(`[検査] ${label}矛盾は検出されませんでした ✅`);
+        } else if (fixMinorIssues) {
+          onStatus(`[検査] ${label}修正対象の矛盾は残っていません ✅`);
         } else {
           onStatus(`[検査] ${label}重大な矛盾なし。軽微な指摘${minorIssues.length}件は許容範囲です ✅`);
         }
       }
-      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: 0 };
+      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: 0, remainingIssues: [] };
     }
 
     // 安全上限に達していたらこれ以上修正しない
@@ -366,19 +393,36 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
 
     // --- 修正 ---
     if (onStatus) {
-      onStatus(`[修正] ${label}重大な矛盾${criticalIssues.length}件を修正中...（試行 ${attempt + 1}/${maxFixAttempts}）`);
+      const targetLabel = fixMinorIssues ? `矛盾${issuesToFix.length}件` : `重大な矛盾${criticalIssues.length}件`;
+      onStatus(`[修正] ${label}${targetLabel}を修正中...（試行 ${attempt + 1}/${maxFixAttempts}）`);
     }
 
     const longNovelContext = isLongNovel ? { recentChaptersFull, allContextMemos } : null;
-    const fixPrompt = buildFixPrompt(currentText, criticalIssues, settings, longNovelContext);
+    const fixPrompt = buildFixPrompt(currentText, issuesToFix, settings, longNovelContext);
 
     try {
       const fixResult = await callGenerativeAI(apiKey, model, fixPrompt, onFallback, {
         temperature: 0.3,
         disableGoogleSearch: true,
+        maxTokens: 16384,
+        maxOutputTokens: 16384,
+        timeoutMs: isLongNovel ? 90000 : 120000,
+        maxModelAttempts: isLongNovel ? 2 : undefined,
       });
 
-      const fixedText = fixResult.text.trim();
+      let fixedText = fixResult.text.trim();
+      if (typeof options.sanitizeText === 'function') {
+        fixedText = options.sanitizeText(fixedText);
+      }
+
+      if (typeof validateFixedText === 'function') {
+        const validationIssues = validateFixedText(fixedText) || [];
+        if (validationIssues.length > 0) {
+          console.warn(`修正結果を品質ゲートで棄却: ${validationIssues.join(' / ')}`);
+          if (onStatus) onStatus(`[修正] 修正結果に本文破損の兆候があるため棄却します（${validationIssues.slice(0, 3).join(' / ')}）`);
+          continue;
+        }
+      }
       const ratio = fixedText.length / currentText.length;
       if (ratio < 0.5 || ratio > 2.0) {
         console.warn(`修正結果の文字数比率が異常 (${(ratio * 100).toFixed(0)}%)。修正を棄却します。`);
@@ -396,8 +440,12 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
 
     } catch (err) {
       console.warn('矛盾修正APIコールが失敗しました:', err.message);
-      if (onStatus) onStatus(`[修正] 修正APIエラー — 現状のテキストで続行します`);
-      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: lastCriticalCount };
+      if (onStatus) {
+        onStatus(failOnAuditError
+          ? `[修正] 修正APIエラー — 残存矛盾があれば保存を停止します`
+          : `[修正] 修正APIエラー — 現状のテキストで続行します`);
+      }
+      return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: lastCriticalCount, remainingIssues: lastIssues };
     }
   }
 
@@ -406,7 +454,7 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
     onStatus(`[検査] ${label}修正上限（${maxFixAttempts}回）に達しましたが、重大な矛盾が${lastCriticalCount}件残存しています ⚠️`);
   }
 
-  return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: lastCriticalCount };
+  return { text: currentText, issues: allIssues, wasFixed, remainingCriticalCount: lastCriticalCount, remainingIssues: lastIssues };
 }
 
 // ============================================================
