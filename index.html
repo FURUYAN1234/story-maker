@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v3.5.9</title>
+  <title>Story Maker v3.8.0</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <script type="module" crossorigin src="./assets/index-BI0YdYQ4.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-ZyYCqWtw.css">
+  <script type="module" crossorigin src="./assets/index-D7cD31Or.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C3Y7t6Yf.css">
 </head>
 <body>
 
@@ -14,13 +14,13 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.5.9</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v3.8.0</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
       <div class="banner-row">
         <div class="banner-label" id="engine-label">⚠ API未設定</div>
-        <input type="password" id="apikey" placeholder="Gemini または OpenAI のAPIキーを入力">
+        <input type="password" id="apikey" placeholder="Gemini または OpenAI のAPIキーを入力" autocomplete="new-password">
         <button id="key-save">保存</button>
         <button id="key-edit" class="hidden">編集</button>
         <button id="btn-switch-api" class="btn-switch-api" title="設定内容は保持したまま、APIエンジン（Gemini / OpenAI）のみを切り替えます">🔄 API切替</button>
@@ -60,7 +60,7 @@
   <main class="main-wrap">
     <!-- ⚙️ Settings Sidebar -->
     <aside class="settings-panel" id="settings">
-      
+
       <!-- 固定ヘッダー（スクロールしない） -->
       <div class="panel-fixed-top">
         <div class="panel-top-actions">
@@ -341,10 +341,10 @@
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
               <span class="ln-warning-text">※生成中にブラウザが「応答なし」になる場合がありますが、AIの長考処理中のためそのまま待機してください。</span>
-              <span class="ln-warning-text">※一時停止を押しても即座には止まらず、現在執筆中の章が書き終わるまで処理が継続します。</span>
+              <span class="ln-warning-text">※生成中は章の確定まで進行表示になります。途中で止める場合は「ここで中断」を押してください。</span>
             </div>
           </div>
-          
+
           <!-- 作品情報バー -->
           <div class="long-novel-info" id="long-novel-info">
             <div class="long-novel-meta">
@@ -355,16 +355,17 @@
               <span class="ln-stat">📝 小説本文: <strong id="ln-char-count">0</strong> 字</span>
               <span class="ln-stat">🎯 目標: <strong id="ln-target">—</strong></span>
             </div>
+            <div class="ln-live-status" id="ln-live-status">待機中</div>
             <!-- プログレスバー -->
             <div class="ln-progress-bar-bg">
               <div class="ln-progress-bar-fill" id="ln-progress-bar" style="width: 0%"></div>
             </div>
           </div>
-          
+
           <!-- 章制御ボタン -->
           <div class="long-novel-actions">
             <button id="btn-ln-pause" class="btn-ln-next" disabled>
-              ⏸ 一時停止
+              待機中
             </button>
             <button id="btn-ln-abort" class="btn-ln-abort hidden">
               ⏹ ここで中断
@@ -441,7 +442,7 @@
             <span class="sa-file-count hidden" id="sa-file-count"></span>
             <button class="btn-secondary sa-btn-small" id="btn-sa-clear">🗑️ 全クリア</button>
           </div>
-          
+
           <div class="sa-dropzone" id="sa-dropzone">
             <div class="sa-dropzone-icon">📥</div>
             <div class="sa-dropzone-text">
@@ -451,7 +452,7 @@
             <div class="sa-dropzone-hint">文体分析用の作品テキストや、色彩・トーン分析用のイラスト画像を投入してください（要件を満たさない短い文章や画像のみでも、AIが超強引に想像して全項目を解析します）</div>
           </div>
           <input type="file" id="sa-file-input" accept=".txt,.md,.csv,text/plain,text/markdown,image/*" multiple class="hidden">
-          
+
           <div class="sa-image-list hidden" id="sa-image-list"></div>
           <div class="sa-file-list" id="sa-file-list"></div>
 
@@ -519,6 +520,6 @@
     </article>
 
   </main>
-
+
 </body>
 </html>
