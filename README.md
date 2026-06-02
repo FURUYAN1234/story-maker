@@ -697,6 +697,13 @@ Developed by **FURU**
 
 ## ChangeLog
 
+### v3.8.1 — 2026-06-02
+* **Long Novel Quality Upgrade**: Long-novel prompts now demand performed scenes instead of summaries: at least three concrete scenes per chapter, an opening hook, a middle turn, irreversible consequences, sensory prose, and an aftertaste/cost at the end of each chapter.
+* **Long Novel Save Gate**: Added a prose-shape gate that rejects chapters that look like bullet-point design memos, summary-only prose, or low-density scene/dialogue output before they can be saved into the manuscript.
+* **Completion Scroll Fix**: Completion and interruption states now explicitly keep the manuscript in the fixed in-box scroll frame with `ln-novel-scroll`, avoiding the final-page full-height expansion.
+* **Full-Run QA**: Verified with a user-entered Gemini API key: 10 / 10 chapters completed, 80,343 total characters, 10 chapter headings, a single final `【完】`, and no detected memo/master-prompt/repair-log contamination in the manuscript body.
+* **Sticky Control QA**: Verified that the long-novel control header remains sticky with the completed manuscript in a fixed internal scroll box (`#output` height 720px, scrollHeight 87,168px, `overflow-y: auto`).
+
 ### v3.7.9 — 2026-06-02
 * **UX**: Long-novel manuscript output now keeps the same readable in-box scroll area after all chapters complete, instead of expanding the entire page into one huge manuscript column.
 
@@ -857,3 +864,10 @@ Developed by **FURU**
 - バグ修正:
   - 継続生成時の部分的な管理マーカーのサニタイズ漏れを修正。
   - 初回チャプター中断時の表示バグを修正。
+
+### v3.8.2 (2026-06-02)
+- **長編小説モードの安定性・品質強化**:
+  - 本文品質の厳密な検証（セーブゲート）を追加し、あらすじ風やメモ書きのような文章を検知してリジェクトするよう改善。
+  - プロンプトのコンテキスト漏れを防止し、継続生成時の整合性を向上。
+  - API呼び出し時のエラーおよびタイムアウト時の自動再試行機能を強化。
+  - 生成完了後や中断時も小説本文の表示ボックスを固定し、枠内でのみスクロールできるようUIを最適化。

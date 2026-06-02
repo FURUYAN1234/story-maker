@@ -96,7 +96,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .settings-panel.disabled-panel{opacity:0.4;pointer-events:none;filter:grayscale(80%)}
 .output-panel{min-width:0;padding:24px;display:flex;flex-direction:column;gap:16px;height:100%;overflow-y:auto;scroll-behavior:smooth}
 .output-panel.ln-live-preview,
-.output-panel.ln-novel-scroll{scroll-behavior:auto;overflow-y:auto;overflow-anchor:none}
+.output-panel.ln-novel-scroll{scroll-behavior:auto;overflow-y:auto;overflow-anchor:none;min-height:0;height:100%}
 .output-panel.ln-live-preview .output-box,
 .output-panel.ln-novel-scroll .output-box{overflow-anchor:none}
 
@@ -319,10 +319,12 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .output-panel.ln-novel-scroll .output-box{
   flex:0 0 auto;
   height:clamp(420px, 48vh, 760px);
+  max-height:clamp(420px, 48vh, 760px);
   min-height:420px;
   margin-bottom:16px;
   overflow-y:auto;
   overscroll-behavior:contain;
+  scrollbar-gutter:stable;
 }
 .output-box pre { white-space: pre-wrap; word-break: break-all; overflow-x: hidden; }
 .output-box.empty{color:var(--text2);font-size:13px;font-family:var(--font-sans);line-height:1.8;white-space:normal}
@@ -1760,11 +1762,14 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 }
 .output-panel.ln-live-preview .output-sticky-header,
 .output-panel.ln-novel-scroll .output-sticky-header {
-  position: static;
+  position: sticky;
+  top: -24px;
+  z-index: 60;
   flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  background: transparent;
+  margin: -24px -24px 0 -24px;
+  padding: 24px 24px 16px 24px;
+  background: var(--bg);
+  box-shadow: 0 18px 28px rgba(0,0,0,.38);
 }
 
 .output-panel:has(#long-novel-panel.ln-completed) {
@@ -1776,17 +1781,22 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   overflow-anchor: none;
   flex: 0 0 auto;
   height: clamp(420px, 48vh, 760px);
+  max-height: clamp(420px, 48vh, 760px);
   min-height: 420px;
   margin-bottom: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 .output-panel:has(#long-novel-panel.ln-completed) .output-sticky-header {
-  position: static;
+  position: sticky;
+  top: -24px;
+  z-index: 60;
   flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  background: transparent;
+  margin: -24px -24px 0 -24px;
+  padding: 24px 24px 16px 24px;
+  background: var(--bg);
+  box-shadow: 0 18px 28px rgba(0,0,0,.38);
 }
 
 /* ============================================================

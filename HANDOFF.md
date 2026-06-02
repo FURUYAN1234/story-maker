@@ -4,11 +4,17 @@
 2026-06-02T00:00:00+09:00
 
 ## Current Status
-- Version: `v3.7.9`
+- Version: `v3.8.1`
 - Branch: `main`
-- Current task: Full long-novel API QA completed, then completion-state manuscript scroll UI was fixed.
+- Current task: v3.8.1 long-novel manuscript quality and completion/interruption scroll behavior patch completed; user-entered Gemini API QA completed.
 - Development port: `http://localhost:5179/`
 - Deployment/backups: not run. Do not deploy or back up unless the user explicitly asks.
+
+## v3.8.1 Current Notes
+- `v3.8.0` was already the deployed baseline; the active Codex patch is `v3.8.1`.
+- `src/main.js` adds a long-novel prose quality contract, stronger continuation instruction, and a prose-shape save gate so summary-like or memo-like chapters are rejected before adoption.
+- `src/main.js` and `src/style.css` keep completed/interrupted long-novel manuscripts inside the fixed readable manuscript scroll frame via `ln-novel-scroll`.
+- Full user-entered Gemini API end-to-end QA completed for `v3.8.1`: 10 / 10 chapters, 80,343 total characters, clean final manuscript scan.
 
 ## Changed Files
 | File | Purpose |
@@ -17,9 +23,10 @@
 | `src/prompt.js` | Long-novel chapter guidance now uses the same roughly 8,000 chars/chapter planning basis, so 80,000 chars plans as about 10 chapters; char-count labels are parsed robustly; next-chapter prompts now prioritize the latest context memo/GMC+S and forbid replaying completed prior events; non-final chapters now explicitly cannot resolve the whole story; reproduction metadata version synced to `v3.7.9`. |
 | `src/api.js` / `src/consistencyAudit.js` | Long-novel audit/fix calls now use bounded timeout and model-attempt options to reduce provider-side stalls during inspection and repair. |
 | `src/style.css` | Disables smooth scrolling and scroll anchoring while long-novel live preview is active; during and after long-novel generation the novel body itself now fills the remaining right-side height and scrolls inside the manuscript box. |
-| `package.json` / `package-lock.json` | Version synced to `3.7.9`. |
-| `index.html` / `src/data.js` | Visible/internal version synced to `v3.7.9`; long-novel panel now includes a fixed live status line. |
-| `README.md` | Added `v3.7.9` changelog. |
+| `package.json` / `package-lock.json` | Version synced to `3.8.1`. |
+| `index.html` / `src/data.js` | Visible/internal version synced to `v3.8.1`; long-novel panel keeps a fixed live status line. |
+| `src/prompt.js` | Reproduction metadata version synced to `v3.8.1`. |
+| `README.md` | Added `v3.8.1` changelog and full-run QA result. |
 
 ## Done
 - Reverted the earlier v3.6.x behavior where the pause button became a disabled progress indicator during chapter generation.
@@ -44,8 +51,18 @@
 - Full-run QA on `v3.7.7` reached chapter 4, but a structurally broken chapter entered repeated audit repair attempts. `v3.7.8` caps repair attempts at two so the chapter is regenerated sooner.
 - Full-run QA on `v3.7.8` completed all 10 chapters with 81,177 total characters. Saved chapter sizes: 5,970 / 8,679 / 4,879 / 7,510 / 9,387 / 8,459 / 8,314 / 11,387 / 10,051 / 6,287. Final scan found 10 chapter headings, one `【完】`, no duplicated chapter numbers, and no management memo/master-prompt/repair-meta contamination in the manuscript body.
 - After completion, the output box expanded to full manuscript height; `v3.7.9` keeps the completed manuscript in the same in-box scroll view used during generation.
+- `v3.8.1` adds a long-novel prose contract and save gate for performed scenes, chapter turns, aftertaste, and rejection of memo-like/summary-like chapter bodies.
+- `v3.8.1` keeps both completed and stopped manuscripts in `ln-novel-scroll`, so the final page no longer expands the text box to the full manuscript height.
+- Full-run QA on `v3.8.1` completed all 10 chapters with 80,343 total characters. Final scan found chapter headings 1-10, one final `【完】`, and no management memo/master-prompt/repair-log contamination in the manuscript body.
+- Completion UI QA on `v3.8.1` confirmed `#output` remains a fixed internal scroll box (`clientHeight` 720, `scrollHeight` 87,168, `overflow-y: auto`) and the long-novel control header remains `position: sticky` with z-index 60.
 
 ## Verification State
+- `node --check src/main.js` passed for `v3.8.1`.
+- `npm run build` passed for `v3.8.1`.
+- `npm run lint --if-present` passed for `v3.8.1`.
+- `git diff --check` passed for the touched Story Maker files; only normal LF-to-CRLF warnings were reported.
+- HTTP check passed: `http://127.0.0.1:5179/` returns `Story Maker v3.8.1`.
+- Browser QA with a user-entered Gemini API key passed for `v3.8.1`: 10 / 10 chapters, 80,343 chars, clean final manuscript scan, sticky/fixed output frame verified.
 - `npm run build` passed for `v3.7.8`.
 - `npm run lint --if-present` passed for `v3.7.8`.
 - `git diff --check` passed for the touched Story Maker files; only normal LF-to-CRLF warnings were reported.
@@ -61,11 +78,11 @@
 - Previous user-entered Gemini API manual QA passed on `v3.7.1`: chapter 1 saved, generation continued into chapter 2, and chapter-end pause stopped after chapter 2 at `2 / 11` with `生成を再開` visible.
 
 ## Remaining Risks / Manual QA
-- Full 10-chapter end-to-end generation completed on `v3.7.8` with user-entered API. Do not ask for or store the API key in chat or files.
+- Full 10-chapter end-to-end generation completed on `v3.8.1` with a user-entered API key. Do not ask for or store the API key in chat or files.
 - If the provider keeps returning short prose below the minimum even after continuation attempts, the app should continue to fail closed instead of saving a broken chapter.
 - Startup/default option handling is still planned: make hidden fallback defaults visible or apply mode-specific defaults when each mode chip is clicked.
 
 ## Next Steps
-1. Verify the `v3.7.9` completion-state scroll fix with a non-API DOM/CSS check after reload.
-2. Implement the planned startup/default option handling correction across modes.
+1. Implement the planned startup/default option handling correction across modes.
+2. Continue tuning literary quality with real prompt samples, while keeping fail-closed body adoption.
 3. Deploy only after an explicit deploy request.
