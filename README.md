@@ -697,7 +697,13 @@ Developed by **FURU**
 
 ## ChangeLog
 
-### v3.8.1 — 2026-06-02
+### v3.8.3 - 2026-06-02
+* **Long Novel Header Restoration**: The saved long-novel manuscript now always starts with a deterministic header block containing `【作品ヘッダー情報】`, `【あらすじ】`, and `【プロット概要】`. If the provider omits the synopsis or chapter outline, the app reconstructs them from parsed settings instead of dropping the sections.
+* **Final Marker Canonicalization**: The final chapter body is normalized before the save gate so the manuscript ends with exactly one independent `【完】` line.
+* **Version Sync**: Runtime metadata and reproduced master-prompt metadata are synced to `v3.8.3`.
+* **QA Status**: Structural checks passed locally; a fresh full API run is still required to judge the actual literary quality of a newly generated manuscript.
+
+### v3.8.1 - 2026-06-02
 * **Long Novel Quality Upgrade**: Long-novel prompts now demand performed scenes instead of summaries: at least three concrete scenes per chapter, an opening hook, a middle turn, irreversible consequences, sensory prose, and an aftertaste/cost at the end of each chapter.
 * **Long Novel Save Gate**: Added a prose-shape gate that rejects chapters that look like bullet-point design memos, summary-only prose, or low-density scene/dialogue output before they can be saved into the manuscript.
 * **Completion Scroll Fix**: Completion and interruption states now explicitly keep the manuscript in the fixed in-box scroll frame with `ln-novel-scroll`, avoiding the final-page full-height expansion.
@@ -865,9 +871,14 @@ Developed by **FURU**
   - 継続生成時の部分的な管理マーカーのサニタイズ漏れを修正。
   - 初回チャプター中断時の表示バグを修正。
 
-### v3.8.2 (2026-06-02)
+### v3.8.1 (2026-06-02, detailed notes)
 - **長編小説モードの安定性・品質強化**:
   - 本文品質の厳密な検証（セーブゲート）を追加し、あらすじ風やメモ書きのような文章を検知してリジェクトするよう改善。
   - プロンプトのコンテキスト漏れを防止し、継続生成時の整合性を向上。
   - API呼び出し時のエラーおよびタイムアウト時の自動再試行機能を強化。
   - 生成完了後や中断時も小説本文の表示ボックスを固定し、枠内でのみスクロールできるようUIを最適化。
+
+### v3.8.4 (2026-06-02)
+- **長編小説モードの安定性・品質強化**:
+  - 途中章および最終章での「完」マークの正規化処理を実装し、必ず1つの【完】で終了するように修正。
+  - プロバイダーからのレスポンスで省略されがちな「作品ヘッダー情報」や「あらすじ」などの必須セクションを、システム側で補完・自動構築する仕組みを追加。
