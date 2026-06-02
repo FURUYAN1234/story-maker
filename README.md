@@ -894,7 +894,25 @@ Developed by **FURU**
   - 途中章および最終章での「完」マークの正規化処理を実装し、必ず1つの【完】で終了するように修正。
   - プロバイダーからのレスポンスで省略されがちな「作品ヘッダー情報」や「あらすじ」などの必須セクションを、システム側で補完・自動構築する仕組みを追加。
 
+### v3.8.9 (2026-06-02)
+- **Fix**: Completed long-novel headers no longer keep generic chapter labels such as `第1章: 第1章`. Generic or abstract chapter labels are replaced with a derived prose title or a concise structural fallback.
+- **Fix**: Saved chapter records now normalize chapter titles before they are reused in later prompts, reducing weak context carry-forward into long-novel continuation.
+- **Fix**: Empty or random placeholder axes are normalized before long-novel prompting/header generation, so the finished synopsis no longer prints weak labels such as `テーマ「ランダム」`.
+- **QA**: Full Gemini browser QA on `v3.8.8` completed 10 / 10 chapters, 74,659 characters, one final `【完】`, and no management memo / repair log / English residue contamination. The remaining defect was generic outline titles, fixed in `v3.8.9`.
+
+### v3.8.8 (2026-06-02)
+- **Fix**: Long-novel save gates now reject near-final chapters that prematurely resolve the whole-story objective before the final chapter, preventing the last chapter from replaying a completed climax.
+- **Fix**: Final-chapter prompts now receive an explicit state lock that treats prior completed events as fixed history and asks for aftermath, revelation, and closure instead of rewinding the penultimate chapter.
+- **Fix**: English-residue detection was narrowed so proper nouns such as `Morris` no longer cause false fail-closed stops, while line-only English repair scraps are still rejected.
+- **QA**: Full Gemini browser QA on `v3.8.7` reached 11 / 12 saved chapters but stopped at chapter 12 after repeated final-chapter replay; `v3.8.8` addresses that root cause and needs a fresh full run.
+
 ### v3.8.7 (2026-06-02)
 - **長編小説モードの品質強化**:
   - 最終章生成完了時に、ログ等の余分なメタデータを排除し、保存済みチャプター履歴から作品ヘッダー（タイトル・あらすじ・プロット）をクリーンな状態で自動再構築する機能を追加。
   - プロバイダー側の挙動に依存せず、常に正確な章立て（10章構成など）のプロットが出力されるようフォールバック機構を改善。
+
+### v3.9.0 (2026-06-03)
+- **長編小説モードの品質・安定性強化**:
+  - 章タイトルやテーマ軸ラベル（「テーマ: ランダム」など）の冗長な表記や汎用的な文字列を、保存時に正規化・補完する処理を追加。
+  - 終盤の章において、物語の最終目的が誤って早期に解決されてしまう問題を防ぐため、最終章到達前の完結ロック機能を強化。
+  - 余分な英語フレーズの混入を検知するフィルターを最適化し、必要な固有名詞（Morris等）が誤検知でリジェクトされる問題を解消。
