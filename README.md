@@ -878,7 +878,23 @@ Developed by **FURU**
   - API呼び出し時のエラーおよびタイムアウト時の自動再試行機能を強化。
   - 生成完了後や中断時も小説本文の表示ボックスを固定し、枠内でのみスクロールできるようUIを最適化。
 
+### v3.8.6 (2026-06-02)
+
+- **Fix**: Completed long-novel manuscripts now rebuild the visible header from the actually saved chapter roster before final display, so a provider outline with too few chapters cannot remain in the finished manuscript.
+- **Fix**: The long-novel header now keeps the user-facing structure to title, synopsis, and plot outline only; internal planning metadata such as logline, total chapter count, and target character count is no longer printed in the manuscript header.
+- **QA**: A full Gemini browser run on `v3.8.5` completed 10 / 10 chapters and ended with `【完】`, but exposed an 8-chapter header outline and visible logline/planning metadata. `v3.8.6` addresses those defects with helper-level verification.
+
+### v3.8.5 (2026-06-02)
+- **Fix**: Long-novel fallback plot headers no longer repeat the same generic chapter sentence for chapters 2-9. The app now generates distinct fallback beats for setup, escalation, midpoint, reversal, evidence, and finale.
+- **Fix**: Long-novel chapter bodies now strip embedded provider metadata such as `タイトル:`, `ログライン:`, `全構成:`, and `予定総文字数:` from the chapter opening before audit/save. The save gate also rejects any remaining header metadata in the manuscript body.
+- **Fix**: Version metadata is synchronized to `v3.8.5` across the visible title, runtime constant, package files, and reproduction metadata after the partial `v3.8.4` / internal `v3.8.3` mismatch.
+
 ### v3.8.4 (2026-06-02)
 - **長編小説モードの安定性・品質強化**:
   - 途中章および最終章での「完」マークの正規化処理を実装し、必ず1つの【完】で終了するように修正。
   - プロバイダーからのレスポンスで省略されがちな「作品ヘッダー情報」や「あらすじ」などの必須セクションを、システム側で補完・自動構築する仕組みを追加。
+
+### v3.8.7 (2026-06-02)
+- **長編小説モードの品質強化**:
+  - 最終章生成完了時に、ログ等の余分なメタデータを排除し、保存済みチャプター履歴から作品ヘッダー（タイトル・あらすじ・プロット）をクリーンな状態で自動再構築する機能を追加。
+  - プロバイダー側の挙動に依存せず、常に正確な章立て（10章構成など）のプロットが出力されるようフォールバック機構を改善。
