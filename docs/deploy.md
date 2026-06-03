@@ -50,7 +50,12 @@ npm run deploy
 
 ## 9. Full Workspace Backup (全体バックアップ手順)
 ※ 全ての作業完了後に全体バックアップが必要な場合のみ。
-- 実行コマンド: `powershell -ExecutionPolicy Bypass -File "$env:ANTIGRAVITY_ROOT\scripts\backup_full.ps1"`
+- Codexから実行する場合は、ユーザーがログを目視できる見えるPowerShellウィンドウ（黒い窓）でPS1を直接起動する。
+- 余計な `-Command` ラッパーやウィンドウタイトル設定は付けない。`-File` で `backup_full.ps1` を直接実行する。
+- 実行コマンド:
+```powershell
+Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-NoExit','-File','C:\Users\sx717\Antigravity\scripts\backup_full.ps1') -WorkingDirectory 'C:\Users\sx717\Antigravity' -WindowStyle Normal
+```
 
 ## 10. Rollback Procedure
 - Actionsが止まった場合: 空コミットで再トリガー (`git commit --allow-empty -m "Trigger Build"`)

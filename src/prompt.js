@@ -810,6 +810,25 @@ ${retryGuidance ? `縲仙燕蝗槫､ｱ謨励°繧峨・蜀咲函謌先欠遉�
 export function buildLongNovelContinuePrompt(chapterNum, totalChapters, settings, previousSummary, recentChaptersFull, allContextMemos, isLastChapter, retryGuidance = '') {
   const cfg = extractLongNovelSettings(settings);
   const continuityGuard = buildLongNovelContinuityGuard(chapterNum, allContextMemos, retryGuidance);
+  const isLateStage = Number(totalChapters) ? chapterNum >= Math.max(1, Number(totalChapters) - 3) : isLastChapter;
+  const isMidStory = Number(totalChapters) ? chapterNum >= Math.max(1, Math.ceil(Number(totalChapters) * 0.5)) : false;
+  const midStoryInstruction = !isLastChapter && isMidStory ? `
+MID-STORY CANON STATE LOCK (never output this heading):
+- Treat saved chapters and context memos as the only canon; failed retry drafts and old outline beats are not canon.
+- Before drafting, internally list the immediately previous chapter's final place/time, character injuries, lost or destroyed items, fired weapons, deaths/exits, handoffs, and unresolved crisis.
+- Start after that state. Do not replay, rewind, undo, hallucinate, or re-stage completed trigger pulls, injuries, item destruction/loss, arrivals, escapes, awakenings, system shutdowns, or public collapses.
+- If a hand, item, weapon, body part, device, or route was destroyed, lost, burned, broken, disabled, or spent in saved canon, it cannot function normally or reappear intact in this chapter.
+- This is not the final chapter: keep the central system/core/conspiracy active or only partially damaged, and end on a new unresolved pressure rather than victory or aftermath.
+- System/core actions in this chapter must be attempts, partial/local damage, decoys, lockouts, or new failsafes; never a successful total shutdown/destruction/collapse.
+` : '';
+  const lateStageInstruction = isLateStage ? `
+Late-stage canon lock:
+- Before drafting, internally list alive/dead/exited characters, current location/time, possessions, injuries, relationships, and unresolved/final promises from saved canon.
+- Do not resurrect exited/dead characters, merge two named characters, swap the actor of a saved decision, or replay an already completed travel/arrival/death/wakeup/item event.
+${isLastChapter
+  ? '- This is the final chapter: resolve from the latest saved chapter state without adding a new lead or replacing the late-stage actor.'
+  : '- This is a late non-final protected chapter: escalate the crisis, keep the central system/core/conspiracy unresolved, do not write epilogue/rescue aftermath, and leave the final resolution for the final chapter.'}
+` : '';
 
   let lastChapterInstruction = '';
   if (isLastChapter) {
@@ -841,6 +860,8 @@ ${recentChaptersFull}
 縲仙・遶縺ｮ譁・ц邯ｭ謖√Γ繝｢・井ｼ冗ｷ壹・莠ｺ迚ｩ繝ｭ繧ｹ繧ｿ繝ｼ繝ｻ繝｢繝√・繝輔・險ｭ險茨ｼ峨・
 ${allContextMemos}
 ${lastChapterInstruction}
+${midStoryInstruction}
+${lateStageInstruction}
 ${LONG_NOVEL_QUALITY_RULES}
 ${cfg.eraRule}${cfg.allCategoryGuides}
 
@@ -899,7 +920,7 @@ export function buildLongNovelInstructionSheet(settings, headerInfo, appState) {
 搭 蜀咲樟逕ｨ繝槭せ繧ｿ繝ｼ謖・､ｺ譖ｸ・医％縺ｮ險ｭ螳壹〒莉悶・AI縺ｧ繧ら函謌舌〒縺阪∪縺呻ｼ・
 笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤
 縲千屮譟ｻ逕ｨ繝｡繧ｿ繝・・繧ｿ縲・
-繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v4.0.3
+繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v4.0.4
 繝ｻ蛻ｩ逕ｨ繧ｨ繝ｳ繧ｸ繝ｳ: ${engineName} (${modelName})
 繝ｻ逕滓・螳御ｺ・律譎・ ${timestamp}
 繝ｻ蜃ｺ蜉帙Δ繝ｼ繝・ 髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝・

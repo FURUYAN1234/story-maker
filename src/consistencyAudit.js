@@ -169,6 +169,8 @@ export function buildFixPrompt(originalText, issues, settings, longNovelContext)
 - Use only saved recent chapters and context memos as canon.
 - Rejected retry drafts are not canon and must not be carried forward.
 - Fix the draft to match canon; do not rewrite canon to match the draft.
+- Before fixing late chapters, internally lock each named character's alive/dead/exited state, current location/time, possessions, injuries, relationships, and unresolved promises from saved canon.
+- Do not resurrect exited characters, merge two named people into one person, swap the actor of a saved decision, or replay an already completed travel, arrival, death, wakeup, item discovery, or handoff.
 
 ### 過去の章の文脈（整合性を保つために参照すること）:
 ${longNovelContext.recentChaptersFull || ''}
