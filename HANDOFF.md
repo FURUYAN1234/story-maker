@@ -8,7 +8,7 @@
 - Branch: `main`
 - Current task: v4.0.3 score-bar display fix and structural-contradiction regeneration hardening are implemented locally after the passing v4.0.2 full API QA.
 - Development port: `http://localhost:5179/`
-- Deployment/backups: v4.0.3 has not been deployed yet. Previous `v4.0.0` deploy completed for GitHub Pages; backup not run.
+- Deployment/backups: v4.0.3 is deployed to GitHub Pages and released/tagged on GitHub. Backup not run.
 
 ## v4.0.3 Current Notes
 - User noticed that the long-novel self-score showed text scores but not visible bars. Browser inspection confirmed the rendered rows used `score-bar` with widths such as `96%`, but CSS only styled `score-bar-fill`, leaving the fill height at `0px`.
@@ -18,6 +18,8 @@
 - Retry analysis from that run showed several chapters reached audit repair attempt `2/2`, but whole-chapter regeneration only used `1/2` or `1/4`. Do not simply increase audit repair attempts; keeping repair at two avoids over-patching a structurally broken draft.
 - `src/main.js` now treats unresolved chronology/geography/setting/character/foreshadowing contradictions as structural failures that get the extended four-regeneration budget plus state-lock guidance: fix position, time, possessions, injuries, life/death, and relationship state before rewriting.
 - Checks passed for v4.0.3: `node --check src/main.js`, `node --check src/consistencyAudit.js`, `npm run build`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, and in-app browser version check showing `Story Maker v4.0.3`.
+- Deploy checks passed: no generated garbage files found; secret scan found no real API keys or credentials, only expected API input/link text and existing public GitHub links. README changelog includes v4.0.3. `v4.0.3` annotated tag and GitHub Release were created with English/Japanese wording.
+- `npm run deploy` published successfully. `origin/gh-pages:index.html` and live GitHub Pages smoke check both show `Story Maker v4.0.3`; public API field is empty.
 
 ## v4.0.2 Current Notes
 - Fresh API QA on `v4.0.1` reached chapter 8 and exposed a real save-through bug: when a repair candidate was rejected for being too short or changing length too much, the unchanged draft could be re-audited, receive a clean second audit result, and then be saved.
