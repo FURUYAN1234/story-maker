@@ -3,6 +3,7 @@
 ## 🚨 超超強制ルール (SUPER CRITICAL RULES) - 絶対遵守
 
 ### 1. バージョンルールの絶対厳守 (Strict Versioning Rule)
+- Readable clarification: version numbers in this app use single-digit minor and patch slots only. After `3.9.9`, the next valid version is `4.0.0`; never create a two-digit minor version.
 - バージョンの更新において、**末尾が `9` の場合（`x.y.9`）の次は必ずマイナーバージョンをインクリメントし、パッチバージョンを `0` にリセットして `x.(y+1).0` とすること**。
   - 例：`3.3.9` の次のバージョンは、絶対に `3.3.10` ではなく **`3.4.0`** とする。
 - パッチバージョンを `9` から `10` などの2桁にする更新は、このプロジェクトにおいて「バージョンジャンプ（数字の読み飛ばし）」とみなされ、**完全なるルール違反**となる。

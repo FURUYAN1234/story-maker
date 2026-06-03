@@ -895,7 +895,7 @@ export function buildLongNovelInstructionSheet(settings, headerInfo, appState) {
 搭 蜀咲樟逕ｨ繝槭せ繧ｿ繝ｼ謖・､ｺ譖ｸ・医％縺ｮ險ｭ螳壹〒莉悶・AI縺ｧ繧ら函謌舌〒縺阪∪縺呻ｼ・
 笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤
 縲千屮譟ｻ逕ｨ繝｡繧ｿ繝・・繧ｿ縲・
-繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v3.8.9
+繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v4.0.0
 繝ｻ蛻ｩ逕ｨ繧ｨ繝ｳ繧ｸ繝ｳ: ${engineName} (${modelName})
 繝ｻ逕滓・螳御ｺ・律譎・ ${timestamp}
 繝ｻ蜃ｺ蜉帙Δ繝ｼ繝・ 髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝・
@@ -950,4 +950,3 @@ ${headerInfo.plotOutline || '・井ｸ願ｨ倩ｨｭ螳壹↓蝓ｺ縺･縺喉
 --- 縺薙％縺ｾ縺ｧ繧ｳ繝斐・ ---
 `;
 }
-

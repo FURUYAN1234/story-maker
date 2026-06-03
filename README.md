@@ -168,7 +168,8 @@ These protocols apply exclusively to the `long` (長編小説) mode to prevent s
 - **Live Preview Scroll Optimization / ライブプレビューのスクロール最適化**: During long-novel generation, the visible manuscript auto-scrolls smoothly within its dedicated container without forcing page-level scroll jumps, while stripping context memos for a clean preview. / 長編生成中、メタ情報である文脈メモを自動除去したプレビューを表示しつつ、画面全体のガタつきを防ぐため小説本文枠内でのみ自動スクロール追従を行います。
 - **Final Chapter Optimization & State Retention / 最終章の最適化と完了状態維持**: The final chapter automatically strips premature final markers, splits at the true end, and maintains the manuscript scroll view cleanly after completion. / 最終章の生成時に、途中に入り込んだ不要な「完」マークを自動除去して正確に完結判定を行い、完了後も生成中のスクロール状態を綺麗に維持します。
 - **Live Status Header / ステータスバー常時表示**: The long-novel panel features a fixed live status row updating current phase, chapter progress, and character counts in real-time. / 長編パネル上部に、現在のフェーズ、章進捗、リアルタイム文字数を常時更新する固定ステータスバーを搭載。
-- **Robust Auto-Recovery / 強牢な自動修復**: If structural logic or continuity checks fail, the engine performs up to two complete chapter regenerations with explicit failure guidance before a fail-closed stop, significantly improving success rates for long novels. / 論理・整合性の検証に失敗した場合、破綻したまま保存せず、最大2回までチャプター全体の再生成と自動修復を試みることで、長編完遂率を大幅に向上させました。
+- **Fail-Closed Save Gates / 保存前フェイルクローズ**: Before a chapter is accepted into the manuscript or Story Bible context, the engine rejects management memos, design-note bullets, bare headings, under-length prose, paragraph-density failures, premature non-final resolution, and unresolved audit contradictions. / 章本文やストーリーバイブルへ保存する前に、管理メモ、設計箇条書き、見出しだけの出力、短すぎる本文、段落密度不足、非最終章の早期完結、未解決の整合性エラーを保存拒否します。
+- **Robust Auto-Recovery / 強牢な自動修復**: If structural logic or continuity checks fail, the engine performs up to two complete chapter regenerations by default, and up to four for duplicate/replay, paragraph/scene-density, or late non-final premature-resolution failures before a fail-closed stop. / 論理・整合性の検証に失敗した場合、通常は最大2回、重複・再演、段落/シーン密度不足、終盤非最終章の早期完結については最大4回まで、明示的な失敗理由つきで章全体の再生成を試みます。
 - **Final Chapter Full-Text Output / 最終章全文出力**: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 最終章完了時に全章の本文を1つのコードブロックにまとめて出力する義務を強化。専用フォーマットとテンプレートでAIの省略を防止。
 - **State Separation & Context Panel / 状態の完全分離と文脈パネル**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 小説本文とAIの構造メモ（目的・伏線等）を内部状態レベルで完全に分離。メモは折りたたみ可能な専用パネルへルーティングされ、AI特有の空のマークダウン記号なども強力にクレンジング除去されるため、エクスポートされるテキストには純粋な小説本文のみが含まれます。
 - **Local Timestamped Export / ローカル時刻での厳密なファイル管理**: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 全てのテキスト・JSON保存のファイル名において、UTCズレのない日本時間（ローカル時刻）の完全な数字14桁（`YYYYMMDDHHmmss`）を強制。長期間にわたる連載執筆時の時系列ソートの一貫性を保証します。
@@ -910,6 +911,57 @@ Developed by **FURU**
 - **長編小説モードの品質強化**:
   - 最終章生成完了時に、ログ等の余分なメタデータを排除し、保存済みチャプター履歴から作品ヘッダー（タイトル・あらすじ・プロット）をクリーンな状態で自動再構築する機能を追加。
   - プロバイダー側の挙動に依存せず、常に正確な章立て（10章構成など）のプロットが出力されるようフォールバック機構を改善。
+
+### v4.0.0 (2026-06-03)
+- **Versioning**: Corrected the post-`v3.9.9` release line to `v4.0.0`, keeping both minor and patch slots single digit as required by the project rule.
+- **Quality Gate**: Long-novel paragraph-density checks now count normal visible line breaks, not only blank-line-separated blocks, preventing properly paragraphed Japanese prose from being falsely rejected as four giant paragraphs.
+- **Recovery**: Paragraph/scene-density save-gate failures now get the extended four-regeneration path and explicit retry guidance to use short visible prose paragraphs instead of huge explanation blocks.
+- **Prompt**: Long-novel chapter and continuation prompts now explicitly require visible paragraph breaks, most paragraphs under 350 Japanese characters, and no chapter returned as a few massive text blocks.
+- **QA**: Fresh Gemini browser QA completed 12 / 12 chapters at 96,555 visible characters. Final scan found 12 chapter headings, exactly one `【完】`, no context memo / GMC+S / regeneration-log contamination, no bare heading artifacts, and no stray `AND` route residue.
+- **Deploy**: Published `v4.0.0` to GitHub Pages after build, lint, diff-check, full API QA, remote `gh-pages` index verification, and live page smoke check.
+
+### v3.9.9 (2026-06-03)
+- **Sanitize**: Bare empty Markdown heading artifacts (`#` / `##` / fullwidth variants) are now stripped during long-novel body cleanup before the save gate, so inert provider formatting noise does not waste every regeneration attempt.
+- **Gate**: Whole-story resolution detection now starts in late non-final chapters from roughly 70% of the planned run, not only the penultimate chapter, and those late-resolution failures get the extended four-regeneration path.
+- **Output**: Fail-closed chapter errors stay in status/logs instead of being appended to the readable manuscript when saved clean text already exists, preventing visible error text from contaminating the output box.
+
+### v3.9.8 (2026-06-03)
+- **Prompt**: Late non-final chapters now receive a concrete previous-chapter endpoint anchor, so regeneration must continue from the saved chapter's final state instead of redoing travel, arrival, or already witnessed events.
+- **Recovery**: Duplicate/replay retry mode now stays in the extended four-retry path when later failures shift into timeline/audit contradictions, and near-final retries explicitly preserve chronology while avoiding whole-story resolution wording.
+- **QA**: v3.9.7 fresh Gemini browser QA saved 8 / 10 chapters, then correctly failed closed at chapter 9 after rejecting repeated chapter 8 replay, premature `すべて...終わ` wording, and an unresolved data-center timeline contradiction; the broken chapter was not saved.
+
+### v3.9.7 (2026-06-03)
+- **Prompt**: The chapter immediately before the final chapter now receives explicit instructions to avoid whole-story resolution, victory declarations, replaying already completed events, and explanation-only pacing.
+- **QA**: v3.9.6 correctly failed closed at chapter 9 after rejecting repeated timeline/replay, bare-heading, premature-resolution, and long-exposition defects; v3.9.7 tightens the late non-final chapter prompt before the next full run.
+
+### v3.9.6 (2026-06-03)
+- **Quality Gate**: Empty Markdown headings such as bare `##` lines are now treated as residual management/formatting artifacts and rejected before a chapter can be saved.
+- **QA**: v3.9.5 completed a full 10/10 Gemini run at 74,267 chars with one final `【完】`, but final scanning found two bare `##` lines; v3.9.6 hardens that failure mode.
+
+### v3.9.5 (2026-06-03)
+- **Recovery**: Chapter 1 pre-save quality-gate failures now use the same full-chapter regeneration path as later chapters instead of stopping immediately.
+- **Prompt**: Chapter 1 regeneration preserves retry notes so the model sees the prior rejection reason and avoids repeating teaser-style endings or repair chatter.
+- **QA**: A fresh full API run is still required after reloading because the UI-held API key is cleared by the code update.
+
+### v3.9.4 (2026-06-03)
+- **Recovery**: When the long-novel duplicate/replay gate rejects a chapter, duplicate-specific chapter regeneration now retries up to four times instead of two.
+- **Prompt**: Regeneration after duplicate rejection now explicitly forbids copying prior chapter openings, paragraphs, dialogue runs, metaphors, and scene placement, and asks the chapter to restart from a different location, obstacle, or choice.
+- **Safety**: The duplicate/replay save gate remains fail-closed; repeated bad prose is still blocked instead of being saved into the manuscript or Story Bible state.
+
+### v3.9.3 (2026-06-03)
+- **Quality Gate**: Long-novel saved chapters now compare candidate prose against already saved chapters and fail closed when long exact paragraph blocks or opening scenes are replayed.
+- **Fix**: Added an automatic cleanup for the observed typo `繰っ広げ` / `繰っ広`, normalizing it to `繰り広げ` / `繰り広`.
+- **Prompt**: Long-novel rules now explicitly forbid chapter-body replay while still allowing consequences from previous chapters to carry forward.
+
+### v3.9.2 (2026-06-03)
+- **Quality**: Long-novel prompts now require an internal 3-5 scene ledger, visible character choice, consequence carry-forward, dialogue subtext, and final-paragraph aftertaste for every chapter.
+- **Quality Gate**: Saved long-novel chapters now receive an additional literary-density check for summary-like paragraphs, thin sensory detail, weak character choice/conflict, and teaser-style endings before being accepted.
+- **QA**: Build/lint/browser smoke checks should be rerun before deployment; full API QA requires the user to enter the key in the UI.
+
+### v3.9.1 (2026-06-03)
+- **Fix**: Mode chips now apply visible default settings for empty axes, so starting generation immediately after API entry no longer sends blank mode/theme/genre/worldview/era/ending/narration fields.
+- **Fix**: Generation now performs a final default-fill pass before reading settings, while preserving any user-selected, random, locked, or typed values.
+- **Fix**: Internal and visible version metadata were synced after the v3.9.0 deployment so the app, reproduction prompt metadata, package files, and UI title no longer drift apart.
 
 ### v3.9.0 (2026-06-03)
 - **長編小説モードの品質・安定性強化**:

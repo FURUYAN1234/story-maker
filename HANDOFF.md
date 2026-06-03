@@ -1,16 +1,77 @@
 # HANDOFF (Story Maker)
 
 ## Snapshot Date
-2026-06-02T00:00:00+09:00
+2026-06-03T15:09:14+09:00
 
 ## Current Status
-- Version: `v3.8.9`
+- Version: `v4.0.0`
 - Branch: `main`
-- Current task: v3.8.9 long-novel completed-run quality polish after v3.8.8 full browser QA completed but exposed generic outline titles.
+- Current task: v4.0.0 long-novel paragraph-density gate fix and full Gemini QA/deploy completed.
 - Development port: `http://localhost:5179/`
-- Deployment/backups: not run. Do not deploy or back up unless the user explicitly asks.
+- Deployment/backups: `npm run deploy` completed for GitHub Pages; backup not run.
 
-## v3.8.9 Current Notes
+## v4.0.0 Current Notes
+- `v3.9.9` fresh in-app Gemini QA after user API entry saved chapter 1, then stopped fail-closed at chapter 2 with `長い説明段落が多く、場面の切れ目が不足しています（第2章: 4段落）`. The rejected chapter 2 was not appended to the readable manuscript; the output box kept the clean chapter 1 manuscript.
+- Root cause: the paragraph-density gates counted only blank-line-separated blocks, while generated Japanese prose often uses normal single-newline paragraph breaks. Properly paragraphed prose could be misread as a few giant text blocks.
+- Versioning correction: after `v3.9.9`, the valid next app version is `v4.0.0`; minor and patch slots must stay single digit.
+- `v4.0.0` changes the paragraph-density checks to count normal visible line breaks, adds explicit prompt rules for visible paragraph breaks, and gives paragraph/scene-density failures the extended four-regeneration path with specific retry guidance.
+- Fresh Gemini in-app browser QA completed 12 / 12 chapters at 96,555 visible characters. The final scan found 12 chapter headings, exactly one `【完】`, no context memo / GMC+S / regeneration-log contamination, no bare heading artifacts, and no stray `AND` route residue.
+- Notable gates during QA: chapter 2 passed the corrected paragraph-density handling; chapter 4 and chapter 8 rejected unresolved contradictions and regenerated; chapter 9 rejected visible design-memo bullets; chapter 10 rejected premature whole-story resolution twice before saving a non-final continuation.
+- User asked Codex to also deploy from this side at appropriate times. After the passing full QA, `npm run deploy` published `v4.0.0` to GitHub Pages. Remote `origin/gh-pages:index.html` and the live page both show `Story Maker v4.0.0`.
+
+## v3.9.9 Previous Notes
+- `v3.9.8` fresh in-app Gemini QA after user API entry saved 8 / 12 chapters, then stopped fail-closed during chapter 9. The broken chapter 9 was not saved.
+- That run showed the save gates worked, but repeated inert empty Markdown heading lines (`#` / `##`) consumed all regeneration attempts. One chapter 9 retry also introduced a critical setting contradiction by making 実花 into `高瀬実花` / 美咲's sister instead of 神崎修平's sister; repair fixed the contradiction, but the empty heading artifact remained and the chapter stayed rejected.
+- `v3.9.9` strips bare empty Markdown heading artifacts during long-novel body cleanup before the save gate, while preserving the fail-closed management-info gate if cleanup misses a real leak.
+- Late non-final whole-story resolution detection now starts at roughly 70% of the planned chapter count instead of only the penultimate chapter, and those late-resolution failures get the extended four-regeneration path.
+- When a chapter stops fail-closed after prior clean chapters exist, the readable output box now keeps the saved clean manuscript instead of appending the error text into the manuscript view; the error remains in status/logs.
+- Static/browser smoke checks passed for v3.9.9. The app is open on `http://localhost:5179/` showing `v3.9.9`; the update cleared the in-memory API key, so fresh full API QA is waiting for the user to enter the key in the UI again.
+
+## v3.9.8 Previous Notes
+- `v3.9.7` fresh in-app Gemini QA after user API entry saved 8 / 10 chapters, then stopped fail-closed during chapter 9 with repeated chapter 8 replay / data-center timeline rewind and premature `すべて...終わ` wording. The broken chapter 9 was not saved.
+- `v3.9.8` adds a concrete previous-chapter endpoint anchor to next-chapter prompts, so late non-final chapters must continue from the saved chapter's final location/state instead of redoing travel, arrival, or already witnessed events.
+- Regeneration guidance now treats rejected current-chapter output as non-canon, preserves chronology during duplicate/replay retries, and keeps duplicate/near-final retry paths at up to four full-chapter regenerations even if later failures become audit/timeline contradictions.
+- Static/browser smoke checks passed. The app is open on `http://localhost:5179/` showing `v3.9.8`; the reload cleared the in-memory API key again, so fresh full API QA is waiting for the user to enter the key in the UI.
+
+## v3.9.7 Previous Notes
+- `v3.9.6` fresh in-app Gemini QA saved 8 / 10 chapters, then stopped fail-closed during chapter 9 with long exposition paragraphs plus premature whole-story resolution (`すべて...終わ`).
+- The v3.9.6 gates behaved correctly during that run: empty Markdown headings were rejected before save in multiple chapters, and broken chapter 9 retries were not adopted into the manuscript or memory state.
+- `v3.9.7` added a specific prompt lock for the chapter immediately before the final chapter: do not resolve the whole story, do not declare victory/final reconstruction, do not replay completed prior events, and keep action/dialogue/choice beats every 400-900 characters.
+
+## v3.9.6 Previous Notes
+- `v3.9.5` in-app Gemini QA completed all 10 / 10 chapters with 74,267 visible manuscript characters and one final `【完】`.
+- The same final scan found no repair-log, master-prompt, code-fence, or regeneration-text contamination, but did find two bare empty Markdown headings (`##`) inside the saved manuscript body.
+- `v3.9.6` adds a fail-closed save-gate pattern for bare Markdown headings (`#` through `######`) so future chapters with empty heading artifacts are rejected before save and can regenerate instead.
+- Fresh v3.9.6 full API QA later saved 8 / 10 chapters and stopped fail-closed at chapter 9, which led to the v3.9.7 late non-final prompt patch.
+
+## v3.9.5 Previous Notes
+- `v3.9.4` in-app Gemini QA stopped fail-closed before saving chapter 1 because the pre-save literary gate detected a teaser/preview-style chapter ending. This confirmed the save gate blocks bad prose, but exposed that chapter 1 was not using the later-chapter regeneration route.
+- `v3.9.5` gives chapter 1 the same retry-state preservation and full-chapter regeneration behavior as later chapters for save-gate failures.
+- Chapter 1 retry prompts now include the prior rejection reason and explicitly ask for a full rewrite that avoids teaser endings, repair chatter, and references to the failed attempt.
+- Full API QA on `v3.9.5` later completed 10 / 10 chapters, but final scanning found two bare `##` lines, so `v3.9.6` was added before accepting the result.
+
+## v3.9.4 Previous Notes
+- `v3.9.3` in-app Gemini QA correctly stopped fail-closed at chapter 4 because the provider repeatedly replayed long chapter 3 prose. The gate worked, but the regeneration guidance was not strong enough to escape the replay loop.
+- `v3.9.4` keeps the duplicate/replay save gate fail-closed, but duplicate-specific rejections now get up to four complete chapter regenerations instead of two.
+- `v3.9.4` adds stronger retry instructions that forbid prior chapter openings, paragraphs, dialogue runs, metaphors, and scene placement, and require the retry to restart from a different location, obstacle, or choice.
+
+## v3.9.3 Previous Notes
+- `v3.9.2` full in-app Gemini QA completed 12 / 12 chapters and 91,252 characters, but deeper manuscript scan found exact long paragraph replay from chapter 7 inside chapter 8 plus one observed typo (`繰っ広げ`).
+- `v3.9.3` adds a save-time fail-closed duplicate gate that compares a candidate chapter against already saved chapter bodies and rejects long exact paragraph/opening-scene replay before the chapter can be adopted.
+- `v3.9.3` also adds automatic cleanup for `繰っ広げ` / `繰っ広` and synchronizes the prompt rule to forbid chapter-body replay while preserving consequence carry-forward.
+
+## v3.9.2 Previous Notes
+- `v3.9.2` strengthens long-novel chapter prompts with an internal 3-5 scene ledger requirement, character agency, consequence carry-forward, dialogue subtext, and final-paragraph aftertaste.
+- Long-novel save checks now add a literary-density gate that rejects chapters that look like compressed summaries, lack sensory/physical detail, lack visible choice/conflict, or end with teaser/preview wording.
+- Full in-app Gemini QA completed 12 / 12 chapters and 91,252 characters; final scan found no memo/master-prompt/repair-log contamination and exactly one final marker, but deeper duplicate scan found chapter 7 prose replay inside chapter 8.
+
+## v3.9.1 Previous Notes
+- `v3.9.1` fixes the startup/default handling gap: the first visible mode now has visible defaults immediately, and generation runs one final default-fill pass before settings are read.
+- Mode clicks now replace only system-applied default values. User-entered, manually selected, random, or locked values are preserved instead of being overwritten.
+- Long-novel mode now gets meaningful visible defaults when selected from a fresh startup state: mystery/suspense, modern Tokyo, adult reader, surprise ending, and ensemble third-person narration.
+- Internal version drift from the v3.9.0 deployment was corrected across `src/main.js`, `src/prompt.js`, `src/data.js`, `index.html`, `package.json`, and `package-lock.json`.
+
+## v3.8.9 Previous Notes
 - `v3.8.8` full Gemini browser QA completed 10 / 10 chapters with 74,659 manuscript characters, one final `【完】`, and no management memo / repair log / English residue contamination. It also confirmed the output box stayed scroll-contained.
 - The remaining quality defect in that run was weak completed-header outline lines such as `第1章: 第1章`, abstract fallback rows for some chapters, and weak axis labels such as `テーマ「ランダム」`. `v3.8.9` normalizes generic chapter titles at save time, derives/falls back to concise chapter labels for completed headers, and replaces empty/random axes with natural defaults.
 - `v3.8.7` full Gemini browser QA reached 11 / 12 saved chapters, then stopped fail-closed in chapter 12 because the provider kept replaying the chapter 11 climax and the old English-residue gate also treated valid proper nouns such as `Morris` as hard failures.
@@ -24,14 +85,13 @@
 ## Changed Files
 | File | Purpose |
 |---|---|
-| `src/main.js` | Maintains long-novel pause, continuation, audit, save-gate, preview-scroll, regeneration safeguards, fallback outline quality, v3.8.6 final-header rebuild, v3.8.8 final-chapter/near-final story gates, and v3.8.9 chapter-title / axis-label normalization. |
-| `src/prompt.js` | Long-novel chapter guidance now uses the same roughly 8,000 chars/chapter planning basis, so 80,000 chars plans as about 10 chapters; char-count labels are parsed robustly; next-chapter prompts now prioritize the latest context memo/GMC+S and forbid replaying completed prior events; non-final chapters now explicitly cannot resolve the whole story; reproduction metadata version synced to `v3.8.9`. |
+| `src/main.js` | Maintains long-novel pause, continuation, audit, save-gate, preview-scroll, regeneration safeguards, fallback outline quality, v3.8.6 final-header rebuild, v3.8.8 final-chapter/near-final story gates, v3.8.9 chapter-title / axis-label normalization, v3.9.1 default-visible mode presets, v3.9.2 literary-density gates, v3.9.3 chapter-replay rejection, v3.9.4 duplicate-specific regeneration hardening, v3.9.5 chapter-1 quality-gate regeneration, v3.9.6 empty-Markdown-heading rejection, v3.9.7 late non-final chapter prompt lock, v3.9.8 endpoint-anchor / retry-chronology hardening, v3.9.9 empty-heading cleanup / late-resolution retry hardening / clean output error handling, and v4.0.0 paragraph-density counting / retry hardening. |
+| `src/prompt.js` | Long-novel chapter guidance now uses the same roughly 8,000 chars/chapter planning basis, so 80,000 chars plans as about 10 chapters; char-count labels are parsed robustly; next-chapter prompts now prioritize the latest context memo/GMC+S and forbid replaying completed prior events; non-final chapters now explicitly cannot resolve the whole story; reproduction metadata version synced to `v4.0.0`. |
 | `src/api.js` / `src/consistencyAudit.js` | Long-novel audit/fix calls now use bounded timeout and model-attempt options to reduce provider-side stalls during inspection and repair. |
 | `src/style.css` | Disables smooth scrolling and scroll anchoring while long-novel live preview is active; during and after long-novel generation the novel body itself now fills the remaining right-side height and scrolls inside the manuscript box. |
-| `package.json` / `package-lock.json` | Version synced to `3.8.9`. |
-| `index.html` / `src/data.js` | Visible/internal version synced to `v3.8.9`; long-novel panel keeps a fixed live status line. |
-| `src/prompt.js` | Reproduction metadata version synced to `v3.8.9`. |
-| `README.md` | Added the v3.8.9 chapter-title quality changelog and QA note. |
+| `package.json` / `package-lock.json` | Version synced to `4.0.0`. |
+| `index.html` / `src/data.js` | Visible/internal version synced to `v4.0.0`; long-novel panel keeps a fixed live status line. |
+| `README.md` | Added v4.0.0 versioning correction, paragraph-density gate, retry-hardening, QA-pass, and deploy changelog notes. |
 
 ## Done
 - Reverted the earlier v3.6.x behavior where the pause button became a disabled progress indicator during chapter generation.
@@ -66,6 +126,64 @@
 - Full browser QA on `v3.8.8` completed all 10 chapters with 74,659 characters, one final `【完】`, no management memo/master-prompt/repair-log/English-residue contamination, and a scroll-contained output box. `v3.8.9` fixes the remaining generic completed-header outline titles.
 
 ## Verification State
+- `v3.9.9` in-app Gemini QA after user API entry saved 1 / 10 chapters, then stopped fail-closed at chapter 2 because the paragraph-density gate counted only blank-line-separated blocks. The rejected chapter 2 was not adopted into `cleanText` or the visible manuscript output.
+- `node --check src/main.js` passed for `v4.0.0`.
+- `npm run build` passed for `v4.0.0` and generated `dist/assets/index-DglsxoYH.js`.
+- `npm run lint --if-present` passed for `v4.0.0`.
+- `git diff --check -- . ':!dist'` passed for `v4.0.0`; only normal LF-to-CRLF warnings were reported.
+- Helper check confirmed the v4.0.0 runtime version, visible-paragraph prompt rules, single-newline paragraph counting, paragraph-density retry budget, and paragraph retry guidance exist in `src/main.js`.
+- In-app browser DOM check on `http://localhost:5179/` confirmed visible `Story Maker v4.0.0`; the user-entered Gemini API key remained saved in-memory as a masked field, without exposing the key.
+- Fresh full Gemini QA completed 12 / 12 chapters, 96,555 visible characters, and exactly one final `【完】`. Final scan found 12 body chapter headings, no context memo / GMC+S / regeneration-log contamination, no bare heading artifacts, no design-memo bullet lines, and no stray `AND` residue. The lone `プロンプト` hit was normal in-story terminal text, not management metadata.
+- `npm run deploy` passed for `v4.0.0`; `gh-pages` published successfully.
+- Remote verification passed: `git fetch origin gh-pages` updated `origin/gh-pages`, and `git show origin/gh-pages:index.html` contains `Story Maker v4.0.0`.
+- Live GitHub Pages smoke check passed at `https://furuyan1234.github.io/story-maker/?v=...`: title/version show `Story Maker v4.0.0`, API field is empty on the public page, and no browser warn/error logs were reported.
+- `node --check src/main.js` passed for `v3.9.9`.
+- `npm run build` passed for `v3.9.9` and generated `dist/assets/index-KUZgCpTf.js`.
+- `npm run lint --if-present` passed for `v3.9.9`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.9`; only normal LF-to-CRLF warnings were reported.
+- Helper check confirmed the v3.9.9 late-resolution gate, empty-heading sanitizer, extended late retry budget, cleanText-preserving error output, and runtime version constant exist in `src/main.js`.
+- In-app browser DOM check on `http://localhost:5179/` confirmed visible `Story Maker v3.9.9`, no browser warn/error logs, and an empty API field after the update.
+- `v3.9.8` in-app Gemini QA after user API entry saved 8 / 12 chapters, then stopped fail-closed in chapter 9 after repeated empty Markdown heading artifacts and a repaired-but-rejected setting contradiction around 実花 / 美咲. The broken chapter 9 was not saved.
+- `v3.9.8` patch check confirmed the endpoint anchor, retry-chronology guidance, runtime version constant, and visible version metadata exist in `src/main.js` / `index.html`.
+- `node --check src/main.js` passed for `v3.9.8`.
+- `npm run build` passed for `v3.9.8` and generated `dist/assets/index-CYm4Slfy.js`.
+- `npm run lint --if-present` passed for `v3.9.8`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.8`; only normal LF-to-CRLF warnings were reported.
+- In-app browser DOM check on `http://localhost:5179/` confirmed visible `Story Maker v3.9.8`; the API field is empty after reload, so fresh full API QA is waiting for user UI key re-entry.
+- `v3.9.7` in-app Gemini QA after user API entry saved 8 / 10 chapters, then stopped fail-closed in chapter 9 after rejecting repeated chapter 8 replay / data-center timeline rewind and premature `すべて...終わ` wording. The broken chapter 9 was not saved.
+- `v3.9.6` in-app Gemini QA after user API entry saved 8 / 10 chapters, then stopped fail-closed in chapter 9 with: `第9章の保存前品質ゲートで停止しました: 長い説明段落が多く、場面の切れ目が不足しています（第9章: 6段落） / Whole-story resolution appears before the final chapter (/すべて(?:が|、)?終わ/)`.
+- `v3.9.4` in-app Gemini QA after user API entry stopped fail-closed at chapter 1 with: `第1章の保存前品質ゲートで停止しました: 章末が予告・煽り文で終わっています（第1章）`.
+- `v3.9.5` patched the chapter-1 quality-gate retry route.
+- `node --check src/main.js` passed for `v3.9.5`.
+- `npm run build` passed for `v3.9.5`.
+- `npm run lint --if-present` passed for `v3.9.5`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.5`; only normal LF-to-CRLF warnings were reported.
+- HTTP check passed: `http://localhost:5179/` returns `Story Maker v3.9.5`.
+- In-app browser reload confirmed visible `Story Maker v3.9.5`; the reload cleared the in-memory API key, so full API QA is waiting for user UI key re-entry.
+- `node --check src/main.js` passed for `v3.9.4`.
+- `npm run build` passed for `v3.9.4`.
+- `npm run lint --if-present` passed for `v3.9.4`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.4`; only normal LF-to-CRLF warnings were reported.
+- HTTP check passed: `http://127.0.0.1:5179/` returns `Story Maker v3.9.4`.
+- In-app browser DOM check on `http://127.0.0.1:5179/` confirmed visible `Story Maker v3.9.4`, no Vite parse overlay, and no saved API key after reload. Full API QA is waiting for user UI key re-entry.
+- `v3.9.3` in-app Gemini QA stopped fail-closed at chapter 4 after the duplicate gate found long chapter 3 replay. This confirmed the save gate blocks broken prose, but also showed duplicate regeneration needed stronger instructions.
+- `node --check src/main.js` passed for `v3.9.3`.
+- `npm run build` passed for `v3.9.3`.
+- `npm run lint --if-present` passed for `v3.9.3`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.3`; only normal LF-to-CRLF warnings were reported.
+- HTTP check passed: `http://127.0.0.1:5179/` returns `Story Maker v3.9.3`.
+- In-app browser DOM check on `http://127.0.0.1:5179/` confirmed visible `Story Maker v3.9.3` and no warn/error logs. The page reload after the code update cleared the in-memory API key, so full API QA is waiting for user UI re-entry.
+- `node --check src/main.js` passed for `v3.9.2`.
+- `npm run build` passed for `v3.9.2`.
+- `npm run lint --if-present` passed for `v3.9.2`.
+- `git diff --check -- . ':!dist'` passed for `v3.9.2`; only normal LF-to-CRLF warnings were reported.
+- HTTP check passed: `http://127.0.0.1:5179/` returns `Story Maker v3.9.2`.
+- In-app browser DOM check on `http://127.0.0.1:5179/` confirmed `Story Maker v3.9.2`; selecting long-novel mode populated visible defaults, and browser warn/error logs were empty.
+- `node --check src/main.js` passed for `v3.9.1`.
+- `npm run build` passed for `v3.9.1`.
+- `npm run lint --if-present` passed for `v3.9.1`.
+- Browser DOM check on `http://127.0.0.1:5179/` confirmed `Story Maker v3.9.1`, startup defaults visible for the initial `4koma` mode, long-mode click replacing system defaults with long-mode defaults, and a typed custom theme remaining preserved across a later mode click.
+- `git diff --check` passed for the touched Story Maker files; only normal LF-to-CRLF warnings were reported.
 - `node --check src/main.js` passed for the current v3.8.9 patch.
 - Helper-level check passed for `v3.8.6`: bad 8-chapter outlines are replaced with 10 chapters, logline/total/planning metadata is not printed in the header, final clean text has chapter headings 1-10, duplicate header titles are suppressed, and final `【完】` remains.
 - Helper-level check passed: the long-novel fallback outline now emits 10 distinct chapter beats, and embedded `タイトル:` / `ログライン:` / `全構成:` metadata under the chapter heading is stripped before save.
@@ -87,11 +205,11 @@
 - Previous user-entered Gemini API manual QA passed on `v3.7.1`: chapter 1 saved, generation continued into chapter 2, and chapter-end pause stopped after chapter 2 at `2 / 11` with `生成を再開` visible.
 
 ## Remaining Risks / Manual QA
-- Full end-to-end generation has not yet been refreshed after the v3.8.9 title-normalization patch. Do not ask for or store the API key in chat or files; ask the user to enter it in the UI when needed.
+- Full end-to-end generation has been refreshed after the v4.0.0 paragraph-density gate fix and passed. Do not ask for or store the API key in chat or files; ask the user to enter it in the UI when needed for future runs.
 - If the provider keeps returning short prose below the minimum even after continuation attempts, the app should continue to fail closed instead of saving a broken chapter.
-- Startup/default option handling is still planned: make hidden fallback defaults visible or apply mode-specific defaults when each mode chip is clicked.
+- Further literary-quality tuning still needs real generated samples; keep fail-closed body adoption and output-box scroll safeguards in place.
 
 ## Next Steps
-1. Implement the planned startup/default option handling correction across modes.
-2. Continue tuning literary quality with real prompt samples, while keeping fail-closed body adoption.
-3. Deploy only after an explicit deploy request.
+1. Continue tuning literary quality with real prompt samples, while keeping fail-closed body adoption.
+2. Watch for mid-run premature-resolution pressure in chapters 6-8; late non-final gates worked well from chapter 9 onward.
+3. Deploy again from Codex only after the next meaningful local checks plus fresh API QA checkpoint.
