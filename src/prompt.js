@@ -656,6 +656,10 @@ ${requiredCharacters}
 
 // 髟ｷ邱ｨ蟆剰ｪｬ縺ｧ蜈ｱ騾壹・蜩∬ｳｪ繝ｫ繝ｼ繝ｫ譁・ｭ怜・
 const LONG_NOVEL_QUALITY_RULES = `
+[LONG-NOVEL ENTERTAINMENT ENGINE - do not output this heading]
+- Every chapter must force one vivid irreversible choice, one visible cost, and one expectation reversal that grows from earlier setup.
+- Every scene must increase danger, desire, relationship strain, mystery, or moral cost; do not reset tension between scenes.
+- Convert lore and exposition into conflict, objects, gestures, overheard lines, or decisions. Never explain a setting without making it pressure a character.
 縲蝉ｼ冗ｷ壹・讒区・繝ｫ繝ｼ繝ｫ・亥推遶縺ｧ蜴ｳ螳茨ｼ峨・
 1. 莨冗ｷ壹・莠句燕驟咲ｽｮ・壼ｾ悟濠縺ｧ驥崎ｦ√↑隕∫ｴ縺ｯ縲∝ｿ・★蠎冗乢縲懷燕蜊翫・遶縺ｫ閾ｪ辟ｶ縺ｫ險蜿翫・證礼､ｺ縺励※縺翫￥縺薙→縲ょｾ悟濠縺ｧ蜚千ｪ√↓譁ｰ險ｭ螳壹ｒ謚募・縺吶ｋ縺薙→繧堤ｦ∵ｭ｢縲・
 2. 繧ｷ繝ｼ繝ｳ縺ｮ鬧・虚蜉幢ｼ・MC+S・会ｼ壼推蝣ｴ髱｢縺ｫ縲檎岼逧・ｼ・oal・峨阪悟虚讖滂ｼ・otivation・峨阪碁囿螳ｳ・・onflict・峨阪瑚ｳｭ縺鷹≡・・takes・峨阪ｒ譏守｢ｺ縺ｫ險ｭ螳壹☆繧九％縺ｨ縲・
@@ -895,7 +899,7 @@ export function buildLongNovelInstructionSheet(settings, headerInfo, appState) {
 搭 蜀咲樟逕ｨ繝槭せ繧ｿ繝ｼ謖・､ｺ譖ｸ・医％縺ｮ險ｭ螳壹〒莉悶・AI縺ｧ繧ら函謌舌〒縺阪∪縺呻ｼ・
 笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤
 縲千屮譟ｻ逕ｨ繝｡繧ｿ繝・・繧ｿ縲・
-繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v4.0.0
+繝ｻ逕滓・繧ｷ繧ｹ繝・Β: Story Maker v4.0.3
 繝ｻ蛻ｩ逕ｨ繧ｨ繝ｳ繧ｸ繝ｳ: ${engineName} (${modelName})
 繝ｻ逕滓・螳御ｺ・律譎・ ${timestamp}
 繝ｻ蜃ｺ蜉帙Δ繝ｼ繝・ 髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝・

@@ -38,6 +38,13 @@ export function buildAuditPrompt(storyText, settings) {
 5. **空間矛盾**: キャラの所在地が説明なく変わる
 6. **退場キャラの不整合**: 明確に死亡・退場したキャラが説明なく再登場
 
+## Canon-source rules for long-novel audit
+- Treat the text under "検査対象" as an unsaved draft under review.
+- Treat only the previous context memos and recent saved chapters as canon.
+- Never say the current target chapter already exists in the recent saved chapters unless the same chapter number and title are literally present in the recent saved-chapters section.
+- Rejected retry drafts are not canon. Ignore their route, location, title, and outcome unless they are explicitly present in saved chapters or context memos.
+- When the draft conflicts with saved canon, report the draft-side conflict; do not invent a prior saved chapter from the draft itself.
+
 ## 入力情報
 
 ### ユーザー指定のキャラクター設定:
@@ -105,6 +112,13 @@ ${eraContext}
 ### 終了記号ルール:
 この章は${isLastChapter ? '最終章です。本文の最後の独立行に一度だけ「【完】」が必要です。' : '最終章ではありません。「【完】」が本文に含まれている場合は設定矛盾として検出してください。'}
 
+### Canon-source rules for this chapter audit:
+- The text under "検査対象" is the current unsaved draft. It is not saved canon yet.
+- The sections "過去の章の文脈維持メモ" and "直近の章の全文" are the only prior canon sources.
+- Do not treat a previous rejected draft for the same chapter number as canon.
+- Do not claim the current draft already appears in the recent saved-chapters section unless it literally appears there.
+- If a retry note mentions a failed draft, use it only as a warning about what to avoid, not as story history.
+
 ### 過去の章の文脈維持メモ:
 ${allContextMemos || '（第1章のため過去メモなし）'}
 
@@ -150,6 +164,12 @@ export function buildFixPrompt(originalText, issues, settings, longNovelContext)
   let contextSection = '';
   if (longNovelContext) {
     contextSection = `
+### Canon-source rules for fixing:
+- The target text is an unsaved draft being repaired.
+- Use only saved recent chapters and context memos as canon.
+- Rejected retry drafts are not canon and must not be carried forward.
+- Fix the draft to match canon; do not rewrite canon to match the draft.
+
 ### 過去の章の文脈（整合性を保つために参照すること）:
 ${longNovelContext.recentChaptersFull || ''}
 
@@ -420,15 +440,38 @@ export async function auditAndFix(apiKey, text, settings, options = {}) {
         if (validationIssues.length > 0) {
           console.warn(`修正結果を品質ゲートで棄却: ${validationIssues.join(' / ')}`);
           if (onStatus) onStatus(`[修正] 修正結果に本文破損の兆候があるため棄却します（${validationIssues.slice(0, 3).join(' / ')}）`);
-          continue;
+          const syntheticIssue = {
+            type: '修正結果破損',
+            severity: '重大',
+            location: '修正候補',
+            description: `修正結果が品質ゲートに失敗しました: ${validationIssues.slice(0, 3).join(' / ')}`,
+          };
+          return {
+            text: currentText,
+            issues: allIssues.concat(syntheticIssue),
+            wasFixed,
+            remainingCriticalCount: Math.max(lastCriticalCount, failOnAuditError ? 1 : 0),
+            remainingIssues: lastIssues.length ? lastIssues : [syntheticIssue],
+          };
         }
       }
       const ratio = fixedText.length / currentText.length;
       if (ratio < 0.5 || ratio > 2.0) {
         console.warn(`修正結果の文字数比率が異常 (${(ratio * 100).toFixed(0)}%)。修正を棄却します。`);
         if (onStatus) onStatus(`[修正] 修正結果の文字数が異常に変動（${(ratio * 100).toFixed(0)}%）。この修正を棄却します`);
-        // 修正を棄却しても次の試行でリトライ
-        continue;
+        const syntheticIssue = {
+          type: '修正結果破損',
+          severity: '重大',
+          location: '修正候補',
+          description: `修正結果の文字数が異常に変動しました: ${(ratio * 100).toFixed(0)}%`,
+        };
+        return {
+          text: currentText,
+          issues: allIssues.concat(syntheticIssue),
+          wasFixed,
+          remainingCriticalCount: Math.max(lastCriticalCount, failOnAuditError ? 1 : 0),
+          remainingIssues: lastIssues.length ? lastIssues : [syntheticIssue],
+        };
       }
 
       currentText = fixedText;

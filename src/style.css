@@ -1719,24 +1719,28 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   overflow: hidden;
   border: 1px solid var(--border);
 }
-.score-bar-fill {
+.score-bar-fill,
+.score-bar {
   height: 100%;
   background: linear-gradient(90deg, var(--accent), var(--accent2));
   width: 0%;
   transition: width 0.3s ease;
   border-radius: 4px;
 }
-.score-val {
+.score-val,
+.score-value {
   width: 80px;
   text-align: right;
   font-weight: 800;
   font-family: monospace;
   color: var(--accent2);
 }
-.score-row.passed .score-bar-fill {
+.score-row.passed .score-bar-fill,
+.score-bar.passed {
   background: linear-gradient(90deg, var(--success), #10B981);
 }
-.score-row.passed .score-val {
+.score-row.passed .score-val,
+.score-row.passed .score-value {
   color: var(--success);
 }
 

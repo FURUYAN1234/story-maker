@@ -1,14 +1,42 @@
 # HANDOFF (Story Maker)
 
 ## Snapshot Date
-2026-06-03T15:09:14+09:00
+2026-06-03T18:48:24+09:00
 
 ## Current Status
-- Version: `v4.0.0`
+- Version: `v4.0.3`
 - Branch: `main`
-- Current task: v4.0.0 long-novel paragraph-density gate fix and full Gemini QA/deploy completed.
+- Current task: v4.0.3 score-bar display fix and structural-contradiction regeneration hardening are implemented locally after the passing v4.0.2 full API QA.
 - Development port: `http://localhost:5179/`
-- Deployment/backups: `npm run deploy` completed for GitHub Pages; backup not run.
+- Deployment/backups: v4.0.3 has not been deployed yet. Previous `v4.0.0` deploy completed for GitHub Pages; backup not run.
+
+## v4.0.3 Current Notes
+- User noticed that the long-novel self-score showed text scores but not visible bars. Browser inspection confirmed the rendered rows used `score-bar` with widths such as `96%`, but CSS only styled `score-bar-fill`, leaving the fill height at `0px`.
+- `src/main.js` now renders long-novel scores with the same classes as the existing short-form score board: `score-row passed`, `score-bar-fill`, and `score-val`.
+- `src/style.css` also styles legacy `score-bar` / `score-value` aliases so any already-rendered long-novel score rows display visible bars once the CSS updates.
+- The latest v4.0.2 full API QA completed 12 / 12 chapters, 99,225 characters, clean final manuscript scan, and visible scores: 伏線回収度 96 / 起承転結の構造 97 / 制約遵守度 100.
+- Retry analysis from that run showed several chapters reached audit repair attempt `2/2`, but whole-chapter regeneration only used `1/2` or `1/4`. Do not simply increase audit repair attempts; keeping repair at two avoids over-patching a structurally broken draft.
+- `src/main.js` now treats unresolved chronology/geography/setting/character/foreshadowing contradictions as structural failures that get the extended four-regeneration budget plus state-lock guidance: fix position, time, possessions, injuries, life/death, and relationship state before rewriting.
+- Checks passed for v4.0.3: `node --check src/main.js`, `node --check src/consistencyAudit.js`, `npm run build`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, and in-app browser version check showing `Story Maker v4.0.3`.
+
+## v4.0.2 Current Notes
+- Fresh API QA on `v4.0.1` reached chapter 8 and exposed a real save-through bug: when a repair candidate was rejected for being too short or changing length too much, the unchanged draft could be re-audited, receive a clean second audit result, and then be saved.
+- Evidence captured from the in-app browser showed the phrase `足りるかな？` present at the end of chapter 7 and again at the start of chapter 8, confirming chapter-to-chapter duplicate prose was saved after the rejected repair path.
+- `src/consistencyAudit.js` now returns a blocking issue when a repair candidate fails `validateFixedText` or the length-ratio gate, instead of continuing to re-audit the unchanged draft.
+- `src/main.js` contains the same fail-closed behavior in the bundled runtime path used by the browser app: rejected repairs now return `remainingCriticalCount >= 1`, which sends long-novel chapters into the existing whole-chapter regeneration flow.
+- Version metadata is synced to `v4.0.2` across package files, visible UI, runtime metadata, and reproduction metadata. README changelog now has a `v4.0.2` entry.
+- Checks passed after the patch: `node --check src/main.js`, `node --check src/consistencyAudit.js`, `npm run build`, `npm run lint --if-present`, and `git diff --check -- . ':!dist'` (only normal LF-to-CRLF warnings).
+- Fresh full API QA on `v4.0.2` after user UI API-key entry completed 12 / 12 chapters with 99,225 visible characters. Final scan found 12 parsed chapters, one final `【完】`, no context memo / GMC+S / progress-log / code-fence contamination, and no duplicate-chapter hints.
+
+## v4.0.1 Current Notes
+- Long-novel completion now builds a deterministic score object and renders the existing `thought-score-board` UI with the same three categories used by shorter modes: `伏線回収度`, `起承転結の構造`, and `制約遵守度`.
+- The score board is hidden when a long-novel run resets/starts, then shown only after all chapters complete and the final manuscript is displayed.
+- Long-novel chapter prompts now add an "Entertainment engine" rule set: each chapter needs an irreversible choice, visible cost, expectation reversal, scene-to-scene escalation, and exposition converted into conflict/objects/gestures/decisions.
+- Version metadata was bumped to `v4.0.1` across visible UI, package files, runtime metadata, and reproduction metadata.
+- README changelog was consolidated into a single compact section. Old duplicate/obsolete changelog blocks were removed.
+- Fresh API QA on `http://127.0.0.1:5179/?v=local-v4.0.1` reached chapter 8 before being stopped to avoid further API consumption. Confirmed behaviors: chapter 2 and 3 contradiction repair passed after recheck; chapter 6 was rejected fail-closed, regenerated, then adopted; chapter 7 early-resolution gate and physical-key contradictions triggered regeneration and eventually passed.
+- QA also found two issues before completion: the main `ストーリー生成` button could become enabled during long-novel retry/regeneration, and the audit/fix prompts could let the model confuse the current unsaved retry draft with saved recent chapters. `src/main.js` now keeps long-mode UI locked across retry gaps, and `src/consistencyAudit.js` now explicitly separates saved canon from the current draft/rejected retry drafts.
+- Post-fix checks passed: `node --check src/main.js`, `node --check src/consistencyAudit.js`, `npm run build`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, and in-app browser reload. Reload cleared the in-memory API key; full post-fix API QA still requires the user to type the key into the UI again.
 
 ## v4.0.0 Current Notes
 - `v3.9.9` fresh in-app Gemini QA after user API entry saved chapter 1, then stopped fail-closed at chapter 2 with `長い説明段落が多く、場面の切れ目が不足しています（第2章: 4段落）`. The rejected chapter 2 was not appended to the readable manuscript; the output box kept the clean chapter 1 manuscript.
@@ -85,13 +113,13 @@
 ## Changed Files
 | File | Purpose |
 |---|---|
-| `src/main.js` | Maintains long-novel pause, continuation, audit, save-gate, preview-scroll, regeneration safeguards, fallback outline quality, v3.8.6 final-header rebuild, v3.8.8 final-chapter/near-final story gates, v3.8.9 chapter-title / axis-label normalization, v3.9.1 default-visible mode presets, v3.9.2 literary-density gates, v3.9.3 chapter-replay rejection, v3.9.4 duplicate-specific regeneration hardening, v3.9.5 chapter-1 quality-gate regeneration, v3.9.6 empty-Markdown-heading rejection, v3.9.7 late non-final chapter prompt lock, v3.9.8 endpoint-anchor / retry-chronology hardening, v3.9.9 empty-heading cleanup / late-resolution retry hardening / clean output error handling, and v4.0.0 paragraph-density counting / retry hardening. |
-| `src/prompt.js` | Long-novel chapter guidance now uses the same roughly 8,000 chars/chapter planning basis, so 80,000 chars plans as about 10 chapters; char-count labels are parsed robustly; next-chapter prompts now prioritize the latest context memo/GMC+S and forbid replaying completed prior events; non-final chapters now explicitly cannot resolve the whole story; reproduction metadata version synced to `v4.0.0`. |
+| `src/main.js` | Maintains long-novel pause, continuation, audit, save-gate, preview-scroll, regeneration safeguards, fallback outline quality, v3.8.6 final-header rebuild, v3.8.8 final-chapter/near-final story gates, v3.8.9 chapter-title / axis-label normalization, v3.9.1 default-visible mode presets, v3.9.2 literary-density gates, v3.9.3 chapter-replay rejection, v3.9.4 duplicate-specific regeneration hardening, v3.9.5 chapter-1 quality-gate regeneration, v3.9.6 empty-Markdown-heading rejection, v3.9.7 late non-final chapter prompt lock, v3.9.8 endpoint-anchor / retry-chronology hardening, v3.9.9 empty-heading cleanup / late-resolution retry hardening / clean output error handling, v4.0.0 paragraph-density counting / retry hardening, and v4.0.1 long-novel score-board rendering plus entertainment-engine prompt rules. |
+| `src/prompt.js` | Long-novel chapter guidance now uses the same roughly 8,000 chars/chapter planning basis, so 80,000 chars plans as about 10 chapters; char-count labels are parsed robustly; next-chapter prompts now prioritize the latest context memo/GMC+S and forbid replaying completed prior events; non-final chapters now explicitly cannot resolve the whole story; v4.0.1 adds the same entertainment-engine guidance and reproduction metadata version sync. |
 | `src/api.js` / `src/consistencyAudit.js` | Long-novel audit/fix calls now use bounded timeout and model-attempt options to reduce provider-side stalls during inspection and repair. |
 | `src/style.css` | Disables smooth scrolling and scroll anchoring while long-novel live preview is active; during and after long-novel generation the novel body itself now fills the remaining right-side height and scrolls inside the manuscript box. |
-| `package.json` / `package-lock.json` | Version synced to `4.0.0`. |
-| `index.html` / `src/data.js` | Visible/internal version synced to `v4.0.0`; long-novel panel keeps a fixed live status line. |
-| `README.md` | Added v4.0.0 versioning correction, paragraph-density gate, retry-hardening, QA-pass, and deploy changelog notes. |
+| `package.json` / `package-lock.json` | Version synced to `4.0.1`. |
+| `index.html` / `src/data.js` | Visible/internal version synced to `v4.0.1`; long-novel panel keeps a fixed live status line. |
+| `README.md` | Added v4.0.1 long-novel self-grading and story-quality prompt notes, plus prior v4.0.0 versioning correction, paragraph-density gate, retry-hardening, QA-pass, and deploy changelog notes. |
 
 ## Done
 - Reverted the earlier v3.6.x behavior where the pause button became a disabled progress indicator during chapter generation.
@@ -126,6 +154,13 @@
 - Full browser QA on `v3.8.8` completed all 10 chapters with 74,659 characters, one final `【完】`, no management memo/master-prompt/repair-log/English-residue contamination, and a scroll-contained output box. `v3.8.9` fixes the remaining generic completed-header outline titles.
 
 ## Verification State
+- `node --check src/main.js` passed for `v4.0.1`.
+- `npm run build` passed for `v4.0.1` and generated `dist/assets/index-Dva3j8LW.js`.
+- `npm run lint --if-present` passed for `v4.0.1`.
+- `git diff --check -- . ':!dist'` passed for `v4.0.1`; only normal LF-to-CRLF warnings were reported.
+- Static helper check confirmed the v4.0.1 visible/runtime metadata, long-novel score-board completion call, score-board reset hide call, and entertainment-engine prompt rules exist in `src/main.js`.
+- In-app browser DOM check on `http://127.0.0.1:5179/?v=local-v4.0.1` confirmed visible `Story Maker v4.0.1`, empty API field, hidden initial score board, hidden long-novel panel, and no browser warn/error logs.
+- Note: `src/prompt.js` still does not pass standalone `node --check` because of pre-existing mojibake string damage near the top of the file; Vite build does not import that broken path and passed.
 - `v3.9.9` in-app Gemini QA after user API entry saved 1 / 10 chapters, then stopped fail-closed at chapter 2 because the paragraph-density gate counted only blank-line-separated blocks. The rejected chapter 2 was not adopted into `cleanText` or the visible manuscript output.
 - `node --check src/main.js` passed for `v4.0.0`.
 - `npm run build` passed for `v4.0.0` and generated `dist/assets/index-DglsxoYH.js`.
@@ -205,11 +240,12 @@
 - Previous user-entered Gemini API manual QA passed on `v3.7.1`: chapter 1 saved, generation continued into chapter 2, and chapter-end pause stopped after chapter 2 at `2 / 11` with `生成を再開` visible.
 
 ## Remaining Risks / Manual QA
-- Full end-to-end generation has been refreshed after the v4.0.0 paragraph-density gate fix and passed. Do not ask for or store the API key in chat or files; ask the user to enter it in the UI when needed for future runs.
+- Full end-to-end generation has not yet been refreshed after the v4.0.1 self-score / story-interest prompt change. Do not ask for or store the API key in chat or files; ask the user to enter it in the UI when needed for future runs.
+- Do not deploy v4.0.1 until a fresh API QA checkpoint passes or the user explicitly accepts a local-check-only deploy.
 - If the provider keeps returning short prose below the minimum even after continuation attempts, the app should continue to fail closed instead of saving a broken chapter.
 - Further literary-quality tuning still needs real generated samples; keep fail-closed body adoption and output-box scroll safeguards in place.
 
 ## Next Steps
-1. Continue tuning literary quality with real prompt samples, while keeping fail-closed body adoption.
-2. Watch for mid-run premature-resolution pressure in chapters 6-8; late non-final gates worked well from chapter 9 onward.
+1. Run a fresh long-novel API QA after the user enters the API key in the UI; confirm the completed manuscript shows the three-item score board.
+2. Review the generated prose for stronger choices, costs, reversals, and scene escalation; tune prompts from real samples if needed.
 3. Deploy again from Codex only after the next meaningful local checks plus fresh API QA checkpoint.
