@@ -454,6 +454,10 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 This changelog is intentionally compact. Older noisy patch-by-patch notes were removed from README to keep the project overview readable. For older detail, use GitHub Releases, tags, or commit history.
 この変更履歴は読みやすさを優先して整理しています。古い細かなパッチ履歴や重複したメモは README から削除し、必要な場合は GitHub Releases / tags / commit history を参照してください。
 
+### v4.1.0 (2026-06-04)
+- **Gen-4 Quality Contract / 第4世代品質契約**: Standard and long-novel generation now inject a preflight fact/logic audit, emotional-arc ledger, controlled human-noise rule, and anti-uniform ending guard while preserving all selected/manual settings. / 通常生成と長編生成に、事前ファクト・ロジック監査、感情曲線レジャー、制御された人間的ノイズ、定型着地回避を追加し、選択・手入力済み設定は変更せず厳守します。
+- **Post-Generation AI Editorial Evaluation / 生成後AI編集評価**: Completed stories are evaluated through the active API for fact/logic safety, emotional arc, human noise, constraint fit, and commercial prose strength, with the result written into the progress log. / 生成完了後に、ファクト/ロジック、感情曲線、人間的ノイズ、指定遵守、商業読後感をアクティブAPIで評価し、進行ログへ表示します。
+- **Long-Novel Coverage / 長編対応**: The same quality contract is appended to the first-chapter and continuation prompts; completed long novels also receive the new editorial evaluation after the existing score board. / 第1章・次章生成プロンプトにも同じ品質契約を付与し、長編完了時は既存スコアバーの後に新しい編集評価も実行します。
 ### v4.0.9 (2026-06-04)
 - **Gemini API Error Classification / Gemini APIエラー分類**: Gemini failures now separate true API-key authentication errors from model/request failures. / Gemini APIの失敗を、実際のAPIキー認証エラーと、モデル名・送信形式などのリクエスト系エラーに分離しました。
 - **False Invalid-Key Prevention / APIキー無効の誤表示防止**: Generic `invalid` model or request messages no longer force the misleading "API key invalid" state when diagnostics show available models. / 診断で利用可能モデルが返っている場合、`invalid` を含むモデル・リクエストエラーを「APIキー無効」と誤表示しないようにしました。
