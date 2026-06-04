@@ -1,14 +1,25 @@
 # HANDOFF (Story Maker)
 
 ## Snapshot Date
-2026-06-03T18:48:24+09:00
+2026-06-04T06:03:39+09:00
 
 ## Current Status
-- Version: `v4.0.3`
+- Version: `v4.0.6`
 - Branch: `main`
-- Current task: v4.0.3 score-bar display fix and structural-contradiction regeneration hardening are implemented locally after the passing v4.0.2 full API QA.
+- Current task: v4.0.6 setting lock is implemented locally to stop selected/manual axes from being rewritten and to carry parent category plus detailed sub-chip values into prompts.
 - Development port: `http://localhost:5179/`
-- Deployment/backups: v4.0.3 is deployed to GitHub Pages and released/tagged on GitHub. Backup not run.
+- Deployment/backups: v4.0.6 is deployed to GitHub Pages and verified live; full workspace backup is being run from a visible PowerShell window next.
+
+## v4.0.6 Current Notes
+- Root cause was system-side state mutation, not only model drift: the common generate handler called `_e(i.mode || "4koma", { includeAxes: true })`, which reached `Fa()` and rewrote genre/worldview/target/theme inputs to mode defaults when generation started.
+- `src/main.js` now removes that generate-start refill call. Generation logs that selected/manual settings are fixed and collects the current UI state without changing visible chips or custom inputs.
+- Category-only selections are now treated as real values: `Va()` counts `catKey`. Detailed selections are now collected as parent/detail combined values, for example `コメディ / ドタバタ`, `現代日本 / 地方都市`, and `全年齢 / ファミリー`.
+- Prompt contracts for standard, scenario, long-novel initial/continuation, and reproduction generation now forbid replacing user settings with unrequested subvalues such as plot twist, Tokyo, or adult audience.
+- This is a cross-mode fix because `tr()` is the shared generation entry point for long novel, normal story, 4koma/scenario, and other modes.
+- Checks passed for v4.0.5: `node --check src/main.js`, `npm run build`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, HTTP 200/version smoke on port 5179, and Playwright route-mocked browser verification across 17 cases: all 15 output modes with category-only settings plus manual-entry checks for `novel` and `long`. No setting deltas, no old default-refill log, and prompts contained the chosen Comedy/Modern Japan/All Ages values.
+- After user entered the API key, live Gemini QA also passed on port 5179: `4koma` category-only generated 809 chars with settings unchanged; `novel` manual fields generated 1,941 chars with exact manual values preserved; `long` category-only generated chapter 1, stopped at `1 / 10` with 6,475 chars saved, then was manually aborted. No test showed a switch to suspense, Tokyo, or adult audience.
+- Additional v4.0.6 detail-subchip QA passed all 15 modes with theme/genre/worldview/target/era/ending/narration subchips selected. UI state stayed unchanged after generation start, the old default-refill log stayed absent, and prompt collection now includes the combined parent/detail values.
+- Deploy passed for v4.0.6: `npm run deploy` published `dist` to `gh-pages`; `origin/gh-pages:index.html` and the live GitHub Pages URL both show `Story Maker v4.0.6`.
 
 ## v4.0.3 Current Notes
 - User noticed that the long-novel self-score showed text scores but not visible bars. Browser inspection confirmed the rendered rows used `score-bar` with widths such as `96%`, but CSS only styled `score-bar-fill`, leaving the fill height at `0px`.

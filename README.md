@@ -454,6 +454,13 @@ A tool to automatically convert static 4-koma manga into fully voiced animated v
 This changelog is intentionally compact. Older noisy patch-by-patch notes were removed from README to keep the project overview readable. For older detail, use GitHub Releases, tags, or commit history.
 この変更履歴は読みやすさを優先して整理しています。古い細かなパッチ履歴や重複したメモは README から削除し、必要な場合は GitHub Releases / tags / commit history を参照してください。
 
+### v4.0.6 (2026-06-04)
+- **Category + Detail Prompt Lock / カテゴリ＋詳細項目の同時反映**: When a parent category and a detailed sub-chip are both selected, prompt collection now sends the combined value such as `Comedy / Slapstick` or `Modern Japan / Local City` instead of dropping the parent category.
+- **Detailed-Axis QA / 詳細項目QA**: Mocked-browser verification covered all 15 output modes with detailed sub-chip selections across theme, genre, worldview, target, era, ending, and narration. No UI state changed after generation start.
+### v4.0.5 (2026-06-04)
+- **Generation Setting Lock / 生成開始時の設定固定**: Removed the common generate-time default-refill path that mutated selected or manually entered axes when the story button was pressed. User selections now stay fixed across long novel, standard story, 4koma/scenario, and other output modes.
+- **Category Values Honored / カテゴリ選択の正式指定化**: Category-only choices such as Comedy, Modern Japan, and All Ages are now collected as real prompt settings instead of being treated as blank fields.
+- **Prompt Contract / プロンプト契約**: Normal, scenario, long-novel, continuation, and reproduction prompts now explicitly forbid replacing chosen settings with unrequested subvalues such as plot twist, Tokyo, or adult audience.
 ### v4.0.4 (2026-06-03)
 - **Late-Stage Retry Margin / 終盤リトライ余裕化**: The final four long-novel chapters now receive a late-stage canon lock, three audit repair attempts, and up to five whole-chapter regenerations so character state, life/death status, possessions, and final-resolution timing have more room to stabilize before fail-closed stop. / 長編終盤4章では、人物状態・生死・所持品・役割・最終解決タイミングを固定するガイドを追加し、部分修正3回、章全体再生成最大5回まで余裕を持たせました。
 - **Retry Budget Carry-Forward / リトライ予算の持ち越し**: Once a chapter enters the extended regeneration path because of a structural or save-gate failure, later failures in the same chapter no longer collapse the budget back to two attempts. / 構造問題や保存前ゲートで拡張再生成に入った章は、同じ章内で失敗理由が変わっても上限が2回へ戻らないようにしました。
