@@ -1,10 +1,9 @@
 // ============================================================
-// data.js 窶・Story Maker v4.0.6
+// data.js 窶・Story Maker v4.0.9
 // ============================================================
 
 // 繝・く繧ｹ繝育函謌千畑繝｢繝・Ν繝ｪ繧ｹ繝・
 export const GEMINI_MODELS = [
-  { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
   { value: 'gemini-flash-latest', label: 'Gemini Flash (Latest)' },
