@@ -1,704 +1,153 @@
-﻿# AI Story Maker - Multi-Axis Entropy Injection System
+# Story Maker v4.9.6 / AI物語メーカー
 
-> **"Stop generating predictable stories. Start generating stories that surprise you."**
-> **縲御ｺ亥ｮ夊ｪｿ蜥後↑迚ｩ隱槭ｒ逕滓・縺吶ｋ縺ｮ繧偵ｄ繧√∬・蛻・′鬩壹￥繧医≧縺ｪ迚ｩ隱槭ｒ逕滓・縺帙ｈ縲ゅ・*
->
-> A web application that generates high-variety stories (4-panel manga plots or fiction) using Google's Gemini and OpenAI's GPT engines. Designed to minimize repetitive, "cookie-cutter" AI outputs through a multi-axis entropy injection system.
-> Google Gemini 縺翫ｈ縺ｳ OpenAI GPT縺ｮ繝・Η繧｢繝ｫ繧ｨ繝ｳ繧ｸ繝ｳ繧剃ｽｿ縺・√ヰ繝ｩ繧ｨ繝・ぅ雎翫°縺ｪ繧ｹ繝医・繝ｪ繝ｼ・・繧ｳ繝樊ｼｫ逕ｻ繝阪ち繝ｻ蟆剰ｪｬ・峨ｒ逕滓・縺吶ｋWeb繧｢繝励Μ縺ｧ縺吶ゅ御ｼｼ縺溘ｊ蟇・▲縺溘ｊ縺ｫ縺ｪ繧句撫鬘後阪ｒ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繝ｻ繝・・繝槭・繧ｸ繝｣繝ｳ繝ｫ繝ｻ譎ゆｻ｣繝ｻ繧ｪ繝√・蝙九・螟夊ｻｸ繝ｩ繝ｳ繝繝蛹悶↓繧医▲縺ｦ讒矩逧・↓隗｣豎ｺ縺吶ｋ縺薙→繧堤岼逧・→縺励※縺・∪縺吶・
->
-> [!['AI_Creative_Studio'](https://github.com/user-attachments/assets/d9b97ee9-5051-4f99-8bd3-fb82967d5c12)](https://youtu.be/Ik59dL_zG1s?si=VduXBkmCTGfz51aJ)
+Story Maker is a browser-based AI story generator for short prose, 4-panel manga plots, scripts, poems, essays, letters, diaries, documentaries, and radio-drama style text. It uses a bring-your-own-key model for Google Gemini API or OpenAI API and focuses on multi-axis randomization so outputs do not collapse into the same predictable pattern.
 
-> [!TIP]
-> **Detailed Commentary Available / 隧ｳ邏ｰ縺ｪ隗｣隱ｬ險倅ｺ九ｒ蜈ｬ髢倶ｸｭ**
-> For insights into the design philosophy and behavior differences between Google Gemini API models, please refer to the following note article. / 譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・險ｭ險域晄Φ繧・；oogle Gemini API縺ｮ繝｢繝・Ν豈弱・謖吝虚縺ｮ驕輔＞縺ｫ縺､縺・※縺ｯ縲∽ｻ･荳九・note險倅ｺ九〒隧ｳ縺励￥隗｣隱ｬ縺励※縺・∪縺吶・
-> [Story Maker 窶・AI迚ｩ隱槭Γ繝ｼ繧ｫ繝ｼ縲AI迚ｹ譛峨・莨ｼ縺溘ｊ蟇・▲縺溘ｊ縺ｮ繧ｹ繝医・繝ｪ繝ｼ縺ｫ縺ｪ繧峨↑縺・す繧ｹ繝・Β / A system designed to break away from repetitive, generic AI-generated plots. (note / Japanese content)](https://note.com/happy_duck780/n/nd3d972922868)
+Story Maker は、Google Gemini API または OpenAI API のユーザー所有キーで動作するブラウザ型の物語生成アプリです。4コマ漫画プロット、短編小説、脚本、詩、エッセイ、手紙、日記、ドキュメンタリー、ラジオドラマなどを、多軸ランダム化で単調になりにくく生成します。
 
----
+## Public Status / 公開状態
 
-## 噫 Core Features / 荳ｻ隕∵ｩ溯・
-- **Character Roster Management (Long Novels) / 髟ｷ邱ｨ蜷代￠莠ｺ迚ｩ繝ｭ繧ｹ繧ｿ繝ｼ邂｡逅・*: Automatically designs and tracks supplementary characters necessary for long novel generation, preserving character consistency, tracking state changes, and maintaining clear relationships with required main characters across multiple chapters. / 髟ｷ邱ｨ蟆剰ｪｬ縺ｮ逕滓・縺ｫ縺翫＞縺ｦ縲∝ｿ・育匳蝣ｴ莠ｺ迚ｩ縺ｫ蜉縺医※迚ｩ隱槭・隕乗ｨ｡縺ｫ蠢・ｦ√↑霑ｽ蜉莠ｺ迚ｩ・医Ο繧ｹ繧ｿ繝ｼ・峨ｒAI縺瑚・蜍戊ｨｭ險医＠縲∝・遶縺ｫ繧上◆縺｣縺ｦ蠖ｹ蜑ｲ繝ｻ迴ｾ蝨ｨ蝨ｰ繝ｻ迥ｶ諷句､牙喧繝ｻ髢｢菫よｧ繧貞宍蟇・↓霑ｽ霍｡繝ｻ邂｡逅・☆繧九％縺ｨ縺ｧ縲・聞邱ｨ迚ｹ譛峨・繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ縺ｮ遐ｴ邯ｻ繧帝亟縺弱∪縺吶・
-- **Dual API Engine Architecture / 繝・Η繧｢繝ｫAPI繧ｨ繝ｳ繧ｸ繝ｳ蟇ｾ蠢・*: Dynamically routes requests to Google Gemini or OpenAI (GPT-4.1 / GPT-4o) based on your API key prefix (`sk-`). Enjoy Gemini's large context processing or OpenAI's high-nuance narrative generation effortlessly. / 蜈･蜉帙＆繧後◆API繧ｭ繝ｼ縺ｮ繝励Ξ繝輔ぅ繝・け繧ｹ・・sk-`・峨ｒ閾ｪ蜍募愛蛻･縺励；oogle Gemini縺ｨOpenAI・・PT-4.1繧ЖPT-4o遲会ｼ峨∈蜍慕噪縺ｫ繝ｪ繧ｯ繧ｨ繧ｹ繝医ｒ謖ｯ繧雁・縺代∪縺吶・emini縺ｮ蟾ｨ螟ｧ繧ｳ繝ｳ繝・く繧ｹ繝亥・逅・→縲＾penAI縺ｮ郢顔ｴｰ縺ｪ蠢・炊謠丞・繝ｻ繝励Ο繝・ヨ讒狗ｯ牙鴨繧偵す繝ｼ繝繝ｬ繧ｹ縺ｫ菴ｿ縺・・縺代ｋ縺薙→縺悟庄閭ｽ縺ｧ縺吶・
-- **Local RAG Integration / 螳悟・繝ｭ繝ｼ繧ｫ繝ｫRAG霎樊嶌縺ｮ邨ｱ蜷・*: Implemented a standalone, zero-cost RAG system that injects specific world-building details (props, era-specific terminology, sensory elements) into the prompt based on the user's selected worldview, era, and theme. This forces the AI to ground its narrative in concrete details rather than abstract tropes, significantly improving world authenticity. / 螟夜Κ繧ｵ繝ｼ繝薙せ荳崎ｦ√・螳悟・辟｡譁吶・繝ｭ繝ｼ繧ｫ繝ｫRAG・域､懃ｴ｢諡｡蠑ｵ逕滓・・峨す繧ｹ繝・Β繧貞ｮ溯｣・ゅΘ繝ｼ繧ｶ繝ｼ縺碁∈謚槭＠縺滉ｸ也阜隕ｳ繝ｻ譎ゆｻ｣繝ｻ繝・・繝槭↓蝓ｺ縺･縺阪∝ｰら畑霎樊嶌縺九ｉ蜈ｷ菴鍋噪縺ｪ繝・ぅ繝・・繝ｫ・亥ｰ城％蜈ｷ繝ｻ騾夊ｲｨ繝ｻ豁ｴ蜿ｲ逕ｨ隱槭・蛹ゅ＞縺ｪ縺ｩ・峨ｒ繝励Ο繝ｳ繝励ヨ縺ｫ蜍慕噪豕ｨ蜈･縲・I迚ｹ譛峨・縲梧歓雎｡逧・〒繝輔Ρ繝・→縺励◆謠丞・縲阪ｒ髦ｲ縺弱∫黄隱槭・隗｣蜒丞ｺｦ縺ｨ荳也阜隕ｳ縺ｮ隱ｬ蠕怜鴨繧貞括逧・↓蜷台ｸ翫＆縺帙∪縺吶・
-- **Google Search Grounding / Google讀懃ｴ｢繧ｰ繝ｩ繧ｦ繝ｳ繝・ぅ繝ｳ繧ｰ蟇ｾ蠢・*: Enabled Gemini's native Search Grounding tool for text generation. When the AI determines that factual accuracy is necessary (e.g., historical events, scientific terms, real-world locations), it will automatically perform a Google search and incorporate the findings into the story. / Gemini繧ｨ繝ｳ繧ｸ繝ｳ縺ｮ繝・く繧ｹ繝育函謌舌↓縺翫＞縺ｦGoogle讀懃ｴ｢繧ｰ繝ｩ繧ｦ繝ｳ繝・ぅ繝ｳ繧ｰ繧呈怏蜉ｹ蛹悶よ凾莉｣閠・ｨｼ繧・ｰる摩遏･隴倥′蠢・ｦ√↑繝・・繝槭′驕ｸ縺ｰ繧後◆髫帙、I縺瑚・蠕狗噪縺ｫGoogle讀懃ｴ｢繧貞ｮ溯｡後＠縺ｦ莠句ｮ溽｢ｺ隱阪ｒ陦後＞縲∵ｭ｣遒ｺ縺ｪ遏･隴倥ｒ繝吶・繧ｹ縺ｫ縺励◆迚ｩ隱槭ｒ蝓ｷ遲・〒縺阪ｋ繧医≧縺ｫ縺ｪ繧翫∪縺励◆縲・
-- **Multiple Output Modes / 隍・焚縺ｮ蜃ｺ蜉帙Δ繝ｼ繝・*: Supports 14 distinct modes including 4-panel manga plots (Ki-sho-ten-ketsu + dialogue), short stories (~3,000 chars), novellas (~4,000 chars), full-length novels (tens of thousands of characters via automated sequential generation), scenarios, essays, and poems. / 4繧ｳ繝樊ｼｫ逕ｻ繝阪ち・郁ｵｷ謇ｿ霆｢邨撰ｼ九そ繝ｪ繝墓｡茨ｼ峨∫洒邱ｨ繝ｻ荳ｭ邱ｨ蟆剰ｪｬ縲∝・閾ｪ蜍輔せ繝医Μ繝ｼ繝溘Φ繧ｰ縺ｫ繧医ｋ髟ｷ邱ｨ蟆剰ｪｬ・域焚荳・ｭ苓ｦ乗ｨ｡・峨√お繝・そ繧､縲∬ｩｩ縺ｪ縺ｩ縲・4遞ｮ縺ｮ蜃ｺ蜉帙Δ繝ｼ繝峨↓蟇ｾ蠢懊・
-- **Character Sheet OCR Import / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝郁・蜍戊ｪ崎ｭ・*: Drag & drop character sheet images onto the drop zone to auto-extract character data via Gemini Vision API. Supports multiple images. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝育判蜒上ｒ繝峨Λ繝・げ・・ラ繝ｭ繝・・縺吶ｋ縺縺代〒縲；emini Vision API縺瑚・蜍戊ｪ崎ｭ倥＠縺ｦ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ諠・ｱ繧呈歓蜃ｺ縲り､・焚譫壼酔譎ょ・逅・↓蟇ｾ蠢懊・
-- **Universal Intake (ﾎｲ) / 荳・・繧､繝ｳ繝励ャ繝・(ﾎｲ迚・**: Dropping images, URLs, text files (.txt/.md), or pasting direct text into the intake zone feeds multiple assets into prompt compilation. Uses Gemini Vision for images and web proxy scraping for URLs, blending diverse sources seamlessly. / 逕ｻ蜒上・URL繝ｻ繝・く繧ｹ繝医ヵ繧｡繧､繝ｫ遲峨ｒ繝峨Λ繝・げ・・ラ繝ｭ繝・・縺ｾ縺溘・繝壹・繧ｹ繝医☆繧九□縺代〒縲∝､壽ｧ倥↑諠・ｱ繝ｪ繧ｽ繝ｼ繧ｹ繧偵せ繝医・繝ｪ繝ｼ逕滓・譎ゅ・繧ｳ繝ｳ繝・く繧ｹ繝医→縺励※繝励Ο繝ｳ繝励ヨ縺ｫ蜍慕噪豕ｨ蜈･縺励∪縺吶・
-- **Today's News Keywords / 莉頑律縺ｮ繝九Η繝ｼ繧ｹ繧ｭ繝ｼ繝ｯ繝ｼ繝牙叙蠕・*: Integrates Gemini's Search Grounding to fetch today's major Japanese news headlines across balanced categories and generate narrative keywords. Click the "倹 繝九Η繝ｼ繧ｹ" button to auto-fill the theme with fresh, AI-extracted news. / Gemini縺ｮ讀懃ｴ｢繧ｰ繝ｩ繧ｦ繝ｳ繝・ぅ繝ｳ繧ｰ繧貞茜逕ｨ縺励∽ｻ頑律縺ｮ荳ｻ隕√ル繝･繝ｼ繧ｹ縺九ｉAI縺檎黄隱槭・繧ｭ繝ｼ繝輔Ξ繝ｼ繧ｺ繧偵ヰ繝ｩ繝ｳ繧ｹ繧医￥閾ｪ蜍墓歓蜃ｺ縲ゅΡ繝ｳ繧ｯ繝ｪ繝・け縺ｧ繧ｫ繧ｹ繧ｿ繝繝・・繝樊ｬ・ｒ險ｭ螳壹＠縺ｾ縺吶・
-- **Individual Input Locking / 蛟句挨蜈･蜉帙Ο繝・け讖溯・**: Freeze specific setting fields (genre, theme, era, worldview, etc.) to protect them during random generation or master reset, enabling granular control over randomized creative paths. / 蜷・・蜉幃・岼・医ず繝｣繝ｳ繝ｫ縲√ユ繝ｼ繝槭∵凾莉｣縲∽ｸ也阜隕ｳ縺ｪ縺ｩ・峨・蛟句挨蝗ｺ螳夲ｼ医Ο繝・け・峨′蜿ｯ閭ｽ縲ゅ交沁ｲ蜈ｨ鬆・岼繝ｩ繝ｳ繝繝縲咲函謌先凾縺ｫ繧ゅ♀豌励↓蜈･繧翫・險ｭ螳壹ｒ菫晁ｭｷ縺ｧ縺阪∪縺吶・
-- **One-Shot Full Random / 蜈ｨ繝ｩ繝ｳ繝繝荳逋ｺ逕滓・**: Single button randomizes all axes (genre, era, ending, perspective, characters) and generates immediately. / 1繝懊ち繝ｳ縺ｧ蜈ｨ鬆・岼繧偵Λ繝ｳ繝繝險ｭ螳壹＠縺ｦ蜊ｳ逕滓・縲・
-- **Smart Gender Sync / 繧ｹ繝槭・繝域ｧ蛻･蜷梧悄**: The character's Sex field and Name are bidirectionally linked. Changing the sex automatically generates a fitting name, and entering a name automatically infers the sex, ensuring consistency with minimal effort. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ縺ｮ縲梧ｧ蛻･縲阪→縲悟錐蜑阪阪′蜿梧婿蜷代↓騾｣蜍輔よｧ蛻･繧貞､峨∴繧九→驕ｩ縺励◆蜷榊燕縺瑚・蜍戊ｪｿ謨ｴ縺輔ｌ縲∝錐蜑阪ｒ謇句・蜉帙☆繧九→諤ｧ蛻･縺瑚・蜍墓耳隲悶＆繧後ｋ縺溘ａ縲∽ｸ雋ｫ諤ｧ縺ｮ縺ゅｋ繧ｭ繝｣繝ｩ險ｭ螳壹ｒ謾ｯ謠ｴ縺励∪縺吶・
-- **Random Theme Seeding / 繝ｩ繝ｳ繝繝繝・・繝槭す繝ｼ繝・*: Combines base event + modifier + adjunct for unpredictable story seeds. / 蝓ｺ譛ｬ繧､繝吶Φ繝茨ｼ倶ｿｮ鬟ｾ隱橸ｼ狗憾豕∬ｪ槭ｒ遒ｺ邇・噪縺ｫ邨・∩蜷医ｏ縺帙∽ｺ域悄縺帙〓迚ｩ隱槭・遞ｮ繧堤函謌舌・
-- **AI 4koma Scenario Link / AI 4koma 繧ｷ繝翫Μ繧ｪ騾｣謳ｺ (STEP2)**: Generates scenarios in AI 4-koma System STEP2-compatible format with EMOTION tags, Location, and dialogue formatting. / AI 4-koma System 縺ｮSTEP2蜈･蜉帶ｬ・↓縺昴・縺ｾ縺ｾ雋ｼ繧贋ｻ倥￠蜿ｯ閭ｽ縺ｪ繝輔か繝ｼ繝槭ャ繝医〒蜃ｺ蜉帙・
-- **Style Analyzer Engine (ﾎｲ) / 菴憺｢ｨ隗｣譫舌お繝ｳ繧ｸ繝ｳ (ﾎｲ迚・**: Supports multimodal composite analysis 窶・drop text files (.txt/.md), images (illustrations, art), or paste text directly into the text area. The AI performs deep computational stylistics analysis, extracting 50+ parameters covering rhetoric, sentence structure, vocabulary, description focus, dialogue style, emotional architecture, and more. When images are included, visual tone (color palette, composition, lighting) is integrated into the analysis. Results are available in two formats: human-readable text (copy) and structured JSON for direct injection into other AI novel tools (ChatGPT, Claude, etc.) or drag-and-drop into AI 4-koma System. Includes a "Rewrite" function that applies the extracted style to your generated story while preserving the plot. Style analysis can be executed independently before story generation. / 繝・く繧ｹ繝医ヵ繧｡繧､繝ｫ縺ｮ繝峨Ο繝・・繝ｻ逕ｻ蜒上ラ繝ｭ繝・・・医う繝ｩ繧ｹ繝育ｭ会ｼ峨・繝・く繧ｹ繝育峩謗･雋ｼ繧贋ｻ倥￠縺ｮ3蜈･蜉帶婿蠑上↓蟇ｾ蠢懊＠縺溘・繝ｫ繝√Δ繝ｼ繝繝ｫ隍・粋隗｣譫舌・I縺御ｿｮ霎樊橿豕輔・譁・ｽ薙・隱槫ｽ吶・謠丞・繝ｻ繧ｻ繝ｪ繝輔・諢滓ュ險ｭ險育ｭ・0莉･荳翫・繝代Λ繝｡繝ｼ繧ｿ繧呈ｷｱ螻､蛻・梵縲ら判蜒上′蜷ｫ縺ｾ繧後ｋ蝣ｴ蜷医・濶ｲ蠖ｩ蛯ｾ蜷代・讒句峙繝ｻ繧ｿ繝・メ遲峨・繝薙ず繝･繧｢繝ｫ繝医・繝ｳ繧らｵｱ蜷郁ｧ｣譫舌らｵ先棡縺ｯ莠ｺ髢鍋畑繝・く繧ｹ繝茨ｼ医さ繝斐・・峨→莉悶・AI蟆剰ｪｬ繝・・繝ｫ・・hatGPT遲会ｼ峨∈縺ｮ謚募・繧・AI 4-koma System 縺ｸ縺ｮ逶ｴ謗･繝峨Λ繝・げ・・ラ繝ｭ繝・・騾｣謳ｺ縺悟庄閭ｽ縺ｪ讒矩蛹褒SON縺ｮ2蠖｢蠑上〒謠蝉ｾ帙りｧ｣譫舌＠縺滉ｽ憺｢ｨ繧堤函謌先ｸ医∩繧ｹ繝医・繝ｪ繝ｼ縺ｫ驕ｩ逕ｨ縺吶ｋ縲後Μ繝ｩ繧､繝医肴ｩ溯・繧よ政霈峨ゅせ繝医・繝ｪ繝ｼ逕滓・蜑阪〒繧ゆｽ憺｢ｨ隗｣譫舌・蜊倡峡螳溯｡悟庄閭ｽ縲・
+- Current public version: `v4.9.6`
+- Public page: https://furuyan1234.github.io/story-maker/
+- Long-novel mode is not promoted as a public feature in this README. It remains below the release-quality bar for public use and is treated as suspended for now.
+- 公開版: `v4.9.6`
+- 公開ページ: https://furuyan1234.github.io/story-maker/
+- 長編モードは公開品質基準を満たしていないため、当面は公開機能紹介から外します。現時点では公開停止扱いです。
 
----
+## Main Features / 主な機能
 
-## 女・・Unique Architecture Highlights / 蝗ｺ譛峨い繝ｼ繧ｭ繝・け繝√Ε繝ｻ謚陦鍋噪隕∫せ
-This system acts as a sophisticated prompt engineering compiler. It leverages multi-layered constraints to force the LLM into producing highly creative outcomes.
-譛ｬ繧ｷ繧ｹ繝・Β縺ｯ鬮伜ｺｦ縺ｪ繝励Ο繝ｳ繝励ヨ繧ｨ繝ｳ繧ｸ繝九い繝ｪ繝ｳ繧ｰ繝ｻ繧ｳ繝ｳ繝代う繝ｩ縺ｨ縺励※讖溯・縺励∪縺吶・LM縺ｫ蟇ｾ縺励※螟壼ｱ､逧・↑蛻ｶ邏・ｒ隱ｲ縺吶％縺ｨ縺ｧ縲∝ｼｷ蛻ｶ逧・↓迢ｬ蜑ｵ諤ｧ縺ｮ鬮倥＞邨先棡繧貞ｼ輔″蜃ｺ縺励∪縺吶・
+- Dual API support: switch between Gemini and OpenAI without changing the story settings.
+- Memory-only API entry in the public build: public pages do not intentionally persist API keys in `localStorage` or `sessionStorage`.
+- Multi-axis randomization: output mode, theme, genre, era, worldview, target reader, ending, narration, and characters can be randomized independently.
+- All-random generation: one button randomizes the selected axes and generates immediately.
+- Output-mode lock: lock a mode when you want all-random to preserve the current format.
+- Character controls: number of characters, names, sex, roles, and personalities can be edited or randomized.
+- Universal intake: text, markdown, URLs, and images can be used as source material where supported.
+- Style analysis and rewrite: analyze an input style and apply it to generated text while preserving the plot.
+- Today's news keyword assist: Gemini search grounding can extract current Japanese news keywords for story seeds.
 
-* **Multi-Axis Randomization / 螟夊ｻｸ繝ｩ繝ｳ繝繝蛹・*:
-  `Output = f(Character ﾃ・Theme ﾃ・Genre ﾃ・Era ﾃ・Ending ﾃ・Perspective)`
-  Each axis is independently randomizable. The combination space is large enough that identical outputs are statistically improbable. / 繧ｭ繝｣繝ｩﾃ励ユ繝ｼ繝榲励ず繝｣繝ｳ繝ｫﾃ玲凾莉｣ﾃ励が繝・苓ｪ槭ｊ蜿｣繧堤峡遶玖ｨ育ｮ励＠縲∫ｵ・∩蜷医ｏ縺帙・辷・匱縺ｫ繧医ｊ繝上Ν繧ｷ繝阪・繧ｷ繝ｧ繝ｳ縺ｧ縺ｯ縺ｪ縺上梧э蜻ｳ縺ｮ縺ゅｋ螟壽ｧ俶ｧ縲阪ｒ逕溘∩蜃ｺ縺呵ｨｭ險医・
-* **Anti-Repetition Engine / 蜿榊ｾｩ髦ｲ豁｢繝励Ο繝ｳ繝励ヨ繧ｨ繝ｳ繧ｸ繝ｳ**: Explicitly instructs Gemini to avoid the most predictable development for the genre, connect the theme in an indirect/unexpected way, and use each character's personality to generate unique reactions. / 縺ゅｊ縺阪◆繧翫↑螻暮幕繧呈ｧ矩逧・↓蝗樣∩縺吶ｋ繧医≧縲√後ず繝｣繝ｳ繝ｫ縺ｮ邇矩％螻暮幕縺ｮ蝗樣∩縲阪後ユ繝ｼ繝槭・髢捺磁逧・磁邯壹阪↑縺ｩ繧但I縺ｫ譏守､ｺ逧・↓謖・､ｺ縲・
-* **Foreshadowing Tier System / 莨冗ｷ壹Ν繝ｼ繝ｫ縺ｮ繝｢繝ｼ繝牙挨繝・ぅ繧｢蛻ｶ**: Dynamically switches prompt constraints based on the narrative mode. / 蜃ｺ蜉帙Δ繝ｼ繝峨↓繧医▲縺ｦ繝励Ο繝ｳ繝励ヨ縺ｮ蛻ｶ邏・Ξ繝吶Ν繧貞虚逧・↓蛻・ｊ譖ｿ縺医ｋ莉慕ｵ・∩縲・
-  * **Tier 1 (Full)**: Narrative modes (novel, scenario, manga, etc.) retain all 15 rules including Emotion Gap Design, Motif Recurrence, Emotion Curve Design, Sensory Balance Enforcement, World-Grounded Metaphor Guard, and Character Knowledge Boundary. / 迚ｩ隱樒ｳｻ繝｢繝ｼ繝峨・縲∵─諠・誠蟾ｮ險ｭ險医・繝｢繝√・繝募屓蟶ｰ繝ｻ諢滓ュ譖ｲ邱夊ｨｭ險医↓蜉縺医∽ｺ疲─繝舌Λ繝ｳ繧ｹ蠑ｷ蛻ｶ繝ｻ荳也阜隕ｳ貅匁侠縺ｮ豈泌湊繧ｬ繝ｼ繝峨・繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ遏･隴伜｢・阜繝√ぉ繝・け繧貞性繧15縺ｮ讒区・繝ｻ諢滓ュ繝ｻ謠丞・險ｭ險医Ν繝ｼ繝ｫ繧帝←逕ｨ縲・
-  * **Tier 2 (Comedy)**: `4koma` mode uses the optimized Comedy Structure Method, integrating the generalized 6-gap techniques and tone variations to ensure high-impact punchlines. / 4繧ｳ繝槭Δ繝ｼ繝峨・縲∽ｸ闊ｬ蛹悶＆繧後◆6遞ｮ縺ｮ繧ｺ繝ｬ謚豕輔→繝医・繝ｳ隱ｿ謨ｴ繧堤ｵｱ蜷医＠縺溘さ繝｡繝・ぅ讒矩繝｡繧ｽ繝・ラ繧帝←逕ｨ縺励√ヱ繝ｳ繝√Λ繧､繝ｳ縺ｮ繧､繝ｳ繝代け繝医ｒ譛螟ｧ蛹悶・
-  * **Tier 3 (None)**: Non-narrative modes (essay, poem, letter, diary) exclude foreshadowing entirely, replaced with mode-specific composition rules. / 髱樒黄隱樒ｳｻ繝｢繝ｼ繝峨・莨冗ｷ壹Ν繝ｼ繝ｫ繧貞ｮ悟・髯､螟悶・
-* **Full-Category Style Guide Engine / 蜈ｨ繧ｫ繝・ざ繝ｪ蟇ｾ蠢懊・譁・ｽ薙ぎ繧､繝峨お繝ｳ繧ｸ繝ｳ**: Centralized style guide data (~250 entries). Instead of passing preset selections (e.g., "Surreal Gag") as mere labels, the system injects specific, actionable writing instructions into the prompt. / 蜊倥↑繧九Λ繝吶Ν蜷肴ｸ｡縺励〒縺ｯ縺ｪ縺上・50莉･荳翫・隧ｳ邏ｰ縺ｪ蝓ｷ遲・Ν繝ｼ繝ｫ・域枚菴薙・讒区・謖・､ｺ遲会ｼ峨ｒ繝励Ο繝ｳ繝励ヨ縺ｫ豕ｨ蜈･縺吶ｋ繧ｨ繝ｳ繧ｸ繝ｳ縲・
-* **15-Rule Narrative Structure / 15縺ｮ迚ｩ隱樊ｧ区・繝ｻ謠丞・險ｭ險医Ν繝ｼ繝ｫ**: Strict guidelines including "Show Don't Tell", protagonist conviction at endings, Emotion Gap Design (6 gap techniques), Motif Recurrence, Emotion Curve Design, Sensory Balance Enforcement (anti-visual-bias), World-Grounded Metaphor Guard (clichﾃｩ elimination), and Character Knowledge Boundary (information leak prevention). / 縲郡how Don't Tell縲阪檎ｵ先忰縺ｧ縺ｮ荳ｻ莠ｺ蜈ｬ縺ｮ諢丞ｿ苓｡ｨ遉ｺ縲阪↓蜉縺医∵─諠・誠蟾ｮ險ｭ險医・繝｢繝√・繝募屓蟶ｰ繝ｻ諢滓ュ譖ｲ邱夊ｨｭ險医・莠疲─繝舌Λ繝ｳ繧ｹ蠑ｷ蛻ｶ・郁ｦ冶ｦ壼￥驥埼亟豁｢・峨・豈泌湊縺ｮ荳也阜隕ｳ貅匁侠・医け繝ｪ繧ｷ繧ｧ謗帝勁・峨・繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ遏･隴伜｢・阜・域ュ蝣ｱ貍乗ｴｩ髦ｲ豁｢・峨ｒ霑ｽ蜉縺励◆15縺ｮ讒矩繝ｫ繝ｼ繝ｫ縲・
-* **Quality Gate / 蜩∬ｳｪ繧ｲ繝ｼ繝・*: AI self-verification checklist executed before output (9 checks including Setup-Payoff structure, emotion gap sufficiency, motif recurrence, ending pattern diversity, tone variation, character narrative function, sensory balance, metaphor originality, and character knowledge boundary). / AI縺悟・蜉帛燕縺ｫ閾ｪ蟾ｱ讀懆ｨｼ縺吶ｋ9鬆・岼縺ｮ繝√ぉ繝・け繝ｪ繧ｹ繝医ゆｺ疲─繝舌Λ繝ｳ繧ｹ繝ｻ豈泌湊縺ｮ迢ｬ閾ｪ諤ｧ繝ｻ繧ｭ繝｣繝ｩ遏･隴伜｢・阜繝√ぉ繝・け繧呈眠縺溘↓霑ｽ蜉縲・
-* **Era Consistency Rules / 譎ゆｻ｣險ｭ螳壹・謨ｴ蜷域ｧ繝ｫ繝ｼ繝ｫ**: AI auto-corrects anachronistic expressions when historical era settings are selected. / 髱樒樟莉｣縺ｮ譎ゆｻ｣險ｭ螳壽凾縺ｫAI縺梧凾莉｣縺ｫ縺昴＄繧上↑縺・ｪ槫ｽ吶ｒ閾ｪ蜍輔〒隱ｭ縺ｿ譖ｿ縺医ｋ繝ｫ繝ｼ繝ｫ縲・
+- Gemini / OpenAI の2系統APIに対応し、設定を保ったまま切り替えできます。
+- 公開ビルドでは API キーをメモリのみで扱い、`localStorage` / `sessionStorage` に意図的に保存しません。
+- 出力モード、テーマ、ジャンル、時代、世界観、読者層、結末、語り口、登場人物を独立してランダム化できます。
+- 全項目ランダムは、選択軸をまとめてランダム化して即生成します。
+- 出力モードをロックすれば、全項目ランダムでも現在の形式を保持できます。
+- 登場人物の人数、名前、性別、役割、性格を編集またはランダム生成できます。
+- テキスト、Markdown、URL、画像を素材として取り込めます。
+- 作風解析とリライトにより、生成済み本文へ文体だけを反映できます。
+- Gemini の検索グラウンディングで、今日の日本語ニュースから物語キーワードを抽出できます。
 
----
+## Public Output Modes / 公開出力モード
 
-## ｧ v2.9 Narrative Engineering Methods / v2.9 迚ｩ隱樊ｧ矩繝｡繧ｽ繝・ラ隗｣隱ｬ
+The public release targets the following non-long output modes:
 
-> These methods were originally developed for comedy manga (4-panel gag) generation in [AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro). Through analysis, we discovered that their core principles are **universal narrative techniques** applicable to ALL genres 窶・because laughter, fear, suspense, and emotional impact all share the same structural origin: **the gap between what the reader expects and what actually happens**.
-> 縺薙ｌ繧峨・繝｡繧ｽ繝・ラ縺ｯ蜈・・[AI 4-koma System](https://github.com/FURUYAN1234/nano-banana-pro) 縺ｧ繧ｮ繝｣繧ｰ貍ｫ逕ｻ・・繧ｳ繝橸ｼ臥函謌千畑縺ｫ髢狗匱縺輔ｌ縺ｾ縺励◆縲ょ・譫舌・邨先棡縲√◎縺ｮ譬ｸ蠢・・**蜈ｨ繧ｸ繝｣繝ｳ繝ｫ縺ｫ驕ｩ逕ｨ蜿ｯ閭ｽ縺ｪ譎ｮ驕咲噪迚ｩ隱樊橿豕・*縺ｧ縺ゅｋ縺薙→縺悟愛譏弱＠縺ｾ縺励◆縲らｬ代＞繝ｻ諱先悶・諢溷虚繝ｻ鬩壹″縺ｯ蜈ｨ縺ｦ蜷後§讒矩逧・次逅・√☆縺ｪ繧上■**縲瑚ｪｭ閠・・譛溷ｾ・ｼ・・峨→螳滄圀縺ｮ螻暮幕・・・峨・關ｽ蟾ｮ縲・*縺九ｉ逕溘∪繧後ｋ縺溘ａ縺ｧ縺吶・
+公開版では、以下の非長編モードを対象にしています。
 
-### 1. Emotion Gap Design / 諢滓ュ關ｽ蟾ｮ險ｭ險・
+| Mode | Japanese label |
+|---|---|
+| 4-panel manga plot | 4コマ漫画風 |
+| AI 4koma scenario link | AI 4koma シナリオ連携（STEP2） |
+| Flash fiction | ショート（約1000字） |
+| Short story | 短編小説（約3000字） |
+| Novella | 中編小説（約4000字） |
+| Script | 脚本 / 台本 |
+| Story manga | ストーリー漫画 |
+| Essay | エッセイ |
+| Poem | 詩・ポエム |
+| Fairy tale / picture book | 童話 / 絵本 |
+| Letter | 手紙 / 書簡体 |
+| Diary / monologue | 日記 / 独白体 |
+| Documentary | ドキュメンタリー |
+| Radio drama | ラジオドラマ |
 
-The fundamental principle: **all emotional impact = Gap between Expected (E) and Reality (R).**
-The direction of the gap determines the emotion:
+## v4.9.6 Changes / v4.9.6 更新内容
 
-蝓ｺ譛ｬ蜴溽炊・・*縺ゅｉ繧・ｋ諢滓ュ逧・う繝ｳ繝代け繝・・・莠域Φ・・・峨→迴ｾ螳滂ｼ・・峨・繧ｮ繝｣繝・・**縲・
-繧ｮ繝｣繝・・縺ｮ譁ｹ蜷代′諢滓ュ縺ｮ遞ｮ鬘槭ｒ豎ｺ繧√ｋ・・
+- Fixed all-random output-mode behavior: when output mode is not locked, all-random now rerolls the output mode instead of keeping the previous mode.
+- Long-novel mode is excluded from all-random public selection.
+- Improved paragraph readability for non-long outputs by adding stronger paragraph-density guidance and cleanup.
+- Verified Gemini and OpenAI across all 14 public non-long output modes.
+- Added a public-build safety guard that removes local QA API-session persistence helpers and fails the build if storage/debug helper strings remain in the production bundle.
+- Rewrote this README in clean UTF-8 English/Japanese and removed the long-novel feature promotion.
 
-| Gap Direction / 關ｽ蟾ｮ縺ｮ譁ｹ蜷・| Emotion / 諢滓ュ | Example / 萓・|
-|:---|:---|:---|
-| More absurd than expected / 莠域Φ繧医ｊ縺翫°縺励＞ | Laughter / 隨代＞ | Comedy, Gag / 繧ｳ繝｡繝・ぅ |
-| More terrifying than expected / 莠域Φ繧医ｊ諤悶＞ | Fear / 諱先・| Horror, Suspense / 繝帙Λ繝ｼ |
-| More heartbreaking than expected / 莠域Φ繧医ｊ蛻・↑縺・| Emotion / 諢溷虚 | Drama, Romance / 繝峨Λ繝槭・諱区・ |
-| More shocking than expected / 莠域Φ繧医ｊ陦晄茶逧・| Surprise / 鬩壹″ | Mystery, Plot twist / 繝溘せ繝・Μ繝ｼ |
+- 全項目ランダム時、出力モードがロックされていない場合は出力モードもランダムに再選択されるよう修正しました。
+- 公開版の全項目ランダムから長編モードを除外しました。
+- 非長編出力で改行が少なすぎる問題に対し、段落密度の指示と整形を強化しました。
+- Gemini / OpenAI の両APIで、公開対象の非長編14モードを検証しました。
+- 公開ビルドではローカルQA用のAPI一時保持ヘルパーを除去し、保存系デバッグ文字列が本番バンドルに残るとビルド失敗にする安全ガードを追加しました。
+- README を UTF-8 の英日併記で作り直し、長編モードの機能紹介を削除しました。
 
-The system provides **6 gap techniques** for the AI to consciously select and combine:
-AI縺梧э隴倡噪縺ｫ驕ｸ謚槭・邨・∩蜷医ｏ縺帙ｋ**6遞ｮ縺ｮ關ｽ蟾ｮ謚豕・*繧呈署萓幢ｼ・
+## API Key And Privacy / APIキーとプライバシー
 
-1. **Substitution / 鄂ｮ謠・*: Reinterpret an event in a completely different context / 縺ゅｋ莠玖ｱ｡繧貞・縺冗焚縺ｪ繧区枚閼医〒蜀崎ｧ｣驥医＆縺帙ｋ
-2. **Exaggeration / 隱・ｼｵ**: Amplify emotions and scale beyond the reader's imagination / 諢滓ュ繝ｻ隕乗ｨ｡繧定ｪｭ閠・・諠ｳ蜒上ｒ雜・∴繧九Ξ繝吶Ν縺ｾ縺ｧ蠅怜ｹ・
-3. **Reversal / 騾・ｻ｢**: Flip character positions, abilities, or relationships without warning / 莠ｺ迚ｩ縺ｮ遶句ｴ繝ｻ閭ｽ蜉帙・髢｢菫よｧ繧剃ｺ亥相縺ｪ縺丞渚霆｢
-4. **Absurdity / 荳肴擅逅・*: Insert logically inexplicable elements for shock / 隲也炊逧・↓隱ｬ譏弱・縺､縺九↑縺・ｦ∫ｴ縺ｧ陦晄茶繧剃ｸ弱∴繧・
-5. **Tension & Release / 邱雁ｼｵ縺ｨ邱ｩ蜥・*: Place intentional calm before maximum impact / 繧ｯ繝ｩ繧､繝槭ャ繧ｯ繧ｹ逶ｴ蜑阪↓諢丞峙逧・↑髱吝ｯゅｒ謖溘・
-6. **Normalcy Return / 蟶ｸ隴倥・謠千､ｺ**: Place one sane perspective amid chaos to highlight abnormality / 逡ｰ蟶ｸ縺ｮ荳ｭ縺ｫ豁｣豌励・隕也せ繧堤ｽｮ縺・※逡ｰ蟶ｸ縺輔ｒ髫帷ｫ九◆縺帙ｋ
+- API keys are typed by the user in the browser UI.
+- The public build is designed to keep keys in memory only for the current page session.
+- A request is sent only to the selected provider needed for generation or analysis.
+- No API key, personal credential, billing data, or private token is committed to this repository.
+- Local QA helpers may exist in development code, but the production build guard strips them from the public bundle.
 
-- **Active Character Roster / 繧ｵ繝悶く繝｣繝ｩ霑ｽ霍｡**: Tracks supporting characters' current locations and statuses in the internal memo to prevent them from disappearing in later chapters. / 繧ｵ繝悶く繝｣繝ｩ繧ｯ繧ｿ繝ｼ縺ｮ迴ｾ蝨ｨ蝨ｰ縺ｨ迥ｶ豕√ｒ豈守ｫ縺ｮ蜀・Κ繝｡繝｢縺ｨ縺励※險倬鹸縺励∫ｵら乢縺ｧ縺ｮ豸亥､ｱ繧帝亟縺舌・
-- **Pacing Enforcement / 謠丞・蟇・ｺｦ縺ｮ蠑ｷ蛻ｶ**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / 繧ｯ繝ｩ繧､繝槭ャ繧ｯ繧ｹ繧・ｼ夊ｩｱ蜉・↓縺翫＞縺ｦ莠疲─謠丞・繧・ｉ菴鍋噪逞幄ｦ壹ｒ蠑ｷ蛻ｶ逧・↓謖ｿ蜈･縺輔○縲∝ｱ暮幕縺ｮ縲碁ｧ・￠雜ｳ縲阪ｒ髦ｲ豁｢縺吶ｋ縲・
-- **Dynamic Chekhov's Gun / 蜍慕噪繝√ぉ繝ｼ繝帙ヵ縺ｮ驫・*: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 蠎冗乢縺ｫ辟｡髢｢菫ゅ↓隕九∴繧九い繧､繝・Β繧・ｿ呈・繧帝・鄂ｮ縺励∫ｵら乢縺ｮ閾ｴ蜻ｽ逧・↑遯∫ｴ蜿｣縺ｨ縺励※蜿崎ｻ｢蝗槫庶縺輔○繧句虚逧・ｼ冗ｷ壹・
-- **Dynamic Scale & Full-Auto Generation / 蜍慕噪隕乗ｨ｡險ｭ險医→蜈ｨ閾ｪ蜍慕函謌・*: The AI automatically determines the optimal chapter count and target length (tens of thousands of characters) based on the input theme. The writing process is fully automated, continuously generating chapter by chapter until completion without requiring manual prompts. / 蜈･蜉帙ユ繝ｼ繝槭↓蝓ｺ縺･縺阪、I縺梧怙驕ｩ縺ｪ遶謨ｰ縺ｨ逶ｮ讓呎枚蟄玲焚・域焚荳・ｭ苓ｦ乗ｨ｡・峨ｒ蜍慕噪縺ｫ豎ｺ螳壹＠縺ｾ縺吶よ焔蜍輔〒縺ｮ繝励Ο繝ｳ繝励ヨ蜈･蜉帙・荳崎ｦ√〒縲∝ｮ檎ｵ舌∪縺ｧ蜈ｨ閾ｪ蜍輔〒遶縺斐→縺ｫ騾｣邯夂函謌舌＆繧後∪縺吶・
-- **State Separation & Context Panel / 迥ｶ諷九・螳悟・蛻・屬縺ｨ譁・ц繝代ロ繝ｫ**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 蟆剰ｪｬ譛ｬ譁・→AI縺ｮ讒矩繝｡繝｢・育岼逧・・莨冗ｷ夂ｭ会ｼ峨ｒ蜀・Κ迥ｶ諷九Ξ繝吶Ν縺ｧ螳悟・縺ｫ蛻・屬縲ゅΓ繝｢縺ｯ謚倥ｊ縺溘◆縺ｿ蜿ｯ閭ｽ縺ｪ蟆ら畑繝代ロ繝ｫ縺ｸ繝ｫ繝ｼ繝・ぅ繝ｳ繧ｰ縺輔ｌ縲、I迚ｹ譛峨・遨ｺ縺ｮ繝槭・繧ｯ繝繧ｦ繝ｳ險伜捷縺ｪ縺ｩ繧ょｼｷ蜉帙↓繧ｯ繝ｬ繝ｳ繧ｸ繝ｳ繧ｰ髯､蜴ｻ縺輔ｌ繧九◆繧√√お繧ｯ繧ｹ繝昴・繝医＆繧後ｋ繝・く繧ｹ繝医↓縺ｯ邏皮ｲ九↑蟆剰ｪｬ譛ｬ譁・・縺ｿ縺悟性縺ｾ繧後∪縺吶・
-- **Local Timestamped Export / 繝ｭ繝ｼ繧ｫ繝ｫ譎ょ綾縺ｧ縺ｮ蜴ｳ蟇・↑繝輔ぃ繧､繝ｫ邂｡逅・*: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 蜈ｨ縺ｦ縺ｮ繝・く繧ｹ繝医・JSON菫晏ｭ倥・繝輔ぃ繧､繝ｫ蜷阪↓縺翫＞縺ｦ縲ゞTC繧ｺ繝ｬ縺ｮ縺ｪ縺・律譛ｬ譎る俣・医Ο繝ｼ繧ｫ繝ｫ譎ょ綾・峨・螳悟・縺ｪ謨ｰ蟄・4譯・ｼ・YYYYMMDDHHmmss`・峨ｒ蠑ｷ蛻ｶ縲る聞譛滄俣縺ｫ繧上◆繧矩｣霈牙濤遲・凾縺ｮ譎らｳｻ蛻励た繝ｼ繝医・荳雋ｫ諤ｧ繧剃ｿ晁ｨｼ縺励∪縺吶・
+- API キーはユーザーがブラウザUIに入力します。
+- 公開ビルドでは、キーは現在のページセッションのメモリ上だけで扱う設計です。
+- 生成や解析に必要な場合だけ、選択されたAPI提供元へリクエストを送ります。
+- このリポジトリには API キー、個人認証情報、課金情報、秘密トークンを含めません。
+- 開発中のローカルQA補助コードは存在する場合がありますが、本番ビルドでは公開バンドルから除去されます。
 
-### 2. Motif Recurrence / 繝｢繝√・繝輔・蝗槫ｸｰ
+## Local Development / ローカル開発
 
-Inspired by the comedy technique "Tendon" (螟ｩ荳ｼ 窶・repeating the same gag pattern with variations until it explodes), generalized for all genres.
-繧ｳ繝｡繝・ぅ謚豕輔悟､ｩ荳ｼ縲搾ｼ亥酔縺倥ぐ繝｣繧ｰ繝代ち繝ｼ繝ｳ繧貞､牙･上＠縺ｪ縺後ｉ郢ｰ繧願ｿ斐＠辷・匱縺輔○繧区焔豕包ｼ峨ｒ蜈ｨ繧ｸ繝｣繝ｳ繝ｫ縺ｫ荳闊ｬ蛹悶・
-
-**Rule**: A symbolic element (item, phrase, scenery, action) must appear **at least twice** in different contexts. The 1st mention is casual; the 2nd+ carries evolved meaning. The recurring motif must connect directly to the emotional climax.
-**繝ｫ繝ｼ繝ｫ**・夊ｱ｡蠕ｴ逧・ｦ∫ｴ・医い繧､繝・Β繝ｻ險闡峨・鬚ｨ譎ｯ繝ｻ陦檎ぜ・峨ｒ**譛菴・蝗・*縲∫焚縺ｪ繧区枚閼医〒逋ｻ蝣ｴ縺輔○繧九・蝗樒岼縺ｯ菴墓ｰ励↑縺・ｨ蜿翫・蝗樒岼莉･髯阪・諢丞袖縺悟､牙喧繝ｻ豺ｱ蛹悶ょ屓蟶ｰ縺吶ｋ繝｢繝√・繝輔・邨先忰縺ｮ諢滓ュ逧・ヴ繝ｼ繧ｯ縺ｨ逶ｴ謗･謗･邯壹＆縺帙ｋ縲・
-
-| In Comedy / 繧ｳ繝｡繝・ぅ縺ｧ縺ｯ | In Other Genres / 莉悶ず繝｣繝ｳ繝ｫ縺ｧ縺ｯ |
-|:---|:---|
-| Same gag pattern 竊・variation 竊・explosion / 蜷後§繝懊こ縺ｮ螟牙･鞘・辷・匱 | Chekhov's Gun, thematic echo, escalating pattern / 繝√ぉ繝ｼ繝帙ヵ縺ｮ驫・√ユ繝ｼ繝槭・蜿榊ｾｩ豺ｱ蛹・|
-
-### 3. Emotion Curve Design / 諢滓ュ譖ｲ邱夊ｨｭ險・
-
-A 15-beat integrated framework for designing the emotional arc of an entire story, based on professional screenwriting methods:
-迚ｩ隱槫・菴薙・諢滓ュ譖ｲ邱壹ｒ險ｭ險医☆繧・5繝薙・繝育ｵｱ蜷亥梛繝輔Ξ繝ｼ繝繝ｯ繝ｼ繧ｯ・・
-
-```
-Setup (蟆主・) 竊・Inciting Incident (莠倶ｻｶ) 竊・Deviation (騾ｸ閼ｱ/隨ｬ荳縺ｮ謇・ 竊・Midpoint (荳ｭ髢灘慍轤ｹ) 竊・Build-up (蠅怜ｹ・縺ｩ繧灘ｺ・ 竊・Payoff (蝗槫庶/繧ｯ繝ｩ繧､繝槭ャ繧ｯ繧ｹ)
+```powershell
+npm install
+npm run dev
 ```
 
-| Phase | Role / 蠖ｹ蜑ｲ |
-|:---|:---|
-| **Setup** (蟆主・/譌･蟶ｸ) | Set reader expectations. Don't surprise yet. Place 1st motif here. / 隱ｭ閠・・譛溷ｾ・､繧定ｨｭ螳壹ゅ∪縺鬩壹°縺帙↑縺・ゅΔ繝√・繝輔・1蝗樒岼繧偵％縺薙↓ |
-| **Deviation** (騾ｸ閼ｱ) | First gap from expectations (Inciting Incident & Plot Point 1). / 譛溷ｾ・°繧峨・譛蛻昴・繧ｺ繝ｬ・井ｺ倶ｻｶ縺ｮ逋ｺ逕溘→隨ｬ荳縺ｮ謇会ｼ・|
-| **Build-up** (蠅怜ｹ・縺ｩ繧灘ｺ・ | Accelerate deviation via Midpoint, push emotional tension to the "All is Lost" limit. / 荳ｭ髢灘慍轤ｹ繧堤ｵ後※騾ｸ閼ｱ繧貞刈騾溘∵─諠・噪邱雁ｼｵ繧偵後☆縺ｹ縺ｦ繧貞､ｱ縺・肴･ｵ髯舌↓ |
-| **Payoff** (蝗槫庶/豎ｺ逹) | Emotional peak + landing (Climax). All foreshadowing and motifs gain meaning here. / 諢滓ュ縺ｮ繝斐・繧ｯ・狗捩蝨ｰ縲ょ・莨冗ｷ壹・繝｢繝√・繝輔′縺薙％縺ｧ諢丞袖繧呈戟縺､ |
+Story Maker uses port `5179` in the Antigravity workspace.
 
-### 4. Scene Dynamics & Physicality / 繧ｷ繝ｼ繝ｳ縺ｮ鬧・虚蜉帙→霄ｫ菴捺ｧ
+Antigravity ワークスペースでは Story Maker のローカル開発ポートは `5179` です。
 
-To prevent flat, "AI-like" abstract writing, every scene must adhere to strict rules including Stakes, Subtext, and Loglines:
-AI迚ｹ譛峨・蟷ｳ蝮ｦ縺ｧ謚ｽ雎｡逧・↑譁・ｫ繧帝亟縺舌◆繧√∝・繧ｷ繝ｼ繝ｳ縺ｫ繧ｹ繝・・繧ｯ繧ｹ繝ｻ繧ｵ繝悶ユ繧ｭ繧ｹ繝医・繝ｭ繧ｰ繝ｩ繧､繝ｳ繧貞性繧莉･荳九・蜴ｳ譬ｼ縺ｪ繝ｫ繝ｼ繝ｫ繧帝←逕ｨ・・
-
-- **Logline Anchor (繝ｭ繧ｰ繝ｩ繧､繝ｳ縺ｫ繧医ｋ霆ｸ蝗ｺ螳・**: The AI must establish a 1-sentence core summary (Logline) before writing and strictly adhere to it throughout the story to prevent plot wandering. / 蝓ｷ遲・燕縺ｫ迚ｩ隱槭・譬ｸ縺ｨ縺ｪ繧・譁・ｦ∫ｴ・ｼ医Ο繧ｰ繝ｩ繧､繝ｳ・峨ｒ蜀・Κ險ｭ螳壹＆縺帙・比ｸｭ縺ｧ隧ｱ縺後ヶ繝ｬ繧九・繧帝亟縺舌・
-- **G.M.C.+S. (Goal, Motivation, Conflict, Stakes)**: Every scene must clearly define what the character wants, why they want it, what stands in their way, and what they lose if they fail (Stakes). / 蜈ｨ縺ｦ縺ｮ繧ｷ繝ｼ繝ｳ縺ｫ縲檎岼逧・阪悟虚讖溘阪碁囿螳ｳ縲阪↓蜉縺医後せ繝・・繧ｯ繧ｹ・亥､ｱ謨玲凾縺ｮ莉｣蜆滂ｼ峨阪ｒ險ｭ螳壹＠縲∫黄隱槭・蛛懈ｻ槭ｒ髦ｲ縺守ｷ願ｿｫ諢溘ｒ鬮倥ａ繧九・
-- **Physicality (Show, Don't Tell)**: Direct emotion words ("I was sad") are banned. Emotions must be described through five senses (weight, temperature, smell, trembling hands). / 縲梧ご縺励＞縲阪↑縺ｩ縺ｮ逶ｴ謗･逧・↑諢滓ュ隱槭ｒ遖∵ｭ｢縲る㍾縺輔∵ｸｩ蠎ｦ縲∝撃縺・∬ｺｫ菴灘渚蠢懶ｼ井ｺ疲─・峨ｒ騾壹＠縺ｦ諢滓ュ繧呈緒蜀吶☆繧九・
-- **Subtext (繧ｵ繝悶ユ繧ｭ繧ｹ繝・**: Direct expression of true feelings in dialogue is banned (No "On the Nose" dialogue). Characters must hide their true intentions, requiring readers to infer meaning from actions. / 繧ｻ繝ｪ繝輔〒逶ｴ謗･諢滓ュ繧定ｪｬ譏弱＆縺帙ｋ縺薙→・医が繝ｳ繝ｻ繧ｶ繝ｻ繝弱・繧ｺ・峨ｒ遖∵ｭ｢縲り｣上・諢滓ュ繧帝國縺励∬｡悟虚縺ｨ縺ｮ遏帷崟縺九ｉ隱ｭ閠・↓謗ｨ貂ｬ縺輔○繧九・
-
-### 5. Tone Variation System / 譁・ｽ鍋ｷｩ諤･縺ｮ3邉ｻ邨ｱ
-
-To prevent monotonous writing, 3 concrete tone registers are defined with a **prohibition of same-tone streaks exceeding 3 paragraphs**:
-譁・ｽ薙・蜊倩ｪｿ蛹悶ｒ髦ｲ縺舌◆繧√・遞ｮ縺ｮ蜈ｷ菴鍋噪繝医・繝ｳ邉ｻ邨ｱ繧貞ｮ夂ｾｩ縺励・*蜷檎ｳｻ邨ｱ縺ｮ3谿ｵ關ｽ莉･荳企｣邯壹ｒ遖∵ｭ｢**・・
-
-| Register / 邉ｻ邨ｱ | Style / 譁・ｽ・| Use For / 驕ｩ逕ｨ蝣ｴ髱｢ |
-|:---|:---|:---|
-| **High-energy / 鬮倡・驥・* | Short sentences, abrupt endings, rapid-fire / 遏ｭ譁・｣邯壹・菴楢ｨ豁｢繧√・逡ｳ縺ｿ縺九￠ | Action, confession, decision / 霑ｽ霍｡繝ｻ蜻顔區繝ｻ豎ｺ譁ｭ |
-| **Quiet-serene / 髱呵ｬ・* | Long sentences, gentle rhythm, white space / 髟ｷ譁・・遨上ｄ縺九↑繝ｪ繧ｺ繝繝ｻ菴咏區 | Flashback, parting, eerie silence / 蝗樊Φ繝ｻ蛻･繧後・荳肴ｰ怜袖縺ｪ髱吝ｯ・|
-| **Cold-analytical / 蜀ｷ蠕ｹ** | Dry declarative, emotion-stripped objectivity / 荵ｾ縺・◆譁ｭ險隱ｿ繝ｻ螳｢隕ｳ謠丞・ | Deduction, analysis, philosophy / 謗ｨ逅・・蛻・梵繝ｻ蜩ｲ蟄ｦ逧・峡逋ｽ |
-
-### 6. Quality Gate & Guard C / 蜩∬ｳｪ繧ｲ繝ｼ繝医→讖滓｢ｰ逧・ヵ繧｣繝ｫ繧ｿ繝ｪ繝ｳ繧ｰ
-
-An AI self-verification checklist executed **before** output, followed by a mechanical JavaScript filter **after** output.
-AI縺悟・蜉・*蜑・*縺ｫ螳溯｡後☆繧玖・蟾ｱ讀懆ｨｼ繝√ぉ繝・け繝ｪ繧ｹ繝医→縲∝・蜉・*蠕・*縺ｫJS縺ｧ螳溯｡後＆繧後ｋ讖滓｢ｰ逧・ヵ繧｣繝ｫ繧ｿ繝ｪ繝ｳ繧ｰ・医ぎ繝ｼ繝韻・峨・莠梧ｮｵ讒九∴縲・
-
-| Check / 繝√ぉ繝・け鬆・岼 | What It Prevents / 髦ｲ豁｢縺吶ｋ蝠城｡・|
-|:---|:---|
-| Setup-Payoff structure / 莨冗ｷ壺・蝗槫庶讒矩 | Deus ex machina endings / 蜚千ｪ√↑譁ｰ險ｭ螳壹〒隗｣豎ｺ縺吶ｋ邨先忰 |
-| Emotion gap sufficiency / 諢滓ュ關ｽ蟾ｮ縺ｮ蜊∝・諤ｧ | "Slightly surprising" instead of "completely unexpected" / 縲後■繧・▲縺ｨ諢丞､悶肴ｭ｢縺ｾ繧翫・螻暮幕 |
-| Motif recurrence / 繝｢繝√・繝輔・蝗槫ｸｰ | Disconnected, one-off symbols / 菴ｿ縺・昏縺ｦ縺ｮ雎｡蠕ｴ |
-| Ending pattern diversity / 邨先忰繝代ち繝ｼ繝ｳ螟壽ｧ俶ｧ | Same structure every time / 豈主屓蜷後§讒矩縺ｮ邨先忰 |
-| Tone variation / 譁・ｽ薙・邱ｩ諤･ | Monotonous writing style / 蜊倩ｪｿ縺ｪ譁・ｽ・|
-| Character narrative function / 繧ｭ繝｣繝ｩ縺ｮ迚ｩ隱樒噪讖溯・ | Bystander characters / 蛯崎ｦｳ閠・□縺代・逋ｻ蝣ｴ莠ｺ迚ｩ |
-| Sensory balance / 莠疲─繝舌Λ繝ｳ繧ｹ | Visual-only descriptions / 隕冶ｦ壼￥驥阪・謠丞・ |
-| Metaphor originality / 豈泌湊縺ｮ迢ｬ閾ｪ諤ｧ | Clichﾃｩ metaphors / 菴ｿ縺・商縺輔ｌ縺溷ｮ壼梛豈泌湊 |
-| Character knowledge boundary / 繧ｭ繝｣繝ｩ遏･隴伜｢・阜 | Information leaks across characters / 繧ｭ繝｣繝ｩ髢薙・荳崎・辟ｶ縺ｪ諠・ｱ貍乗ｴｩ |
-| **Guard C (Post-filter)** / 繧ｬ繝ｼ繝韻 | Clichﾃｩ phrases ("In conclusion...") / AI迚ｹ譛峨・髯ｳ閻舌↑險縺・屓縺暦ｼ医後＞縺九′縺ｧ縺励◆縺九咲ｭ会ｼ峨・迚ｩ逅・炎髯､ |
-
-### 7. Long-Form Narrative Protocols / 髟ｷ邱ｨ蟆ら畑繝ｻ譁・ц邯ｭ謖√・繝ｭ繝医さ繝ｫ
-These protocols apply exclusively to the `long` (髟ｷ邱ｨ蟆剰ｪｬ) mode to prevent structural collapse and loss of detail across fully automated, multi-chapter (tens of thousands of characters) generated text.
-髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝牙ｰら畑縺ｮ繝励Ο繝医さ繝ｫ鄒､縲よ焚荳・ｭ苓ｦ乗ｨ｡縺ｮ迚ｩ隱槭ｒ蜈ｨ閾ｪ蜍輔〒騾｣邯夂函謌舌☆繧矩圀縺ｫ逕溘§繧九御ｼ冗ｷ壹・遐ｴ邯ｻ縲阪ｄ縲悟ｾ悟濠縺ｮ諱ｯ蛻・ｌ縲阪ｒ髦ｲ縺弱∪縺吶・
-
-- **Active Character Roster / 繧ｵ繝悶く繝｣繝ｩ霑ｽ霍｡**: Tracks supporting characters' current locations and statuses in the internal memo to prevent them from disappearing in later chapters. / 繧ｵ繝悶く繝｣繝ｩ繧ｯ繧ｿ繝ｼ縺ｮ迴ｾ蝨ｨ蝨ｰ縺ｨ迥ｶ豕√ｒ豈守ｫ縺ｮ蜀・Κ繝｡繝｢縺ｨ縺励※險倬鹸縺励∫ｵら乢縺ｧ縺ｮ豸亥､ｱ繧帝亟縺舌・
-- **Pacing Enforcement / 謠丞・蟇・ｺｦ縺ｮ蠑ｷ蛻ｶ**: Forces the AI to include sensory details, physical pain, and environmental descriptions during climax scenes and dialogue to prevent rushed pacing. / 繧ｯ繝ｩ繧､繝槭ャ繧ｯ繧ｹ繧・ｼ夊ｩｱ蜉・↓縺翫＞縺ｦ莠疲─謠丞・繧・ｉ菴鍋噪逞幄ｦ壹ｒ蠑ｷ蛻ｶ逧・↓謖ｿ蜈･縺輔○縲∝ｱ暮幕縺ｮ縲碁ｧ・￠雜ｳ縲阪ｒ髦ｲ豁｢縺吶ｋ縲・
-- **Dynamic Chekhov's Gun / 蜍慕噪繝√ぉ繝ｼ繝帙ヵ縺ｮ驫・*: Introduces a seemingly irrelevant item or habit in early chapters, intentionally leaving it unresolved, to be used as a critical breakthrough in the final chapter. / 蠎冗乢縺ｫ辟｡髢｢菫ゅ↓隕九∴繧九い繧､繝・Β繧・ｿ呈・繧帝・鄂ｮ縺励∫ｵら乢縺ｮ閾ｴ蜻ｽ逧・↑遯∫ｴ蜿｣縺ｨ縺励※蜿崎ｻ｢蝗槫庶縺輔○繧句虚逧・ｼ冗ｷ壹・
-- **Dynamic Scale & Full-Auto Generation / 蜍慕噪隕乗ｨ｡險ｭ險医→蜈ｨ閾ｪ蜍慕函謌・*: The AI automatically determines the optimal chapter count and target length (tens of thousands of characters) based on the input theme. The writing process is fully automated, continuously generating chapter by chapter until completion without requiring manual prompts. / 蜈･蜉帙ユ繝ｼ繝槭↓蝓ｺ縺･縺阪、I縺梧怙驕ｩ縺ｪ遶謨ｰ縺ｨ逶ｮ讓呎枚蟄玲焚・域焚荳・ｭ苓ｦ乗ｨ｡・峨ｒ蜍慕噪縺ｫ豎ｺ螳壹＠縺ｾ縺吶よ焔蜍輔〒縺ｮ繝励Ο繝ｳ繝励ヨ蜈･蜉帙・荳崎ｦ√〒縲∝ｮ檎ｵ舌∪縺ｧ蜈ｨ閾ｪ蜍輔〒遶縺斐→縺ｫ騾｣邯夂函謌舌＆繧後∪縺吶・
-- **Graceful Pause Control / 螳牙・縺ｪ荳譎ょ●豁｢莠育ｴ・ｩ溯・**: Features a pause reservation toggle during active generation. Pausing does not interrupt mid-sentence; it waits for the current chapter to finish and safely stops before the next chapter begins. / 蜈ｨ閾ｪ蜍慕函謌蝉ｸｭ縺ｮ縲御ｸ譎ょ●豁｢縲阪・蜊ｳ蠎ｧ縺ｮ驕ｮ譁ｭ縺ｧ縺ｯ縺ｪ縺上∫樟蝨ｨ蝓ｷ遲・ｸｭ縺ｮ遶繧呈怙蠕後∪縺ｧ譖ｸ縺榊・縺｣縺ｦ縺九ｉ螳牙・縺ｫ蠕・ｩ溽憾諷九↓遘ｻ陦後☆繧九御ｺ育ｴ・阪→縺励※讖溯・縺励∪縺吶・- **Live Preview Scroll Optimization / 繝ｩ繧､繝悶・繝ｬ繝薙Η繝ｼ縺ｮ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ譛驕ｩ蛹・*: During long-novel generation, the visible manuscript auto-scrolls smoothly within its dedicated container without forcing page-level scroll jumps, while stripping context memos for a clean preview. / 髟ｷ邱ｨ逕滓・荳ｭ縲√Γ繧ｿ諠・ｱ縺ｧ縺ゅｋ譁・ц繝｡繝｢繧定・蜍暮勁蜴ｻ縺励◆繝励Ξ繝薙Η繝ｼ繧定｡ｨ遉ｺ縺励▽縺､縲∫判髱｢蜈ｨ菴薙・繧ｬ繧ｿ縺､縺阪ｒ髦ｲ縺舌◆繧∝ｰ剰ｪｬ譛ｬ譁・棧蜀・〒縺ｮ縺ｿ閾ｪ蜍輔せ繧ｯ繝ｭ繝ｼ繝ｫ霑ｽ蠕薙ｒ陦後＞縺ｾ縺吶・- **Final Chapter Optimization & State Retention / 譛邨らｫ縺ｮ譛驕ｩ蛹悶→螳御ｺ・憾諷狗ｶｭ謖・*: The final chapter automatically strips premature final markers, splits at the true end, and maintains the manuscript scroll view cleanly after completion. / 譛邨らｫ縺ｮ逕滓・譎ゅ↓縲・比ｸｭ縺ｫ蜈･繧願ｾｼ繧薙□荳崎ｦ√↑縲悟ｮ後阪・繝ｼ繧ｯ繧定・蜍暮勁蜴ｻ縺励※豁｣遒ｺ縺ｫ螳檎ｵ仙愛螳壹ｒ陦後＞縲∝ｮ御ｺ・ｾ後ｂ逕滓・荳ｭ縺ｮ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ迥ｶ諷九ｒ邯ｺ鮗励↓邯ｭ謖√＠縺ｾ縺吶・- **Live Status Header / 繧ｹ繝・・繧ｿ繧ｹ繝舌・蟶ｸ譎り｡ｨ遉ｺ**: The long-novel panel features a fixed live status row updating current phase, chapter progress, and character counts in real-time. / 髟ｷ邱ｨ繝代ロ繝ｫ荳企Κ縺ｫ縲∫樟蝨ｨ縺ｮ繝輔ぉ繝ｼ繧ｺ縲∫ｫ騾ｲ謐励√Μ繧｢繝ｫ繧ｿ繧､繝譁・ｭ玲焚繧貞ｸｸ譎よ峩譁ｰ縺吶ｋ蝗ｺ螳壹せ繝・・繧ｿ繧ｹ繝舌・繧呈政霈峨・- **Fail-Closed Save Gates / 菫晏ｭ伜燕繝輔ぉ繧､繝ｫ繧ｯ繝ｭ繝ｼ繧ｺ**: Before a chapter is accepted into the manuscript or Story Bible context, the engine rejects management memos, design-note bullets, bare headings, under-length prose, paragraph-density failures, premature non-final resolution, and unresolved audit contradictions. / 遶譛ｬ譁・ｄ繧ｹ繝医・繝ｪ繝ｼ繝舌う繝悶Ν縺ｸ菫晏ｭ倥☆繧句燕縺ｫ縲∫ｮ｡逅・Γ繝｢縲∬ｨｭ險育ｮ・擅譖ｸ縺阪∬ｦ句・縺励□縺代・蜃ｺ蜉帙∫洒縺吶℃繧区悽譁・∵ｮｵ關ｽ蟇・ｺｦ荳崎ｶｳ縲・撼譛邨らｫ縺ｮ譌ｩ譛溷ｮ檎ｵ舌∵悴隗｣豎ｺ縺ｮ謨ｴ蜷域ｧ繧ｨ繝ｩ繝ｼ繧剃ｿ晏ｭ俶拠蜷ｦ縺励∪縺吶・- **Robust Auto-Recovery / 蠑ｷ迚｢縺ｪ閾ｪ蜍穂ｿｮ蠕ｩ**: If structural logic or continuity checks fail, the engine performs up to two complete chapter regenerations by default, and up to four for duplicate/replay, paragraph/scene-density, or late non-final premature-resolution failures before a fail-closed stop. / 隲也炊繝ｻ謨ｴ蜷域ｧ縺ｮ讀懆ｨｼ縺ｫ螟ｱ謨励＠縺溷ｴ蜷医・壼ｸｸ縺ｯ譛螟ｧ2蝗槭・㍾隍・・蜀肴ｼ斐∵ｮｵ關ｽ/繧ｷ繝ｼ繝ｳ蟇・ｺｦ荳崎ｶｳ縲∫ｵら乢髱樊怙邨らｫ縺ｮ譌ｩ譛溷ｮ檎ｵ舌↓縺､縺・※縺ｯ譛螟ｧ4蝗槭∪縺ｧ縲∵・遉ｺ逧・↑螟ｱ謨礼炊逕ｱ縺､縺阪〒遶蜈ｨ菴薙・蜀咲函謌舌ｒ隧ｦ縺ｿ縺ｾ縺吶・- **Final Chapter Full-Text Output / 譛邨らｫ蜈ｨ譁・・蜉・*: Upon final chapter completion, the AI compiles ALL chapters into a single markdown code block for one-click copy. A dedicated output format section with concrete template prevents AIs from skipping this step. / 譛邨らｫ螳御ｺ・凾縺ｫ蜈ｨ遶縺ｮ譛ｬ譁・ｒ1縺､縺ｮ繧ｳ繝ｼ繝峨ヶ繝ｭ繝・け縺ｫ縺ｾ縺ｨ繧√※蜃ｺ蜉帙☆繧狗ｾｩ蜍吶ｒ蠑ｷ蛹悶ょｰら畑繝輔か繝ｼ繝槭ャ繝医→繝・Φ繝励Ξ繝ｼ繝医〒AI縺ｮ逵∫払繧帝亟豁｢縲・
-- **State Separation & Context Panel / 迥ｶ諷九・螳悟・蛻・屬縺ｨ譁・ц繝代ロ繝ｫ**: Novel text and AI's structural memos (GMC+S, foreshadowing) are strictly separated at the state level. Memos are routed to a collapsible side panel, ensuring the final text export is 100% clean novel prose without any meta-noise or markdown artifacts. / 蟆剰ｪｬ譛ｬ譁・→AI縺ｮ讒矩繝｡繝｢・育岼逧・・莨冗ｷ夂ｭ会ｼ峨ｒ蜀・Κ迥ｶ諷九Ξ繝吶Ν縺ｧ螳悟・縺ｫ蛻・屬縲ゅΓ繝｢縺ｯ謚倥ｊ縺溘◆縺ｿ蜿ｯ閭ｽ縺ｪ蟆ら畑繝代ロ繝ｫ縺ｸ繝ｫ繝ｼ繝・ぅ繝ｳ繧ｰ縺輔ｌ縲、I迚ｹ譛峨・遨ｺ縺ｮ繝槭・繧ｯ繝繧ｦ繝ｳ險伜捷縺ｪ縺ｩ繧ょｼｷ蜉帙↓繧ｯ繝ｬ繝ｳ繧ｸ繝ｳ繧ｰ髯､蜴ｻ縺輔ｌ繧九◆繧√√お繧ｯ繧ｹ繝昴・繝医＆繧後ｋ繝・く繧ｹ繝医↓縺ｯ邏皮ｲ九↑蟆剰ｪｬ譛ｬ譁・・縺ｿ縺悟性縺ｾ繧後∪縺吶・
-- **Local Timestamped Export / 繝ｭ繝ｼ繧ｫ繝ｫ譎ょ綾縺ｧ縺ｮ蜴ｳ蟇・↑繝輔ぃ繧､繝ｫ邂｡逅・*: All text and JSON exports enforce a rigid 14-digit local timestamp (`YYYYMMDDHHmmss`) to resolve timezone drift and ensure chronological sorting consistency across long-term serialized writing. / 蜈ｨ縺ｦ縺ｮ繝・く繧ｹ繝医・JSON菫晏ｭ倥・繝輔ぃ繧､繝ｫ蜷阪↓縺翫＞縺ｦ縲ゞTC繧ｺ繝ｬ縺ｮ縺ｪ縺・律譛ｬ譎る俣・医Ο繝ｼ繧ｫ繝ｫ譎ょ綾・峨・螳悟・縺ｪ謨ｰ蟄・4譯・ｼ・YYYYMMDDHHmmss`・峨ｒ蠑ｷ蛻ｶ縲る聞譛滄俣縺ｫ繧上◆繧矩｣霈牙濤遲・凾縺ｮ譎らｳｻ蛻励た繝ｼ繝医・荳雋ｫ諤ｧ繧剃ｿ晁ｨｼ縺励∪縺吶・
-- **AI Consistency Audit Engine / AI遏帷崟讀懈渊繧ｨ繝ｳ繧ｸ繝ｳ**: Implemented a recursive loop mechanism (check -> fix -> recheck) with a maximum of 8 iterations to ruthlessly eliminate logical paradoxes and setting inconsistencies during long-form continuous generation. Detailed audit logs are displayed to the user in real-time. / 髟ｷ邱ｨ騾｣邯夂函謌蝉ｸｭ縺ｫ逋ｺ逕溘☆繧玖ｨｭ螳壹・遐ｴ邯ｻ繧・ｫ也炊逧・泝逶ｾ繧呈､懃衍縺励∝ｮ牙・荳企剞8蝗槭∪縺ｧ縲梧､懈渊竊剃ｿｮ豁｣竊貞・讀懈渊縲阪・繝ｫ繝ｼ繝励ｒ蝗槭＠縺ｦ蠕ｹ蠎慕噪縺ｫ遏帷崟繧呈賜髯､縺吶ｋ繧ｨ繝ｳ繧ｸ繝ｳ繧呈政霈峨ゆｽ輔′遏帷崟縺励※縺・ｋ縺九・隧ｳ邏ｰ繧帝ｲ陦後Ο繧ｰ縺ｫ繝ｪ繧｢繝ｫ繧ｿ繧､繝陦ｨ遉ｺ縺励∪縺吶・
-
-
----
-
-## 屏・・System Feature Specifications / 繧ｷ繧ｹ繝・Β讖溯・隧ｳ邏ｰ莉墓ｧ・
-
-### 1. Universal Intake Spec / 荳・・繧､繝ｳ繝励ャ繝茨ｼ医Θ繝九ヰ繝ｼ繧ｵ繝ｫ繝ｻ繧､繝ｳ繝・・繧ｯ・芽ｩｳ邏ｰ莉墓ｧ・
-A unified asset injection pipeline that accepts various content types (images, web links, documents, and manual text) and dynamic embeds context into prompt generation.
-逕ｻ蜒上仝eb繝ｪ繝ｳ繧ｯ縲∵枚譖ｸ繝輔ぃ繧､繝ｫ縲∫峩謗･蜈･蜉帙↑縺ｩ縺ｮ螟夂ｨｮ螟壽ｧ倥↑繧｢繧ｻ繝・ヨ繧剃ｸ縺､縺ｮ繧､繝ｳ繧ｿ繝ｼ繝輔ぉ繝ｼ繧ｹ縺ｧ蜿鈴倥＠縲√せ繝医・繝ｪ繝ｼ逕滓・縺ｮ繧ｳ繝ｳ繝・く繧ｹ繝医→縺励※蜍慕噪縺ｫ繝励Ο繝ｳ繝励ヨ縺ｸ豕ｨ蜈･縺吶ｋ讖溯・縺ｧ縺吶・
-
-- **Operational Value & Benefits / 蟆主・繝｡繝ｪ繝・ヨ**:
-  - **Multi-Source Context Synthesis / 螟壼・諠・ｱ縺ｮ邨ｱ蜷・*: Allows users to blend visual cues from character sheets, factual details from real-time web articles, and structural drafts from local text files simultaneously. The AI naturally synthesizes these distinct elements into a cohesive narrative. / 謇句・縺ｮ繧ｭ繝｣繝ｩ繧ｷ繝ｼ繝育判蜒上√う繝ｳ繧ｹ繝斐Ξ繝ｼ繧ｷ繝ｧ繝ｳ蜈・・Web繝壹・繧ｸ縲∽ｸ区嶌縺阪・繝・く繧ｹ繝医→縺・▲縺溷・縺冗焚縺ｪ繧区ュ蝣ｱ貅舌ｒ1縺､縺ｮ繧ｹ繝医・繝ｪ繝ｼ逕滓・縺ｸ繧ｷ繝ｼ繝繝ｬ繧ｹ縺ｫ隱ｿ蜥後＆縺帙∵ｷｱ縺ｿ縺ｮ縺ゅｋ繧ｹ繝医・繝ｪ繝ｼ繧堤函縺ｿ蜃ｺ縺励∪縺吶・
-  - **Fault-Tolerant Engine / 閠宣囿螳ｳ險ｭ險・*: If a URL scrape fails due to CORS or an image analysis is blocked by missing API keys, the system automatically bypasses the faulty asset, ensuring prompt generation proceeds without polluting the prompt with UI error strings. / 隗｣譫舌お繝ｩ繝ｼ繧・い繧ｯ繧ｻ繧ｹ蛻ｶ髯撰ｼ・ORS繧ｨ繝ｩ繝ｼ縺ｪ縺ｩ・峨′逋ｺ逕溘＠縺溘い繧ｻ繝・ヨ繧定・蜍墓､懃衍縺励※繝励Ο繝ｳ繝励ヨ讒狗ｯ峨°繧画賜髯､縺吶ｋ縺溘ａ縲∫函謌仙・逅・′騾比ｸｭ縺ｧ蛛懈ｻ槭＠縺溘ｊ縲√お繝ｩ繝ｼ繝・く繧ｹ繝医′繝励Ο繝ｳ繝励ヨ縺ｫ蜈･繧願ｾｼ繧薙〒AI縺ｮ蜃ｺ蜉帙ｒ豎壽沒縺励◆繧翫☆繧九・繧帝亟縺弱∪縺吶・
-- **Multi-Format Ingestion / 螟壼ｽｩ縺ｪ繝輔か繝ｼ繝槭ャ繝亥女鬆・*:
-  - **Images (逕ｻ蜒・**: Automatically processes characters, illustrations, or product sheets. Uses Gemini Vision API to convert visual cues (outfit, facial expressions, actions, objects, specific brands) into a 100-250 characters textual summary. / 繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ險ｭ螳壹す繝ｼ繝医ｄ陬ｽ蜩√う繝ｩ繧ｹ繝医↑縺ｩ繧偵ラ繝ｭ繝・・縺吶ｋ縺ｨ縲；emini Vision API縺瑚・蜍輔〒繝薙ず繝･繧｢繝ｫ隕∫ｴ・域恪陬・∬｡ｨ諠・∫黄菴薙√ヶ繝ｩ繝ｳ繝峨∫恚譚ｿ譁・ｭ励↑縺ｩ・峨ｒ謚ｽ蜃ｺ縺励・00縲・50譁・ｭ励・隗｣隱ｬ隕∫ｴ・→縺励※繝・く繧ｹ繝亥喧縺励∪縺吶・
-  - **Web Links (URL)**: Resolves CORS scraping limitations using public proxies (Codetabs & Allorigins fallback). Automatically strips boilerplate code (`<script>`, `<style>`, `nav`, `footer`, etc.) and digests the core metadata and text body up to 3,000 characters. / Web繧ｵ繧､繝・of URL繧貞・蜉帙☆繧九→縲，ORS繝励Ο繧ｭ繧ｷ繧堤ｵ檎罰縺励※譛ｬ譁・ｒ繧ｹ繧ｯ繝ｬ繧､繝斐Φ繧ｰ縲ゆｸ崎ｦ√↑繧ｹ繧ｯ繝ｪ繝励ヨ繧・リ繝薙ご繝ｼ繧ｷ繝ｧ繝ｳ繧帝勁蜴ｻ縺励◆荳翫〒縲∵怙螟ｧ3000譁・ｭ励・繧ｳ繝ｳ繝・く繧ｹ繝医ョ繝ｼ繧ｿ繧呈歓蜃ｺ縺励∪縺吶・
-  - **Text Documents (譁・嶌繝峨Ο繝・・)**: Instantly processes local `.txt` or `.md` files via FileReader API (UTF-8 encoding). / 繝ｭ繝ｼ繧ｫ繝ｫ縺ｮ繝・く繧ｹ繝医ヵ繧｡繧､繝ｫ・・txt / .md・峨ｒ繝峨Ο繝・・縺吶ｋ縺縺代〒縲∝叉蠎ｧ縺ｫ繧｢繧ｻ繝・ヨ縺ｨ縺励※逋ｻ骭ｲ縺励∪縺吶・
-- **Asset Control / 繧｢繧ｻ繝・ヨ蛻ｶ蠕｡繧ｷ繧ｹ繝・Β**:
-  - Each item supports independent locking (locking freezes the asset status during random generation) and individual deletion. / 謚募・縺励◆繧｢繧ｻ繝・ヨ縺ｯ蛟句挨縺ｫ繝ｭ繝・け・亥・繝ｩ繝ｳ繝繝逕滓・縺ｧ縺ｮ繧ｯ繝ｪ繧｢縺九ｉ菫晁ｭｷ・峨♀繧医・蛟句挨蜑企勁縺悟庄閭ｽ縺ｧ縺吶・
-  - OBSTACLE-FREE GENERATION: Built-in validation filters out error state assets (e.g., scraping failure messages) from prompt construction to prevent prompt pollution. / 隗｣譫舌お繝ｩ繝ｼ縺ｫ縺ｪ縺｣縺溘い繧ｻ繝・ヨ縺後・繝ｭ繝ｳ繝励ヨ縺ｸ豺ｷ蜈･縺吶ｋ縺ｮ繧帝亟縺千黄逅・勁螟悶ぎ繝ｼ繝峨ｒ謳ｭ霈峨・
-
-### 2. Style Analyzer Engine / 雜・ｼｷ蠑包ｼ∽ｽ憺｢ｨ隗｣譫舌お繝ｳ繧ｸ繝ｳ隧ｳ邏ｰ莉墓ｧ・
-Deep computational stylistics analysis tool that evaluates user-provided texts and clones the target writing style onto the generated story plot.
-閾ｪ遲・・譁・ｫ繧・･ｽ縺阪↑菴懷ｮｶ縺ｮ繝・く繧ｹ繝医ｒ隗｣譫舌＠縲√◎縺ｮ譁・ｽ薙ｄ菫ｮ霎樒音蠕ｴ繧呈ｷｱ螻､蛻・梵縺励※縲∫函謌舌＠縺溘せ繝医・繝ｪ繝ｼ縺ｮ繝励Ο繝・ヨ・域ｧ区・・峨ｒ邯ｭ謖√＠縺溘∪縺ｾ譁・ｫ繧偵◎縺ｮ菴憺｢ｨ縺ｸ縺ｨ縲後Μ繝ｩ繧､繝医阪☆繧九お繝ｳ繧ｸ繝ｳ縺ｧ縺吶・
-
-- **Operational Value & Benefits / 蟆主・繝｡繝ｪ繝・ヨ**:
-  - **Rhetorical Fingerprinting / 譁・ｽ薙・螳｢隕ｳ逧・・譫・*: Deconstructs target text patterns into structured data, making it easier for writers to study other styles or ensure their own work remains linguistically consistent. / 閾ｪ遲・・莉冶・・譁・ｫ讒矩・井ｿｮ霎槭∬ｪ槫ｽ吶∵枚髟ｷ縺ｪ縺ｩ・峨ｒ50莉･荳翫・謖・ｨ吶〒隕冶ｦ夂噪繝ｻ螳｢隕ｳ逧・↓蜿ｯ隕門喧縺励∬・霄ｫ縺ｮ譁・ｽ薙・逋悶ｒ謚頑升縺励◆繧翫∽ｻ紋ｽ懷ｮｶ縺ｮ繧ｹ繧ｿ繧､繝ｫ繧貞・譫舌・蟄ｦ鄙偵＠縺溘ｊ縺吶ｋ縺ｮ繧貞勧縺代∪縺吶・
-  - **Zero-Data-Loss Writing / 繝励Ο繝・ヨ邯ｭ謖∝梛螟画鋤**: The "Style Rewrite" engine converts prose styles without losing a single plot point (Ki-sho-ten-ketsu structure). This resolves a major pain point where AI rewrites typically alter the plot or omit character actions. / 縲後％縺ｮ菴憺｢ｨ縺ｧ繝ｪ繝ｩ繧､繝亥ｮ溯｡後肴ｩ溯・縺ｯ縲∝・縺ｮ襍ｷ謇ｿ霆｢邨舌・繝ｭ繝・ヨ繧貞ｮ悟・縺ｫ蝗ｺ螳壹＠縺滉ｸ翫〒縲∵緒蜀呵｡ｨ迴ｾ縺ｨ繝医・繝ｳ縺ｮ縺ｿ繧帝∈謚槭＠縺滉ｽ憺｢ｨ縺ｫ蜈･繧梧崛縺医∪縺吶・I縺ｫ縺ゅｊ縺後■縺ｪ縲後Μ繝ｩ繧､繝医☆繧九→隧ｱ縺ｮ蜀・ｮｹ繧・く繝｣繝ｩ縺ｮ陦悟虚縺ｾ縺ｧ蜍晄焔縺ｫ螟峨ｏ縺｣縺ｦ縺励∪縺・阪→縺・≧蝠城｡後ｒ隗｣豎ｺ縺励∪縺吶・
-  - **Portability / 螟夜Κ騾｣謳ｺ諤ｧ**: Structured JSON reports can be exported and directly loaded into ChatGPT, Claude, or other LLMs to replicate the analyzed writing style on external platforms. / 隗｣譫千ｵ先棡繧呈ｧ矩蛹褒SON縺ｨ縺励※菫晏ｭ倥＠縲，hatGPT繧Гlaude遲峨・螟夜ΚAI繝√Ε繝・ヨ繝・・繝ｫ縺ｫ縲後％縺ｮ譁・ｽ薙〒蝓ｷ遲・＠縺ｦ縲阪→逶ｴ謗･蜻ｽ莉､縺ｨ縺励※謚募・縺吶ｋ縺薙→縺悟庄閭ｽ縺ｧ縺吶ゅ∪縺溘∫函謌舌＠縺滉ｽ憺｢ｨJSON縺ｯ AI 4-koma System 縺ｮSTEP1縺ｫ逶ｴ謗･繝峨Λ繝・げ・・ラ繝ｭ繝・・縺励※驕ｩ逕ｨ縺吶ｋ縺薙→繧ょ庄閭ｽ縺ｧ縺吶・
-- **50+ Parameter Analysis / 50莉･荳翫・繝代Λ繝｡繝ｼ繧ｿ隗｣譫・*:
-  - Dropping a text sample triggers deep stylistic parsing covering Rhetoric (metaphors, repetition), Syntax (average sentence length, ending verbs), Vocabulary (parts of speech, density of abstract words), Dialogue balance, and Emotional arc. / 繝・く繧ｹ繝医ｒ繝峨Ο繝・・縺励※隗｣譫舌ｒ螳溯｡後☆繧九→縲、I縺御ｿｮ霎樊橿豕輔∵ｧ区枚・域枚髟ｷ縲∽ｽ楢ｨ豁｢繧∵ｯ皮紫・峨∬ｪ槫ｽ吶・蛛上ｊ縲∽ｼ夊ｩｱ豈皮紫縲∵─諠・峇邱壹↑縺ｩ50莉･荳翫・譁・ｽ鍋音蠕ｴ繧呈ｷｱ螻､蛻・梵縺励∪縺吶・
-- **Dual Format Output / 2蠖｢蠑上・繝ｬ繝昴・繝亥・蜉・*:
-  - **Human-Readable (譁・ｫ陦ｨ遉ｺ)**: Clear, itemized analysis of the writer's style for study or presentation. / 隗｣譫千ｵ先棡繧定ｫ也炊逧・↓隗｣隱ｬ縺励◆莠ｺ髢鍋畑譁・ｫ繝ｬ繝昴・繝医・
-  - **Structured JSON (讒矩蛹褒SON)**: Outputs a structured JSON representing the stylistic fingerprint. Can be copied and pasted directly into external tools (ChatGPT, Claude, etc.) or dragged and dropped into AI 4-koma System's STEP1. / 螟夜Κ繝・・繝ｫ・・hatGPT / Claude遲会ｼ峨↓縺昴・縺ｾ縺ｾ繧ｳ繝斐・・・・繝ｼ繧ｹ繝医＠縺ｦ菴憺｢ｨ繧ｯ繝ｭ繝ｼ繝ｳ繧呈欠遉ｺ縺ｧ縺阪ｋ縺ｻ縺九、I 4-koma System 縺ｮSTEP1縺ｫ逶ｴ謗･繝峨Λ繝・げ・・ラ繝ｭ繝・・縺励※驕ｩ逕ｨ蜿ｯ閭ｽ縺ｪ讒矩蛹褒SON蜃ｺ蜉帙・
-- **Plot-Preserving Rewrite / 讒区・邯ｭ謖∝梛繝ｪ繝ｩ繧､繝域ｩ溯・**:
-  - Implements the "Rewrite with Style" feature. It takes the original generated story, maps its core plot points, and uses the saved style parameters to rewrite the draft. Changes style, voice, and sensory details while retaining 100% of the original story progression (Ki-sho-ten-ketsu structure). / 隗｣譫舌＠縺滓枚菴薙ｒ縲∽ｸ翫・蜃ｺ蜉帙お繝ｪ繧｢縺ｫ逕滓・縺輔ｌ縺溘せ繝医・繝ｪ繝ｼ縺ｫ驕ｩ逕ｨ縺励※縲後Μ繝ｩ繧､繝医阪ｒ螳溯｡後ゅせ繝医・繝ｪ繝ｼ螻暮幕・郁ｵｷ謇ｿ霆｢邨撰ｼ峨ｒ螳悟・縺ｫ菫昴▲縺溘∪縺ｾ縲∵枚遶陦ｨ迴ｾ繝ｻ謠丞・繝ｻ隱槭ｊ蜿｣縺ｮ縺ｿ繧定ｧ｣譫舌＠縺滉ｽ憺｢ｨ縺ｸ縺ｨ繧ｳ繝ｳ繝舌・繝医＠縺ｾ縺吶・
-- **Style Rewrite Progress Sync / 菴憺｢ｨ繝ｪ繝ｩ繧､繝域凾縺ｮ騾ｲ謐励・繧ｹ繝医Μ繝ｼ繝溘Φ繧ｰ蜷梧悄**:
-  - Rewriting now clears the log window and displays simulation step logs (rhythm check, vocabulary mapping) followed by a live character counter during text compilation. / 菴憺｢ｨ繝ｪ繝ｩ繧､繝亥・逅・′繧ｹ繝医Μ繝ｼ繝溘Φ繧ｰ騾壻ｿ｡蛹悶＆繧後∝ｮ溯｡梧凾縺ｫ騾ｲ謐礼ｪ薙′閾ｪ蜍輔Μ繧ｻ繝・ヨ縺輔ｌ縲√Μ繝ｩ繧､繝亥ｾ・ｩ滉ｸｭ縺ｮ驕ｩ逕ｨ繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝ｭ繧ｰ縺翫ｈ縺ｳ蝓ｷ遲・ｸｭ縺ｮ譁・ｭ玲焚縺碁ｲ謐礼ｪ灘・縺ｫ繝ｪ繧｢繝ｫ繧ｿ繧､繝蜷梧悄陦ｨ遉ｺ縺輔ｌ縺ｾ縺吶・
-
-### 3. Today's News Keywords / 莉頑律縺ｮ繝九Η繝ｼ繧ｹ繧ｭ繝ｼ繝ｯ繝ｼ繝牙叙蠕苓ｩｳ邏ｰ莉墓ｧ・
-Leverages Google Gemini's Search Grounding to fetch the latest real-time Japanese news headlines and extract multi-category narrative keywords to feed the story generator.
-Google Gemini縺ｮ讀懃ｴ｢繧ｰ繝ｩ繧ｦ繝ｳ繝・ぅ繝ｳ繧ｰ・・earch Grounding・峨ヤ繝ｼ繝ｫ繧貞茜逕ｨ縺励※縲√Μ繧｢繝ｫ繧ｿ繧､繝縺ｮ譌･譛ｬ縺ｮ荳ｻ隕√ル繝･繝ｼ繧ｹ縺九ｉ縲∝卸菴懊・蛻ｺ豼縺ｨ縺ｪ繧句､夊ｧ堤噪縺ｪ繧ｭ繝ｼ繝ｯ繝ｼ繝峨ｒ閾ｪ蜍墓歓蜃ｺ縺励√き繧ｹ繧ｿ繝繝・・繝槭→縺励※繧ｻ繝・ヨ縺吶ｋ讖溯・縺ｧ縺吶・
-
-- **Operational Value & Benefits / 蟆主・繝｡繝ｪ繝・ヨ**:
-  - **Real-Time Synergy / 繝ｪ繧｢繝ｫ繧ｿ繧､繝諤ｧ縺ｮ陞榊粋**: Automatically grounds fictional settings in active, real-world events. Writers can effortlessly craft topical stories that resonate with current social conversations. / 迴ｾ螳溽､ｾ莨壹・繝帙ャ繝医↑隧ｱ鬘後ｄ譎ゆｺ九ル繝･繝ｼ繧ｹ繧貞叉蠎ｧ縺ｫ蜑ｵ菴懊・繝ｭ繝・ヨ縺ｮ蛻・ｊ蜿｣縺ｨ縺励※蜿悶ｊ霎ｼ縺ｿ縲√ヨ繝ｬ繝ｳ繝峨ｒ蜿肴丐縺励◆遉ｾ莨夂噪蜈ｱ諢滓ｧ縺ｮ鬮倥＞迚ｩ隱槭ｒ螳ｹ譏薙↓逕溘∩蜃ｺ縺吶％縺ｨ縺後〒縺阪∪縺吶・
-  - **Curation Diversity & Balance / 蛛上ｊ縺ｮ縺ｪ縺・く繝･繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ**: The search agent is strictly instructed to pull keywords across social, international, business, entertainment, sports, and science categories. This breaks the LLM's natural tendency to overfocus on high-tech topics like AI or IT. / AI縺ｫ蟇ｾ縺励※遉ｾ莨壹∝嵜髫帙∫ｵ梧ｸ医√お繝ｳ繧ｿ繝｡縲∫ｧ大ｭｦ縺ｪ縺ｩ縺ｮ蜷・ず繝｣繝ｳ繝ｫ縺九ｉ繝舌Λ繝ｳ繧ｹ繧医￥繧ｭ繝ｼ繝ｯ繝ｼ繝峨ｒ髮・ａ繧九ｈ縺・欠遉ｺ縺励※縺翫ｊ縲、I縺後栗T繝ｻAI縲阪↑縺ｩ縺ｮ荳驛ｨ縺ｮ繝医ヴ繝・け縺ｫ蛛上▲縺溘ロ繧ｿ縺ｰ縺九ｊ繧帝∈縺ｶ縺ｮ繧帝亟縺弱∝､壽ｧ俶ｧ縺ｫ蟇後ｓ縺迚ｩ隱槭・遞ｮ繧剃ｾ帷ｵｦ縺励∪縺吶・
-- **Interactive Execution / 繧､繝ｳ繧ｿ繝ｩ繧ｯ繝・ぅ繝悶↑螳溯｡後ヵ繝ｭ繝ｼ**:
-  - Requires a valid API key. When the "倹 繝九Η繝ｼ繧ｹ" button is clicked, the app sends a semantic search request to the Gemini engine, processes the headlines, format them as comma-separated values, and appends the new keywords to the custom theme field with a comma, preventing overwriting existing inputs. / 譛牙柑縺ｪAPI繧ｭ繝ｼ繧定ｨｭ螳壹＠縺溽憾諷九〒縲交沍・繝九Η繝ｼ繧ｹ縲阪・繧ｿ繝ｳ繧偵け繝ｪ繝・け縺吶ｋ縺ｨ縲、I縺係eb讀懃ｴ｢繧剃ｻ九＠縺ｦ譛譁ｰ繝九Η繝ｼ繧ｹ繧定ｦ句・縺励→縺励※蜿朱寔繝ｻ讒矩蛹悶＠縲√ユ繝ｼ繝槫・蜉帶ｬ・∈譌｢蟄倥・蜈･蜉帙ｒ荳頑嶌縺阪○縺壹√き繝ｳ繝橸ｼ・, `・峨〒郢九￡縺ｦ霑ｽ險倥＠縺ｾ縺吶・
-
-### 4. Individual Input Locking Spec / 蛟句挨蜈･蜉帙Ο繝・け讖溯・隧ｳ邏ｰ莉墓ｧ・
-Granular interface freeze mechanism that allows writers to lock down specific fields, protecting them from random generation or reset operations.
-迚ｹ螳壹・蜈･蜉帙ヵ繧｣繝ｼ繝ｫ繝峨ｒ蛟句挨縺ｫ蝗ｺ螳夲ｼ医Ο繝・け・峨＠縲∽ｸ諡ｬ繝ｩ繝ｳ繝繝逕滓・繧・・繝ｪ繧ｻ繝・ヨ縺ｨ縺・▲縺滓桃菴懊↓繧医ｋ莠域悄縺帙〓蛟､縺ｮ荳頑嶌縺阪°繧我ｿ晁ｭｷ縺吶ｋ縺溘ａ縺ｮ繧､繝ｳ繧ｿ繝ｼ繝輔ぉ繝ｼ繧ｹ蛻ｶ蠕｡讖溯・縺ｧ縺吶・
-
-- **Operational Value & Benefits / 蟆主・繝｡繝ｪ繝・ヨ**:
-  - **Granular Control in Randomization / 諢丞峙逧・↑繝ｩ繝ｳ繝繝諤ｧ縺ｮ蛻ｶ蠕｡**: Enables an iterative brainstorming workflow. Writers can lock down their established characters and worldview while letting the engine randomize themes, eras, and endings to discover unexpected scenarios. / 縲檎匳蝣ｴ莠ｺ迚ｩ繧・ｸ也阜隕ｳ縺縺代・蝗ｺ螳壹＠縲∽ｻ悶・繝・・繝槭ｄ繧ｪ繝√√ず繝｣繝ｳ繝ｫ縺縺代ｒ繝ｩ繝ｳ繝繝縺ｫ螟画峩縺励※濶ｲ縲・↑繧｢繧､繝・い繧貞・縺励◆縺・阪→縺・▲縺溘∵э蝗ｳ逧・↑驛ｨ蛻・崋螳壹Λ繝ｳ繝繝逕滓・縺悟庄閭ｽ縺ｫ縺ｪ繧翫∝柑邇・噪縺ｪ繧ｷ繝翫Μ繧ｪ繝上Φ繝・ぅ繝ｳ繧ｰ繧偵し繝昴・繝医＠縺ｾ縺吶・
-  - **Safe Reset / 螳牙・縺ｪ荳諡ｬ繧ｯ繝ｪ繧｢繧ｬ繝ｼ繝・*: Protects highly customized assets (such as visual data in the Universal Intake or complex character sheets) during a reset operation, eliminating the anxiety of accidental data loss. / 荳・・繧､繝ｳ繝励ャ繝医↓繝峨Ο繝・・縺励◆螟壽焚縺ｮ繧｢繧ｻ繝・ヨ繧・∽ｽ懊ｊ霎ｼ繧薙□繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝医↑縺ｩ縲∝・蜈･蜉帙↓譎る俣縺ｮ縺九°繧矩㍾隕√↑繧ｫ繧ｹ繧ｿ繝諠・ｱ繧剃ｿ晄戟縺励◆縺ｾ縺ｾ莉悶・繝代Λ繝｡繝ｼ繧ｿ縺ｮ縺ｿ繧剃ｸ謗・＠縲∝ｮ牙・縺ｫ谺｡縺ｮ隧ｦ陦後↓遘ｻ繧九％縺ｨ縺後〒縺阪∪縺吶・
-- **Toggle Lock Interface / 繝医げ繝ｫ繝ｭ繝・け繧､繝ｳ繧ｿ繝ｼ繝輔ぉ繝ｼ繧ｹ**:
-  - Every setting section features a lock button (`箔`/`白`). When toggled to locked (`白`), the field becomes read-only and ignores all global operations, including "One-Shot Full Random" (`軸 蜈ｨ鬆・岼繝ｩ繝ｳ繝繝`), specific section randomizer, and "Reset All" (`卵・・蜈ｨ繝ｪ繧ｻ繝・ヨ`). / 蜷・・蜉帙そ繧ｯ繧ｷ繝ｧ繝ｳ縺ｫ驟咲ｽｮ縺輔ｌ縺溘交沐・白縲阪ヨ繧ｰ繝ｫ繝懊ち繝ｳ繧偵け繝ｪ繝・け縺励※繝ｭ繝・け迥ｶ諷九↓縺吶ｋ縺ｨ縲√◎縺ｮ谺・∈縺ｮ蜈･蜉帙ｄ繝ｩ繝ｳ繝繝螟画峩縺悟ｮ悟・縺ｫ謚第ｭ｢縺輔ｌ縲√交沁ｲ 蜈ｨ鬆・岼繝ｩ繝ｳ繝繝縲阪ｄ縲交泓托ｸ・蜈ｨ繝ｪ繧ｻ繝・ヨ縲肴凾縺ｫ繧ょｽｱ髻ｿ繧貞女縺代★縺ｫ險ｭ螳壼､縺檎ｶｭ謖√＆繧後∪縺吶・
-
-### 5. AI Progress & Thought Log Window Spec / AI騾ｲ謐励・諤晁・Ο繧ｰ遯楢ｩｳ邏ｰ莉墓ｧ・
-A visual status console and parser framework that exposes the LLM's internal cognitive process (Chain of Thought) and live writing metrics to the user.
-LLM縺ｮ蜀・Κ諤晁・・繝ｭ繧ｻ繧ｹ・・hain of Thought・峨♀繧医・繝ｪ繧｢繝ｫ繧ｿ繧､繝縺ｪ蝓ｷ遲・憾豕√ｒ蜿ｯ隕門喧縺励・ｲ謐励・荳埼乗・縺輔ｄ繝輔Μ繝ｼ繧ｺ諢溘ｒ隗｣豸医☆繧九◆繧√・繧ｳ繝ｳ繧ｽ繝ｼ繝ｫ蝙玖｡ｨ遉ｺ繝ｻ隗｣譫舌す繧ｹ繝・Β縺ｧ縺吶・
-
-- **Operational Value & Benefits / 蟆主・繝｡繝ｪ繝・ヨ**:
-  - **Zero-Freeze Visibility / 繝輔Μ繝ｼ繧ｺ諢溘・螳悟・縺ｪ謇墓強**: API謗･邯壽凾縺ｮ騾壻ｿ｡蠕・ｩ滉ｸｭ繧ゅ∫ｴ・遘偵＃縺ｨ縺ｫ繝繝溘・縺ｮ蜀・Κ險育ｮ励Ο繧ｰ・郁ｵｷ謇ｿ霆｢邨仙ｦ･蠖捺ｧ縺ｮ讀懆ｨｼ縲∵─諠・誠蟾ｮ豈皮紫縺ｮ繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ遲会ｼ峨′蜃ｺ蜉帙＆繧後、I縺瑚｣上〒蜍輔＞縺ｦ縺・ｋ讒伜ｭ舌′繝ｪ繧｢繝ｫ繧ｿ繧､繝縺ｫ莨昴ｏ繧翫∪縺吶・
-  - **Cognitive Process Transparency / 諤晁・・繝ｭ繧ｻ繧ｹ縺ｮ騾乗・蛹・*: AI縺梧晁・＠縺溷・螳ｹ・・<thought>`繧ｿ繧ｰ蜀・ｼ峨ｒ閾ｪ蜍慕噪縺ｫ蛻・屬繝ｻ謚ｽ蜃ｺ縺励∝ｰら畑縺ｮ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ鬆伜沺縺ｫ縲梧晁・・繝ｭ繧ｻ繧ｹ縲阪→縺励※豬√＠霎ｼ縺ｿ縺ｾ縺吶・I縺後←縺ｮ繧医≧縺ｪ繝励Ο繝・ヨ繧堤ｫ九※縲∬・蟾ｱ謗｡轤ｹ繧定｡後▲縺溘°繧堤峩謗･繝・ヰ繝・げ繝ｻ遒ｺ隱阪〒縺阪∪縺吶・
-  - **Interactive Character Counter / 繝ｪ繧｢繝ｫ繧ｿ繧､繝蝓ｷ遲・き繧ｦ繝ｳ繝・*: 譛ｬ譁・・蝓ｷ遲・′髢句ｧ九＆繧後ｋ縺ｨ縲√せ繝医Μ繝ｼ繝溘Φ繧ｰ騾壻ｿ｡縺ｨ騾｣蜍輔＠縺ｦ縲後・迴ｾ蝨ｨ譁・ｭ玲焚: XXX譁・ｭ励阪→譁・ｭ玲焚縺後き繧ｦ繝ｳ繝医い繝・・縺輔ｌ縲∝濤遲・・騾ｲ謐怜ｺｦ縺後ン繧ｸ繝･繧｢繝ｫ縺ｧ蛻・°繧翫∪縺吶・
-- **Exclusive Scoreboard Layout / 謗剃ｻ冶｡ｨ遉ｺ蝙玖・蟾ｱ謗｡轤ｹ繧ｹ繧ｳ繧｢繝懊・繝・*:
-  - Displays progress bars and passing badges representing the AI's self-verified scores (Plot Recovery, Structure, Constraint compliance).
-  - To maximize log visibility and prevent UI clutter inside the 200px fixed-height console, the scoreboard is completely hidden during active generation while the API warning bar (yellow) is visible. Upon successful generation, the warning bar disappears, and the finalized self-grading scoreboard (green passing bars) instantly populates the top of the progress log. / AI縺ｮ閾ｪ蟾ｱ讀懆ｨｼ邨先棡・井ｼ冗ｷ壼屓蜿弱・讒矩繝ｻ蛻ｶ邏・ｼ峨ｒ蜿ｯ隕門喧縺吶ｋ蜷域ｼ繧ｰ繝ｩ繝包ｼ育ｷ代・繝舌・・峨るｲ陦後Ο繧ｰ縺ｮ陦ｨ遉ｺ鬆伜沺・磯ｫ倥＆200px・峨ｒ蝨ｧ霑ｫ縺励↑縺・ｈ縺・∫函謌蝉ｸｭ縺ｯ鮟・牡縺ｮ隴ｦ蜻翫ヰ繝ｼ繧定｡ｨ遉ｺ縺励せ繧ｳ繧｢繝懊・繝峨・髱櫁｡ｨ遉ｺ縺ｫ縺励∪縺吶ょｮ御ｺ・凾縺ｫ隴ｦ蜻翫ヰ繝ｼ縺梧ｶ医∴縲∝粋譬ｼ遒ｺ螳壹＠縺溘げ繝ｩ繝輔′荳企Κ縺ｫ荳諡ｬ陦ｨ遉ｺ縺輔ｌ繧区賜莉冶｡ｨ遉ｺ繝ｬ繧､繧｢繧ｦ繝医ｒ謗｡逕ｨ縺励※縺・∪縺吶・
-- **Robust Empty Output Prevention / 遨ｺ逋ｽ蜃ｺ蜉帙ヰ繧ｰ縺ｮ螳悟・縺ｪ隗｣豸・*:
-  - Implemented an automatic rescue logic in the thought log parsing (CoT extraction) where the entire text is treated as the story body if no output markers (e.g., 'Topic:') are detected. Furthermore, a double-layered empty output prevention guardrail has been introduced to forcibly restore text from the raw response if the final parsed output is 50 characters or less, resolving the blank output bug completely. / 髟ｷ邱ｨ蟆剰ｪｬ繝｢繝ｼ繝峨・繝励Ο繝ｳ繝励ヨ逕滓・縺ｪ縺ｩ縲∵枚荳ｭ縺ｫ蛻・屬繧ｭ繝ｼ繝ｯ繝ｼ繝会ｼ・Topic:` 遲会ｼ峨′蜷ｫ縺ｾ繧後↑縺・ｴ蜷医↓蜃ｺ蜉帙′遨ｺ縺ｫ縺ｪ繧九ヰ繧ｰ繧剃ｿｮ豁｣縲ゅく繝ｼ繝ｯ繝ｼ繝画悴讀懷・譎ゅ・繝・く繧ｹ繝亥・菴薙ｒ譛ｬ譁・→縺ｿ縺ｪ縺励√＆繧峨↓譛邨ょ・蜉帙′50譁・ｭ玲悴貅縺ｮ蝣ｴ蜷医・蜈ｨ菴薙ユ繧ｭ繧ｹ繝茨ｼ・totalText`・峨°繧画悽譁・ｒ蠑ｷ蛻ｶ謨大・縺吶ｋ繝輔ぉ繝ｼ繝ｫ繧ｻ繝ｼ繝輔ｒ螳溯｣・＠縲∫ｩｺ逋ｽ蜃ｺ蜉帙ヰ繧ｰ繧貞ｮ悟・縺ｫ隗｣豸医＠縺ｾ縺励◆縲・
-
----
-
-
-## 捗 Tech Stack / 謚陦薙せ繧ｿ繝・け
-- **Frontend**: Vite + Vanilla HTML/CSS/JS (Lightweight frontend / 霆ｽ驥上ヵ繝ｭ繝ｳ繝医お繝ｳ繝画ｧ区・)
-- **LLM/VFM**: Google Gemini API (`gemini-3-flash-preview`, `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-2.5-pro`) & OpenAI API (`gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano`, `gpt-4o`, `gpt-4o-mini`)
-- **Deployment**: GitHub Pages (static hosting / 髱咏噪繝帙せ繝・ぅ繝ｳ繧ｰ縺ｫ繧医ｋ繝・・繝ｭ繧､)
-
----
-
-## 訣 Cloud / Browser (Deploy)
-1. **Access**: Open the deployed web app / [Story Maker (GitHub Pages)](https://furuyan1234.github.io/story-maker/) 縺ｫ繧｢繧ｯ繧ｻ繧ｹ
-2. **Get API Key**: Obtain a Gemini API key at [Google AI Studio](https://aistudio.google.com/app/apikey) or an OpenAI API key at [OpenAI Platform](https://platform.openai.com/api-keys) / [Google AI Studio](https://aistudio.google.com/app/apikey) 縺ｧGemini API繧ｭ繝ｼ縲√∪縺溘・ [OpenAI Platform](https://platform.openai.com/api-keys) 縺ｧOpenAI API繧ｭ繝ｼ繧貞叙蠕・
-3. **Run**: Enter your API key at the top and click generate buttons / 荳企Κ縺ｮAPI繧ｭ繝ｼ谺・↓蜈･蜉帙＠縺ｦ縲御ｿ晏ｭ倥榊ｾ後√交沁ｲ 蜈ｨ縺ｦ繝ｩ繝ｳ繝繝縺ｧ逕滓・縲阪∪縺溘・縲後せ繝医・繝ｪ繝ｼ逕滓・縲阪・繧ｿ繝ｳ繧呈款縺・
-
-> Billing is pay-per-use (or free tier). Story generation typically uses ~1,000窶・,500 tokens per request.
-> 譁咎≡縺ｯ蠕馴㍼隱ｲ驥大宛・医∪縺溘・辟｡譁呎棧・峨〒縺吶る壼ｸｸ縲・蝗槭・迚ｩ隱樒函謌舌〒邏・,000縲・,500繝医・繧ｯ繝ｳ繧呈ｶ郁ｲｻ縺励∪縺吶・
->
-> **Note:** The API key is held in memory only and never sent anywhere except the official Google/OpenAI API endpoints.
-> **豕ｨ:** API繧ｭ繝ｼ縺ｯ繝｡繝｢繝ｪ蜀・・縺ｿ縺ｧ菫晄戟縺輔ｌ縲；oogle縺翫ｈ縺ｳOpenAI縺ｮ蜈ｬ蠑上お繝ｳ繝峨・繧､繝ｳ繝井ｻ･螟悶↓縺ｯ騾∽ｿ｡縺輔ｌ縺ｾ縺帙ｓ縲・
-
-### 捗 Run Locally (Windows) / 繝ｭ繝ｼ繧ｫ繝ｫ螳溯｡檎沿・・IP繝繧ｦ繝ｳ繝ｭ繝ｼ繝画凾・・
-1. [Releases](https://github.com/FURUYAN1234/story-maker/releases) 縺九ｉZIP繝輔ぃ繧､繝ｫ繧偵ム繧ｦ繝ｳ繝ｭ繝ｼ繝峨＠縲∝ｱ暮幕縺吶ｋ / Unzip the downloaded folder
-2. 繝輔か繝ｫ繝蜀・・ `start_Story_app.bat` 繧偵ム繝悶Ν繧ｯ繝ｪ繝・け縺吶ｋ / Double-click `start_Story_app.bat`
-3. 萓晏ｭ倥Λ繧､繝悶Λ繝ｪ縺瑚・蜍輔う繝ｳ繧ｹ繝医・繝ｫ縺輔ｌ縲√ヶ繝ｩ繧ｦ繧ｶ縺瑚ｵｷ蜍輔＠縺ｾ縺吶・/ Node.js dependencies are automatically installed and the app launches.
-*(窶ｻ螳溯｡後↓縺ｯ[Node.js](https://nodejs.org/)縺ｮ繧､繝ｳ繧ｹ繝医・繝ｫ縺悟ｿ・ｦ√〒縺・/ Requires Node.js installed)*
-
-### 噫 Deploy to GitHub Pages / GitHub Pages縺ｧ繝・・繝ｭ繧､
-```bash
-git clone https://github.com/YOUR_USERNAME/story-maker
-cd story-maker
-# Push to main branch, then enable GitHub Pages in repo Settings
+```powershell
+npm run build
+npm run deploy
 ```
 
----
+Deployment target: GitHub Pages (`gh-pages` branch).
 
-## 笞厄ｸ・Compliance & Legal Stance / 豕慕噪驕ｵ螳医↓縺､縺・※
-**Japanese Copyright Law (Article 30-4)**
-This project is developed in full compliance with Article 30-4 of the Japanese Copyright Act, which allows for the exploitation of copyrighted works for information analysis and technological development of AI.
-譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲∵律譛ｬ縺ｮ闡嶺ｽ懈ｨｩ豕慕ｬｬ30譚｡縺ｮ4・域ュ蝣ｱ隗｣譫千岼逧・ｭ峨〒縺ｮ蛻ｩ逕ｨ・峨↓蝓ｺ縺･縺阪∵橿陦捺､懆ｨｼ縺翫ｈ縺ｳ諠・ｱ隗｣譫舌ｒ逶ｮ逧・→縺励※髢狗匱縺輔ｌ縺ｦ縺翫ｊ縲∵ｳ慕噪縺ｫ驕ｩ豁｣縺ｪ遽・峇蜀・〒蜈ｬ髢九＆繧後※縺・∪縺吶・
+デプロイ先は GitHub Pages（`gh-pages` ブランチ）です。
 
-**Official API Usage**
-All generations are performed through the official Google Gemini API and OpenAI API. This system adheres strictly to their respective usage policies.
-譛ｬ繧ｷ繧ｹ繝・Β縺ｯGoogle蜈ｬ蠑上・Gemini API縺翫ｈ縺ｳOpenAI蜈ｬ蠑上・API繧剃ｻ九＠縺ｦ蜍穂ｽ懊＠縺ｦ縺翫ｊ縲∝推遉ｾ縺悟ｮ壹ａ繧九檎函謌植I遖∵ｭ｢莠矩・阪♀繧医・蛻ｩ逕ｨ隕冗ｴ・ｒ蜴ｳ譬ｼ縺ｫ驕ｵ螳医＠縺ｦ縺・∪縺吶・
+## Verification / 検証
 
-**No-Profit & Research Focus**
-The core logic (Prompts/Protocols) is released under CC BY-NC-SA 4.0. Any commercial misuse by third parties is strictly prohibited. This project exists solely for the advancement of LLM control technology and the democratization of creative writing tools.
-譬ｸ蠢・噪縺ｪ繝ｭ繧ｸ繝・け縺ｯCC BY-NC-SA 4.0・磯撼蝟ｶ蛻ｩ・峨・荳九〒蜈ｬ髢九＆繧後※縺・∪縺吶らｬｬ荳芽・↓繧医ｋ謔ｪ雉ｪ縺ｪ蝠・畑蛻ｩ逕ｨ縺ｯ繝ｩ繧､繧ｻ繝ｳ繧ｹ驕募渚縺ｨ縺ｪ繧翫∪縺吶よ悽繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲´LM蛻ｶ蠕｡謚陦薙・逋ｺ螻輔→縲∝濤遲・ｴｻ蜍輔・豌台ｸｻ蛹悶ｒ逶ｮ逧・→縺励◆遐皮ｩｶ謌先棡縺ｧ縺吶・
+Current release checks:
 
----
+現在のリリース確認:
 
-## 笞厄ｸ・License & Rights / 繝ｩ繧､繧ｻ繝ｳ繧ｹ繝ｻ讓ｩ蛻ｩ髢｢菫・
-This project uses a hybrid license to balance technology sharing and intellectual property protection.
-謚陦薙・蜈ｱ譛峨→蜑ｵ菴懊・菫晁ｭｷ繧剃ｸ｡遶九☆繧九◆繧√∽ｻ･荳九・繝上う繝悶Μ繝・ラ繝ｩ繧､繧ｻ繝ｳ繧ｹ繧呈治逕ｨ縺励※縺・∪縺吶・
+- `node --check src/main.js`
+- `node --check vite.config.js`
+- `npm run lint --if-present`
+- `npm run build`
+- `git diff --check -- . ':!dist'`
+- All-random browser check: all 14 public modes appeared across repeated runs, with no long mode selected.
+- Gemini API matrix: 14 / 14 public modes passed.
+- OpenAI API matrix: 14 / 14 public modes passed.
+- Public bundle scan: no QA API persistence helper, browser storage API, API-key pattern, or token pattern found in the live public asset.
 
-* **Source Code**: [MIT License](https://opensource.org/licenses/MIT)
-  Applies to software logic and implementation code. / 繧ｽ繝輔ヨ繧ｦ繧ｧ繧｢縺ｮ蜍穂ｽ懊Ο繧ｸ繝・け繧・ｮ溯｣・さ繝ｼ繝峨↓驕ｩ逕ｨ縲・
-* **Logic & Prompts**: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)
-  Applies to original design philosophy, multi-axis randomization arrays, and anti-repetition structures. / 險ｭ險域晄Φ縲∝､夊ｻｸ繝ｩ繝ｳ繝繝蛹悶・驟榊・縲√♀繧医・蜿榊ｾｩ髦ｲ豁｢繝励Ο繝ｳ繝励ヨ讒矩縺ｫ驕ｩ逕ｨ縲・
+- 全項目ランダムのブラウザ確認で、公開対象14モードすべてが出現し、長編モードは選ばれませんでした。
+- Gemini API マトリクスは 14 / 14 公開モードで通過しました。
+- OpenAI API マトリクスは 14 / 14 公開モードで通過しました。
+- 公開バンドル検査で、QA用API保持ヘルパー、ブラウザ保存API、APIキー風パターン、トークン風パターンが公開アセットに残っていないことを確認しました。
 
-* **Output Ownership / 逕滓・迚ｩ縺ｮ蟶ｰ螻・*:
-  The CC SA (ShareAlike) requirement **does not apply** to texts generated by this system. Rights belong to the user.
-  譛ｬ繧ｷ繧ｹ繝・Β縺ｧ逕滓・縺輔ｌ縺溘ユ繧ｭ繧ｹ繝茨ｼ育黄隱槭・繝励Ο繝・ヨ・峨↓荳願ｨ呂C繝ｩ繧､繧ｻ繝ｳ繧ｹ縺ｮ邯呎価鄒ｩ蜍吶・驕ｩ逕ｨ縺輔ｌ縺ｾ縺帙ｓ縲よｨｩ蛻ｩ縺ｯ繝ｦ繝ｼ繧ｶ繝ｼ縺ｫ蟶ｰ螻槭＠縺ｾ縺吶・
+## Release Notes / リリースノート
 
-**Commercial Use and Paid Seminars / 蝠・畑蛻ｩ逕ｨ繝ｻ譛画侭繧ｻ繝溘リ繝ｼ縺ｫ縺､縺・※**
-Usage of this system (including prompts and logic) in high-priced information products, paid seminars, or any "get-rich-quick" schemes is strictly prohibited under the CC BY-NC-SA 4.0 license.
-譛ｬ繧ｷ繧ｹ繝・Β・医・繝ｭ繝ｳ繝励ヨ縺翫ｈ縺ｳ繝ｭ繧ｸ繝・け繧貞性繧・峨ｒ縲・ｫ倬｡阪↑諠・ｱ蝠・攝縲∵怏譁吶そ繝溘リ繝ｼ縲√∪縺溘・縲悟憶讌ｭ繝ｻ遞ｼ縺偵ｋ縲咲ｭ峨・隰ｳ縺・枚蜿･繧剃ｼｴ縺・ン繧ｸ繝阪せ縺ｫ辟｡譁ｭ縺ｧ菴ｿ逕ｨ縺吶ｋ縺薙→縺ｯ縲，C BY-NC-SA 4.0繝ｩ繧､繧ｻ繝ｳ繧ｹ縺ｫ蝓ｺ縺･縺阪∝崋縺冗ｦ√§縺ｾ縺吶・
+### v4.9.6 (2026-06-08)
 
-Any commercial or educational use involving fees requires explicit prior written consent from the developer (FURU).
-譛画侭縺ｮ謨呵ご逶ｮ逧・ｄ蝠・畑蛻ｩ逕ｨ繧呈､懆ｨ弱＆繧後ｋ蝣ｴ蜷医・縲∝ｿ・★莠句燕縺ｫ髢狗匱閠・ｼ・URU・峨・譖ｸ髱｢縺ｫ繧医ｋ謇ｿ隲ｾ繧貞ｾ励※縺上□縺輔＞縲・
+- Public README repaired from mojibake and rewritten in English/Japanese.
+- Long-novel feature promotion removed until quality is acceptable for public release.
+- All-random output-mode reroll fixed.
+- Non-long paragraph readability improved.
+- Public deploy safety guard added for QA API-session persistence code.
+- Gemini/OpenAI public-mode verification completed.
 
----
+- README の文字化けを修正し、英日併記で再構成しました。
+- 長編モードの機能紹介を削除し、品質が満たされるまで公開停止扱いにしました。
+- 全項目ランダムで出力モードもランダム化されるよう修正しました。
+- 非長編出力の改行・段落の読みやすさを改善しました。
+- QA用API一時保持コードが公開バンドルに残らない安全ガードを追加しました。
+- Gemini / OpenAI の公開モード検証を完了しました。
 
-### 1. 逶ｮ逧・/ Purpose
-譛ｬ繝・・繝ｫ縺ｯ蜑ｵ菴懈髪謠ｴ繧堤岼逧・→縺励◆繧ゅ・縺ｧ縺ゅｊ縲∵里蟄倥・闡嶺ｽ懃黄縲√ヶ繝ｩ繝ｳ繝峨√く繝｣繝ｩ繧ｯ繧ｿ繝ｼ縲√∪縺溘・迚ｹ螳壹・菴懷ｮｶ繝ｻ菴懷刀縺ｮ蜀咲樟繧・ｻ｣譖ｿ繧堤岼逧・→縺励◆蛻ｩ逕ｨ縺ｯ諠ｳ螳壹＠縺ｦ縺・∪縺帙ｓ縲・
-This tool is intended for creative assistance and is not designed to reproduce, substitute, or replicate existing copyrighted works, brands, characters, or specific creators.
+### v4.9.5 (2026-06-08)
 
----
-
-### 2. 逕滓・繧ｳ繝ｳ繝・Φ繝・↓髢｢縺吶ｋ遖∵ｭ｢莠矩・/ Prohibited Uses
-繝ｦ繝ｼ繧ｶ繝ｼ縺ｯ縲∵悽繝・・繝ｫ繧剃ｽｿ逕ｨ縺励※莉･荳九・陦檎ぜ繧定｡後▲縺ｦ縺ｯ縺ｪ繧翫∪縺帙ｓ縲・
-Users must not engage in the following:
-
-#### (1) 闡嶺ｽ懈ｨｩ繝ｻ遏･逧・ｲ｡逕｣讓ｩ萓ｵ螳ｳ / Intellectual Property Infringement
-譌｢蟄倥・蟆剰ｪｬ縲∬・譛ｬ縲∬ｨ倅ｺ九∵ｼｫ逕ｻ蜴滉ｽ懊√◎縺ｮ莉匁枚遶繧ｳ繝ｳ繝・Φ繝・ｒ螳溯ｳｪ逧・↓蜀咲樟繝ｻ讓｡蛟｣縺吶ｋ陦檎ぜ
-Reproducing or closely imitating existing written works such as novels, scripts, articles, or story content
-
-迚ｹ螳壹・菴懷ｮｶ繝ｻ菴懷刀縺ｮ譁・ｽ薙∬ｪ槭ｊ蜿｣縲√・繝ｭ繝・ヨ讒矩縲√く繝｣繝ｩ繧ｯ繧ｿ繝ｼ讒区・繧定ｭ伜挨蜿ｯ閭ｽ縺ｪ繝ｬ繝吶Ν縺ｧ蜀咲樟縺吶ｋ陦檎ぜ
-Replicating the writing style, narrative voice, plot structure, or character composition of a specific author or work in a recognizable manner
-
-譌｢蟄倅ｽ懷刀縺ｮ繧ｹ繝医・繝ｪ繝ｼ螻暮幕縲∬ｨｭ螳壹√・繝ｭ繝・ヨ繧定ｨ縺・鋤縺医・螟牙ｽ｢縺励※蜀榊茜逕ｨ縺吶ｋ陦檎ぜ
-Reusing or paraphrasing existing storylines, settings, or plots from copyrighted works
-
-#### (2) 讓ｩ蛻ｩ萓ｵ螳ｳ繧ｳ繝ｳ繝・Φ繝・・蛻ｩ逕ｨ / Use of Infringing Content
-- 隨ｬ荳芽・・闡嶺ｽ懈ｨｩ縲∝膚讓呎ｨｩ縲∬ｖ蜒乗ｨｩ縲√ヱ繝悶Μ繧ｷ繝・ぅ讓ｩ遲峨ｒ萓ｵ螳ｳ縺吶ｋ繧ｳ繝ｳ繝・Φ繝・・逕滓・縲∝・髢九∬ｲｩ螢ｲ縲∝・譛・
-- 譌｢蟄露P縺ｫ鬘樔ｼｼ縺励◆繧ｳ繝ｳ繝・Φ繝・・辟｡譁ｭ蝠・畑蛻ｩ逕ｨ
-
-Generating, distributing, or monetizing infringing or derivative content without permission.
-
-#### (3) 蜈･蜉帙ョ繝ｼ繧ｿ縺ｮ荳肴ｭ｣蛻ｩ逕ｨ / Misuse of Input Data
-- 繝ｦ繝ｼ繧ｶ繝ｼ縺ｯ縲∝・蜉帙☆繧狗判蜒上・繝・く繧ｹ繝育ｭ峨↓縺､縺・※縲・←豕輔↑讓ｩ蛻ｩ縺ｾ縺溘・菴ｿ逕ｨ險ｱ隲ｾ繧呈怏縺吶ｋ縺薙→繧剃ｿ晁ｨｼ縺吶ｋ繧ゅ・縺ｨ縺励∪縺・
-- 讓ｩ蛻ｩ繧呈怏縺励↑縺・ｬｬ荳芽・さ繝ｳ繝・Φ繝・ｒ蜈･蜉帙→縺励※菴ｿ逕ｨ縺吶ｋ陦檎ぜ
-
-Users must have legal rights to all input data.
-
-#### (4) 荳肴ｭ｣蛻ｩ逕ｨ縺ｮ蜉ｩ髟ｷ / Facilitation of Misuse
-- 讓ｩ蛻ｩ萓ｵ螳ｳ繧堤岼逧・→縺励◆繝励Ο繝ｳ繝励ヨ縲√ユ繝ｳ繝励Ξ繝ｼ繝医√Ρ繝ｼ繧ｯ繝輔Ο繝ｼ縺ｮ菴懈・繝ｻ蜈ｱ譛・
-- 莉冶・↓萓ｵ螳ｳ陦檎ぜ繧剃ｿ・☆陦檎ぜ
-
-Creating or sharing tools intended for infringement.
-
-#### (5) 豕穂ｻ､驕募渚繝ｻ荳肴ｭ｣陦檎ぜ / Illegal Activities
-- 驕ｩ逕ｨ縺輔ｌ繧区ｳ穂ｻ､縺ｫ驕募渚縺吶ｋ陦檎ぜ
-- 隧先ｬｺ縲∽ｸ肴ｭ｣陦檎ぜ縲√∪縺溘・譛牙ｮｳ縺ｪ逶ｮ逧・〒縺ｮ蛻ｩ逕ｨ
-
-Any illegal or harmful use.
-
----
-
-### 3. 逕滓・迚ｩ縺ｮ雋ｬ莉ｻ縺翫ｈ縺ｳ讓ｩ蛻ｩ / Responsibility & Ownership
-逕滓・縺輔ｌ縺溘さ繝ｳ繝・Φ繝・・蜀・ｮｹ縺翫ｈ縺ｳ蛻ｩ逕ｨ縺ｫ髢｢縺吶ｋ縺吶∋縺ｦ縺ｮ雋ｬ莉ｻ縺ｯ繝ｦ繝ｼ繧ｶ繝ｼ縺ｫ蟶ｰ螻槭＠縺ｾ縺吶・
-The user bears full responsibility for generated content.
-
-譛ｬ繝・・繝ｫ縺ｮ蛻ｩ逕ｨ縺ｫ繧医▲縺ｦ逕滓・縺輔ｌ縺溘さ繝ｳ繝・Φ繝・↓縺､縺・※縲・幕逋ｺ閠・・闡嶺ｽ懈ｨｩ縺昴・莉悶・讓ｩ蛻ｩ繧剃ｸｻ蠑ｵ縺励∪縺帙ｓ縺後√◎縺ｮ驕ｩ豕墓ｧ繝ｻ蛻ｩ逕ｨ蜿ｯ閭ｽ諤ｧ繧剃ｿ晁ｨｼ縺吶ｋ繧ゅ・縺ｧ縺ｯ縺ゅｊ縺ｾ縺帙ｓ縲・
-The developer does not claim ownership of generated content but does not guarantee its legality or usability.
-
----
-
-### 4. 蜈崎ｲｬ莠矩・/ Disclaimer
-譛ｬ繝・・繝ｫ縺ｯ縲檎樟迥ｶ譛牙ｧｿ・・S IS・峨阪〒謠蝉ｾ帙＆繧後∵・遉ｺ縺ｾ縺溘・鮟咏､ｺ繧貞撫繧上★縲√＞縺九↑繧倶ｿ晁ｨｼ繧り｡後＞縺ｾ縺帙ｓ縲・
-This tool is provided "as is" without any warranties.
-
-髢狗匱閠・・縲∵悽繝・・繝ｫ縺ｮ蛻ｩ逕ｨ縺ｾ縺溘・逕滓・繧ｳ繝ｳ繝・Φ繝・↓襍ｷ蝗縺吶ｋ縺・°縺ｪ繧区錐螳ｳ縺ｫ縺､縺・※繧りｲｬ莉ｻ繧定ｲ縺・∪縺帙ｓ縲・
-The developer shall not be liable for any damages arising from use.
-
----
-
-### 5. 讓ｩ蛻ｩ萓ｵ螳ｳ縺ｸ縺ｮ蟇ｾ蠢・/ Infringement & Takedown
-讓ｩ蛻ｩ萓ｵ螳ｳ縺ｮ逕ｳ縺礼ｫ九※縺後≠縺｣縺溷ｴ蜷医・幕逋ｺ閠・・迢ｬ閾ｪ縺ｮ蛻､譁ｭ縺ｫ繧医ｊ莉･荳九・蟇ｾ蠢懊ｒ陦後≧蝣ｴ蜷医′縺ゅｊ縺ｾ縺吶・
-Upon receiving a valid claim, the developer may:
-
-- 隧ｲ蠖薙さ繝ｳ繝・Φ繝・・蜑企勁隕∬ｫ九∪縺溘・蜑企勁
-- 蛻ｩ逕ｨ縺ｮ蛻ｶ髯舌∪縺溘・遖∵ｭ｢
-- 繝ｪ繝昴ず繝医Μ縺ｮ蜈ｬ髢句●豁｢遲峨・謗ｪ鄂ｮ
-
-Remove content, restrict usage, or take necessary actions.
-
----
-
-### 6. 隕冗ｴ・・螟画峩 / Changes
-譛ｬ隕冗ｴ・・莠亥相縺ｪ縺丞､画峩縺輔ｌ繧句ｴ蜷医′縺ゅｊ縺ｾ縺吶・
-These terms may be updated without notice.
-
----
-
-### 7. 貅匁侠豕・/ Governing Law
-譛ｬ隕冗ｴ・・譌･譛ｬ豕輔↓貅匁侠縺励∪縺吶・
-These terms are governed by the laws of Japan.
-
----
-
-## 迫 Integrated Ecosystem / 邨ｱ蜷医お繧ｳ繧ｷ繧ｹ繝・Β
-This project is part of an integrated ecosystem designed to support AI-powered manga and story creation.
-譛ｬ繝励Ο繧ｸ繧ｧ繧ｯ繝医・縲、I繧呈ｴｻ逕ｨ縺励◆貍ｫ逕ｻ繝ｻ繧ｹ繝医・繝ｪ繝ｼ蛻ｶ菴懊ｒ謾ｯ謠ｴ縺吶ｋ邨ｱ蜷医お繧ｳ繧ｷ繧ｹ繝・Β縺ｮ荳驛ｨ縺ｧ縺吶・
-
-#### 1. AI 4-koma System
-A system specialized in creating 4-panel manga with AI. / AI繧呈ｴｻ逕ｨ縺励◆4繧ｳ繝樊ｼｫ逕ｻ蛻ｶ菴懊↓迚ｹ蛹悶＠縺溘す繧ｹ繝・Β縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/ndf063558c1f5)
-- [Demo / 繝・Δ](https://furuyan1234.github.io/nano-banana-pro/)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/nano-banana-pro)
-
-#### 2. AI Story Maker
-A tool for generating creative stories and plots using AI. / AI繧堤畑縺・※繧ｯ繝ｪ繧ｨ繧､繝・ぅ繝悶↑繧ｹ繝医・繝ｪ繝ｼ繧・・繝ｭ繝・ヨ繧堤函謌舌☆繧九ヤ繝ｼ繝ｫ縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/nd3d972922868)
-- [Demo / 繝・Δ](https://furuyan1234.github.io/story-maker/)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/story-maker)
-
-#### 3. AI Character Sheet Maker
-An assistant for designing detailed character sheets and settings. / 隧ｳ邏ｰ縺ｪ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｷ繝ｼ繝医ｄ險ｭ螳壹ｒ繝・じ繧､繝ｳ縺吶ｋ縺溘ａ縺ｮ謾ｯ謠ｴ繝・・繝ｫ縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/neccbebd7d957)
-- [Demo / 繝・Δ](https://furuyan1234.github.io/character-sheet-maker/)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/character-sheet-maker)
-
-#### 4. AI Comic Translation Tool
-A tool for translating manga into 10 languages using AI. / AI繧剃ｽｿ縺｣縺ｦ貍ｫ逕ｻ繧・0險隱槭↓鄙ｻ險ｳ縺吶ｋ繝・・繝ｫ縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/nbdf826604ce7)
-- [Demo / 繝・Δ](https://furuyan1234.github.io/comic-translation/)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/comic-translation)
-
-#### 5. 360ﾂｰ AI Panorama Generator
-A tool that generates seamless 360-degree spatial backgrounds to provide background assets for manga and video. / 繧ｷ繝ｼ繝繝ｬ繧ｹ縺ｪ360蠎ｦ遨ｺ髢薙・閭梧勹繧堤函謌舌＠縲∵ｼｫ逕ｻ繧・虚逕ｻ縺ｮ閭梧勹邏譚舌→縺励※謠蝉ｾ帙☆繧九ヤ繝ｼ繝ｫ縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/nb53b121fef88)
-- [Demo / 繝・Δ](https://furuyan1234.github.io/panoforge/)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/panoforge)
-
-#### 6. AI Voice Comic Maker
-A tool to automatically convert static 4-koma manga into fully voiced animated videos. / 髱呎ｭ｢逕ｻ縺ｮ4繧ｳ繝樊ｼｫ逕ｻ繧偵ヵ繝ｫ繝懊う繧ｹ縺ｮ蜍慕判縺ｫ閾ｪ蜍募､画鋤縺吶ｋ繝・・繝ｫ縺ｧ縺吶・
-- [Explanation / 隗｣隱ｬ](https://note.com/happy_duck780/n/ndc6533c1512f)
-- [Code / 繧ｳ繝ｼ繝云(https://github.com/FURUYAN1234/ai-voice-comic-maker)
-
----
-
-## Changelog / 螟画峩螻･豁ｴ
-
-This changelog is intentionally compact. Older noisy patch-by-patch notes were removed from README to keep the project overview readable. For older detail, use GitHub Releases, tags, or commit history.
-縺薙・螟画峩螻･豁ｴ縺ｯ隱ｭ縺ｿ繧・☆縺輔ｒ蜆ｪ蜈医＠縺ｦ謨ｴ逅・＠縺ｦ縺・∪縺吶ょ商縺・ｴｰ縺九↑繝代ャ繝∝ｱ･豁ｴ繧・㍾隍・＠縺溘Γ繝｢縺ｯ README 縺九ｉ蜑企勁縺励∝ｿ・ｦ√↑蝣ｴ蜷医・ GitHub Releases / tags / commit history 繧貞盾辣ｧ縺励※縺上□縺輔＞縲・
-### v4.9.5 (2026-06-07)
-- **Non-Long Output Mode Format Contracts / 非長編モード形式契約**: Fresh Gemini QA found that `4koma` could fall back into ordinary prose instead of producing a four-panel structure. v4.9.5 adds a shared output-mode contract on the standard generation prompt path for every non-long mode: 4koma, AI 4koma scenario, short-short, novel, medium, scenario, manga, essay, poem, fairy tale, letter, diary, documentary, and radio drama. The contract keeps the selected genre in charge while forcing each mode's required labels and finished-output shape, so changing genre does not require patching one surface phrase at a time. Long-novel mode remains sealed and excluded. / Gemini実機QAで `4koma` が4コマ形式ではなく普通の散文に落ちる不具合を確認しました。v4.9.5では標準生成プロンプト経路に、非長編全モード共通の形式契約を追加しました。4コマ、AI 4コマ連携、ショート、短編、中編、脚本、漫画、エッセイ、詩、童話、手紙、日記、ドキュメンタリー、ラジオドラマごとに必須ラベルと完成形を固定し、ジャンルはジャンルとして尊重したまま、モードだけが散文へ崩れないようにします。長編モードは引き続き封鎖・除外です。
-
-### v4.9.4 (2026-06-07)
-- **Long-Novel Mode Sealed / 長編モード封鎖**: The final Gemini long-novel QA for v4.9.3 failed to complete: chapters 1 and 2 saved, but chapter 3 repeatedly rebuilt from the ledger and remained at 2/10 chapters after off-route and chapter-boundary failures. Long-novel mode is now disabled at the UI entry point, excluded from random mode selection, and blocked again at generation start if a custom long-novel label is entered. / v4.9.3の最終Gemini長編QAは完走しませんでした。第1章・第2章は保存できましたが、第3章で台帳再構築を繰り返し、逸脱ルートと章境界再演を抜けられず 2/10 章のままで止まりました。そのため長編モードをUI入口で無効化し、ランダム選択から除外し、カスタム欄に長編指定が残っていても生成開始時に拒否するよう封鎖しました。
-
-### v4.9.3 (2026-06-07)
-- **Chapter-Ledger Drafting / 章設計台帳**: Adds a long-novel drafting layer that fixes each chapter's start state, genre-specific drive, chapter-end state, foreshadowing/prop usage, character entry/exit, and next-chapter handoff before prose is written. First-chapter prompts now require an internal whole-novel ledger, while every later chapter rebuilds from the last saved chapter and context memo instead of relying on rejected drafts. Quality-gate retries are relabeled as ledger rebuilds and get a larger rebuild budget, so the loop is no longer framed around `Stop`/two-attempt failure. / 長編の本文生成前に、章の開始状態、選択ジャンル別の推進力、章末状態、伏線・小物、人物の入退場、次章への引き継ぎを小さな台帳として固定する層を追加しました。第1章では全章台帳を内部作成し、第2章以降は保存済み直近章と文脈メモだけを正史として章を書きます。保存前品質ゲートの再試行も `Stop` / 2回終了の見え方ではなく、章設計台帳からの再構築として扱います。
-
-### v4.9.2 (2026-06-07)
-- **Analog Store-Work Digital False-Positive Closure / 店内実務のデジタル誤爆閉鎖**: Adds a final filter so old `v4.6.1 story-means ledger` `digitalLab` and old POS fallback warnings no longer reject ordinary register, shelf, receipt, invoice, package, customer, or storefront prose. Digital/lab material is still rejected when it is the actual cause, proof, solution, clue, or hook. / 普通のレジ、棚札、紙レシート、納品書、包装、客、店先の本文が、古い `v4.6.1 story-means ledger` の `digitalLab` やPOS系警告で保存拒否されないよう最終フィルタを追加しました。データ/研究施設/端末などが本当に原因・証拠・解決・手がかり・章末フックになった場合は引き続き弾きます。
-
-### v4.9.1 (2026-06-07)
-- **Genre-Dominance Guard / ジャンル主導ガード**: Narrows the local-comedy QA profile so convenience-store, shopping-street, or daily-life axes no longer take ownership of every non-suspense genre. The store-work comedy ledger is now a lower-level constraint only when the selected genre itself is comedy/dotabata/gag. Other genres keep their own structure, payoff, and emotional engine even if they use a convenience store or shopping street as the setting. v4.9.1 also filters an old v4.6.1 `cultFacility` false positive when the prose is clearly ordinary store-work and contains no hard cult/ritual route. / コンビニ、商店街、日常軸があるだけで全ジャンルをローカルコメディ台帳へ吸わせないよう、ジャンル主導ガードを追加しました。店内実務コメディ台帳は、選択ジャンル自体がコメディ/ドタバタ/ギャグの時だけ下位制約として働きます。コンビニや商店街を舞台にしても、恋愛、ヒューマンドラマ、ホラー、サスペンス等はそれぞれの構成・回収・感情エンジンを優先します。通常の店内実務本文に対する古い v4.6.1 `cultFacility` 誤爆も除去します。
-
-### v4.9.0 (2026-06-07)
-- **Selected-Genre Payoff Engine and Completion Rescue / 選択ジャンルのフリ回収エンジンと完成救済**: Adds a root-level long-novel contract that turns each chapter's setup into a selected-genre payoff, punchline, cost, or relationship update instead of treating quality detection as an endpoint. Draft, next-chapter, repair, and continuation prompts now explicitly rebuild off-route material into the chosen genre's engine and preserve a complete chapter. For the local-comedy QA profile, promotional, limited-product, secret-inventory, past-event, legend-item, digital/lab, or grand-template routes are detected as a failed story engine when they become cause, proof, solution, or hook; retries are instructed to finish through register misunderstandings, shelf labels, paper receipts, cash-count slips, invoices, package labels, complaint slips, shift notes, testimony, apologies, refunds, and visible cleanup. / 長編の各章に、冒頭のフリを選択ジャンルの回収・オチ・代償・関係更新へ着地させる根本契約を追加しました。品質検出を終了地点にせず、初回・次章・修復・継続プロンプトで、外れた素材を選択ジャンルの駆動装置へ組み直して完成稿へ戻します。日常コメディQA軸では、販促、限定商品、秘密在庫、過去イベント、伝説品、デジタル/研究施設、巨大テンプレートが原因・証拠・解決・章末フックになった場合、物語エンジンの逸脱として検出し、レジ前の誤解、棚札、紙レシート、現金確認票、納品書、包装ラベル、苦情票、シフトメモ、証言、謝罪、返金、見える後始末で章を完成させるよう再構成します。
-
-### v4.8.9 (2026-06-07)
-- **Selected-Genre Native Pull and Campaign-Price Stall Closure / 選択ジャンル本来の牽引力と販促価格停滞の閉鎖**: Formalizes the next long-novel hardening layer after v4.8.8. Long-novel prompts now restate the selected genre's own drive for every draft, next chapter, repair, and continuation path so the app does not flatten all stories into workplace crisis, local comedy, or suspense. For the local-comedy QA profile, campaign/discount/limited-price explanations are forbidden as the cause of price gaps, shelf-label contradictions, cash differences, or trust crises; those conflicts must come from handwritten shelf labels, paper receipts, cash-count slips, paper invoices, transmission mistakes, package labels, or face-to-face testimony. Continuation prompts also reject stagnant repeats and demand new current-scene prose only. / v4.8.8後の長編補強層を正式化しました。長編の初回、次章、修復、継続プロンプトで、選択ジャンル本来の牽引力を章ごとに再固定し、すべての作品が職場危機・日常コメディ・サスペンスへ丸まることを防ぎます。日常コメディQA軸では、キャンペーン価格、値引き、期間限定価格を価格差、棚札矛盾、現金差異、信用危機の原因にすることを禁止し、手書き棚札、紙レシート、現金確認票、紙の納品書、伝達漏れ、包装ラベル、対面証言へ戻します。継続応答も既出本文の停滞反復を拒み、新しい現在進行の本文だけを要求します。
-
-### v4.8.8 (2026-06-07)
-- **Chapter-Start Replay and Secret-Shelf Route Preemption / 章頭再演と秘密棚ルートの事前抑止**: A v4.8.7 Gemini QA attempt saved four chapters but still spent regeneration budget on previous-chapter opening replay and secret-shelf/prize/smuggling-style drift. v4.8.8 strengthens the local-comedy long-novel prompt before drafting: each new chapter must open with a fresh current store action, customer interruption, manager line, or visible paper evidence instead of reusing previous prose, and backroom/shelf scenes must remain ordinary inventory or cleanup work. It also adds a save gate for secret shelves, mystery paper, prize/phantom-item, smuggling, and code phrasing when those become the cause, proof, solution, trust crisis, or chapter hook. / v4.8.7のGemini QAでは4章まで保存できたものの、前章冒頭の再演と、秘密棚・景品・密輸風の寄り道で再生成を消費しました。v4.8.8では、章を書く前の段階で、各章の冒頭を新しい店内行動、客の割り込み、店長の発言、見える紙証拠から始めるよう強化し、バックヤードや棚は通常の在庫・掃除・納品作業に限定します。秘密棚、謎紙、景品/幻の品、密輸、暗号が原因・証拠・解決・信用危機・章末フックになる場合の保存ゲートも追加しました。
-
-### v4.8.7 (2026-06-07)
-- **Analog Store-Work DigitalLab False-Positive Closure / アナログ店内実務のdigitalLab誤爆閉鎖**: A v4.8.6 Gemini QA attempt improved the chapter-1 route toward shelf labels, receipts, refunds, customer lines, and visible register work, but an older `v4.6.1 story-means ledger` digitalLab message still rejected the chapter even though the current prose had no USB/POS/data/lab route. v4.8.7 adds a final analog-store false-positive filter: old digitalLab/POS warnings are removed when the body is clearly grounded in register/shelf/receipt/cash/invoice/package/customer/storefront work and has no hard digital, device, data, camera, app, server, or lab route. / v4.8.6のGemini QAでは、第1章が棚札、レシート、返金、客の列、レジ作業へ寄りましたが、古い `v4.6.1 story-means ledger` のdigitalLab判定が、USB/POS/データ/研究施設ルートのない本文まで保存拒否しました。v4.8.7では、本文がレジ、棚札、紙レシート、現金、納品書、包装、客対応、店内作業に明確に根ざし、硬いデジタル/装置/データ/カメラ/アプリ/サーバー/研究施設ルートを持たない場合、古いdigitalLab/POS警告を最終段で除去します。
-
-### v4.8.6 (2026-06-07)
-- **Continuation Delta + Selected-Genre Purity Guard / 継続差分採用と選択ジャンル純化**: A fresh v4.8.5 Gemini QA still spent regeneration budget: chapter 1 repeated large body blocks during continuation, then chapter 2 returned to old campaign/stamp-rally material through paper bundles and POP sheets from a box. v4.8.6 adds a local continuation join guard that treats a repeated full-body continuation as already-known text and appends only the new delta where possible, plus a repeated-block collapse before audit/save so duplicated chapter bodies are not handed to the contradiction repair path. It also closes the legacy promotion-paper route by rejecting old shelf-label bundles, faded flyers, campaign POP, stamp-rally instructions, and past-promotion remnants as cause/proof/solution hooks. The selected-genre prompt is clarified again: comedy should maximize comedy, serious drama should maximize seriousness, suspense should maximize tension, and practical crisis/trust/deadline pressure is used only when it fits the selected genre. / v4.8.5のGemini QAでは、第1章の継続で本文の大きな反復が起き、第2章では箱から出た紙束/POP/スタンプラリー資料を経由して過去キャンペーン系へ戻りました。v4.8.6では、継続応答が既存本文を丸ごと返した場合に既知本文として扱い、可能な限り新しい差分だけを結合します。さらに矛盾検査/保存前に大きな重複ブロックを折り畳み、反復本文をAI修正ルートへ渡さないようにします。古い棚札の束、色褪せたチラシ、キャンペーンPOP、スタンプラリー指示書、過去販促物の残骸も、原因・証拠・解決・章末フックとして保存拒否します。選択ジャンルについても、コメディはコメディ、シリアスはシリアス、サスペンスはサスペンスを極め、実務危機・信用・締切の圧は選択ジャンルに合う時だけ使うことを再明確化しました。
-
-### v4.8.5 (2026-06-07)
-- **Hidden-Paper Box Drift + Continuation Growth Guard / 段ボール隠し紙ルートと継続停滞の防止**: A v4.8.4 Gemini QA stopped the campaign-card route, but chapter 1 still drifted into a hidden-paper-from-box style hook and continuation requests repeated the same body length instead of growing the manuscript. v4.8.5 keeps cardboard/boxes as ordinary store-work objects only: evidence must be visible receipts, delivery invoices, shelf labels, complaint slips, shift notes, packaging labels, or testimony, not paper or notes falling from inside/under a box. Continuation prompts now explicitly require new prose only, no repeated paragraphs, no headings or memo, and a meaningful increase in current-scene action/dialogue/work evidence each time. / v4.8.4のGemini QAではキャンペーンカード系は止まりましたが、第1章が箱の裏から紙が落ちる隠し箱風フックに寄り、継続リクエストでも本文量が増えず同じ長さのまま停滞しました。v4.8.5では段ボール/箱を通常の店内実務物に限定し、証拠は見える紙レシート、納品書、棚札、苦情票、シフトメモ、包装ラベル、証言に固定します。継続プロンプトも、既出段落の再掲、章題、メモ、文字数報告を禁止し、毎回新しい現在進行の行動・会話・物証確認を増やすよう強化します。
-
-### v4.8.4 (2026-06-07)
-- **Local Comedy Ledger Alignment / ローカルコメディ許可台帳の再整合**: A fresh Gemini QA on v4.8.3 showed that older prompt ledgers still listed campaign-card/stamp material as allowed store evidence, while newer gates rejected it as the chapter engine. v4.8.4 removes campaign-card/stamp/prize routes from the local-comedy allowed ledger and runtime beat plans, then fixes the selected QA axis to shelf labels, paper receipts, cash differences, paper delivery invoices, packaging/cardboard, complaint slips, shift notes, testimony, apologies, and small refunds. / v4.8.3のGemini QAで、古いプロンプト台帳がキャンペーンカード/スタンプ系を許可証拠として残し、新しい保存ゲートがそれを章エンジンとして拒否する不整合が見つかりました。v4.8.4ではローカルコメディの許可台帳と章別ビートからキャンペーンカード/スタンプ/景品ルートを外し、棚札、紙レシート、現金差異、紙の納品書、包装/段ボール、苦情票、シフトメモ、証言、謝罪、小さな返金へ固定します。
-
-### v4.8.3 (2026-06-07)
-- **Analog Store-Work False-Positive Filter / アナログ店内業務の旧デジタル過検出フィルタ**: A v4.8.2 Gemini QA still hit old v4.4/v4.6 digital-route gates on analog store-work scenes built from shelf labels, POP sheets, cardboard, paper memos, and packaging. v4.8.3 filters those older digital/POS warnings only when the chapter contains no hard digital-route terms such as USB, POS logs/data, sales/register data, system logs, electronic records, cameras, analysis, research facilities, secret plans, or AI weapons, and the prose is clearly grounded in analog store work. / v4.8.2のGemini QAで、棚札、POP、段ボール、紙メモ、包装で構成されたアナログ店内業務場面が、旧v4.4/v4.6のデジタルルートゲートに過検出されました。v4.8.3では、USB、POSログ/データ、売上/レジデータ、システムログ、電子記録、カメラ、解析、研究施設、秘密計画、AI兵器のようなハードなデジタル語がなく、本文が明確にアナログ店内業務に接地している場合だけ、旧デジタル/POS警告を除外します。
-
-### v4.8.2 (2026-06-07)
-- **Repair Length Preservation / 修正時の本文量維持**: A v4.8.1 Gemini QA no longer used stamp/card material as the chapter engine, but a contradiction repair removed too much prose and left chapter 1 below the save minimum, causing a full regeneration. v4.8.2 strengthens repair, continuation, initial, and next-chapter prompts so contradiction fixes must preserve chapter length: removing a repeated opening must be balanced with new current-scene action, dialogue, physical evidence, apology/refund, or shelf/packaging/invoice work instead of summarizing the chapter down. / v4.8.1のGemini QAではスタンプ/カード主エンジンは止まりましたが、矛盾修正が本文を短くしすぎ、第1章が保存最低文字数を下回って全章再生成になりました。v4.8.2では修正・継続・初回・次章プロンプトを強化し、矛盾修正時も本文量を維持させます。冒頭再演を削る場合は、章を要約して短くするのではなく、新しい現在進行の行動、会話、物理的証拠、謝罪/返金、棚札/包装/納品書確認で補います。
-
-### v4.8.1 (2026-06-07)
-- **No Stamp/Card Engine for Local-Comedy QA / ローカルコメディQAのスタンプ・カード主エンジン禁止**: Repeated Gemini runs showed that as long as campaign cards, stamps, or prizes remain an allowed chapter carrier, the model tends to expand them into old-card piles, hidden boxes, back campaigns, last-year prizes, or stamp mazes. v4.8.1 overrides earlier local-comedy carrier prompts for this QA profile: stamps/cards/campaigns/prizes may appear only as incidental background, never as the chapter's cause, mystery, proof, solution, or hook. The chapter carriers are now shelf labels, paper receipts, cash differences, paper delivery invoices, packaging/cardboard, complaint slips, shift notes, customer/shopkeeper testimony, apologies, refunds, and confessions. / Geminiの再検証で、キャンペーンカード、スタンプ、景品を章キャリアとして残す限り、古いカードの山、隠し箱、裏キャンペーン、去年の景品、スタンプ迷宮へ広がりやすいことが分かりました。v4.8.1では、このQA軸に限り、以前のローカルコメディ・キャリア指示を上書きします。スタンプ/カード/キャンペーン/景品は背景の一言なら可ですが、章の原因・謎・証拠・解決・フックにはできません。章キャリアは、棚札、紙レシート、現金差異、紙の納品書、包装/段ボール、苦情票、シフトメモ、客/店主の証言、謝罪、返金、告白へ移します。
-
-### v4.8.0 (2026-06-07)
-- **Ordinary Register POS Surface Repair / 通常レジのPOS表面語修復**: A fresh Gemini v4.7.9 QA saved chapter 1, then chapter 2 was regenerated because ordinary register prose contained the surface word `POS`, which triggered older POS/data gates even though the visible scene was mundane shelf-label/register work. v4.8.0 keeps real digital routes blocked (`POSログ`, `POSデータ`, sales/register data, system logs, electronic records), but locally rewrites harmless surface terms such as `POSレジ`, `POS端末`, `POSシステム`, or standalone `POS` into manuscript-safe `レジ` / `レジ設定` before the save gate. This preserves the retry budget without allowing data-log solutions. / Gemini v4.7.9のQAでは第1章が保存された後、第2章の普通の棚札/レジ場面に`POS`という表面語が出たため、旧POS/データゲートに捕まり再生成を消費しました。v4.8.0では、`POSログ`、`POSデータ`、売上/レジデータ、システムログ、電子記録のような本物のデジタル証拠ルートは引き続き拒否します。一方で、`POSレジ`、`POS端末`、`POSシステム`、単独の`POS`のような無害な表面語は、保存ゲート前に`レジ` / `レジ設定`へローカル修復し、データログ解決を許さずに再生成残数を守ります。
-
-### v4.7.9 (2026-06-07)
-- **Hidden-Box Lexical Closure / 隠し箱ルート語彙閉鎖**: A fresh Gemini v4.7.8 long-novel QA showed the model could still return to the same unselected route through lexical variants: `wooden box` had been blocked as `木箱`, but the draft used `木の箱`, `hidden/back campaign`, last year's stamp-rally prizes, and a stamp "maze" as the chapter engine. v4.7.9 treats those variants as one forbidden route for the local-comedy profile. Boxes and tins may still appear as ordinary packaging or store equipment, but they cannot become the mystery, cause, solution, proof, or chapter hook. The save gate now rejects `木の箱`, `木製の箱`, hidden/back campaign language, last-year prize hunts, legendary/phantom stamp prizes, and stamp/card maze language before they enter saved canon. / Gemini v4.7.8の長編QAで、同じ未選択ルートが語彙を変えて戻ることが分かりました。`木箱`は止めていましたが、本文は`木の箱`、`裏キャンペーン`、去年のスタンプラリー景品、スタンプの迷宮を章のエンジンにしました。v4.7.9では、これらをローカルコメディ軸では同一の禁止ルートとして扱います。箱や缶は普通の包装・備品としては出せますが、謎・原因・解決手段・証拠・章末フックにはできません。保存ゲートでも、`木の箱`、`木製の箱`、裏キャンペーン、去年の景品探し、伝説/幻のスタンプ景品、スタンプ/カード迷宮を正史化前に拒否します。
-
-### v4.7.8 (2026-06-07)
-- **Selected-Genre Mastery + Retry-Budget Preservation / 選択ジャンル極振り + 再生成残数保護**: Clarifies the v4.7.x "interestingness" direction so it does not mean comedy-only or workplace-crisis-only. Long-novel prompts now tell the model to maximize the selected genre itself: gag/comedy stays driven by laughter and timing, serious drama by irreversible choices and emotional weight, suspense by danger/deadline/trust pressure, mystery by fair clues and inference, romance by relationship movement, and so on. Regeneration prompts now strengthen both the positive target and the negative prompt: the failed opening, failed route, and unselected high-power templates must be discarded rather than renamed. To protect completion rate, v4.7.8 also adds a local repair path for chapter-opening replay, so repeated previous-chapter openings can be trimmed before spending another full regeneration. For the current local-comedy QA profile, chapter-3-and-later card/stamp saturation is detected earlier and redirected to the assigned chapter carrier. / v4.7.xの「面白さ」補強がコメディ専用または実務危機専用に見えないよう明確化しました。長編プロンプトでは、選択ジャンルそのものを極めます。ギャグ/コメディなら笑いとタイミング、シリアスなら不可逆の選択と感情の重さ、サスペンスなら危険・締切・信用の圧、ミステリーなら公平な手がかりと推理、恋愛なら関係変化で読者を引っ張ります。再生成時は目的のプロンプト強化とネガティブプロンプト強化を両方行い、失敗した冒頭・失敗ルート・未選択の強いテンプレートを別名で再利用しないようにします。完走率を守るため、前章冒頭の再演は章全体の再生成前にローカル修復で除去できる場合は除去します。現在のローカルコメディQA軸では、第3章以降のカード/スタンプ飽和をより早く検出し、章別キャリアへ戻します。
-
-### v4.7.7 (2026-06-07)
-- **Local-Comedy Carrier Rotation / ローカルコメディ証拠キャリアローテーション**: A v4.7.6 Gemini QA run completed chapters 1-2 without regeneration, but chapter 3 showed a new saturation pattern: the story kept making old stamp cards, card boxes, phantom prizes, and stamp-card "maze" language the center of the plot. v4.7.7 assigns a concrete carrier for each local-comedy chapter and forces the story to rotate from stamp/cards into shelf labels, paper receipts, cash differences, delivery invoices, packaging/cardboard mix-ups, complaint slips, shift notes, customer/shopkeeper testimony, apology, refund, and confession. From chapter 3 onward, old card boxes, card piles, phantom prizes, and stamp-maze hooks are rejected before they can become the chapter engine. / v4.7.6のGemini QAでは第1-2章が再生成なしで保存されましたが、第3章で古いスタンプカード、カード箱、幻の景品、スタンプカード迷宮を物語の中心にし続ける飽和パターンが出ました。v4.7.7ではローカルコメディ各章に具体的な証拠/騒動キャリアを割り当て、スタンプ/カードから、棚札、紙レシート、現金差異、紙の納品書、包装/段ボール取り違え、苦情票、シフトメモ、客/店主の証言、謝罪、返金、告白へ物語をローテーションさせます。第3章以降は、古いカード箱、カードの山、幻の景品、スタンプ迷宮を章のエンジンにする出力を保存前に拒否します。
-
-### v4.7.6 (2026-06-07)
-- **Ordinary Register Precision + Shopping-Street Anchor / 通常レジ過検出修正 + 商店街アンカー**: A v4.7.5 Gemini QA run fixed the wooden-box / legendary-stamp drift in chapter 1, but chapter 2 spent retries because ordinary store-work phrases such as register screen, scan, receipt printer, and price confirmation were treated as POS/data proof routes. v4.7.6 filters those false positives for the local-comedy profile unless hard POS/log/sales-data/digital-evidence terms are present, while keeping real POS/data routes blocked. It also adds a per-chapter shopping-street anchor prompt so each chapter visibly includes local storefronts, shopkeepers, arcade/street geography, neighborhood customers, or shop-association notices without turning them into history/legend lore. / v4.7.5のGemini QAでは第1章の木箱・伝説スタンプ漂流は止まりましたが、第2章で通常の店内業務表現（レジ画面、スキャン、レシートプリンター、値段確認など）までPOS/データ証拠ルート扱いされ、再生成回数を消費しました。v4.7.6ではローカルコメディ軸に限り、POSログ・売上データ・電子記録などの硬いデジタル証拠語がない場合は通常レジ操作を過検出から外し、本物のPOS/データルートは引き続き拒否します。あわせて、各章に商店街アンカー（近所の店、店主、アーケード/通り、常連客、商店会掲示など）を入れる指示を追加し、店内だけで閉じる章を減らします。
-
-### v4.7.5 (2026-06-07)
-- **Mundane Campaign-Stamp Lock / 店内運用ミス固定**: A fresh Gemini v4.7.4 run showed that the new selected-genre pull contract was still not enough for the convenience-store comedy axis: the model could turn an ordinary campaign-card/stamp problem back into a wooden-box / legendary-stamp / origin-history route, then save it after a regeneration. v4.7.5 adds a targeted local-comedy lock before initial drafting, next chapters, continuation, and repair: stamps, cards, prizes, shelf labels, receipts, packaging, and cardboard must remain today's store-work mistakes such as wrong stamp position, mixed-in cards, expired cards, old ink pads, missed explanations, shelf-label mismatch, customer confusion, or staff report omissions. A matching save-time gate now rejects wooden boxes, hidden boxes, legendary stamps, phantom prizes, impossible stamps, historical stamp-origin investigations, and old-manager-special-order lore before they enter saved canon. / v4.7.4のGemini再QAで、選択ジャンル牽引契約だけではまだ不足することが分かりました。コンビニ・商店街・コメディ軸でも、通常のキャンペーンカード/スタンプ問題が、木箱・伝説スタンプ・由来調査ルートへ戻り、再生成後に保存される可能性がありました。v4.7.5では初回設計、次章、継続、修正のすべてにローカルコメディ専用の固定を追加し、スタンプ、カード、景品、棚札、レシート、包装、段ボールは、押印欄違い、別店舗カード混入、期限切れ、古いインク台、説明不足、棚札不一致、客の勘違い、スタッフの報告漏れなど「今日の店内運用ミス」として扱わせます。保存前ゲートでも、木箱、隠し箱、伝説スタンプ、幻の景品、存在しないはずのスタンプ、スタンプ由来調査、昔の店長の特注品設定を正史化前に拒否します。
-
-### v4.7.4 (2026-06-07)
-- **Selected-Genre Pull Contract / 選択ジャンル牽引契約**: Generalizes the v4.7.2-v4.7.3 "interestingness" work beyond local comedy. Long-novel prompts now tell the model to maximize the selected genre itself: comedy through misread timing and escalating reversals, suspense through danger/deadline/trust pressure, serious drama through irreversible choices and relationship cost, romance through distance and vulnerability, horror through dread and sensory escalation, and so on. The contract also keeps completion rate in mind by applying as prompt-first guidance rather than another broad hard save gate, while explicitly blocking unselected high-power templates such as hidden boxes, legendary items, USB/POS/data, amnesia, research labs, world-scale conspiracies, cult rituals, smuggling, code routes, and AI weapons from becoming the core mystery, proof, solution, or chapter hook unless the user selected those axes. / v4.7.2-v4.7.3の「面白さ」補強をローカルコメディ専用から全ジャンル対応へ一般化しました。長編プロンプトでは、選択ジャンルそのものを極めるよう指示します。コメディなら勘違い・タイミング・反復・ズレ、サスペンスなら危険・締切・信用の圧、シリアスなら不可逆の選択と関係の代償、恋愛なら距離と傷つきやすさ、ホラーなら不穏さと五感の増幅で読者を引っ張ります。完走率を守るため、まずは広い保存拒否ゲートではなく生成前プロンプトとして適用しつつ、未選択の箱/伝説アイテム/USB/POS/データ/記憶喪失/研究施設/世界規模陰謀/教団儀式/密輸/暗号/AI兵器などが核心の謎・証拠・解決手段・章末フックになることを明示的に防ぎます。
-
-### v4.7.3 (2026-06-07)
-- **Japanese-Only Local-Comedy QA Hardening / ローカルコメディ日本語化QA補強**: A fresh Gemini long-novel QA on v4.7.2 completed all 10 chapters but the final scan found an English internal label (`awkward`) leaking into the manuscript, and the run required heavy late-stage retries. v4.7.3 replaces the v4.7.2 English entertainment-spine prompt wrapper with a Japanese-only version wired to the pre-v4.7.2 base prompt functions. To preserve retry budget, minor leaked labels and preview-style chapter endings are repaired during save-path cleanup instead of forcing regeneration, while unrepaired internal-instruction blocks still fail closed. / v4.7.2のGemini長編QAは全10章を完走しましたが、最終スキャンで英語の内部ラベル（`awkward`）が本文に漏れ、後半章の再生成も多くなりました。v4.7.3では、v4.7.2の英語混じり面白さプロンプトを日本語のみの版に差し替え、v4.7.2追加前のベース関数へ接続し直します。再生成残数を守るため、軽微な英語ラベル漏れや予告調の章末は保存経路のクリーニングで修復し、内部指示ブロックが残る重大な漏れだけを保存拒否します。
-
-### v4.7.2 (2026-06-07)
-- **Local-Comedy Entertainment Spine / ローカルコメディ面白さ補強**: Adds a pre-drafting entertainment spine for convenience-store / shopping-street / dotabata long novels. Each chapter now receives concrete laugh beats such as public customer interruptions, campaign-card mistakes, shelf-label contradictions, cardboard mix-ups, awkward apologies, and visible store cleanup. The save gate remains moderate for completion rate, but rejects severe cases where a chapter loses local store action, turns into heavy truth-summary melodrama, reopens already-settled envelope/debt threads as a new mystery in late chapters, or ends only with abstract future/truth/unity language. / コンビニ・商店街・ドタバタ長編向けに、生成前の面白さ台帳を追加しました。各章に、客の割り込み、キャンペーンカードの押し間違い、棚札の矛盾、段ボール取り違え、気まずい謝罪、店内片付けなどの具体的な笑いビートを割り当てます。完走率を落としすぎないよう保存ゲートは中程度に留めつつ、店内行動が消えた章、重い真相まとめに寄りすぎた章、後半で解決済みの封筒・負債スレッドを新たな謎として蒸し返す章、抽象的な未来・真実・団結だけで終わる章は保存前に再生成させます。
-
-### v4.7.1 (2026-06-07)
-- **Gemini Progress-Meta Stripper / Gemini進捗メタ除去**: Fresh Gemini long-novel QA on v4.7.0 completed all 10 chapters but the final manuscript scan still found generated length/progress commentary such as `ここまでの文字数概算`, `現在の出力文字数`, and `最低文字数` between adopted chapters. v4.7.1 strips those progress blocks across chapter cleanup and final adopted-chapter assembly, and the save gate rejects any remaining length/progress notes before they can become manuscript text. / v4.7.0のGemini長編QAは全10章を完走しましたが、最終原稿スキャンで`ここまでの文字数概算`、`現在の出力文字数`、`最低文字数`などの生成メタが章間に残りました。v4.7.1では章本文クリーニングと採用済み章だけの最終組み立ての両方でこれらの進捗ブロックを除去し、残存する文字数・進捗メモは保存前ゲートで拒否します。
-
-### v4.7.0 (2026-06-07)
-- **Leading Generated-Plan Stripper / 先頭設計ブロック除去**: v4.6.9 confirmed that OpenAI could still ignore the initial prose-only instruction and start live chapter output with title/logline/all-structure labels. v4.7.0 moves this from prompt-only prevention to save-path sanitation: before chapter extraction and save-time quality gates, the app strips leading generated plan/header lines such as `タイトル`, `ログライン`, `全構成`, `作品ヘッダー情報`, `あらすじ`, `プロット概要`, numbered header blocks, and outline-style chapter lines, then validates only the remaining prose. This keeps rejected or ignored planning output from becoming chapter body or final manuscript state. / v4.6.9でもOpenAIが初回の本文のみ指示を無視し、ライブ第1章をタイトル/ログライン/全構成ラベルから始めることが確認されました。v4.7.0では、これをプロンプト宣言だけで防ぐのではなく保存経路側で処理します。章抽出と保存前品質ゲートの前に、`タイトル`、`ログライン`、`全構成`、`作品ヘッダー情報`、`あらすじ`、`プロット概要`、番号付きヘッダー、章別アウトライン行を先頭から剥がし、残った本文だけを検査・保存します。これにより、棄却対象や無視された設計出力が章本文や最終原稿状態へ混入しません。
-
-### v4.6.9 (2026-06-07)
-- **OpenAI Initial Long-Plan Prose Override / OpenAI初回長編プロンプト本文化**: v4.6.8 fixed final manuscript assembly and added the surface ledger, but the next in-app OpenAI QA showed the first chapter could still begin as `タイトル` / `ログライン` / `全構成`. The issue was that the v4.6.7 prose kickoff guarded retry/continuation prompts but not the initial `D()` long-plan-plus-chapter prompt. v4.6.9 applies an OpenAI-only initial prompt override for local-comedy long novels: the visible response must start with chapter prose, must not output title/logline/outline labels, must write at least 6,500 Japanese characters before the context memo, and must ground the first 1,000 characters in shopping-street convenience-store work. / v4.6.8では最終本文組み立てと表層台帳を直しましたが、続くOpenAI QAでは第1章がまだ`タイトル` / `ログライン` / `全構成`から始まりました。原因は、v4.6.7の本文キックオフがリトライ/継続プロンプトには掛かっていた一方、初回の`D()`長編設計兼第1章プロンプトには掛かっていなかったことです。v4.6.9ではローカルコメディ長編のOpenAI初回プロンプトにも、表示出力は章本文から始める、タイトル/ログライン/構成ラベルを出さない、文脈メモ前に6,500字以上を書く、冒頭1,000字で商店街コンビニ業務を可視化する契約を追加しました。
-
-### v4.6.8 (2026-06-07)
-- **Adopted-Chapters-Only Final Output / 採用済み章だけの最終出力**: Fresh OpenAI long-novel QA on v4.6.7 completed all 10 chapters, but the final readable manuscript still began with rejected-draft management material such as `作品ヘッダー情報`, `タイトル:`, `あらすじ`, and `プロット概要`. v4.6.8 wraps the long-novel completion assembler so the final manuscript, copy text, and save text are rebuilt only from adopted chapter bodies and app-owned chapter headings, never from the raw failed/retry stream or generated header plan. It also adds a local-comedy surface ledger that rejects hard unselected-template words such as USB, POS, amnesia, Project, research facility, smuggling, and code/cipher wording even when they appear as metaphor. / v4.6.7のOpenAI長編QAは10章完走しましたが、最終表示本文の先頭に、棄却草稿由来の`作品ヘッダー情報`、`タイトル:`、`あらすじ`、`プロット概要`が残りました。v4.6.8では完了時の組み立てをラップし、最終本文・コピー・保存対象を採用済み章本文とアプリ側章見出しだけから再構成します。あわせてローカルコメディでは、USB、POS、記憶喪失、Project、研究施設、密輸、暗号などの未選択テンプレート語を比喩でも保存させない表層台帳ゲートを追加しました。
-
-### v4.6.7 (2026-06-07)
-- **OpenAI First-Chapter Prose Kickoff / OpenAI第1章本文キックオフ補強**: After v4.6.6 fixed the OpenAI chapter-2 false-positive route gate, a fresh OpenAI run failed earlier at chapter 1: the model first emitted title/logline/structure metadata, then retried into a digital/off-ledger route, and finally produced a short 1,577-character fragment without visible shopping-street grounding. v4.6.7 adds an OpenAI-only first-chapter long-novel contract for local-comedy stories: output prose only, begin from a first-person physical store action, visibly include shopping-street/convenience-store/storekeeper/customer grounding in the first 800 characters, avoid digital/POS/lab/memory proof routes, and continue past 5,200 Japanese characters before the context memo. / v4.6.6でOpenAI第2章の台帳ゲート誤爆は直りましたが、再実行では第1章でタイトル/ログライン/全構成の管理情報、次にデジタル系の台帳外ルート、最後に商店街軸の見えない1,577字の短文断片が出て失敗しました。v4.6.7では、ローカルコメディ長編のOpenAI第1章だけに、本文のみ出力、一人称の店内物理行動から開始、冒頭800字以内に商店街・コンビニ・店長/客などを可視化、デジタル/POS/研究/記憶装置を証拠化しない、文脈メモ前に5,200字以上まで継続する契約を追加します。
-
-### v4.6.6 (2026-06-07)
-- **Route-Level Local-Comedy Gate / ルート単位のローカルコメディゲート**: Gemini QA on v4.6.5 completed all 10 chapters and the saved manuscript scan found no hard forbidden routes such as USB, POS, amnesia, lab, secret-society, smuggling, or code routes. The follow-up OpenAI QA then exposed an over-strict v4.6.5 local-comedy gate: ordinary store words such as cardboard boxes, shelf backs, notes, or mild unease could be counted as hidden-box/code drift even when the draft stayed inside cash-count slips, shelf labels, receipts, packages, and testimony. v4.6.6 replaces that save-time check with route-level compound detection, so only concrete hidden/conspiracy/code/smuggling routes are rejected while mundane store-work scenes can pass. / v4.6.5のGemini QAは全10章完走し、保存本文スキャンでもUSB、POS、記憶喪失、研究施設、秘密結社、密輸、暗号ルートなどのハード禁止経路は0件でした。一方、OpenAI QAでは、段ボール箱、棚の裏、伝言ノート、軽い不穏さのような日常語までhidden-box/code漂流として拾う過検出が出ました。v4.6.6では保存時チェックを単語単位ではなくルート単位の複合判定に差し替え、実際の隠し箱・陰謀・暗号・密輸ルートだけを拒否し、現金差異・棚札・レシート・包装・証言などの日常店舗シーンは通過させます。
-
-### v4.6.5 (2026-06-07)
-- **Concrete Local-Comedy Chapter Beat Plan / ローカルコメディ章別ビート設計**: A fresh v4.6.4 Gemini run showed that even a narrowed ledger can fail before chapter 1 is saved if the model chooses a hidden box, secret message, smuggling, or secret-society premise as the initial plot seed. v4.6.5 adds a deterministic chapter-by-chapter beat plan for convenience-store / shopping-street / comedy long novels. Each chapter is assigned concrete store-work beats such as campaign-card stamp mismatch, shift-note contradiction, cash-count slip, shelf-label/product-package/cardboard trouble, customer complaint slip, paper invoice, shopkeeper testimony, bad timing, apology, repayment, or confession. Hidden boxes, open-me notes, codes, smuggling, secret societies, cults, old maps/keys/photos, ominous strangers, underground rooms, and historical conspiracies are rejected before they can become chapter canon. / v4.6.4のGemini再実行では、台帳を絞っても第1章の種そのものが「開けるな箱」「秘密メッセージ」「密輸」「秘密結社」へ飛ぶと保存前に失敗することが分かりました。v4.6.5では、コンビニ・商店街・コメディ長編に対して章ごとの具体的な店内トラブルビートを固定します。キャンペーンカードの押印ミス、シフトメモの矛盾、現金差異、棚札/商品/包装/段ボールトラブル、苦情票、紙の納品書、店主の証言、タイミングの悪さ、謝罪、返金、告白などを章ごとに割り当て、箱・開けるなメモ・暗号・密輸・秘密結社・教団・古地図/鍵/写真・不穏な客・地下施設・歴史陰謀を正史化前に拒否します。
-
-### v4.6.4 (2026-06-07)
-- **Footer-Safe Project/AI Gate / フッター由来のProject/AI誤判定修正**: v4.6.3 Gemini browser QA reached the final chapter, but the old Project/AI guard could still treat the generated `AI Story Maker` footer, ordinary menu-development wording, or non-Project "secret flavor" phrasing as a hard grandScale route. v4.6.4 strips generated footer text before hard Project/AI classification, preserving real Project/AI/weapon/world-scale rejection while allowing local store-work endings to pass when they do not contain hard route tokens. / v4.6.3のGeminiブラウザQAは最終章まで到達しましたが、旧Project/AIゲートが生成フッター内の `AI Story Maker`、通常のメニュー開発表現、Projectではない「秘密の隠し味」などをgrandScale扱いし得ました。v4.6.4では、硬いProject/AI判定の前に生成フッターを除外し、本物のProject/AI/兵器/世界規模ルートは止めつつ、ローカル店舗トラブルの締めを誤爆させないようにします。
-
-### v4.6.3 (2026-06-07)
-- **Local Comedy Ledger Narrowing / ローカルコメディ台帳の絞り込み**: Fresh Gemini browser QA after the v4.6.2 hotfix proved the grandScale false-positive class was no longer the blocker, but the story still failed by drifting into a shopping-street treasure-hunt / interview-suspense route by Chapter 3. v4.6.3 narrows the allowed ledger for convenience-store / shopping-street / comedy long novels to mundane store-work means: receipts, handwritten shift notes, cash-count slips, stock or shelf discrepancies, paper invoices, customer complaint slips, packaging/cardboard, campaign-card misunderstandings, customer/shopkeeper testimony, face-to-face lies/confessions, awkward apologies, bad timing, practical loss, debt, refusal, and betrayal. Old maps, hidden keys/boxes, ominous strangers, treasure hunts, and historical-secret investigation are now rejected as the wrong engine for this axis. / v4.6.2後のGeminiブラウザQAでは、最終章のgrandScale誤爆は主因ではなくなりましたが、第3章で商店街の宝探し・聞き込みサスペンスへ寄って失敗しました。v4.6.3では、コンビニ・商店街・コメディ長編の許可台帳を、紙レシート、手書きシフトメモ、現金差異、棚/在庫差異、紙の納品書、苦情票、包装/段ボール、キャンペーンカードの勘違い、客/店主の証言、対面の嘘や告白、気まずい謝罪、タイミングの悪さ、実務上の損失、借金、拒絶、裏切りに絞ります。古地図、隠し鍵/箱、不穏な客、宝探し、商店街史の秘密調査は、この軸のエンジンとして保存拒否します。
-
-### v4.6.2 (2026-06-07)
-- **Final-Chapter Ledger False-Positive Fix / 最終章の台帳ゲート誤爆修正**: Browser QA with saved API keys showed the v4.6.1 ledger correctly rejected a real Chapter 8 template relapse, but Chapter 10 could be blocked by an over-broad `grandScale` classification inherited from older guards. v4.6.2 keeps the Project/AI/world-scale route blocked only when hard Project/AI/weapon/conspiracy tokens are actually present, so ordinary final-chapter wording about fate, closure, plans, or resolution does not waste all retries. / 保存済みAPIキーでのブラウザQAにより、v4.6.1の台帳ゲートは第8章の実際のテンプレ回帰を正しく拒否できる一方、第10章では旧ガード由来の広すぎる `grandScale` 判定で誤爆し得ることが分かりました。v4.6.2では、Project/AI/兵器/巨大陰謀/世界規模を示す明確な語がある場合だけそのルートとして扱い、最終章の通常の「運命」「締め」「計画」「解決」表現だけで全リトライを消費しないようにします。
-
-### v4.6.1 (2026-06-07)
-- **Story-Specific Allowed Means Ledger / 作品別の解決手段台帳**: Moves the long-novel anti-template defense from one-off forbidden-word patching to a per-work ledger created from the selected settings. Before first drafting, continuation, repair, and save, the app now fixes the allowed mystery/evidence/solution means for the work and rejects non-ledger routes as the same class of unselected-template intrusion, even when the model renames the shortcut. For a convenience-store / shopping-street / comedy setup, the accepted route is paper receipts, register tape, handwritten shift notes, cash-count slips, physical packages/cardboard, keys/photos, customer or shopkeeper testimony, face-to-face lies/confession, misunderstanding, refusal, betrayal, debt, practical loss, and bodily cost; unselected USB/data/POS-screen/camera/device, fake amnesia, cult/facility, Project/AI/weapon, and world-scale answers are rejected before saved prose can carry them forward. / 長編のテンプレ侵入対策を、個別禁止語の継ぎ足しから「作品ごとに許可された謎・証拠・解決手段の台帳」へ移しました。初稿、継続、修復、保存前チェックの各段階で、選択設定から許可台帳を固定し、そこにない解決手段は名前を変えても同じ未選択テンプレート侵入として拒否します。コンビニ・商店街・コメディ軸では、紙レシート、レジロール、手書きシフトメモ、現金差異、物理的な荷物や段ボール、鍵や写真、客や店主の証言、対面の嘘や告白、勘違い、拒絶、裏切り、借金、実務上の損失、身体的代償を許可し、未選択のUSB/データ/POS画面/カメラ/装置、偽記憶喪失、教団/施設、Project/AI/兵器、世界規模の答えを保存前に止めます。
-
-### v4.6.0 (2026-06-06)
-- **Unselected Memory-Template Guard / 未選択の記憶喪失テンプレート防止**: v4.5.9 Gemini QA stopped POS/register-data fallback, but the model then tried to smuggle the long-mode default `lost memory` route back in as a comedy-flavored "fake amnesia store manager" premise. v4.6.0 treats amnesia, fake amnesia, lost memory, recovered memory, and forgotten-past titles/loglines as unselected template fallback unless the user selected that axis. It also filters the earlier Project/AI guard so ordinary words like "plan" do not become false Project/AI failures unless hard AI/project/weapon tokens are actually present. / v4.5.9 Gemini QAでPOS/レジデータへの逆戻りは止まりましたが、今度は長編モード既定の `消えた記憶` 系が「記憶喪失を装う店長」というコメディ風の形で戻りました。v4.6.0では、ユーザーがその軸を選んでいない限り、記憶喪失、偽の記憶喪失、消えた記憶、取り戻す記憶、忘れていた過去をタイトル・ログライン・中核・解決にするルートを未選択テンプレートとして保存拒否します。また、以前のProject/AIゲートが普通の「計画」語だけで過剰反応しないよう、明確なAI/Project/兵器トークンがある場合に絞って扱います。
-
-### v4.5.9 (2026-06-06)
-- **POS/Register Data Fallback Guard / レジデータ逆戻り防止**: Fresh Gemini long-novel QA on v4.5.8 confirmed that the mode-axis rewrite bug was fixed and the story stayed on the selected convenience-store / shopping-street / comedy axis, but it also exposed a narrower fallback: the model began treating register logs, sales data, and register display information as possible clues. v4.5.9 keeps registers available as normal store-work props while rejecting unselected POS/register/sales-data routes as proof, twist, or resolution. The prompt and save gate now force those story functions back to printed receipts, register tape, handwritten shift notes, cash-count slips, paper invoices, customer testimony, staff lies, physical packages, and face-to-face confession. / v4.5.8 Gemini長編QAで、長編モード選択時に設定軸が勝手に変わる問題は解消し、コンビニ・商店街・コメディ軸は保持されました。一方で、より細い逃げ道として、AIがレジログ・売上データ・レジ画面を手がかり候補にし始めることを確認しました。v4.5.9では、レジを通常の店舗作業小道具として使うことは許可しつつ、未選択のPOS/レジ/売上データを証拠・どんでん返し・解決に使うルートを保存前に拒否します。代わりに、紙レシート、レジロール、手書きシフトメモ、現金差異、紙の納品書、客の証言、スタッフの嘘、物理的な荷物、対面の告白へ戻します。
-
-### v4.5.8 (2026-06-06)
-- **Mode Change Does Not Rewrite Axes / モード変更時の軸上書き停止**: v4.5.7 browser QA exposed a deeper UI-state bug before generation even started: pressing the long-novel mode chip rewrote the visible daily-life/convenience/comedy/shopping-street settings into the long-mode defaults (`mystery / lost memory / suspense / Tokyo / adult / surprise`). v4.5.8 changes mode-chip selection and mode randomization so they update only the output mode label and do not reapply mode-default theme/genre/worldview/target/ending axes. Initial startup/reset defaults still work, but a user-visible or manually typed axis is no longer overwritten just because the output mode changes. / v4.5.7のブラウザQAで、生成前のさらに深いUI状態バグが再現しました。長編モードのチップを押した瞬間、表示されていた日常・コンビニ・コメディ・商店街が、長編モード既定の `ミステリー / 消えた記憶 / サスペンス / 東京 / 大人向け / サプライズ` に上書きされていました。v4.5.8では、モード選択とモードランダムが出力モードだけを更新し、テーマ/ジャンル/世界観/ターゲット/オチなどの軸デフォルトを再適用しないようにしました。初回起動・全リセット時の初期補完は残しつつ、ユーザーが見えている選択・手入力済み項目は、出力モード変更だけでは勝手に変わりません。
-
-### v4.5.7 (2026-06-06)
-- **Selected-Axis Local Adherence Gate / 選択軸ローカル遵守ゲート**: Fresh v4.5.6 Gemini long-novel QA answered the user's direct question: a beginning-only declaration is not enough. With `long novel / daily-life / convenience store / comedy-dotabata / modern Japan / shopping street / all ages`, the model first drifted into a memory-loss suspense route, the digital gate rejected it once, but the retry was still saved as a serious memory/Tokyo/underground-office suspense chapter because the local setting-consistency gate did not require visible selected-axis anchors. v4.5.7 adds a local save-time gate and prompt contract that require visible selected anchors such as convenience-store work, shopping-street geography, and comedy beats, and rejects unselected memory-loss/Tokyo-thriller replacement even if the AI contradiction checker says there is no issue. / v4.5.6 Gemini 長編QAで、冒頭で禁止を宣言するだけでは不十分だと確認しました。`長編 / 日常・生活 / コンビニ / コメディ・ドタバタ / 現代日本 / 商店街 / 全年齢` でも、AIはまず記憶喪失サスペンスへ逸れ、デジタルゲートで一度拒否された後、再生成でなお記憶・東京・地下/オフィス系サスペンスを保存してしまいました。原因は、AI矛盾検査が「矛盾なし」と判断しても、ローカル保存ゲートがコンビニ・商店街・コメディなど選択軸の可視アンカーを必須として見ていなかったことです。v4.5.7では、コンビニ業務、商店街の地理、人間関係、笑い/ドタバタの拍などを本文内の必須アンカーとして保存前にローカル検査し、未選択の記憶喪失/東京スリラー置換を保存不可にします。
-
-### v4.5.6 (2026-06-06)
-- **Project/AI Weapon Escape Guard / Project・AI兵器逃げガード**: Fresh v4.5.5 Gemini long-novel QA with daily-life/comedy/storefront settings showed another escape route: the first rejected chapter correctly failed on a project-like clue, but the retry saved `Aoi Project` and the next chapter escalated into AI weapon, secret development, giant conspiracy, and chase-thriller prose. v4.5.6 adds an explicit prompt contract and save-time gate for unselected `Project`, AI, artificial intelligence, weapon, secret plan, hidden development program, giant conspiracy, and chase-thriller replacement of daily comedy axes. These routes are now rejected unless the user explicitly selected AI/SF/digital/research, and the same plot function must be rebuilt through letters, photos, signatures, receipts, testimony, lies, betrayal, refusal, bodily cost, store work, conversation, mistakes, or local human stakes. / 日常・コメディ・店舗系設定での v4.5.5 Gemini 長編QAにより、さらに別の逃げ道が見つかりました。第1章初稿はプロジェクト的な手がかりで正しく落ちましたが、再生成で `Aoi Project` が保存され、第2章では AI兵器、秘密開発、巨大陰謀、追跡スリラーへ拡大しました。v4.5.6では、未指定の `Project`、AI、人工知能、兵器、秘密計画、隠れた開発計画、巨大陰謀、日常コメディ軸を追跡スリラーへ置換する展開に対して、プロンプト契約と保存前ゲートを明示追加しました。AI/SF/デジタル/研究がユーザー指定されていない限り拒否し、同じ物語機能を手紙、写真、署名、領収書、証言、嘘、裏切り、拒絶、身体的代償、店の仕事、会話、ミス、身近な人間関係へ組み直します。
-
-### v4.5.5 (2026-06-06)
-- **Always-On Axis Escape Lock / 常時軸逸脱ロック**: Fresh Gemini long-novel QA proved that even a strengthened opening ban can still let the model detour from USB/data/device routes into another unselected big template: religious order, brainwashing, purification, underground/special facility, soul-box/rebirth logic, and a giant villain plan. v4.5.5 applies the escape lock before every long-novel chapter, continuation, repair, and retry, not only late chapters or rejected retries. It also adds a save-time gate that rejects unselected cult/facility/brainwashing/research-memory routes when they become the proof, core threat, reveal, or ending, and forces the same plot function back into people, paper evidence, photographs/film, signatures, receipts, testimony, betrayal, refusal, confession, bodily cost, or visible object loss/damage. / Gemini長編QAで、強い冒頭禁止を入れても、USB/データ/装置系から別の未指定巨大テンプレへ逃げることが確認されました。具体的には、宗教団体、洗脳、浄化、地下/特別施設、魂の箱/再生理屈、巨大黒幕計画です。v4.5.5では終盤や再生成時だけでなく、長編の各章・続きを書く処理・修正・再生成のすべてに逃げルートロックを常時適用します。さらに保存前ゲートで、未指定のカルト/施設/洗脳/研究記憶ルートが証拠・核心脅威・暴露・結末になった場合に拒否し、同じ物語機能を人物、紙の物証、写真/フィルム、署名、領収書、証言、裏切り、拒絶、告白、身体的代償、見える物の喪失/破損へ戻します。
-
-### v4.5.4 (2026-06-06)
-- **Late-Stage Escape-Route Lock / 終盤逃げルートロック**: Fresh v4.5.3 Gemini long-novel QA proved that a beginning-only ban is not enough: chapter 11 repeatedly tried to solve pressure by jumping across rejected routes such as digital props, ritual/sacrifice folklore, repeated chapter openings, premature "everything is over" closure, and inconsistent evidence inventories. v4.5.4 adds a late-stage retry contract for long novels that discards every rejected route as non-canon and forces the next draft to continue only from saved canon, existing physical evidence, face-to-face conversation, refusal, betrayal, confession, debt, bodily cost, or a visible loss/damage of an already-held object. / v4.5.3 の Gemini 長編QAで、冒頭に禁止を宣言するだけでは足りないことが確認されました。第11章で、デジタル小道具、儀式/生贄系の民俗テンプレ、前章冒頭の再演、早すぎる「全部終わった」型の締め、証拠所持品の矛盾など、複数の拒否済みルートへ横断的に逃げました。v4.5.4 では長編終盤の再生成契約を追加し、拒否された草稿ルートをすべて非正史として破棄し、保存済み正史、既存の物理証拠、対面会話、拒絶、裏切り、告白、借金、身体的代償、既に持っている物の喪失/破損だけから次稿を組み直すよう強制します。
-
-### v4.5.3 (2026-06-06)
-- **Evidence Handoff State Lock / 証拠受け渡し状態ロック**: Fresh v4.5.2 Gemini long-novel QA removed the research/experiment relapse, but chapter 7 became stuck in a different loop: police records and a loan contract already received in chapter 6 were rediscovered and handed over again in chapter 7. v4.5.3 adds a long-novel prompt contract that treats saved chapters and context memos as the only canon for physical evidence. Once police records, contracts, letters, envelopes, notebooks, photos, film negatives, keys, ledgers, receipts, medical notes, victim reports, or signed/sealed papers have been received/read/shown/used/lost/hidden, later chapters must use, confront, hide, damage, refuse to show, or notice a new detail in the already-held item instead of staging its first discovery again. / v4.5.2 の Gemini 長編QAでは研究・実験テンプレへの再吸着は抑えられましたが、第6章で既に受け取った警察資料と金銭消費貸借契約書を、第7章で再び初めて知り、受け取るループが発生しました。v4.5.3 では、保存済み章と文脈メモを物理証拠の唯一の正史として扱う長編プロンプト契約を追加します。警察資料、契約書、手紙、封筒、ノート、写真、フィルムネガ、鍵、帳簿、領収書、診断書、被害届、署名/押印済み書類などを一度受領・読解・提示・使用・紛失・隠匿した場合、後続章では初発見や初受領を再演せず、既に持っている証拠を使う、突きつける、隠す、傷つける、見せるのを拒む、見落としていた細部に気づく、といった次の行動へ進めます。
-
-### v4.5.2 (2026-06-06)
-- **Research/Experiment Template Guard / 研究・実験テンプレガード**: Fresh v4.5.1 Gemini long-novel QA fixed the worst chapter-7 USB/data/lab relapse, but chapter 8 still saved a different off-axis core through wording such as "experiment success", "test subject data", and "the world will change". v4.5.2 treats research/experiment/test-subject motifs as the same unselected template class even when explicit labs, capsules, or devices are absent. The pre-save gate now rejects experiment-success smells, test subjects, clinical/research plans, research data, and world-changing project slogans unless the user selected an AI/SF/digital/research axis; prompts and repairs force replacement with forged consent, debt, insurance fraud, workplace cover-up, victim reports, diagnosis notes, signed documents, receipts, witness silence, betrayal, refusal, or bodily cost. / v4.5.1 の Gemini 長編QAでは第7章の USB・データ・研究室への大量再吸着は改善しましたが、第8章で「実験の成功」「被験者データ」「世界が変わる」といった別名の未指定テンプレが保存済みメモへ入りました。v4.5.2 では、明示的な研究室・カプセル・装置がなくても、研究・実験・被験者モチーフを同じ未指定テンプレとして扱います。保存前ゲートは、実験成功の匂い、被験者、臨床/研究計画、研究データ、世界を変える計画スローガンを、AI/SF/デジタル/研究系が選択されていない限り拒否します。プロンプトと修正指示も、同意書偽造、借金、保険金詐欺、職場事故隠し、被害届、診断書、署名書類、領収書、証言の沈黙、裏切り、拒絶、身体的代償へ置換するよう強制します。
-
-### v4.5.1 (2026-06-06)
-- **False-Route Purge Retry Law / 誤ルート破棄リトライ則**: Fresh v4.5.0 Gemini long-novel QA improved the first half but still showed a severe mid/late drift: chapter 7 tried to carry rejected USB/data/research-room/memory-device material back into the story (`digital:65 / payoff:10 / lab:2`). v4.5.1 treats rejected digital/lab drafts as false routes, not drafts to repair. On retries and repairs, the prompt now deletes the failed premise before planning, forbids even theory/background mentions of unselected USB/data/device/lab/capsule/memory technology, and forces the next chapter to open from a human/physical action tied to paper, film, keys, scars, receipts, testimony, confession, betrayal, refusal, or cost. / v4.5.0 の Gemini 長編QAでは前半の改善は確認できた一方、第7章で棄却済みの USB・データ・研究室・記憶装置ルートへ強く戻る問題が残りました（`digital:65 / payoff:10 / lab:2`）。v4.5.1 では、棄却されたデジタル/研究施設系草稿を「修理対象」ではなく「誤ルート」として扱い、再生成・修正時にその前提を計画前に破棄します。未指定の USB・データ・装置・研究室・カプセル・記憶技術は仮説や背景としても出さず、紙資料、フィルム、鍵、傷、領収書、証言、告白、裏切り、拒絶、代償に結びつく人間的・物理的な行動から章を書き直します。
-
-### v4.5.0 (2026-06-06)
-- **Analog Mystery Carrier Ledger / アナログ謎キャリア台帳**: Fresh Gemini long-novel QA proved that even a front-loaded "no USB/data/device/lab" declaration can fail when a theme such as "lost memory" strongly tempts the model toward memory devices, research rooms, capsules, and data clues. v4.5.0 changes the approach from ban-only to assignment-first: for unselected digital/SF/lab long novels, every chapter now receives an internal analog proof carrier before drafting, such as an old photograph, handwritten note, witness testimony, sealed envelope, paper ledger, receipt, physical key, scar, signature, refusal, betrayal, debt, or bodily cost. "Lost memory" is explicitly treated as human/social absence, not memory technology. / Gemini長編QAで、「USB・データ・装置・研究施設は禁止」と冒頭で宣言しても、「消えた記憶」のようなテーマでは記憶装置、研究室、カプセル、データ手がかりへ戻ることが確認されました。v4.5.0では禁止だけではなく、未指定のデジタル/SF/研究施設系長編に対して、各章の執筆前に古い写真、手書きメモ、証言、封筒、紙の帳簿、領収書、物理的な鍵、傷、署名、拒絶、裏切り、借金、身体的代償などのアナログ証拠キャリアを内部指定します。「消えた記憶」は記憶技術ではなく、人間関係・証言・物証の欠落として扱います。
-
-### v4.4.9 (2026-06-06)
-- **Analog Repair Scope Fix + Online Search Repair / アナログ修復範囲修正 + オンライン検索癖の修復**: Keeps the v4.4.8 local analog repair from running during streaming cleanup without chapter context, preventing repeated progress-log noise. For unselected digital/SF/lab long novels, light habits such as image-based online search are also repaired into paper records, old indexes, handwritten notes, maps, and physical reference checks before save-gate evaluation. Core USB, device data, servers, research rooms, capsules, memory devices, and memory-manipulation engines remain hard failures rather than silent rewrites. / v4.4.8 のローカル・アナログ修復が章文脈のないストリーミング整理中に走って進捗ログを荒らさないようにしました。デジタル/SF/研究施設系が選択されていない長編では、画像を使ったオンライン検索のような軽い癖も、保存前評価に入る前に紙資料、古い索引、手書きメモ、地図、物理的な照合作業へ修復します。一方で USB、端末データ、サーバー、研究室、カプセル、記憶装置、記憶操作が物語の核心になる場合は、勝手に書き換えずハード不合格のまま扱います。
-
-### v4.4.8 (2026-06-06)
-- **Analog Repair For Minor Digital Habits / 軽微なデジタル癖のアナログ修復**: Prompt bans alone are not enough for habitual actions such as "zoom the photo on a smartphone" or "move away from the PC." For unselected digital/SF/lab long novels, these minor digital habits are now repaired locally before save-gate checks into analog actions such as using a loupe, desk lamp, paper photograph, desk papers, and physical evidence. Core USB/data-file/server/lab/capsule/memory-device mechanics are still not silently converted; they remain save-gate failures so broken story engines do not enter saved chapters. / 「スマホで写真を拡大する」「PCから離れる」のような習慣的な軽いデジタル動作は、プロンプトで禁止するだけでは残りやすいため、デジタル/SF/研究施設系が選択されていない長編では保存前にローカルでルーペ、電気スタンド、紙焼き写真、机上の書類、物理証拠へ修復します。一方でUSB、データファイル、サーバー、研究施設、カプセル、記憶装置のような核心的な仕組みは勝手に変換せず、引き続き保存前ゲートで拒否します。
-
-### v4.4.7 (2026-06-06)
-- **First-Draft Zero-Tolerance Carrier Lock / 初稿ゼロ許容キャリアロック**: Moves the anti-USB/device/data/lab rule from a late warning into the very front of long-novel first-draft design when no digital/SF/lab axis is selected. The model is now told before outlining that code names, hidden networks, D-plan style project labels, servers, PCs, emails, data trails, research rooms, capsules, and memory devices are not allowed mystery carriers. First chapters must instead start from paper evidence, physical objects, witnesses, direct accusations, betrayal, refusal, confession, debt, scars, or bodily cost. The same lock applies immediately on the first retry after a digital/lab rejection, not only after multiple repeated failures. / デジタル/SF/研究施設系が選択されていない長編では、USB・端末・データ・研究施設禁止を後半の注意書きではなく、初稿設計の最前面へ移しました。コードネーム、地下ネットワーク、D計画風のプロジェクト名、サーバー、PC、メール、データ痕跡、研究室、カプセル、記憶装置は謎の運び手として使えないと、プロット作成前に指示します。第1章は紙の物証、物理的な小道具、証人、対面の告発、裏切り、拒絶、告白、借金、傷、身体的代償から始めます。デジタル/研究施設方向で棄却された場合も、複数回失敗後ではなく最初の再生成から同じロックを適用します。
-
-### v4.4.6 (2026-06-06)
-- **Repeated Digital Retry Lock + QA Abort Automation / 反復デジタル再生成ロック + QA中断自動化**: When a long-novel chapter repeatedly fails because unselected USB/device/data/PC/email/lab/capsule mechanics keep returning, the next retry now applies a hard lock that forbids those carriers across the whole chapter and forces the proof/payoff into paper evidence, physical objects, testimony, direct conversation, betrayal, refusal, confession, bodily cost, or practical human choice. Fantasy/isekai rejection is also scoped so generic words are not treated as magic or reincarnation unless real fantasy tokens appear. In local QA restore mode only, generation-abort confirmation dialogs are auto-accepted so automated verification does not stall on a manual OK button. / 長編で未指定のUSB・端末・データ・PC・メール・研究室・カプセル系が何度も戻ってくる場合、次の再生成では章全体に強制ロックをかけ、証拠・回収を紙の物証、物理的な小道具、証言、対面会話、裏切り、拒絶、告白、身体的代償、実務的な人間の選択へ移します。異世界/魔法/転生の拒否も、本当にそれらの語がある場合だけに絞り、一般語で誤判定しにくくしました。ローカルQA復元モード限定で、生成中断確認ダイアログを自動OKし、自動検証が手動ボタン待ちで止まらないようにしました。
-
-### v4.4.5 (2026-06-06)
-- **Physical Evidence Gate Scope + QA Restore Continuity / 物理証拠ゲート範囲修正 + QA復元継続**: Prevents the anti-digital long-novel save gate from treating paper files, locked folders, ledgers, notebooks, photos, film negatives, signatures, seals, keys, and ordinary pendants as digital props only because words like `file` or `key` appear. USB/device/data/server/lab/capsule engines remain blocked unless selected, but physical evidence can carry suspense and payoff. Local development QA restore also survives browser restart and local URL normalization after explicit opt-in, while public pages remain memory-only and expose no QA restore UI. / 長編の反デジタル保存ゲートが、紙のファイル、鍵付き書類、帳簿、手帳、写真、ネガ、署名、印鑑、鍵、普通のペンダントを、`ファイル` や `鍵` という語だけでデジタル小道具扱いしないようにしました。USB・端末・データ・サーバー・研究施設・カプセルが核心になる場合は、選択されていなければ引き続き拒否しますが、物理証拠によるサスペンスと回収は許可します。ローカル開発QAでは、明示的に有効化した後のブラウザ再起動やローカルURLの揺れでも復元が続きます。公開ページは引き続きAPIキーをメモリ内のみで扱い、QA復元UIも表示しません。
-
-### v4.4.4 (2026-06-06)
-- **Separator Self-Repair / 区切り線の自己修復**: Isolated separator/control lines such as `---`, `区切り線`, or divider-only lines are now stripped locally before long-novel save gates. Real body defects, control labels, memo leakage, underlength chapters, selected-setting replacement, and unselected-template takeover still fail closed, but a valid chapter no longer wastes regeneration budget only because of a removable divider. / 長編の保存前ゲートに入る前に、`---`、`区切り線`、区切りだけの行のような単独セパレーターをローカル除去します。本文欠陥、制御ラベル、管理メモ漏れ、文字数不足、選択設定の置換、未指定テンプレートの核心化は引き続き保存拒否しますが、本文として成立している章が除去可能な区切り線だけで再生成回数を浪費しないようにしました。
-
-### v4.4.3 (2026-06-06)
-- **Adaptive Retry + QA Persistence Hardening / 動的再生成 + QA保持強化**: Adds a stronger failure-aware retry layer for long novels. Repeated failures now escalate from "try again" into mechanism replacement, concrete human/physical beats, separator-artifact removal, and early-resolution prevention. Raw non-prose artifacts such as `---` and `区切り線 ---` are rejected before chapter save. Local development QA also persists Gemini/OpenAI keys again at save, switch, generation start, continuation, visibility-hide, and unload time on explicit localhost QA URLs only, so interrupted QA is less likely to require re-entry. Audit/API transport failures are marked as operational failures instead of spending the chapter's story-regeneration budget. / 長編の失敗理由に応じた再生成強化を追加しました。繰り返し失敗時は単なる「もう一度」ではなく、失敗した仕組みそのものを、人間関係・物理証拠・会話・代償の具体ビートへ置換させます。`---` や `区切り線 ---` のような本文ではない区切り線アーティファクトは保存前に拒否します。ローカル開発QAでは、明示的な localhost QA URL に限り、キー保存・API切替・生成開始・次章継続・非表示化・unload 時にも Gemini/OpenAI キーを再保存し、中断後の再入力負担を減らします。検査API/通信エラーは物語の再生成失敗回数として消費しない運用エラーとして扱います。
-
-### v4.4.2 (2026-06-06)
-- **Full-Template Retry Expansion / 全テンプレート再生成強化**: Extends the v4.4.1 dynamic retry system beyond digital/lab drift. Long-novel retries now apply targeted pressure for chapter-boundary replay, unselected sacrifice/ritual/folklore/cult drift, and unselected grand-scale/chuni/isekai drift. First drafts also receive a stronger carrier-lock contract that forces each chapter's proof and payoff into human testimony, paper evidence, physical objects, dialogue, betrayal, refusal, confession, or cost before prose is written. Internal QA control now includes semantic pause/abort/reload helpers for the in-app browser without relying on screen coordinates. / v4.4.1 の動的再生成をデジタル/研究施設だけでなく、章境界再演、未指定のイケニエ/儀式/民俗/カルト逸脱、未指定の世界規模/厨二/異世界逸脱まで拡張しました。初稿段階でも各章の証拠・回収の運び手を、人間の証言、紙の物証、物理的な小道具、会話、裏切り、拒絶、告白、代償へ先に固定する契約を強化します。内部QA操作は画面座標に頼らず、内蔵ブラウザの意味的な一時停止/中断/リロード補助を使えるようにしました。
-
-### v4.4.1 (2026-06-06)
-- **Dynamic Retry Escalation + Local QA Auto-Keep / 動的再生成強化 + ローカルQA自動保持**: When a long-novel chapter is rejected and regenerated, the next prompt now escalates according to the actual failure class and retry count instead of repeating the same weak instruction. Repeated digital/lab drift explicitly forces a different proof carrier and rewrites the failed function into human testimony, paper evidence, physical objects, dialogue, betrayal, refusal, or cost. Underlength, duplicate/restart, early-resolution, contradiction, rhythm, and label-leak failures also receive targeted regeneration pressure. The internal local development QA helper remains hidden from normal/public pages, while development QA can resume with fewer manual API-key re-entries after interruption. / 長編の章が保存前ゲートで棄却され再生成される場合、同じ弱い指示を繰り返すのではなく、失敗類型と再試行回数に応じて次のプロンプトを段階的に強化します。デジタル/研究施設方向への反復逸脱では、証拠の運び手を変え、人間の証言、紙の物証、物理的な小道具、会話、裏切り、拒絶、代償へ機能ごと置換させます。文字数不足、重複/巻き戻し、早すぎる総決算、矛盾、段落リズム、内部ラベル漏れにも個別の再生成圧をかけます。内部ローカル開発QA補助は通常/公開ページでは引き続き非表示のまま、開発QAでは中断後のAPIキー再入力負担を減らします。
-
-### v4.4.0 (2026-06-06)
-- **Mid-Story Digital/Lab Core Guard / 中盤デジタル・研究施設核心化ガード**: Strengthens Gemini/OpenAI long-novel prompts and save gates so unselected USB, device data, videos, servers, research rooms, experiment rooms, capsules, memory devices, and memory manipulation cannot become the mid-story proof, key, hidden answer, villain engine, or solution. Rejected drafts explicitly stop being canon and retries are instructed to replace that function with film photos, handwritten letters, paper ledgers, receipts, keys, scars, witness testimony, face-to-face betrayal, refusal, or human cost. / Gemini/OpenAI の長編プロンプトと保存前ゲートを強化し、未指定の USB、端末データ、映像、サーバー、研究室、実験室、カプセル、記憶装置、記憶操作が中盤から証拠・鍵・謎の本体・黒幕装置・解決手段になることを防ぎます。棄却された草稿は正史ではないと明示し、再生成ではフィルム写真、手書きの手紙、紙の帳簿、領収書、鍵、傷、証言、対面の裏切り、拒絶、人間的な代償へ置換します。
-
-### v4.3.9 (2026-06-06)
-- **Domestic-Comedy Gate Scope Fix / 日常コメディゲート適用範囲修正**: Fixed a long-novel save-gate bug where the v4.3.7 domestic-comedy tone guard could fire on a non-comedy suspense/mystery long-novel run because generic axes such as modern Japan or all-ages were treated as enough evidence for domestic comedy. The gate now checks the actual fixed settings, requires explicit daily-life/comedy intent, treats suspense/mystery/action/SF/fantasy axes as exclusions, and receives the active long-novel settings during save-time quality checks. / v4.3.7の日常コメディ文体ガードが、現代日本・全年齢のような汎用軸だけを根拠に、コメディではないサスペンス/ミステリー長編へ誤発火する不具合を修正しました。保存前ゲートは実際の固定設定を参照し、日常・コメディ意図が明示された場合だけ作動し、サスペンス/ミステリー/アクション/SF/ファンタジー系の軸では除外されます。
-
-### v4.3.8 (2026-06-06)
-- **Internal QA Resume Safety / 内部QA継続安全化**: Improves the local development QA harness so interrupted browser sessions can resume provider verification without changing public API-key behavior. Public builds remain memory-only for API keys and expose no local QA restore UI. / ローカル開発QAの中断後再開を改善しました。公開版のAPIキー取り扱いは変更せず、公開ビルドではAPIキーは引き続きメモリ内のみで、検証用の復元UIも表示されません。
-### v4.3.7 (2026-06-06)
-- **Domestic Comedy Tone Guard / 譌･蟶ｸ繧ｳ繝｡繝・ぅ霆ｸ縺ｮ繧ｵ繧ｹ繝壹Φ繧ｹ蟇・ｊ髦ｲ豁｢**: Adds a Gemini/OpenAI shared long-novel contract and save-gate check for domestic comedy/life-scale settings. Light mystery can remain as spice, but if a chapter becomes driven by pursuers, danger, surveillance, criminal-conspiracy texture, cold fear, or "no longer safe" thriller language, the next retry rewrites that function through shop work, shifts, receipts, handwritten notes, local gossip, face-to-face confession, embarrassment, comic timing, and human relationship cost. / Gemini/OpenAI 蜈ｱ騾壹〒縲∵律蟶ｸ繧ｳ繝｡繝・ぅ繝ｻ逕滓ｴｻ繧ｹ繧ｱ繝ｼ繝ｫ謖・ｮ壽凾縺ｮ髟ｷ邱ｨ螂醍ｴ・→菫晏ｭ伜燕繝√ぉ繝・け繧定ｿｽ蜉縺励∪縺励◆縲りｻｽ縺・Α繧ｹ繝・Μ繝ｼ縺ｯ蜻ｳ莉倥￠縺ｨ縺励※谿九○縺ｾ縺吶′縲∬ｿｽ霍｡閠・∝些髯ｺ縲∫屮隕悶∫官鄂ｪ髯ｰ隰縲∝・縺溘＞諱先悶√後ｂ縺・ｮ牙・縺ｧ縺ｯ縺ｪ縺・咲ｳｻ縺ｮ繧ｵ繧ｹ繝壹Φ繧ｹ隱槭′遶縺ｮ荳ｻ蟆取ｨｩ繧呈升縺｣縺溷ｴ蜷医∵ｬ｡蝗槫・逕滓・縺ｧ縺ｯ蠎励・莉穂ｺ九√す繝輔ヨ縲√Ξ繧ｷ繝ｼ繝医∵焔譖ｸ縺阪Γ繝｢縲∫伴蜀・・蝎ゅ・擇縺ｨ蜷代°縺｣縺溷相逋ｽ縲∵▼縲∫ｬ代＞縺ｮ髢薙∽ｺｺ髢馴未菫ゅ・莉｣蜆溘∈譖ｸ縺肴鋤縺医∪縺吶・
-### v4.3.6 (2026-06-06)
-- **Long-Novel Chapter Boundary Anti-Replay / 髟ｷ邱ｨ遶蠅・阜縺ｮ蜀肴ｼ秘亟豁｢**: Adds a Gemini/OpenAI shared long-novel contract and save-gate check so a new chapter cannot restart by copying or replaying the previous chapter's opening, departure, investigation, dialogue, metaphors, or paragraph blocks. Repairs must replace removed duplicate prose with new in-scene action, conversation, physical evidence, or human cost instead of shrinking below the chapter minimum or jumping to a full-story solution. / Gemini/OpenAI 蜈ｱ騾壹・髟ｷ邱ｨ螂醍ｴ・→菫晏ｭ伜燕繝√ぉ繝・け繧定ｿｽ蜉縺励∵眠縺励＞遶縺悟燕遶縺ｮ蜀帝ｭ縲∫ｧｻ蜍輔∬ｪｿ譟ｻ縲∽ｼ夊ｩｱ縲∵ｯ泌湊縲∵ｮｵ關ｽ繝悶Ο繝・け繧偵さ繝斐・繝ｻ蜀肴ｼ斐＠縺ｦ蟋九∪繧九％縺ｨ繧帝亟縺弱∪縺吶ゆｿｮ蠕ｩ譎ゅ・驥崎､・炎髯､縺縺代〒遶繧堤洒縺上＠縺溘ｊ蜈ｨ菴楢ｧ｣豎ｺ縺ｸ鬟帙・縺励◆繧翫○縺壹∵眠縺励＞蝣ｴ髱｢蜀・・陦悟虚縲∽ｼ夊ｩｱ縲∫黄逅・噪險ｼ諡縲∽ｺｺ迚ｩ縺ｮ莉｣蜆溘〒鄂ｮ縺肴鋤縺医∪縺吶・
-### v4.3.4 (2026-06-06)
-- **Hard Gates vs Effort Goals / 遑ｬ縺・ｿ晏ｭ倥ご繝ｼ繝医→蜉ｪ蜉帷岼讓吶・蛻・屬**: Reclassifies fiction-craft checks so they improve Gemini/OpenAI output without stopping good chapters. AI-smell removal, paragraph-rhythm variety, abstract-word reduction, muddy human lines, chapter temperature differences, imperfect aftertaste, and small interesting detours are now effort goals. Hard save gates remain for real product failures: selected/manual setting replacement, internal management labels, chapter-control leakage, broken text, underlength chapters, duplicate/restarted prose, hard contradictions, and unselected template takeover such as digital/research/capsule/isekai/chuni/folklore/world-scale material becoming the core proof, weapon, villain, or solution. / Gemini/OpenAI 荳｡譁ｹ縺ｧ縲∝ｰ剰ｪｬ縺ｮ雉ｪ繧剃ｸ翫￡繧句ｷ･闃ｸ繝√ぉ繝・け繧偵瑚憶縺・ｫ縺ｾ縺ｧ豁｢繧√ｋ菫晏ｭ俶拠蜷ｦ縲阪°繧牙・髮｢縺励∪縺励◆縲・I閾ｭ髯､蜴ｻ縲∵ｮｵ關ｽ繝ｪ繧ｺ繝縺ｮ螟牙喧縲∵歓雎｡隱槭・蜑頑ｸ帙∵ｳ･閾ｭ縺・ｺｺ髢薙・荳險縲∫ｫ縺斐→縺ｮ菴捺ｸｩ蟾ｮ縲∽ｸ榊ｮ悟・縺ｪ菴咎渊縲・擇逋ｽ縺・ｰ上＆縺ｪ閼ｱ邱壹・蜉ｪ蜉帷岼讓吶〒縺吶ゆｸ譁ｹ縺ｧ縲・∈謚槭・謇句・蜉帶ｸ医∩險ｭ螳壹・鄂ｮ謠帙∫ｮ｡逅・Λ繝吶Ν豺ｷ蜈･縲∫ｫ蛻ｶ蠕｡繝ｩ繝吶Ν貍上ｌ縲∝｣翫ｌ縺滓悽譁・∵枚蟄玲焚荳崎ｶｳ縲・㍾隍・蟾ｻ縺肴綾縺励・㍾螟ｧ遏帷崟縲∵悴驕ｸ謚槭・繝・ず繧ｿ繝ｫ/遐皮ｩｶ譁ｽ險ｭ/繧ｫ繝励そ繝ｫ/逡ｰ荳也阜/蜴ｨ莠・蝨ｰ譁ｹ莨晏･・荳也阜隕乗ｨ｡繝・Φ繝励Ξ縺瑚ｨｼ諡繝ｻ豁ｦ蝎ｨ繝ｻ鮟貞ｹ輔・隗｣豎ｺ縺ｮ荳ｭ譬ｸ縺ｫ縺ｪ繧句ｴ蜷医・縲∝ｼ輔″邯壹″遑ｬ縺・ｿ晏ｭ倥ご繝ｼ繝医〒豁｢繧√∪縺吶・
-### v4.3.3 (2026-06-06)
-- **Late-Stage Template Recovery + Novel AI-Smell Removal / 邨ら乢繝・Φ繝励Ξ陬懈ｭ｣ + 蟆剰ｪｬ蜷代￠AI閾ｭ髯､蜴ｻ**: Adds a Gemini/OpenAI shared recovery contract and long-novel save gate for late chapters. If an unselected digital, research-facility, lab, capsule, data-core, USB, device, server, or system payoff starts taking over the ending, the next regeneration is instructed to convert that function into witness testimony, paper ledgers, photos, keys, receipts, letters, wounds, face-to-face dialogue, lies, betrayal, refusal, or human cost. v4.3.3 also adds a fiction-specific AI-smell removal layer: it is not a generic casual-chat rewrite, but detects explanation-summary endings, excessive abstract-word repetition, uniform paragraph rhythm, and clean dawn/hope/truth afterglow, then pushes the retry toward dialogue, action, physical evidence, mistakes, body reactions, and imperfect human lines. / Gemini/OpenAI 蜈ｱ騾壹〒縲∫ｵら乢遶縺ｮ繝・Φ繝励Ξ騾ｸ閼ｱ繧偵梧拠蜷ｦ縺励※邨ゅｏ繧翫阪〒縺ｯ縺ｪ縺上御ｺｺ髢馴未菫ゅ・迚ｩ險ｼ繝ｻ莨夊ｩｱ繝ｻ莉｣蜆溘∈譖ｸ縺肴鋤縺医※邯夊｡後阪☆繧句･醍ｴ・→菫晏ｭ伜燕繧ｲ繝ｼ繝医ｒ霑ｽ蜉縺励∪縺励◆縲よ悴謖・ｮ壹・繝・ず繧ｿ繝ｫ縲∫皮ｩｶ譁ｽ險ｭ縲∝ｮ滄ｨ灘ｮ､縲√き繝励そ繝ｫ縲√ョ繝ｼ繧ｿ繧ｳ繧｢縲ゞSB縲∬｣・ｽｮ縲√し繝ｼ繝舌・縲√す繧ｹ繝・Β縺檎ｵ先忰縺ｮ豎ｺ繧∵焔縺ｫ縺ｪ繧翫◎縺・↑蝣ｴ蜷医∵ｬ｡縺ｮ蜀咲函謌舌〒縺ｯ險ｼ險縲∫ｴ吶・蟶ｳ邁ｿ縲∝・逵溘・嵯縲・伜庶譖ｸ縲∵焔邏吶∝す縲∝ｯｾ髱｢莨夊ｩｱ縲∝・縲∬｣丞・繧翫∵拠邨ｶ縲∽ｺｺ迚ｩ縺ｮ莉｣蜆溘∈讖溯・繧堤ｽｮ縺肴鋤縺医ｋ繧医≧謖・､ｺ縺励∪縺吶ゅ＆繧峨↓蟆剰ｪｬ蜷代￠AI閾ｭ髯､蜴ｻ縺ｨ縺励※縲∝腰縺ｪ繧九き繧ｸ繝･繧｢繝ｫ莨夊ｩｱ蛹悶〒縺ｯ縺ｪ縺上∬ｪｬ譏守ｷ乗峡縲∵歓雎｡隱槭・蜿榊ｾｩ縲∝插荳縺ｪ谿ｵ關ｽ繝ｪ繧ｺ繝縲∵悃/蟶梧悍/逵溷ｮ溘〒邯ｺ鮗励↓邱繧√ｋ菴咎渊繧呈､懷・縺励∽ｼ夊ｩｱ繝ｻ陦悟虚繝ｻ迚ｩ險ｼ繝ｻ螟ｱ謨励・霄ｫ菴灘渚蠢懊・荳榊ｮ悟・縺ｪ莠ｺ髢薙・荳險縺ｸ蟇・○縺ｾ縺吶・
-### v4.3.2 (2026-06-06)
-- **Final Force-Close Elasticity / 譛邨らｫ縺ｮ蠑ｷ陦檎捩蝨ｰ險ｱ蜿ｯ**: v4.3.1縺ｮGemini髟ｷ邱ｨQA縺ｯ隨ｬ10遶縺ｾ縺ｧ騾ｲ繧薙□繧ゅ・縺ｮ縲∵怙邨らｫ縺・蝗樣｣邯壹〒譛ｪ謖・ｮ壹・繝・ず繧ｿ繝ｫ蟆城％蜈ｷ繧定ｧ｣豎ｺ縺ｮ荳ｻ蠖ｹ縺ｫ謌ｻ縺励∽ｿ晏ｭ伜燕繧ｲ繝ｼ繝医〒蛛懈ｭ｢縺励∪縺励◆縲Ｗ4.3.2縺ｧ縺ｯ譛邨らｫ縺縺代∫ｮ｡逅・Γ繝｢繝ｻ遶蛻ｶ蠕｡繝ｩ繝吶Ν繝ｻ驥崎､・・驥榊､ｧ遏帷崟繝ｻ譁・ｭ玲焚荳崎ｶｳ縺ｯ蠑輔″邯壹″諡貞凄縺励▽縺､縲∽ｼ夊ｩｱ繝ｻ驕ｸ謚槭・莉｣蜆溘・蜈ｷ菴鍋黄縺悟香蛻・≠繧句ｴ蜷医・縲∝､壼ｰ題穀縺上※繧る擇逋ｽ縺募━蜈医・縲悟ｼｷ陦檎捩蝨ｰ縲阪→縺励※謗｡逕ｨ縺ｧ縺阪ｋ謨第ｸ医Ν繝ｼ繝医ｒ霑ｽ蜉縺励∪縺励◆縲・emini/OpenAI蜈ｱ騾壹・繝励Ο繝ｳ繝励ヨ縺ｫ繧ゅ∬｣・ｽｮ繧・ヵ繧｡繧､繝ｫ繧剃ｸｻ蠖ｹ縺ｫ縺帙★縲∽ｺｺ髢薙・驕ｸ謚槭・險ｼ險繝ｻ諡堤ｵｶ繝ｻ莉｣蜆溘〒闕偵￥邱繧√ｋ譁ｹ驥昴ｒ霑ｽ蜉縺励※縺・∪縺吶・/ The v4.3.1 Gemini long-novel QA reached chapter 10, but the final chapter repeatedly returned to an unselected digital-object payoff and stopped at the pre-save gate. v4.3.2 adds a final-chapter-only force-close escape hatch: memo/control artifacts, duplication, hard contradictions, and underlength text still fail, but a vivid final chapter with enough dialogue, choice, cost, and concrete objects may be accepted as a rough human ending instead of burning more retries.
-
-### v4.3.1 (2026-06-05)
-- **Final-Core / Afterglow Guard / v4.3.1 checkpoint**: Fresh Gemini long-novel QA on v4.3.0 completed technically but failed quality because the final chapter accepted an unselected digital payoff (`black file`, server room, terminal/device, download/data extraction) and closed with dawn/hope/truth-light language. v4.3.1 adds a Gemini/OpenAI-shared final-core contract plus a hard final-chapter pre-save gate so unselected digital objects cannot become the final proof, last weapon, or ending solution, and clean AI-like afterglow is rejected before the chapter is saved. The Gen-4 editorial JSON parser also falls back to the app's robust parser.
-
-### v4.3.0 (2026-06-05)
-- **Bio-Device/Cult Hard Guard / v4.3.0 checkpoint**: Corrects the post-`v4.2.9` version bump to `v4.3.0` and adds a hard guard for a new long-novel QA failure class. A stopped Gemini long-form run showed unselected research-facility, giant-device, capsule, biomechanical-experiment, and Ikenie/sacrifice/ritual-activation motifs taking over a modern suspense/mystery story. Gemini/OpenAI shared prompts now forbid those templates unless selected, and the long-novel pre-save gate rejects them before saved prose can carry the drift forward. This keeps "creative elasticity" for human-feeling detours while treating unselected SF/occult/cult machinery as a setting replacement, not acceptable yuragi.
-
-### v4.2.8 (2026-06-05)
-- **Creative Elasticity + Human Drift / 蜑ｵ菴懊ｆ繧峨℃險ｱ螳ｹ・倶ｺｺ髢鍋噪閼ｱ邱・*: Rebalances Gemini/OpenAI generation so Story Maker does not treat every small drift as an automatic save rejection. Prompts now state that reader emotion is the top priority, selected axes are "gravity, not a cage", and a strong detour may be kept if it is metabolized back into the chosen theme, genre, world, and character stakes. The pre-save gate filters soft quality warnings such as mild genre bleed, over-polished endings, abstract repetition, and report-like explanation out of the hard-reject path, while still rejecting real failures: internal labels, chapter restarts, duplicated prose, explicit setting replacement, unselected isekai/fantasy systems, severe folklore/body-invasion takeover, device-as-solution drift, and final-chapter sequel bait. The Gen-4 editorial parser also normalizes 0-1 style scores into 0-100 display scores. / Gemini/OpenAI 逕滓・繧定ｪｿ謨ｴ縺励∝ｰ上＆縺ｪ閼ｱ邱壹∪縺ｧ閾ｪ蜍慕噪縺ｫ菫晏ｭ俶拠蜷ｦ縺吶ｋ迥ｶ諷九ｒ隕狗峩縺励∪縺励◆縲ゅ・繝ｭ繝ｳ繝励ヨ縺ｧ縺ｯ縲瑚ｪｭ閠・ｒ諢溷虚縺輔○繧九％縺ｨ縲阪ｒ譛蜆ｪ蜈医↓縺励・∈謚櫁ｻｸ縺ｯ讙ｻ縺ｧ縺ｯ縺ｪ縺城㍾蜉帙→縺励※謇ｱ縺・∝ｼｷ縺・ｯ・ｊ驕薙・繝・・繝槭・繧ｸ繝｣繝ｳ繝ｫ繝ｻ荳也阜隕ｳ繝ｻ莠ｺ迚ｩ縺ｮ雉ｭ縺鷹≡縺ｸ蝗槫庶縺ｧ縺阪ｋ縺ｪ繧画ｴｻ縺九＠縺ｾ縺吶ゆｿ晏ｭ伜燕繧ｲ繝ｼ繝医〒縺ｯ縲∬ｻｽ縺・ず繝｣繝ｳ繝ｫ謠ｺ繧後∫ｶｺ鮗励☆縺弱ｋ菴咎渊縲∵歓雎｡隱槫渚蠕ｩ縲∬ｪｬ譏手ｪｿ縺ｮ逡ｳ縺ｿ縺ｪ縺ｩ繧堤｡ｬ縺・拠蜷ｦ縺九ｉ螟悶＠縺､縺､縲∝・驛ｨ繝ｩ繝吶Ν縲∫ｫ蜀阪せ繧ｿ繝ｼ繝医・㍾隍・∬ｨｭ螳夂ｽｮ謠帙∵悴謖・ｮ壹・逡ｰ荳也阜/鬲疲ｳ輔す繧ｹ繝・Β縲・㍾蠎ｦ縺ｮ蝨溽捩菫｡莉ｰ/霄ｫ菴謎ｾｵ鬟滉ｹ励▲蜿悶ｊ縲∬｣・ｽｮ隗｣豎ｺ蛹悶∵怙邨らｫ縺ｮ譁ｰ遶莠亥相騾・￡縺ｯ蠑輔″邯壹″諡貞凄縺励∪縺吶らｬｬ4荳紋ｻ｣AI邱ｨ髮・ｩ穂ｾ｡縺ｮ 0-1 邉ｻ繧ｹ繧ｳ繧｢繧・0-100 陦ｨ遉ｺ縺ｸ豁｣隕丞喧縺励∪縺吶・
-### v4.2.7 (2026-06-05)
-- **Local Folklore Drift Guard / 蝨ｰ譁ｹ莨晏･・ｸ閼ｱ繧ｬ繝ｼ繝・*: During fresh Gemini long-novel QA, a mundane `convenience store + comedy + local city` run drifted into unselected folklore/body-horror material such as sacrifices, shrines, green powder, land-scale awakening, and body invasion. v4.2.7 adds a Gemini/OpenAI-shared prompt contract that treats selected axes as fixed writing law and explicitly forbids unselected local folklore, occult rites, cursed objects, monstrous plants, and land-awakening plots from becoming the core mystery or ending. Long-novel save gates now reject unselected folklore drift, mundane-to-land-scale escalation, comedy-to-horror pressure, and leaked internal beat labels such as scene/aftertaste beat headings before they enter saved prose. / Gemini髟ｷ邱ｨQA荳ｭ縲～繧ｳ繝ｳ繝薙ル・九さ繝｡繝・ぅ・句慍譁ｹ驛ｽ蟶Ａ 縺ｮ譌･蟶ｸ邉ｻ謖・ｮ壹′縲∬ｴ・・逾繝ｻ邱代・邊峨・蝨溷慍隕乗ｨ｡縺ｮ隕夐・繝ｻ霄ｫ菴謎ｾｵ鬟溘↑縺ｩ縲∵悴謖・ｮ壹・蝨ｰ譁ｹ莨晏･・繝懊ョ繧｣繝帙Λ繝ｼ縺ｸ騾ｸ閼ｱ縺励∪縺励◆縲Ｗ4.2.7縺ｧ縺ｯGemini/OpenAI蜈ｱ騾壹・繝ｭ繝ｳ繝励ヨ螂醍ｴ・〒驕ｸ謚櫁ｻｸ繧貞崋螳壼濤遲・Ν繝ｼ繝ｫ縺ｨ縺励※謇ｱ縺・∵悴謖・ｮ壹・蝨ｰ譁ｹ莨晏･・∝悄逹菫｡莉ｰ縲∝測迚ｩ縲∫焚蠖｢讀咲黄縲∝悄蝨ｰ隕夐・繝励Ο繝・ヨ繧呈ｸ蠢・・隰弱ｄ邨先忰縺ｫ縺吶ｋ縺薙→繧堤ｦ∵ｭ｢縺励∪縺吶ゅ＆繧峨↓髟ｷ邱ｨ菫晏ｭ伜燕繧ｲ繝ｼ繝医〒縲∵悴謖・ｮ壹・莨晏･・ｸ閼ｱ縲∵律蟶ｸ邉ｻ縺九ｉ蝨溷慍隕乗ｨ｡縺ｸ縺ｮ諡｡螟ｧ縲√さ繝｡繝・ぅ縺九ｉ諤ｪ螂・悸縺ｸ縺ｮ螟芽ｳｪ縲√す繝ｼ繝ｳ繝薙・繝・繧｢繝輔ち繝ｼ繝・う繧ｹ繝医ン繝ｼ繝育ｭ峨・蜀・Κ險ｭ險医Λ繝吶Ν貍上ｌ繧剃ｿ晏ｭ伜燕縺ｫ諡貞凄縺励∪縺吶・
-### v4.2.6 (2026-06-05)
-- **Chapter Restart/Duplicate Save Gate / 遶蜀阪せ繧ｿ繝ｼ繝医・驥崎､・ｿ晏ｭ倥ご繝ｼ繝・*: Fresh Gemini long-novel QA on v4.2.5 completed all planned chapters, but the final manuscript scan found a duplicated chapter heading/body restart pattern around chapter 10. v4.2.6 rejects chapter headings inside saved chapter bodies and detects long repeated paragraphs within the same chapter so regenerated or continued fragments cannot silently restart the chapter inside the final manuscript. / v4.2.5縺ｮGemini髟ｷ邱ｨQA縺ｧ縺ｯ莠亥ｮ夂ｫ謨ｰ縺ｮ逕滓・閾ｪ菴薙・螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ10遶莉倩ｿ代↓遶隕句・縺・譛ｬ譁・・繧ｹ繧ｿ繝ｼ繝育ｳｻ縺ｮ驥崎､・′谿九ｊ縺ｾ縺励◆縲Ｗ4.2.6縺ｧ縺ｯ菫晏ｭ倡ｫ譛ｬ譁・・縺ｮ遶隕句・縺玲ｷｷ蜈･縺ｨ縲∝酔荳遶蜀・・髟ｷ縺・ｮｵ關ｽ驥崎､・ｒ菫晏ｭ伜燕縺ｫ諡貞凄縺励∝・逕滓・繝ｻ邯咏ｶ壽妙迚・′螳梧・遞ｿ蜀・〒遶繧貞ｷｻ縺肴綾縺吶％縺ｨ繧帝亟縺弱∪縺吶・
-### v4.2.5 (2026-06-05)
-- **Long Chapter Completion Guard / 髟ｷ邱ｨ遶螳御ｺ・愛螳壹・菫ｮ豁｣**: Fixes a long-novel control bug where a chapter could be treated as complete because the raw output plus context memo was long enough, even though the cleaned prose body was still below the save-gate minimum. Non-final chapters now continue requesting prose until the cleaned chapter body itself reaches the minimum, preventing chapter 1 from stopping after retry exhaustion with `遶譛ｬ譁・′遏ｭ縺吶℃縺ｾ縺兪. / 髟ｷ邱ｨ逕滓・縺ｧ縲∵枚閼医Γ繝｢霎ｼ縺ｿ縺ｮ raw 蜃ｺ蜉帙′髟ｷ縺・□縺代〒遶螳御ｺ・桶縺・↓縺ｪ繧翫∝ｮ滄圀縺ｮ譛ｬ譁・′菫晏ｭ伜燕譛菴取枚蟄玲焚縺ｫ螻翫°縺ｪ縺・∪縺ｾ菫晏ｭ倥ご繝ｼ繝医〒蛛懈ｭ｢縺吶ｋ蛻ｶ蠕｡繝舌げ繧剃ｿｮ豁｣縺励∪縺励◆縲る撼譛邨らｫ縺ｯ縲√け繝ｪ繝ｼ繝ｳ貂医∩譛ｬ譁・◎縺ｮ繧ゅ・縺梧怙菴取枚蟄玲焚縺ｸ螻翫￥縺ｾ縺ｧ邯壹″逕滓・繧定｡後≧縺溘ａ縲∫ｬｬ1遶縺・`遶譛ｬ譁・′遏ｭ縺吶℃縺ｾ縺兪 縺ｧ蜀崎ｩｦ陦御ｸ企剞縺ｫ驕斐＠縺ｦ蛛懈ｭ｢縺吶ｋ蝠城｡後ｒ髦ｲ縺弱∪縺吶・
-### v4.2.4 (2026-06-05)
-- **Template Invasion Prevention + Sasaru Core / 譛ｪ謖・ｮ壹ユ繝ｳ繝励Ξ萓ｵ蜈･髦ｲ豁｢・句絢縺輔ｋ譬ｸ**: Adds a Gemini/OpenAI-shared prompt contract and long-novel pre-save gate that keep Story Maker's variety rooted in the selected axes instead of defaulting to familiar AI story patterns. Digital/gadget, chuni/grandiose, isekai/fantasy, and world-scale conspiracy motifs are allowed when the user selects them, but if they are not selected they may only appear as incidental texture and must not become the core reveal, protagonist identity, plot engine, solution, or ending. The contract now explicitly fixes a protagonist wound/desire/lie/impossible choice/price, requires a raw human beat, rotates chapter temperature cards, rejects explanation/report-style chapter resolution, blocks neat final afterglow, and audits repeated abstract words such as memory/truth/hope/device/darkness/light/dawn. The long-novel save gate detects unselected template-family drift, overuse of abstract words without concrete scene texture, report-summary endings, missing raw human beats, and overly clean final afterglow. / Gemini/OpenAI蜈ｱ騾壹・繝励Ο繝ｳ繝励ヨ螂醍ｴ・→髟ｷ邱ｨ菫晏ｭ伜燕繧ｲ繝ｼ繝医ｒ霑ｽ蜉縺励ヾtory Maker縺ｮ螟壽ｧ俶ｧ繧偵窟I縺後ｈ縺丈ｽｿ縺・ｮ夂分縲阪〒縺ｯ縺ｪ縺城∈謚槭＆繧後◆蜷・ｻｸ縺九ｉ菴懊ｋ繧医≧縺ｫ縺励∪縺励◆縲ゅョ繧ｸ繧ｿ繝ｫ/繧ｬ繧ｸ繧ｧ繝・ヨ縲∝耳莠檎羅逧・↑螟ｧ莉ｰ險ｭ螳壹∫焚荳也阜/繝輔ぃ繝ｳ繧ｿ繧ｸ繝ｼ縲∽ｸ也阜隕乗ｨ｡縺ｮ髯ｰ隰縺ｯ縲√Θ繝ｼ繧ｶ繝ｼ縺碁∈謚槭＠縺溷ｴ蜷医・菴ｿ逕ｨ蜿ｯ閭ｽ縺ｧ縺吶ゆｸ譁ｹ縲∵悴驕ｸ謚槭・蝣ｴ蜷医・蟆城％蜈ｷ遞句ｺｦ縺ｫ逡吶ａ縲∵ｸ蠢・・隰弱∽ｸｻ莠ｺ蜈ｬ縺ｮ豁｣菴薙∝ｱ暮幕繧ｨ繝ｳ繧ｸ繝ｳ縲∬ｧ｣豎ｺ縲√が繝√↓縺励※縺ｯ縺・￠縺ｾ縺帙ｓ縲ゅ＆繧峨↓荳ｻ莠ｺ蜈ｬ縺ｮ蛯ｷ/谺ｲ譛・蝌・驕ｸ縺ｹ縺ｪ縺・ｺ梧萱/莉｣蜆溘・蝗ｺ螳壹∵ｳ･閾ｭ縺・ｸ陦後∫ｫ縺斐→縺ｮ菴捺ｸｩ蟾ｮ縲∬ｪｬ譏弱・蝣ｱ蜻翫〒逡ｳ繧遶縺ｮ遖∵ｭ｢縲∫ｶｺ鮗励☆縺弱ｋ譛邨ゆｽ咎渊縺ｮ諡貞凄縲∬ｨ俶・/逵溷ｮ・蟶梧悍/陬・ｽｮ/髣・蜈・螟懈・縺代↑縺ｩ縺ｮ謚ｽ雎｡隱槫渚蠕ｩ逶｣譟ｻ繧呈・遉ｺ縺励∪縺励◆縲る聞邱ｨ菫晏ｭ伜燕繧ｲ繝ｼ繝医〒縺ｯ縲∵悴謖・ｮ壹ユ繝ｳ繝励Ξ邉ｻ邨ｱ縺ｸ縺ｮ騾ｸ閼ｱ縲∝・菴灘ｴ髱｢縺ｫ荵上＠縺・歓雎｡隱槫渚蠕ｩ縲∝ｱ蜻願ｦ∫ｴ・〒縺ｮ逡ｳ縺ｿ縲∵ｳ･閾ｭ縺・ｸ陦御ｸ崎ｶｳ縲∫ｶｺ鮗励☆縺弱ｋ譛邨ゆｽ咎渊繧呈､懷・縺励∪縺吶・
-### v4.2.3 (2026-06-05)
-- **Long-Novel QA Release Separation / 髟ｷ邱ｨ蟆剰ｪｬQA邨先棡縺ｮ繝ｪ繝ｪ繝ｼ繧ｹ蛻・屬**: Separates the completed Gemini long-novel QA checkpoint from v4.2.2 into its own release version. The verified run completed 10 / 10 chapters with 75,502 manuscript characters, showed the completion marker and footer as `縲仙ｮ後疏 plus `Generated By AI Story Maker V4.2.2` before the version bump, and confirmed zero chapter-control or management-memo artifacts in the extracted manuscript scan. v4.2.3 keeps the same generation behavior while making the public app, footer version, release tag, and release notes align with the post-QA deploy checkpoint. / v4.2.2縺ｮ縺ｾ縺ｾ讀懆ｨｼ邨先棡繧呈ｷｷ縺懊★縲；emini髟ｷ邱ｨ蟆剰ｪｬQA螳瑚ｵｰ繝√ぉ繝・け繝昴う繝ｳ繝医ｒ迢ｬ遶九＠縺溘Μ繝ｪ繝ｼ繧ｹ迚医→縺励※蛻・屬縺励∪縺吶よ､懆ｨｼ貂医∩螳溯｡後〒縺ｯ蜈ｨ10遶縲∵悽譁・5,502蟄励〒螳瑚ｵｰ縺励√ヰ繝ｼ繧ｸ繝ｧ繝ｳ譖ｴ譁ｰ蜑阪・螳梧・陦ｨ遉ｺ縺ｧ縺ｯ `縲仙ｮ後疏 縺ｨ `Generated By AI Story Maker V4.2.2` 縺檎｢ｺ隱阪＆繧後∵歓蜃ｺ譛ｬ譁・せ繧ｭ繝｣繝ｳ縺ｧ繧らｫ蛻ｶ蠕｡繝ｩ繝吶Ν繧・ｮ｡逅・Γ繝｢豺ｷ蜈･縺ｯ0莉ｶ縺ｧ縺励◆縲Ｗ4.2.3縺ｯ逕滓・謖吝虚繧貞､峨∴縺壹∝・髢九い繝励Μ縲√ヵ繝・ち繝ｼ繝舌・繧ｸ繝ｧ繝ｳ縲√ち繧ｰ縲√Μ繝ｪ繝ｼ繧ｹ繝弱・繝医ｒQA蠕後ョ繝励Ο繧､蝨ｰ轤ｹ縺ｫ蜷医ｏ縺帙∪縺吶・
-### v4.2.2 (2026-06-05)
-- **Provider-Accurate Model Display / API繝励Ο繝舌う繝蛻･繝｢繝・Ν陦ｨ遉ｺ縺ｮ豁｣遒ｺ蛹・*: OpenAI generation already routed through the OpenAI `gpt-4.1` path when an `sk-...` key was active, but the progress log still displayed the Gemini default model name during the initial connection phase. v4.2.2 now derives the initial text model and provider label from the active key/provider for standard generation, long-novel chapter 1, long-novel continuation, and post-generation editorial evaluation, so verification logs and output tags agree for both Gemini and OpenAI. / OpenAI繧ｭ繝ｼ菴ｿ逕ｨ譎ゅ・逕滓・蜃ｦ逅・・菴薙・OpenAI `gpt-4.1` 邨瑚ｷｯ縺ｫ蜈･縺｣縺ｦ縺・∪縺励◆縺後∝・譛滓磁邯壹Ο繧ｰ縺縺代′Gemini譌｢螳壹Δ繝・Ν蜷阪ｒ陦ｨ遉ｺ縺励※縺・∪縺励◆縲Ｗ4.2.2縺ｧ縺ｯ騾壼ｸｸ逕滓・繝ｻ髟ｷ邱ｨ隨ｬ1遶繝ｻ髟ｷ邱ｨ谺｡遶繝ｻ逕滓・蠕檎ｷｨ髮・ｩ穂ｾ｡縺ｮ蛻晄悄繝｢繝・Ν/繝励Ο繝舌う繝陦ｨ遉ｺ繧偵い繧ｯ繝・ぅ繝悶↑繧ｭ繝ｼ遞ｮ蛻･縺九ｉ豎ｺ螳壹＠縲；emini/OpenAI縺ｩ縺｡繧峨〒繧るｲ謐励Ο繧ｰ縺ｨ蜃ｺ蜉帙ち繧ｰ縺御ｸ閾ｴ縺吶ｋ繧医≧縺ｫ縺励∪縺励◆縲・
-### v4.2.1 (2026-06-05)
-- **Unified Narrative Method Stack / 迚ｩ隱槫宛菴懊Γ繧ｽ繝・ラ蜈ｱ騾壽ｳｨ蜈･**: Standard and long-novel generation now append the README narrative-engineering stack through the shared prompt contract used by both Gemini and OpenAI. The stack explicitly covers Setup-Payoff, Emotion Gap Design, Motif Recurrence, the 15-beat emotional curve, GMC+S, Show Don't Tell, Subtext, sensory balance, world-grounded metaphors, character knowledge boundaries, category-guide obedience, and multi-axis de-biasing so long-form generation does not silently bypass the app's accumulated story-making methods. The post-generation AI editorial evaluation now scores narrative-method coverage, category-guide adherence, and de-biasing in addition to the existing fact/logic, emotional arc, human-noise, constraint-fit, and commercial-prose checks. / 騾壼ｸｸ逕滓・縺ｨ髟ｷ邱ｨ逕滓・縺ｮ荳｡譁ｹ縺ｧ縲；emini/OpenAI蜈ｱ騾壹・繝励Ο繝ｳ繝励ヨ螂醍ｴ・ｒ騾壹§縺ｦ README 縺ｮ迚ｩ隱槫宛菴懊Γ繧ｽ繝・ラ繧呈・遉ｺ豕ｨ蜈･縺吶ｋ繧医≧縺ｫ縺励∪縺励◆縲４etup-Payoff縲∵─諠・誠蟾ｮ險ｭ險医√Δ繝√・繝募屓蟶ｰ縲・5繝薙・繝域─諠・峇邱壹；MC+S縲ヾhow Don't Tell縲√し繝悶ユ繧ｭ繧ｹ繝医∽ｺ疲─繝舌Λ繝ｳ繧ｹ縲∽ｸ也阜隕ｳ貅匁侠縺ｮ豈泌湊縲√く繝｣繝ｩ繧ｯ繧ｿ繝ｼ遏･隴伜｢・阜縲√き繝・ざ繝ｪ譁・ｽ薙ぎ繧､繝蛾・螳医∝､夊ｻｸ繝ｩ繝ｳ繝繝蛛上ｊ謚大宛繧呈・譁・喧縺励・聞邱ｨ縺縺代′闢・ｩ肴ｸ医∩繝｡繧ｽ繝・ラ繧堤ｴ騾壹ｊ縺励↑縺・ｈ縺・↓縺励※縺・∪縺吶ら函謌仙ｾ後・AI邱ｨ髮・ｩ穂ｾ｡縺ｫ繧ゅ∫黄隱槭Γ繧ｽ繝・ラ驕ｩ逕ｨ縲√き繝・ざ繝ｪ譁・ｽ薙ぎ繧､繝蛾・螳医∝､夊ｻｸ繝ｩ繝ｳ繝繝蛛上ｊ謚大宛縺ｮ謗｡轤ｹ霆ｸ繧定ｿｽ蜉縺励∪縺励◆縲・### v4.2.0 (2026-06-05)
-- **Unified Management-Block Body Guard / 邂｡逅・ヶ繝ｭ繝・け譛ｬ譁・ｷｷ蜈･繧ｬ繝ｼ繝臥ｵｱ荳**: Fresh OpenAI long-novel QA on v4.1.9 completed all 10 chapters and appended the version footer, but the final manuscript scan still found two management blocks inside chapter 1: `縲千ｬｬ1遶譛ｫ繝ｻ讒矩繝｡繝｢縲疏 and `縲千ｬｬ1遶繝ｻ蠕悟濠陬懷ｮ後・謗･邯壹Γ繝｢縲疏. v4.2.0 treats chapter-end, in-chapter, continuation, supplement, structure, design, foreshadowing, roster, motif, and GMC-style memo headings as one forbidden body-contamination class. The guard removes the whole block, including following design bullets, across extraction, save-time cleanup, visible manuscript cleanup, and copy/export text; remaining management headings or design bullets are rejected by the pre-save quality gate. A fresh v4.2.0 OpenAI full-run QA passed 10 / 10 chapters with 73,830 manuscript characters, exactly one `縲仙ｮ後疏, exactly one `Generated By AI Story Maker V4.2.0`, and zero chapter-control or management-memo artifacts in the copied manuscript. / v4.1.9 縺ｮ OpenAI 髟ｷ邱ｨQA縺ｧ縺ｯ蜈ｨ10遶螳瑚ｵｰ縺ｨ繝舌・繧ｸ繝ｧ繝ｳ繝輔ャ繧ｿ繝ｼ莉倅ｸ弱∪縺ｧ縺ｯ螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ1遶譛ｬ譁・・縺ｫ `縲千ｬｬ1遶譛ｫ繝ｻ讒矩繝｡繝｢縲疏 縺ｨ `縲千ｬｬ1遶繝ｻ蠕悟濠陬懷ｮ後・謗･邯壹Γ繝｢縲疏 縺ｮ2繝悶Ο繝・け縺梧ｮ九ｊ縺ｾ縺励◆縲Ｗ4.2.0 縺ｧ縺ｯ遶譛ｫ縲∫ｫ蜀・∵磁邯壹∬｣懷ｮ後∵ｧ矩縲∬ｨｭ險医∽ｼ冗ｷ壹√Ο繧ｹ繧ｿ繝ｼ縲√Δ繝√・繝輔；MC邉ｻ縺ｮ繝｡繝｢隕句・縺励ｒ縲∝酔縺倥梧悽譁・ｷｷ蜈･遖∵ｭ｢縲阪き繝・ざ繝ｪ縺ｨ縺励※謇ｱ縺・∪縺吶りｦ句・縺・陦後□縺代〒縺ｪ縺丞ｾ檎ｶ壹・險ｭ險育ｮ・擅譖ｸ縺阪∪縺ｧ繝悶Ο繝・け蜊倅ｽ阪〒髯､蜴ｻ縺励∵悽譁・歓蜃ｺ縲∽ｿ晏ｭ俶凾繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・縲∝庄隕匁悽譁・け繝ｪ繝ｼ繝九Φ繧ｰ縲√さ繝斐・/菫晏ｭ伜ｯｾ雎｡縺ｫ蜷後§繧ｬ繝ｼ繝峨ｒ驕ｩ逕ｨ縺励∪縺吶ゅ＆繧峨↓谿句ｭ倥☆繧狗ｮ｡逅・ｦ句・縺励ｄ險ｭ險育ｮ・擅譖ｸ縺阪・菫晏ｭ伜燕蜩∬ｳｪ繧ｲ繝ｼ繝医〒諡貞凄縺励∪縺吶Ｗ4.2.0 縺ｮ OpenAI 螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶繝ｻ譛ｬ譁・3,830蟄励〒螳瑚ｵｰ縺励～縲仙ｮ後疏 縺ｨ `Generated By AI Story Maker V4.2.0` 縺ｯ蜷・蝗槭√さ繝斐・蟇ｾ雎｡譛ｬ譁・・縺ｮ遶蛻ｶ蠕｡繝ｩ繝吶Ν繝ｻ邂｡逅・Γ繝｢豺ｷ蜈･縺ｯ縺・★繧後ｂ0莉ｶ縺ｧ縺励◆縲・
-### v4.1.9 (2026-06-05)
-- **Unified Chapter-Control Artifact Classifier / 遶蛻ｶ蠕｡繧｢繝ｼ繝・ぅ繝輔ぃ繧ｯ繝育ｵｱ荳蛻・｡槫勣**: v4.1.8 completed an OpenAI long-novel run but still allowed the standalone chapter-boundary label `・育ｬｬ9遶 邯壹￥・荏 to remain between chapters 9 and 10. v4.1.9 replaces the fragment-by-fragment guard approach with one classifier for standalone chapter-control artifacts, covering Japanese continuation/completion labels, English labels such as `END CHAPTER 9`, non-numbered continuation labels, and management memo labels. The classifier is wired into tail detection, visible manuscript cleanup, tail stripping, and the pre-save quality gate so chapter-control lines are blocked before saved prose can carry them forward. / v4.1.8 縺ｮ OpenAI 髟ｷ邱ｨQA縺ｧ縺ｯ螳瑚ｵｰ蠕後∫ｬｬ9遶縺ｨ隨ｬ10遶縺ｮ髢薙↓迢ｬ遶九＠縺溽ｫ蠅・阜繝ｩ繝吶Ν `・育ｬｬ9遶 邯壹￥・荏 縺梧ｮ九ｊ縺ｾ縺励◆縲Ｗ4.1.9 縺ｧ縺ｯ譁ｭ迚・＃縺ｨ縺ｮ蛟句挨繧ｬ繝ｼ繝峨〒縺ｯ縺ｪ縺上∫峡遶九＠縺溽ｫ蛻ｶ蠕｡繧｢繝ｼ繝・ぅ繝輔ぃ繧ｯ繝医ｒ蛻､螳壹☆繧狗ｵｱ荳蛻・｡槫勣縺ｸ謨ｴ逅・＠縲∵律譛ｬ隱槭・邯咏ｶ・螳御ｺ・Λ繝吶Ν縲～END CHAPTER 9` 縺ｪ縺ｩ縺ｮ闍ｱ隱槭Λ繝吶Ν縲∫ｫ逡ｪ蜿ｷ縺ｪ縺励・邯咏ｶ壹Λ繝吶Ν縲∫ｮ｡逅・Γ繝｢繝ｩ繝吶Ν繧偵∪縺ｨ繧√※謇ｱ縺・∪縺吶ゅ％縺ｮ蛻・｡槫勣繧偵ユ繝ｼ繝ｫ讀懷・縲∝庄隕匁悽譁・け繝ｪ繝ｼ繝九Φ繧ｰ縲∫ｫ譛ｫ髯､蜴ｻ縲∽ｿ晏ｭ伜燕蜩∬ｳｪ繧ｲ繝ｼ繝医∈謗･邯壹＠縲∫ｫ蛻ｶ蠕｡陦後′菫晏ｭ俶悽譁・ｄ谺｡遶譁・ц縺ｸ謖√■雜翫＆繧後ｋ蜑阪↓豁｢繧√∪縺吶・
-### v4.1.8 (2026-06-05)
-- **English Chapter-Control Label Guard / 闍ｱ隱樒ｫ蛻ｶ蠕｡繝ｩ繝吶Ν繧ｬ繝ｼ繝・*: Fresh OpenAI long-novel QA on v4.1.7 was stopped at 9 / 10 chapters because the saved chapter 9 body still contained the provider-side control label `END CHAPTER 9`. v4.1.8 treats standalone English chapter labels such as `END CHAPTER 9`, `END OF CHAPTER 9`, `CHAPTER 9 END`, `CHAPTER 9 COMPLETE`, and bracketed variants as non-prose system artifacts. They are removed from visible combined output, stripped from chapter tails, and rejected by the pre-save quality gate if any remain. / v4.1.7 縺ｮ OpenAI 髟ｷ邱ｨQA縺ｧ縺ｯ 9 / 10 遶縺ｾ縺ｧ騾ｲ縺ｿ縺ｾ縺励◆縺後∫ｬｬ9遶譛ｬ譁・忰縺ｫ `END CHAPTER 9` 縺ｨ縺・≧繝励Ο繝舌う繝蛛ｴ縺ｮ遶蛻ｶ蠕｡繝ｩ繝吶Ν縺梧ｮ九▲縺溘◆繧∽ｸｭ譁ｭ縺励∪縺励◆縲Ｗ4.1.8 縺ｧ縺ｯ `END CHAPTER 9`縲～END OF CHAPTER 9`縲～CHAPTER 9 END`縲～CHAPTER 9 COMPLETE` 縺翫ｈ縺ｳ諡ｬ蠑ｧ莉倥″縺ｮ螟臥ｨｮ繧呈悽譁・〒縺ｯ縺ｪ縺・す繧ｹ繝・Β譁ｭ迚・→縺励※謇ｱ縺・∫ｵ仙粋譛ｬ譁・°繧蛾勁蜴ｻ縺励∫ｫ譛ｫ縺九ｉ髯､蜴ｻ縺励∽ｿ晏ｭ伜燕繧ｲ繝ｼ繝医〒谿句ｭ倥ｒ諡貞凄縺励∪縺吶・### v4.1.7 (2026-06-05)
-- **Chapter-Done Tail Label Guard / 遶莠・Λ繝吶Ν譁ｭ迚・ぎ繝ｼ繝・*: Fresh OpenAI long-novel QA on v4.1.6 completed all 10 chapters with 75,563 visible characters and appended `Generated By AI Story Maker V4.1.6`, but the final scan still found a chapter-completion label fragment, `・懃ｬｬ9遶莠・・`, between chapters 9 and 10. v4.1.7 treats standalone chapter-done labels such as `・懃ｬｬ9遶莠・・`, `・育ｬｬ1遶縲∽ｺ・ｼ荏, and `縲千ｬｬ9遶邨ゆｺ・・` as non-prose tail artifacts: they are stripped from chapter tails, removed from combined visible text if encountered, and rejected by the save gate if they remain. Normal prose references such as `隨ｬ9遶縺ｧ縺ｯ縲・..縲Ａ are explicitly preserved. / v4.1.6 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶繝ｻ75,563蟄励→ `Generated By AI Story Maker V4.1.6` 繝輔ャ繧ｿ繝ｼ莉倅ｸ弱∪縺ｧ縺ｯ螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ9遶縺ｨ隨ｬ10遶縺ｮ髢薙↓遶螳御ｺ・Λ繝吶Ν譁ｭ迚・`・懃ｬｬ9遶莠・・` 縺梧ｮ九ｊ縺ｾ縺励◆縲Ｗ4.1.7 縺ｧ縺ｯ `・懃ｬｬ9遶莠・・`縲～・育ｬｬ1遶縲∽ｺ・ｼ荏縲～縲千ｬｬ9遶邨ゆｺ・・` 縺ｮ繧医≧縺ｪ迢ｬ遶九＠縺溽ｫ莠・Λ繝吶Ν繧呈悽譁・〒縺ｯ縺ｪ縺冗ｫ譛ｫ譁ｭ迚・→縺励※謇ｱ縺・∫ｫ譛ｫ縺九ｉ髯､蜴ｻ縺励∫ｵ仙粋譛ｬ譁・↓谿九▲縺溷ｴ蜷医ｂ髯､蜴ｻ縺励∽ｿ晏ｭ伜燕繧ｲ繝ｼ繝医〒谿句ｭ倥ｒ諡貞凄縺励∪縺吶ゆｸ譁ｹ縺ｧ `隨ｬ9遶縺ｧ縺ｯ縲・..縲Ａ 縺ｮ繧医≧縺ｪ騾壼ｸｸ譛ｬ譁・・遶蜿ら・縺ｯ譏守､ｺ逧・↓菫晄戟縺励∪縺吶・
-### v4.1.6 (2026-06-04)
-- **Bracketed Memo and Incomplete Parenthetical Guard / 諡ｬ蠑ｧ莉倥″邂｡逅・Γ繝｢繝ｻ譛ｪ螳御ｺ・峡蠑ｧ譁ｭ迚・ぎ繝ｼ繝・*: Fresh OpenAI long-novel QA on v4.1.5 completed all 10 chapters and appended `Generated By AI Story Maker V4.1.5`, but the final manuscript scan still found `縲先枚閼育ｶｭ謖√・谺｡遶騾｣邨舌Γ繝｢縲疏 inside chapter 1 and an unfinished `・育ｶ壹￥遶繝ｻ螻暮幕縺ｮ` tail fragment in chapter 9. v4.1.6 treats those as system-side save-quality failures, strips bracketed memo labels through the visible-body cleaner, and rejects or removes incomplete parenthetical continuation fragments before they enter saved prose. / v4.1.5 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶逕滓・縺ｨ `Generated By AI Story Maker V4.1.5` 繝輔ャ繧ｿ繝ｼ莉倅ｸ弱∪縺ｧ縺ｯ螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ1遶譛ｬ譁・・縺ｮ `縲先枚閼育ｶｭ謖√・谺｡遶騾｣邨舌Γ繝｢縲疏 縺ｨ縲∫ｬｬ9遶譛ｫ縺ｮ譛ｪ螳御ｺ・妙迚・`・育ｶ壹￥遶繝ｻ螻暮幕縺ｮ` 縺梧ｮ九ｊ縺ｾ縺励◆縲Ｗ4.1.6 縺ｧ縺ｯ縺薙ｌ繧峨ｒ繧ｷ繧ｹ繝・Β蛛ｴ縺ｮ菫晏ｭ伜刀雉ｪ荳榊粋譬ｼ縺ｨ縺励※謇ｱ縺・∵峡蠑ｧ莉倥″繝｡繝｢繝ｩ繝吶Ν繧貞庄隕匁悽譁・け繝ｪ繝ｼ繝翫・縺ｧ髯､蜴ｻ縺励∵悴螳御ｺ・・諡ｬ蠑ｧ莉倥″邯壹″譁ｭ迚・ｒ菫晏ｭ伜燕縺ｫ髯､蜴ｻ縺ｾ縺溘・諡貞凄縺励∪縺吶・
-### v4.1.5 (2026-06-04)
-- **Last-Line Tail Fragment Guard / 遶譛ｫ譛邨り｡梧妙迚・ぎ繝ｼ繝・*: Fresh OpenAI long-novel QA on v4.1.4 completed all 10 chapters, but the final manuscript scan still found a standalone `・彖 at the end of chapter 8 and a `邨らｫ縺ｸ...` connector line at the end of chapter 9. v4.1.5 expands the save-time chapter-tail cleaner and gate to strip or reject lone bracket marks and next/final-chapter connector fragments before they enter the readable manuscript. / v4.1.4 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶逕滓・縺ｯ螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ8遶譛ｫ縺ｮ蜊倡峡 `・彖 縺ｨ隨ｬ9遶譛ｫ縺ｮ `邨らｫ縺ｸ...` 邉ｻ謗･邯壽枚縺梧ｮ九ｊ縺ｾ縺励◆縲Ｗ4.1.5 縺ｧ縺ｯ縲∫ｫ譛ｫ縺ｮ蜊倡峡諡ｬ蠑ｧ險伜捷繧・ｬ｡遶繝ｻ邨らｫ縺ｸ縺ｮ謗･邯壽妙迚・ｒ縲∝庄隱ｭ譛ｬ譁・∈蜈･繧句燕縺ｫ菫晏ｭ俶凾繧ｯ繝ｪ繝ｼ繝翫・縺ｨ菫晏ｭ伜燕繧ｲ繝ｼ繝医〒髯､蜴ｻ縺ｾ縺溘・諡貞凄縺励∪縺吶・### v4.1.4 (2026-06-04)
-- **Broad Chapter-Tail Fragment Guard / 遶譛ｫ譁ｭ迚・ぎ繝ｼ繝峨・諡｡蠑ｵ**: Fresh OpenAI long-novel QA on v4.1.3 completed all 10 chapters, but the final manuscript scan still found chapter-tail fragments such as `・育ｶ壹￥・荏, `窶・谺｡遶: ...`, dangling parentheses, and a label-less bullet note. v4.1.4 treats all such non-prose tail fragments as save-time cleanup/rejection targets, not acceptable manuscript text. / v4.1.3 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶縺ｮ逕滓・閾ｪ菴薙・螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ `・育ｶ壹￥・荏縲～窶・谺｡遶: ...`縲∵峡蠑ｧ縺縺代・陦後√Λ繝吶Ν縺ｪ縺礼ｮ・擅譖ｸ縺阪Γ繝｢縺檎ｫ譛ｫ縺ｫ谿九ｋ繧ｱ繝ｼ繧ｹ繧呈､懷・縺励∪縺励◆縲Ｗ4.1.4 縺ｧ縺ｯ縺薙ｌ繧峨ｒ譛ｬ譁・〒縺ｯ縺ｪ縺丈ｿ晏ｭ俶凾縺ｫ髯､蜴ｻ縺ｾ縺溘・諡貞凄縺吶∋縺咲ｫ譛ｫ譁ｭ迚・→縺励※謇ｱ縺・∪縺吶・
-### v4.1.3 (2026-06-04)
-- **Label-less Outline Bullet Guard / 繝ｩ繝吶Ν縺ｪ縺礼ｮ・擅譖ｸ縺崎ｨｭ險医Γ繝｢繧ｬ繝ｼ繝・*: Fresh OpenAI long-novel QA on v4.1.2 completed all 10 chapters, but the final manuscript scan found several chapter endings polluted by label-less bullet outline fragments such as `繝ｻ谺｡遶...`, `繝ｻ蟶・浹...`, and `繝ｻ蟆守ｷ・..`. v4.1.3 treats these trailing outline bullets as formal save-quality failures, strips them from chapter tails when possible, and rejects the chapter if any remain after cleanup. / v4.1.2 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶縺ｮ逕滓・閾ｪ菴薙・螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ `繝ｻ谺｡遶...`縲～繝ｻ蟶・浹...`縲～繝ｻ蟆守ｷ・..` 縺ｮ繧医≧縺ｪ繝ｩ繝吶Ν縺ｪ縺礼ｮ・擅譖ｸ縺崎ｨｭ險医Γ繝｢縺瑚､・焚遶縺ｮ譛ｫ蟆ｾ縺ｫ豺ｷ蜈･縺励※縺・ｋ縺薙→繧呈､懷・縺励∪縺励◆縲Ｗ4.1.3 縺ｧ縺ｯ縺薙ｌ繧峨ｒ豁｣蠑上↑菫晏ｭ伜刀雉ｪ荳榊粋譬ｼ縺ｨ縺励※謇ｱ縺・∝庄閭ｽ縺ｪ蝣ｴ蜷医・遶譛ｫ縺九ｉ髯､蜴ｻ縺励・勁蜴ｻ蠕後ｂ谿九ｋ蝣ｴ蜷医・遶菫晏ｭ倥ｒ諡貞凄縺励∪縺吶・
-### v4.1.2 (2026-06-04)
-- **Dangling Chapter-Design Fragment Guard / 遶譛ｫ險ｭ險域妙迚・ぎ繝ｼ繝牙ｼｷ蛹・*: OpenAI long-novel full-run QA completed all 10 chapters on v4.1.1, but the final manuscript scan found an unfinished design fragment, `縲千ｫ蜀・, saved at the end of chapter 8. v4.1.2 extends the save-time trailing-fragment guard to strip or reject short unfinished chapter/design labels such as chapter-internal notes, chapter-end notes, scene labels, memo labels, turn/aftertaste labels, and related planning fragments before they enter the readable manuscript or carry-forward context. / v4.1.1 縺ｮ OpenAI 髟ｷ邱ｨ螳瑚ｵｰQA縺ｧ縺ｯ蜈ｨ10遶縺ｮ逕滓・閾ｪ菴薙・螳御ｺ・＠縺ｾ縺励◆縺後∝ｮ梧・遞ｿ繧ｹ繧ｭ繝｣繝ｳ縺ｧ隨ｬ8遶譛ｫ縺ｫ `縲千ｫ蜀・ 縺ｨ縺・≧譛ｪ螳御ｺ・・險ｭ險域妙迚・′菫晏ｭ倥＆繧後※縺・ｋ縺薙→繧呈､懷・縺励∪縺励◆縲Ｗ4.1.2 縺ｧ縺ｯ菫晏ｭ俶凾縺ｮ遶譛ｫ譁ｭ迚・ぎ繝ｼ繝峨ｒ諡｡蠑ｵ縺励∫ｫ蜀・Γ繝｢縲∫ｫ譛ｫ繝｡繝｢縲∝ｴ髱｢繝ｩ繝吶Ν縲√Γ繝｢繝ｩ繝吶Ν縲√ち繝ｼ繝ｳ/菴咎渊繝ｩ繝吶Ν縺ｪ縺ｩ縺ｮ遏ｭ縺・悴螳御ｺ・ｨｭ險域妙迚・′縲∝庄隱ｭ譛ｬ譁・ｄ谺｡遶譁・ц縺ｸ蜈･繧句燕縺ｫ髯､蜴ｻ縺ｾ縺溘・菫晏ｭ俶拠蜷ｦ縺輔ｌ繧九ｈ縺・↓縺励∪縺励◆縲・### v4.1.1 (2026-06-04)
-- **OpenAI Long-Novel Paragraph Discipline / OpenAI髟ｷ邱ｨ縺ｮ谿ｵ關ｽ謨ｴ蠖｢**: Long-novel prompts now explicitly forbid blank empty lines after every sentence and require single-newline paragraph breaks. Saved chapters are normalized before the pre-save quality gate, so OpenAI-style over-spaced manuscripts are corrected before they enter the readable manuscript or carry-forward context. / 髟ｷ邱ｨ繝励Ο繝ｳ繝励ヨ縺ｫ縲御ｸ譁・＃縺ｨ縺ｮ遨ｺ陦檎ｦ∵ｭ｢縲阪悟腰荳謾ｹ陦後〒谿ｵ關ｽ繧剃ｽ懊ｋ縲阪Ν繝ｼ繝ｫ繧定ｿｽ蜉縺励∽ｿ晏ｭ伜燕繝√ぉ繝・け縺ｮ蜑阪↓譛ｬ譁・ｒ豁｣隕丞喧縺励∪縺吶０penAI縺ｧ蜃ｺ繧・☆縺・ｩｺ陦碁℃螟壹・譛ｬ譁・′縲∝庄隱ｭ譛ｬ譁・ｄ谺｡遶譁・ц縺ｫ蜈･繧句燕縺ｫ謨ｴ蠖｢縺輔ｌ縺ｾ縺吶・- **Cross-Mode Output Cleanup / 莉悶Δ繝ｼ繝牙・騾壹・蜃ｺ蜉帶紛蠖｢**: Standard story output now uses the same paragraph-spacing normalizer before the version footer is appended. The long-novel quality gate also detects excessive blank lines and sends unresolved paragraph-spacing failures into the existing fail-closed retry path. / 騾壼ｸｸ逕滓・縺ｧ繧ゅヵ繝・ち繝ｼ莉倅ｸ主燕縺ｫ蜷後§谿ｵ關ｽ謨ｴ蠖｢繧帝壹＠縺ｾ縺吶る聞邱ｨ菫晏ｭ伜燕繧ｲ繝ｼ繝医↓縺ｯ遨ｺ陦碁℃螟壹・邏ｰ蛻・ｌ谿ｵ關ｽ縺ｮ讀懷・繧りｿｽ蜉縺励∫峩縺帙↑縺・ｴ蜷医・譌｢蟄倥・fail-closed蜀咲函謌舌∈蝗槭＠縺ｾ縺吶・- **Neutral API Placeholder / API蜈･蜉帶ｬ・・荳ｭ遶玖｡ｨ遉ｺ**: When no key is saved, the API input placeholder now says `Gemini 縺ｾ縺溘・ OpenAI 縺ｮAPI繧ｭ繝ｼ繧貞・蜉嫣 instead of implying Gemini-only entry. / API譛ｪ險ｭ螳壽凾縺ｮ蜈･蜉帶ｬ・・Gemini蝗ｺ螳壹〒縺ｯ縺ｪ縺上＾penAI繧ょ・蜉帙〒縺阪ｋ荳ｭ遶玖｡ｨ遉ｺ縺ｫ縺励∪縺吶・- **Design Label Guard / 險ｭ險医Λ繝吶Ν貍上ｌ髦ｲ豁｢**: OpenAI long-novel drafts that leak planning labels such as chapter turns or aftertaste headings are stripped before save and rejected by the pre-save gate if residue remains. / OpenAI髟ｷ邱ｨ縺ｧ縲檎ｫ縺ｮ繧ｿ繝ｼ繝ｳ縲阪御ｽ咎渊縲阪↑縺ｩ縺ｮ險ｭ險育畑隕句・縺励′譛ｬ譁・∈豺ｷ蜈･縺励◆蝣ｴ蜷医∽ｿ晏ｭ伜燕縺ｫ髯､蜴ｻ縺励∵ｮ九▲縺溷ｴ蜷医・菫晏ｭ伜燕繧ｲ繝ｼ繝医〒蛛懈ｭ｢縺励∪縺吶・- **Trailing Fragment Guard / 遶譛ｫ譁ｭ迚・ぎ繝ｼ繝・*: Saved chapters now strip or reject dangling scene separators and unfinished design fragments at the very end of a chapter, such as `窶覗, `・柿, or an incomplete chapter label. / 遶譛ｫ縺・`窶覗 繧・`・柿縲・泌・繧後◆遶繝ｩ繝吶Ν縺縺代〒邨ゅｏ繧句ｴ蜷医・縲∽ｿ晏ｭ伜燕縺ｫ髯､蜴ｻ縺ｾ縺溘・繧ｲ繝ｼ繝亥●豁｢縺励∪縺吶・### v4.1.0 (2026-06-04)
-- **Gen-4 Quality Contract / 隨ｬ4荳紋ｻ｣蜩∬ｳｪ螂醍ｴ・*: Standard and long-novel generation now inject a preflight fact/logic audit, emotional-arc ledger, controlled human-noise rule, and anti-uniform ending guard while preserving all selected/manual settings. / 騾壼ｸｸ逕滓・縺ｨ髟ｷ邱ｨ逕滓・縺ｫ縲∽ｺ句燕繝輔ぃ繧ｯ繝医・繝ｭ繧ｸ繝・け逶｣譟ｻ縲∵─諠・峇邱壹Ξ繧ｸ繝｣繝ｼ縲∝宛蠕｡縺輔ｌ縺滉ｺｺ髢鍋噪繝弱う繧ｺ縲∝ｮ壼梛逹蝨ｰ蝗樣∩繧定ｿｽ蜉縺励・∈謚槭・謇句・蜉帶ｸ医∩險ｭ螳壹・螟画峩縺帙★蜴ｳ螳医＠縺ｾ縺吶・- **Post-Generation AI Editorial Evaluation / 逕滓・蠕窟I邱ｨ髮・ｩ穂ｾ｡**: Completed stories are evaluated through the active API for fact/logic safety, emotional arc, human noise, constraint fit, and commercial prose strength, with the result written into the progress log. / 逕滓・螳御ｺ・ｾ後↓縲√ヵ繧｡繧ｯ繝・繝ｭ繧ｸ繝・け縲∵─諠・峇邱壹∽ｺｺ髢鍋噪繝弱う繧ｺ縲∵欠螳夐・螳医∝膚讌ｭ隱ｭ蠕梧─繧偵い繧ｯ繝・ぅ繝泡PI縺ｧ隧穂ｾ｡縺励・ｲ陦後Ο繧ｰ縺ｸ陦ｨ遉ｺ縺励∪縺吶・- **Long-Novel Coverage / 髟ｷ邱ｨ蟇ｾ蠢・*: The same quality contract is appended to the first-chapter and continuation prompts; completed long novels also receive the new editorial evaluation after the existing score board. / 隨ｬ1遶繝ｻ谺｡遶逕滓・繝励Ο繝ｳ繝励ヨ縺ｫ繧ょ酔縺伜刀雉ｪ螂醍ｴ・ｒ莉倅ｸ弱＠縲・聞邱ｨ螳御ｺ・凾縺ｯ譌｢蟄倥せ繧ｳ繧｢繝舌・縺ｮ蠕後↓譁ｰ縺励＞邱ｨ髮・ｩ穂ｾ｡繧ょｮ溯｡後＠縺ｾ縺吶・### v4.0.9 (2026-06-04)
-- **Gemini API Error Classification / Gemini API繧ｨ繝ｩ繝ｼ蛻・｡・*: Gemini failures now separate true API-key authentication errors from model/request failures. / Gemini API縺ｮ螟ｱ謨励ｒ縲∝ｮ滄圀縺ｮAPI繧ｭ繝ｼ隱崎ｨｼ繧ｨ繝ｩ繝ｼ縺ｨ縲√Δ繝・Ν蜷阪・騾∽ｿ｡蠖｢蠑上↑縺ｩ縺ｮ繝ｪ繧ｯ繧ｨ繧ｹ繝育ｳｻ繧ｨ繝ｩ繝ｼ縺ｫ蛻・屬縺励∪縺励◆縲・- **False Invalid-Key Prevention / API繧ｭ繝ｼ辟｡蜉ｹ縺ｮ隱､陦ｨ遉ｺ髦ｲ豁｢**: Generic `invalid` model or request messages no longer force the misleading "API key invalid" state when diagnostics show available models. / 險ｺ譁ｭ縺ｧ蛻ｩ逕ｨ蜿ｯ閭ｽ繝｢繝・Ν縺瑚ｿ斐▲縺ｦ縺・ｋ蝣ｴ蜷医～invalid` 繧貞性繧繝｢繝・Ν繝ｻ繝ｪ繧ｯ繧ｨ繧ｹ繝医お繝ｩ繝ｼ繧偵窟PI繧ｭ繝ｼ辟｡蜉ｹ縲阪→隱､陦ｨ遉ｺ縺励↑縺・ｈ縺・↓縺励∪縺励◆縲・- **Gemini Model Candidate Cleanup / Gemini繝｢繝・Ν蛟呵｣懈紛逅・*: Removed the stale `gemini-3.5-flash` candidate from UI defaults and fallback lists, while preserving fallback across current Gemini 2.5/latest candidates. / 蜿､縺・`gemini-3.5-flash` 蛟呵｣懊ｒUI譌｢螳壼､縺ｨ繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ繝ｪ繧ｹ繝医°繧牙､悶＠縲；emini 2.5邉ｻ縺翫ｈ縺ｳlatest邉ｻ縺ｮ蛟呵｣懊〒繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺吶ｋ蠖｢縺ｫ謨ｴ逅・＠縺ｾ縺励◆縲・- **API Smoke Verification / API繧ｹ繝｢繝ｼ繧ｯ讀懆ｨｼ**: User-entered Gemini API QA on port 5179 generated a short story successfully, appended `Generated By AI Story Maker V4.0.9`, and did not report a false invalid-key error. / 繝ｦ繝ｼ繧ｶ繝ｼ蜈･蜉帶ｸ医∩縺ｮGemini API縺ｧ螳溽函謌舌ｒ陦後＞縲・,413譁・ｭ励・繧ｷ繝ｧ繝ｼ繝井ｽ懷刀逕滓・縲～Generated By AI Story Maker V4.0.9` 繝輔ャ繧ｿ繝ｼ莉倅ｸ弱、PI繧ｭ繝ｼ辟｡蜉ｹ縺ｮ隱､陦ｨ遉ｺ縺ｪ縺励ｒ遒ｺ隱阪＠縺ｾ縺励◆縲・### v4.0.8 (2026-06-04)
-- **Unified Version Footer / 繝舌・繧ｸ繝ｧ繝ｳ鄂ｲ蜷阪・邨ｱ荳**: Standard story outputs and completed long-novel manuscripts now use the same final footer, `Generated By AI Story Maker V4.0.8`. Long-novel final text keeps `縲仙ｮ後疏 and appends the footer after it for display, copy, and TXT save.
-- **Chapter-End Noise Gate / 遶譛ｫ繝弱う繧ｺ繧ｲ繝ｼ繝・*: Long-novel prompts now forbid repeated scenery-only afterglow endings, and the pre-save quality gate rejects formulaic sunset/sky/wind/light/echo-style endings unless they include concrete human friction such as a messy line, practical task, bodily discomfort, awkward silence, or unfinished obligation.
-### v4.0.7 (2026-06-04)
-- **Strict Configurable Axis Lock / 蜈ｨ險ｭ螳夐・岼繝ｭ繝・け**: Manual entries, detailed sub-chip selections, and category-only selections are now tracked as fixed user intent. Random buttons and one-shot full random only fill unset axes or open detail slots inside the already selected parent category.
-- **Random De-Biasing / 繝ｩ繝ｳ繝繝蛛上ｊ謚大宛**: Flat random idea seeds now filter unrequested digital/electronics/AI/SNS/gadget motifs unless the user explicitly selects an SF, future, cyberpunk, AI, robot, or similar axis. Prompt contracts also forbid filling unspecified gaps with digital motifs.
-### v4.0.6 (2026-06-04)
-- **Category + Detail Prompt Lock / 繧ｫ繝・ざ繝ｪ・玖ｩｳ邏ｰ鬆・岼縺ｮ蜷梧凾蜿肴丐**: When a parent category and a detailed sub-chip are both selected, prompt collection now sends the combined value such as `Comedy / Slapstick` or `Modern Japan / Local City` instead of dropping the parent category.
-- **Detailed-Axis QA / 隧ｳ邏ｰ鬆・岼QA**: Mocked-browser verification covered all 15 output modes with detailed sub-chip selections across theme, genre, worldview, target, era, ending, and narration. No UI state changed after generation start.
-### v4.0.5 (2026-06-04)
-- **Generation Setting Lock / 逕滓・髢句ｧ区凾縺ｮ險ｭ螳壼崋螳・*: Removed the common generate-time default-refill path that mutated selected or manually entered axes when the story button was pressed. User selections now stay fixed across long novel, standard story, 4koma/scenario, and other output modes.
-- **Category Values Honored / 繧ｫ繝・ざ繝ｪ驕ｸ謚槭・豁｣蠑乗欠螳壼喧**: Category-only choices such as Comedy, Modern Japan, and All Ages are now collected as real prompt settings instead of being treated as blank fields.
-- **Prompt Contract / 繝励Ο繝ｳ繝励ヨ螂醍ｴ・*: Normal, scenario, long-novel, continuation, and reproduction prompts now explicitly forbid replacing chosen settings with unrequested subvalues such as plot twist, Tokyo, or adult audience.
-### v4.0.4 (2026-06-03)
-- **Late-Stage Retry Margin / 邨ら乢繝ｪ繝医Λ繧､菴呵｣募喧**: The final four long-novel chapters now receive a late-stage canon lock, three audit repair attempts, and up to five whole-chapter regenerations so character state, life/death status, possessions, and final-resolution timing have more room to stabilize before fail-closed stop. / 髟ｷ邱ｨ邨ら乢4遶縺ｧ縺ｯ縲∽ｺｺ迚ｩ迥ｶ諷九・逕滓ｭｻ繝ｻ謇謖∝刀繝ｻ蠖ｹ蜑ｲ繝ｻ譛邨りｧ｣豎ｺ繧ｿ繧､繝溘Φ繧ｰ繧貞崋螳壹☆繧九ぎ繧､繝峨ｒ霑ｽ蜉縺励・Κ蛻・ｿｮ豁｣3蝗槭∫ｫ蜈ｨ菴灘・逕滓・譛螟ｧ5蝗槭∪縺ｧ菴呵｣輔ｒ謖√◆縺帙∪縺励◆縲・- **Retry Budget Carry-Forward / 繝ｪ繝医Λ繧､莠育ｮ励・謖√■雜翫＠**: Once a chapter enters the extended regeneration path because of a structural or save-gate failure, later failures in the same chapter no longer collapse the budget back to two attempts. / 讒矩蝠城｡後ｄ菫晏ｭ伜燕繧ｲ繝ｼ繝医〒諡｡蠑ｵ蜀咲函謌舌↓蜈･縺｣縺溽ｫ縺ｯ縲∝酔縺倡ｫ蜀・〒螟ｱ謨礼炊逕ｱ縺悟､峨ｏ縺｣縺ｦ繧ゆｸ企剞縺・蝗槭∈謌ｻ繧峨↑縺・ｈ縺・↓縺励∪縺励◆縲・- **Context Memo Fragment Guard / 譁・ц繝｡繝｢譁ｭ迚・ぎ繝ｼ繝・*: Incomplete long-novel memo headings such as chapter-end state notes are stripped before save, and any remaining memo fragments are rejected before they can enter the readable manuscript or Story Bible context. / `隨ｬ笳狗ｫ 邨ゆｺ・凾轤ｹ縺ｧ縺ｮ...` 縺ｮ繧医≧縺ｪ騾比ｸｭ縺ｧ蛻・ｌ縺滄聞邱ｨ繝｡繝｢隕句・縺励・菫晏ｭ伜燕縺ｫ髯､蜴ｻ縺励∵ｮ句ｭ倥＠縺溷ｴ蜷医・譛ｬ譁・ｄ繧ｹ繝医・繝ｪ繝ｼ繝舌う繝悶Ν縺ｸ蜈･繧句燕縺ｫ諡貞凄縺励∪縺吶・- **Premature Resolution Gate / 譌ｩ譛溷ｮ檎ｵ舌ご繝ｼ繝亥ｼｷ蛹・*: Non-final long-novel chapters now reject whole-story resolution from the mid-story onward, including core destruction, system shutdown, rescue-transfer epilogues, and hospital-awakening style false endings. / 髟ｷ邱ｨ縺ｮ髱樊怙邨らｫ縺ｧ縺ｯ縲∽ｸｭ逶､莉･髯阪・繧ｳ繧｢遐ｴ螢翫・繧ｷ繧ｹ繝・Β蛛懈ｭ｢繝ｻ謨第･謳ｬ騾√お繝斐Ο繝ｼ繧ｰ繝ｻ逞・ｮ､逶ｮ隕壹ａ邉ｻ縺ｮ逍台ｼｼ螳檎ｵ舌ｒ菫晏ｭ伜燕縺ｫ諡貞凄縺励∪縺吶・- **Premature Gate Precision / 譌ｩ譛溷ｮ檎ｵ舌ご繝ｼ繝育ｲｾ蠎ｦ隱ｿ謨ｴ**: Failed, prevented, partial, temporary, or local system/core shutdown attempts are now treated as mid-story crisis beats instead of completed resolution, reducing unnecessary retries around the middle chapters. / 螟ｱ謨励・髦ｻ豁｢繝ｻ驛ｨ蛻・噪繝ｻ荳譎ら噪繝ｻ螻謇逧・↑繧ｷ繧ｹ繝・Β/繧ｳ繧｢蛛懈ｭ｢譛ｪ驕ゅ・縲∽ｸｭ逶､縺ｮ蜊ｱ讖溘→縺励※謇ｱ縺・∝ｮ檎ｵ先ｸ医∩縺ｨ隱､蛻､螳壹＠縺ｦ荳崎ｦ√↑蜀咲函謌舌ｒ豸郁ｲｻ縺励↑縺・ｈ縺・ｪｿ謨ｴ縺励∪縺励◆縲・- **Mid-Story Canon State Lock / 荳ｭ逶､莉･髯阪・豁｣蜿ｲ迥ｶ諷句崋螳・*: Mid-story and retry prompts now explicitly inherit the previous saved chapter's final place, injuries, destroyed/lost items, spent weapons, exits, handoffs, and unresolved crisis so retries do not rewind irreversible events. / 荳ｭ逶､莉･髯阪→蜀咲函謌先凾縺ｮ謖・､ｺ縺ｫ縲∫峩蜑堺ｿ晏ｭ倡ｫ縺ｮ菴咲ｽｮ繝ｻ雋蛯ｷ繝ｻ遐ｴ螢・邏帛､ｱ繧｢繧､繝・Β繝ｻ逋ｺ蟆・ｸ医∩豁ｦ蝎ｨ繝ｻ騾蝣ｴ繝ｻ蠑輔″貂｡縺励・譛ｪ隗｣豎ｺ蜊ｱ讖溘ｒ豁｣蜿ｲ縺ｨ縺励※蝗ｺ螳壹☆繧九Ν繝ｼ繝ｫ繧定ｿｽ蜉縺励∽ｸ榊庄騾・う繝吶Φ繝医・蟾ｻ縺肴綾縺励ｒ謚代∴縺ｾ縺吶・- **Chapter-1 Gate Scope / 隨ｬ1遶繧ｲ繝ｼ繝育ｯ・峇菫ｮ豁｣**: Chapter 1 now passes the total chapter count into the pre-save quality gate, and premature-resolution checks stay disabled until the configured mid-story threshold. / 隨ｬ1遶縺ｮ菫晏ｭ伜燕蜩∬ｳｪ繧ｲ繝ｼ繝医↓繧らｷ冗ｫ謨ｰ繧呈ｸ｡縺励∵掠譛溷ｮ檎ｵ舌メ繧ｧ繝・け縺御ｸｭ逶､蛻ｰ驕泌燕縺ｫ隱､逋ｺ轣ｫ縺励↑縺・ｈ縺・↓縺励∪縺励◆縲・- **Full API QA / 螳滓ｩ蘗PI讀懆ｨｼ**: Fresh Gemini browser QA completed 12 / 12 chapters at 96,684 visible characters, with clean manuscript scan, one final marker, visible score bars, and scores of 96 / 97 / 100. Late protected chapters stayed within margin: chapter 10 used 2 / 5 regenerations and chapter 11 used 1 / 3 audit repairs. / Gemini螳滓ｩ櫺A縺ｧ12遶繝ｻ96,684蟄励ｒ螳瑚ｵｰ縺励∵悽譁・せ繧ｭ繝｣繝ｳ縲∝ｮ檎ｵ舌・繝ｼ繧ｫ繝ｼ1蛟九∵治轤ｹ繝舌・陦ｨ遉ｺ縲・6 / 97 / 100轤ｹ繧堤｢ｺ隱阪＠縺ｾ縺励◆縲らｵら乢菫晁ｭｷ遶縺ｮ豸郁ｲｻ縺ｯ隨ｬ10遶縺悟・逕滓・2 / 5縲∫ｬｬ11遶縺梧紛蜷域ｧ菫ｮ豁｣1 / 3縺ｫ蜿弱∪繧翫∪縺励◆縲・- **Backup Rule / 繝舌ャ繧ｯ繧｢繝・・驕狗畑**: Antigravity full backup should be launched in a visible PowerShell window by directly running `backup_full.ps1` with `-File`, avoiding wrapper commands that can print unrelated startup errors. / Antigravity縺ｮ繝輔Ν繝舌ャ繧ｯ繧｢繝・・縺ｯ縲√Θ繝ｼ繧ｶ繝ｼ縺後Ο繧ｰ繧堤岼隕悶〒縺阪ｋ鮟偵＞PowerShell遯薙〒PS1繧堤峩謗･襍ｷ蜍輔☆繧矩°逕ｨ縺ｫ邨ｱ荳縺励∪縺励◆縲・
-### v4.0.3 (2026-06-03)
-- **Score Bar Visibility / 謗｡轤ｹ繝舌・陦ｨ遉ｺ菫ｮ豁｣**: Long-novel self-grading now uses the same score-row, bar-fill, and score-value classes as the existing short-form score board, with CSS compatibility for already-rendered long-novel score rows. / 髟ｷ邱ｨ螳御ｺ・凾縺ｮ閾ｪ蟾ｱ謗｡轤ｹ縺檎洒邱ｨ遲峨→蜷後§繝舌・陦ｨ遉ｺ繧ｯ繝ｩ繧ｹ繧剃ｽｿ縺・ｈ縺・ｿｮ豁｣縺励∵里縺ｫ陦ｨ遉ｺ貂医∩縺ｮ髟ｷ邱ｨ繧ｹ繧ｳ繧｢縺ｫ繧ゅヰ繝ｼ縺瑚ｦ九∴繧倶ｺ呈鋤CSS繧定ｿｽ蜉縺励∪縺励◆縲・- **Structural Retry Budget / 讒矩遏帷崟繝ｪ繝医Λ繧､蠑ｷ蛹・*: Repair attempts stay capped to avoid over-patching a broken draft, but unresolved chronology, geography, setting, character, or foreshadowing contradictions now receive the extended chapter-regeneration budget and stronger state-lock retry guidance. / 螢翫ｌ縺溽ｫ繧帝Κ蛻・ｿｮ豁｣縺礼ｶ壹￠縺ｪ縺・ｈ縺・ｿｮ豁｣隧ｦ陦後・謐ｮ縺育ｽｮ縺阪▽縺､縲∵凾邉ｻ蛻励・蝨ｰ逅・・險ｭ螳壹・莠ｺ迚ｩ繝ｻ莨冗ｷ壹・讒矩遏帷崟縺梧ｮ九ｋ蝣ｴ蜷医・遶蜀咲函謌舌・莠育ｮ励→迥ｶ諷句崋螳壽欠遉ｺ繧貞ｼｷ蛹悶＠縺ｾ縺励◆縲・
-### v4.0.2 (2026-06-03)
-- **Long-Novel Repair Fail-Closed / 髟ｷ邱ｨ菫ｮ豁｣繧ｲ繝ｼ繝医・fail-closed蛹・*: Rejected repair candidates now block saving and trigger chapter regeneration instead of letting the original draft pass a second audit. / 遐ｴ謳阪・逡ｰ蟶ｸ縺ｪ菫ｮ豁｣蛟呵｣懊ｒ譽・唆縺励◆蠕後∵悴菫ｮ豁｣譛ｬ譁・ｒ蜀肴､懈渊縺ｧ菫晏ｭ倥＠縺ｦ縺励∪縺・ｵ瑚ｷｯ繧貞｡槭℃縲∫ｫ蜈ｨ菴薙・蜀咲函謌舌∈蝗槭☆繧医≧縺ｫ縺励∪縺励◆縲・- **Duplicate Carry-Over Guard / 驥崎､・戟縺｡雜翫＠蟇ｾ遲・*: Hardened the path caught during API QA where chapter-to-chapter duplicated prose could be saved after a too-short or length-shifted repair result was rejected. / API讀懆ｨｼ荳ｭ縺ｫ讀懷・縺励◆遶縺ｾ縺溘℃縺ｮ驥崎､・悽譁・↓縺､縺・※縲∫洒縺吶℃繧倶ｿｮ豁｣譯医ｄ譁・ｭ玲焚螟牙虚縺悟､ｧ縺阪＞菫ｮ豁｣譯医ｒ菫晏ｭ倥↓騾壹＆縺ｪ縺・ｈ縺・ｼｷ蛹悶＠縺ｾ縺励◆縲・
-### v4.0.1 (2026-06-03)
-- **Long-Novel Self-Grading / 髟ｷ邱ｨ閾ｪ蟾ｱ謗｡轤ｹ陦ｨ遉ｺ**: Completed long novels now show the existing three-item score board: Plot Recovery, Structure, and Constraint compliance. / 髟ｷ邱ｨ蟆剰ｪｬ縺ｮ蜈ｨ遶螳御ｺ・凾縺ｫ繧ゅ∫洒邱ｨ遲峨→蜷後§縲御ｼ冗ｷ壼屓蜿主ｺｦ縲阪瑚ｵｷ謇ｿ霆｢邨舌・讒矩縲阪悟宛邏・・螳亥ｺｦ縲阪・3鬆・岼繧ｹ繧ｳ繧｢繝懊・繝峨ｒ陦ｨ遉ｺ縺励∪縺吶・- **Story Quality / 蟆剰ｪｬ譛ｬ邱ｨ縺ｮ髱｢逋ｽ縺募ｼｷ蛹・*: Long-novel prompts now emphasize irreversible choices, visible costs, expectation reversals, scene-to-scene escalation, and exposition converted into character pressure. / 荳榊庄騾・↑驕ｸ謚槭∽ｻ｣蜆溘∵悄蠕・・蜿崎ｻ｢縲√す繝ｼ繝ｳ縺斐→縺ｮ邱雁ｼｵ荳頑・縲∬ｪｬ譏弱ｒ闡幄陸縺ｸ螟画鋤縺吶ｋ謖・､ｺ繧定ｿｽ蜉縺励∪縺励◆縲・- **Verification / 讀懆ｨｼ**: Local checks passed: `node --check src/main.js`, `npm run build`, `npm run lint --if-present`, `git diff --check`, and browser DOM smoke check on port 5179. Fresh full API QA and deploy are still pending. / 繝ｭ繝ｼ繧ｫ繝ｫ讀懆ｨｼ縺ｯ騾夐℃貂医∩縲よ眠縺励＞繝輔ΝAPI QA縺ｨ繝・・繝ｭ繧､縺ｯ譛ｪ螳滓命縺ｧ縺吶・
-### v4.0.0 (2026-06-03)
-- **Versioning / 繝舌・繧ｸ繝ｧ繝ｳ驕狗畑**: Corrected the post-`v3.9.9` release line to `v4.0.0`, keeping minor and patch slots from becoming two digits. / `v3.9.9` 縺ｮ谺｡繧・`v4.0.0` 縺ｫ陬懈ｭ｣縺励・譯∝喧縺励↑縺・°逕ｨ縺ｫ縺励∪縺励◆縲・- **Long-Novel Reliability / 髟ｷ邱ｨ螳牙ｮ壼喧**: Paragraph-density checks now count normal visible line breaks, reducing false rejection of properly paragraphed Japanese prose. / 騾壼ｸｸ縺ｮ謾ｹ陦梧ｮｵ關ｽ繧呈ｭ｣縺励￥謨ｰ縺医・←蛻・↓谿ｵ關ｽ蛻・￠縺輔ｌ縺滓律譛ｬ隱樊悽譁・・隱､繝ｪ繧ｸ繧ｧ繧ｯ繝医ｒ貂帙ｉ縺励∪縺励◆縲・- **Recovery / 閾ｪ蜍募ｾｩ譌ｧ**: Paragraph/scene-density failures now use extended regeneration with explicit retry guidance. / 谿ｵ關ｽ繝ｻ繧ｷ繝ｼ繝ｳ蟇・ｺｦ縺ｮ螟ｱ謨玲凾縺ｫ縲∝・菴鍋噪縺ｪ蜀咲函謌先欠遉ｺ縺ｨ諡｡蠑ｵ繝ｪ繝医Λ繧､繧剃ｽｿ縺・ｈ縺・↓縺励∪縺励◆縲・- **QA and Deploy / QA縺ｨ繝・・繝ｭ繧､**: Fresh Gemini browser QA completed 12 / 12 chapters at 96,555 visible characters with clean final scan, then GitHub Pages deploy passed. / Gemini螳滓ｩ櫺A縺ｧ12遶螳瑚ｵｰ縲∵悽譁・せ繧ｭ繝｣繝ｳ騾夐℃蠕後↓GitHub Pages縺ｸ繝・・繝ｭ繧､縺励∪縺励◆縲・
-### v3.9.x (2026-06-03)
-- **Fail-Closed Long-Novel Gates / 繝輔ぉ繧､繝ｫ繧ｯ繝ｭ繝ｼ繧ｺ蠑ｷ蛹・*: Added duplicate/replay rejection, empty-heading cleanup, late non-final premature-resolution detection, and clean output preservation after failed retries. / 驥崎､・・蜀肴ｼ斐∫ｩｺ隕句・縺励∫ｵら乢謇句燕縺ｮ譌ｩ縺吶℃繧玖ｧ｣豎ｺ縲∝､ｱ謨玲凾縺ｮ譛ｬ譁・ｱ壽沒繧帝亟縺蝉ｿ晏ｭ伜燕繧ｲ繝ｼ繝医ｒ蠑ｷ蛹悶＠縺ｾ縺励◆縲・- **Prompt and Recovery / 繝励Ο繝ｳ繝励ヨ縺ｨ蠕ｩ譌ｧ**: Added endpoint anchors, retry chronology guidance, duplicate-specific regeneration, and chapter-1 quality-gate retry handling. / 逶ｴ蜑咲ｫ縺ｮ蛻ｰ驕皮せ蝗ｺ螳壹∵凾邉ｻ蛻礼ｶｭ謖√・㍾隍・ｰら畑繝ｪ繝医Λ繧､縲∫ｬｬ1遶縺ｮ蜩∬ｳｪ繧ｲ繝ｼ繝亥・逕滓・繧呈紛蛯吶＠縺ｾ縺励◆縲・- **Startup Defaults / 蛻晄悄蛟､菫ｮ豁｣**: Mode defaults are applied before generation while preserving user-entered, random, or locked values. / 逕滓・蜑阪↓繝｢繝ｼ繝牙・譛溷､繧堤｢ｺ螳溘↓蜿肴丐縺励▽縺､縲√Θ繝ｼ繧ｶ繝ｼ蜈･蜉帙・繝ｩ繝ｳ繝繝繝ｻ繝ｭ繝・け貂医∩蛟､縺ｯ菫晄戟縺励∪縺吶・
-### v3.8.x (2026-06-02)
-- **Completed Manuscript Display / 螳梧・蜴溽ｨｿ陦ｨ遉ｺ**: Rebuilt final long-novel headers from saved chapters and kept completed manuscripts in the scroll-contained output box. / 菫晏ｭ俶ｸ医∩遶縺九ｉ螳梧・繝倥ャ繝繝ｼ繧貞・讒狗ｯ峨＠縲∝ｮ梧・蠕後ｂ譛ｬ譁・ｬ・・繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ繧堤ｶｭ謖√＠縺ｾ縺励◆縲・- **Final Chapter Safety / 譛邨らｫ螳牙・蛹・*: Added final-chapter state locks, proper final marker normalization, and near-final resolution guards. / 譛邨らｫ縺ｮ迥ｶ諷句崋螳壹∝ｮ御ｺ・・繝ｼ繧ｫ繝ｼ豁｣隕丞喧縲∫ｵら乢謇句燕縺ｮ豎ｺ逹髦ｲ豁｢繧定ｿｽ蜉縺励∪縺励◆縲・- **QA / 讀懆ｨｼ**: Multiple full Gemini browser runs verified 10 / 10 chapter completion and clean manuscript scans, while exposing and fixing header/title regressions. / 隍・焚蝗槭・10遶螳瑚ｵｰQA縺ｧ譛ｬ譁・ｱ壽沒繧堤｢ｺ隱阪＠縲√・繝・ム繝ｼ繧・ｫ繧ｿ繧､繝医Ν縺ｮ騾陦後ｒ菫ｮ豁｣縺励∪縺励◆縲・
-### v3.7.x (2026-06-02)
-- **Long-Novel Control / 髟ｷ邱ｨ蛻ｶ蠕｡**: Stabilized chapter-end pause, automatic continuation, live preview scrolling, and full-run QA handling. / 遶譛ｫ荳譎ょ●豁｢縲∬・蜍慕ｶ咏ｶ壹√Λ繧､繝悶・繝ｬ繝薙Η繝ｼ縺ｮ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ縲√ヵ繝ｫ繝ｩ繝ｳ讀懆ｨｼ繧貞ｮ牙ｮ壼喧縺励∪縺励◆縲・- **Output Hygiene / 蜃ｺ蜉幄｡帷函**: Kept clean manuscripts visible after completion and prevented context memo leakage into the readable body. / 螳梧・蠕後・譛ｬ譁・｡ｨ遉ｺ繧剃ｿ晄戟縺励∵枚閼医Γ繝｢縺悟庄隱ｭ譛ｬ譁・∈豺ｷ蜈･縺励↑縺・ｈ縺・↓縺励∪縺励◆縲・
-### v3.6.x (2026-06-01 to 2026-06-02)
-- **Long-Form Foundation / 髟ｷ邱ｨ蝓ｺ逶､**: Introduced long-novel memory/state separation, chapter memo handling, Story Bible safeguards, and fail-closed adoption before saved text or carry-forward context can be polluted. / 髟ｷ邱ｨ縺ｮ迥ｶ諷句・髮｢縲∫ｫ繝｡繝｢縲ヾtory Bible菫晁ｭｷ縲∽ｿ晏ｭ伜燕繝輔ぉ繧､繝ｫ繧ｯ繝ｭ繝ｼ繧ｺ謗｡逕ｨ繧貞ｰ主・縺励∪縺励◆縲・- **Quality Cleanup / 蜩∬ｳｪ繧ｯ繝ｪ繝ｼ繝ｳ繧｢繝・・**: Hardened body cleanup against repair chatter, memo residue, citation-like artifacts, malformed attempts, and continuity contradictions. / 菫ｮ蠕ｩ繝ｭ繧ｰ縲√Γ繝｢谿矩ｪｸ縲∝ｼ慕畑鬚ｨ繝弱う繧ｺ縲∽ｸ肴ｭ｣縺ｪ遶隧ｦ陦後∵紛蜷域ｧ遏帷崟繧剃ｿ晏ｭ伜燕縺ｫ髯､蜴ｻ繝ｻ諡貞凄縺吶ｋ莉慕ｵ・∩繧貞ｼｷ蛹悶＠縺ｾ縺励◆縲・
-### v3.5 and Earlier / v3.5莉･蜑・- Archived from this README to reduce noise. See GitHub Releases, tags, and commit history for older detail. / README縺ｮ蜿ｯ隱ｭ諤ｧ邯ｭ謖√・縺溘ａ隧ｳ邏ｰ螻･豁ｴ縺ｯ蜑企勁縺励∪縺励◆縲ょ商縺・ｩｳ邏ｰ縺ｯGitHub Releases縲》ags縲…ommit history繧貞盾辣ｧ縺励※縺上□縺輔＞縲・
+- Verified non-long output modes and kept long-novel public selection sealed.
+- 非長編出力モードの検証を行い、長編モードの公開選択封印を維持しました。
