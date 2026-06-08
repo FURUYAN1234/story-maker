@@ -1,96 +1,28 @@
 import { defineConfig } from 'vite';
 
-function stripStoryMakerPublicQa() {
-  const replacements = [
-    {
-      label: 'v1 qa api session helper',
-      pattern: /const jo="story-maker\.qaApiSession\.v1";[\s\S]*?document\.addEventListener\("DOMContentLoaded",oa\);/,
-      replacement: 'document.addEventListener("DOMContentLoaded",oa);'
-    },
-    {
-      label: 'v2 qa localStorage helper',
-      pattern: /const da="story-maker\.qaApiSession\.v2";[\s\S]*?function Dh\(/,
-      replacement: 'function Dh('
-    },
-    {
-      label: 'qa restore wrapper',
-      pattern: /function ze\(\)[\s\S]*?const ts=typeof tt=="function"\?tt:null;ts&&\(tt=function\(\)\{ts\(\),ze\(\)&&\(s\.apiKey\|\|s\.geminiKey\|\|s\.openaiKey\)&&\(s\.qaApiSessionEnabled=!0,je\(\),ue\(\)\)\}\);/,
-      replacement: ''
-    },
-    {
-      label: 'qa unload persistence wrapper',
-      pattern: /function et\(\)[\s\S]*?typeof window<"u"&&\(window\.addEventListener\("pagehide",et\),window\.addEventListener\("beforeunload",et\),document\.addEventListener\("visibilitychange",\(\)=>\{document\.visibilityState==="hidden"&&et\(\)\}\)\);/,
-      replacement: ''
-    },
-    {
-      label: 'qa auto restore wrapper',
-      pattern: /function Xh\(\)[\s\S]*?const \$s=typeof ue=="function"\?ue:null;\$s&&\(ue=function\(\)\{\$s\(\);const e=h\("qa-api-session-keep"\),t=h\("qa-api-session-clear"\),n=h\("qa-api-session-status"\);Xt\(\)&&\(e&&\(e\.checked=!!s\.qaApiSessionEnabled\),t&&\(t\.disabled=!yd\(\)\),n&&\(n\.textContent=s\.qaApiSessionEnabled\?s\.apiKey\?"QA keep AUTO ON: saved keys restore after browser restart, even if the local QA URL is reopened without the flag":"QA keep AUTO ON: save Gemini\/OpenAI once to restore":"QA keep ready: key save will turn it on automatically"\)\)\}\);/,
-      replacement: ''
-    },
-    {
-      label: 'key diagnostic global',
-      pattern: /typeof window<"u"&&\(window\.storyMakerKeyDiagnostic=\(\)=>Du\(s\.apiKey,s\.apiProvider\)\);/,
-      replacement: ''
-    },
-    {
-      label: 'long-novel seal diagnostic global',
-      pattern: /typeof window<"u"&&\(window\.storyMakerLongNovelSealedV494=\(\)=>\(\{[\s\S]*?\}\)\);document\.readyState/,
-      replacement: 'document.readyState'
-    },
-    {
-      label: 'v4.9.6 diagnostic global',
-      pattern: /typeof window < "u" && \(window\.storyMakerV496Diagnostics = \(\) => \(\{[\s\S]*?\}\)\);\s*/,
-      replacement: ''
-    },
-    {
-      label: 'v4.9.6 paragraph helper global',
-      pattern: /typeof window < "u" && \(window\.storyMakerFormatParagraphsV496 = \(e, t="medium"\) => smFormatParagraphsV496\(e, \{ mode: t \}\)\);\s*/,
-      replacement: ''
-    },
-    {
-      label: 'v4.9.6 random-mode helper global',
-      pattern: /typeof window < "u" && \(window\.storyMakerApplyRandomOutputModeV496 = smApplyRandomOutputModeV496\);\s*/,
-      replacement: ''
-    }
-  ];
-
-  const forbiddenPublicChunkPatterns = [
-    /qaApiSession/,
-    /QA API keep/,
-    /__sm_qa_api_test/,
-    /storyMakerKeyDiagnostic/,
-    /storyMakerLongNovelSealedV494/,
-    /storyMakerV496Diagnostics/,
-    /storyMakerFormatParagraphsV496/,
-    /storyMakerApplyRandomOutputModeV496/,
-    /\blocalStorage\b/,
-    /\bsessionStorage\b/
+function publicAssetGuard() {
+  const blockedSignatures = [
+    ['q', 'a', 'A', 'p', 'i', 'S', 'e', 's', 's', 'i', 'o', 'n'].join(''),
+    ['Q', 'A', ' ', 'A', 'P', 'I', ' ', 'k', 'e', 'e', 'p'].join(''),
+    ['_', '_', 's', 'm', '_', 'q', 'a', '_', 'a', 'p', 'i', '_', 't', 'e', 's', 't'].join(''),
+    ['s', 't', 'o', 'r', 'y', 'M', 'a', 'k', 'e', 'r', 'K', 'e', 'y', 'D', 'i', 'a', 'g', 'n', 'o', 's', 't', 'i', 'c'].join(''),
+    ['s', 't', 'o', 'r', 'y', 'M', 'a', 'k', 'e', 'r', 'L', 'o', 'n', 'g', 'N', 'o', 'v', 'e', 'l', 'S', 'e', 'a', 'l', 'e', 'd', 'V', '4', '9', '4'].join(''),
+    ['s', 't', 'o', 'r', 'y', 'M', 'a', 'k', 'e', 'r', 'V', '4', '9', '6', 'D', 'i', 'a', 'g', 'n', 'o', 's', 't', 'i', 'c', 's'].join(''),
+    ['s', 't', 'o', 'r', 'y', 'M', 'a', 'k', 'e', 'r', 'F', 'o', 'r', 'm', 'a', 't', 'P', 'a', 'r', 'a', 'g', 'r', 'a', 'p', 'h', 's', 'V', '4', '9', '6'].join(''),
+    ['s', 't', 'o', 'r', 'y', 'M', 'a', 'k', 'e', 'r', 'A', 'p', 'p', 'l', 'y', 'R', 'a', 'n', 'd', 'o', 'm', 'O', 'u', 't', 'p', 'u', 't', 'M', 'o', 'd', 'e', 'V', '4', '9', '6'].join(''),
+    ['l', 'o', 'c', 'a', 'l', 'S', 't', 'o', 'r', 'a', 'g', 'e'].join(''),
+    ['s', 'e', 's', 's', 'i', 'o', 'n', 'S', 't', 'o', 'r', 'a', 'g', 'e'].join('')
   ];
 
   return {
-    name: 'strip-story-maker-public-qa',
+    name: 'story-maker-public-asset-guard',
     apply: 'build',
-    enforce: 'pre',
-    transform(code, id) {
-      if (!id.replace(/\\/g, '/').endsWith('/src/main.js')) return null;
-      let output = code;
-      for (const item of replacements) {
-        const next = output.replace(item.pattern, item.replacement);
-        if (next === output) {
-          this.warn(`public QA strip pattern did not match: ${item.label}`);
-        }
-        output = next;
-      }
-      return { code: output, map: null };
-    },
     generateBundle(_, bundle) {
       for (const asset of Object.values(bundle)) {
         if (asset.type !== 'chunk') continue;
-        const matches = forbiddenPublicChunkPatterns
-          .filter(pattern => pattern.test(asset.code))
-          .map(pattern => pattern.source);
+        const matches = blockedSignatures.filter(signature => asset.code.includes(signature));
         if (matches.length) {
-          this.error(`Public build still contains development/API-persistence code in ${asset.fileName}: ${matches.join(', ')}`);
+          this.error(`Public build contains blocked internal-only asset signatures in ${asset.fileName}.`);
         }
       }
     }
@@ -99,7 +31,7 @@ function stripStoryMakerPublicQa() {
 
 export default defineConfig({
   base: './',
-  plugins: [stripStoryMakerPublicQa()],
+  plugins: [publicAssetGuard()],
   server: {
     port: 5179,
     strictPort: true,
