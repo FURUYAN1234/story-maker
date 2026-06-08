@@ -1,4 +1,4 @@
-# Story Maker v4.9.6 / AI物語メーカー
+﻿# Story Maker v4.9.8 / AI物語メーカー
 
 > Stop generating predictable stories. Start generating stories that surprise you.
 >
@@ -10,27 +10,27 @@ Story Maker は、Google Gemini API または OpenAI API を使って、物語�
 
 ## Public Status / 公開状況
 
-- Current public version: `v4.9.6`
+- Current public version: `v4.9.8`
 - Public page: https://furuyan1234.github.io/story-maker/
 - Repository: https://github.com/FURUYAN1234/story-maker
 - Local development port in the Antigravity workspace: `5179`
 - The public release focuses on the 14 non-long output modes listed below.
-- Long-novel mode is not promoted as a public feature while it remains below the current release-quality bar. The app blocks or redirects long-mode entry in the public workflow, and this README intentionally does not present long-mode implementation details as a supported feature.
+- Long-novel mode is not promoted as a public feature while it remains below the current release-quality bar. The public UI keeps the long-mode button visible as a disabled "paused" status chip, excludes it from random selection, and blocks public generation entry.
 
-- 現在の公開版: `v4.9.6`
+- 現在の公開版: `v4.9.8`
 - 公開ページ: https://furuyan1234.github.io/story-maker/
 - リポジトリ: https://github.com/FURUYAN1234/story-maker
 - Antigravity ワークスペースでのローカル開発ポート: `5179`
 - 公開版では、下記の非長編14出力モードを対象にしています。
-- 長編モードは現時点の公開品質基準を満たすまで、公開機能として紹介しません。公開ワークフローでは長編入口を封鎖または別モードへ戻す扱いであり、このREADMEでも長編の内部実装詳細をサポート済み機能として掲載しません。
+- 長編モードは現時点の公開品質基準を満たすまで、公開機能として紹介しません。公開UIでは長編ボタンを「機能停止中」の非活性ステータスとして表示し、ランダム選択と公開生成入口から除外します。
 
 ## API Key Safety / APIキーの安全性
 
-API keys are entered by the user in the browser UI. The repository, README, release notes, release assets, and deployed static files do not include API keys. The public app does not intentionally save API keys permanently; keys are treated as current-page runtime input. Closing or reloading the page clears entered page state.
+API keys are entered by the user in the browser UI. The repository, README, release notes, release assets, and deployed static files do not include API keys. The public app does not intentionally save API keys permanently; saved keys are kept only as same-tab browser session state so the same tab can survive reloads. Closing the tab or clearing browser session data removes that state.
 
 API keys are sent only when an API request is made to the selected provider needed for story generation, style analysis, image understanding, or news grounding. Story Maker does not send keys to the repository, release system, issue tracker, documentation, or unrelated external apps. Users should still manage billing, usage limits, key rotation, and revocation on the provider side.
 
-APIキーはユーザーがブラウザUIに入力します。リポジトリ、README、リリースノート、リリース成果物、デプロイ済み静的ファイルにはAPIキーを含めません。公開版アプリはAPIキーを永続保存しません。キーは現在開いているページの実行時入力として扱い、ページを閉じる、またはリロードすると入力状態は消えます。
+APIキーはユーザーがブラウザUIに入力します。リポジトリ、README、リリースノート、リリース成果物、デプロイ済み静的ファイルにはAPIキーを含めません。公開版アプリはAPIキーを永続保存しません。保存済みキーは同じブラウザタブ内の一時状態として扱い、同じタブのリロードでは復元できます。タブを閉じる、またはブラウザのセッション情報を消すと、その状態は消えます。
 
 APIキーは、物語生成、作風解析、画像理解、ニュース取得などで必要になったときだけ、選択中のAPI提供元へのリクエストに使われます。Story Makerは、キーをリポジトリ、リリース管理、Issue、公開文書、無関係な外部アプリへ送信しません。ただし、利用量、課金、制限、キーのローテーション、失効は各API提供元側で管理してください。
 
@@ -73,7 +73,7 @@ Story Maker は、創作依頼を多くの独立軸に分解することで、AI
 | API | Gemini / OpenAI switching | Switch the selected provider from the UI without changing repository files. |
 | API | User-entered runtime key | API keys are entered in the browser and are not shipped in the repo or release assets. |
 | API | Provider links | The header links to Gemini API and OpenAI API key pages for user-managed keys. |
-| API | Reload clear | The reload control clears entered page state, including the key field. |
+| API | Same-tab key restore | Saved keys are restored only inside the same browser tab session and are not included in repository or release files. |
 | Randomization | All-random | Randomizes major axes and starts generation immediately. |
 | Randomization | v4.9.6 output-mode reroll | Output mode is rerolled during all-random when the output-mode section is not locked. |
 | Randomization | Per-section random | Each major section can be randomized independently. |
@@ -98,14 +98,15 @@ Story Maker は、創作依頼を多くの独立軸に分解することで、AI
 | Progress | Score board | Displays generation/evaluation status when available. |
 | Quality | Mode contracts | Each public mode receives a required output shape. |
 | Quality | Paragraph density | v4.9.6 adds line-break guidance and post-formatting for readable prose blocks. |
-| Quality | Long-mode seal | Long mode is excluded from public all-random and blocked from public generation entry. |
+| Quality | Long-mode paused chip | Long mode stays visible as disabled/paused status, is excluded from public all-random, and is blocked from public generation entry. |
+| Quality | Suspended long-mode QA path | v4.9.8 verifies a chapter ledger, eight-block chapter construction, staged local/AI audits, and retry/rebuild gates before a chapter is adopted. |
 
 | 領域 | 機能 | 詳細 |
 |---|---|---|
 | API | Gemini / OpenAI 切り替え | リポジトリを変更せず、UI上でAPI提供元を切り替えます。 |
 | API | ユーザー入力式キー | APIキーはブラウザで入力し、リポジトリやリリース成果物に含めません。 |
 | API | キー取得リンク | ヘッダーからGemini APIとOpenAI APIのキー取得ページへ移動できます。 |
-| API | リロードでクリア | リロード操作でAPIキー欄を含む入力状態を消します。 |
+| API | 同一タブ内キー復元 | 保存済みキーは同じブラウザタブの一時状態として復元し、リポジトリやリリース成果物には含めません。 |
 | ランダム | 全項目ランダム | 主要軸をまとめてランダム化し、そのまま生成します。 |
 | ランダム | v4.9.6 出力モード再抽選 | 出力モードがロックされていない場合、全項目ランダムで出力モードも変わります。 |
 | ランダム | セクション別ランダム | 各主要セクションだけを個別にランダム化できます。 |
@@ -130,7 +131,8 @@ Story Maker は、創作依頼を多くの独立軸に分解することで、AI
 | 進捗 | スコア表示 | 生成・評価の状態を必要に応じて表示します。 |
 | 品質 | モード契約 | 公開モードごとに必須の出力形を指定します。 |
 | 品質 | 改行密度 | v4.9.6で読みやすい段落分割の指示と整形を追加しました。 |
-| 品質 | 長編封鎖 | 長編は公開全項目ランダムから除外し、公開生成入口もブロックしています。 |
+| 品質 | 長編停止中チップ | 長編は停止中の非活性チップとして表示し、公開全項目ランダムから除外し、公開生成入口もブロックしています。 |
+| 品質 | 停止中長編の検証経路 | v4.9.8では、章台帳、章内8ブロック構成、段階的なローカル/AI監査、再生成/再構成ゲートを通してから章を採用します。 |
 
 ## Public Output Modes / 公開出力モード
 
@@ -453,9 +455,41 @@ v4.9.6では、本文が長い一塊にならないよう、改行指示と整�
 
 ### Public Long-Mode Seal / 公開長編モード封鎖
 
-Long-novel mode remains present historically in the repository, but it is not treated as a public feature in this release. The public mode list excludes it, all-random selection excludes it, and generation entry is blocked when long-mode labels are detected. Historical long-mode implementation details are intentionally not promoted in this README while the mode is suspended.
+Long-novel mode remains paused as a public feature in this release. The public UI keeps the long-mode button visible as a disabled status chip, public all-random selection excludes it, and generation entry is blocked when long-mode labels are detected. This README describes the public behavior only and does not present long mode as a supported public output mode.
 
-長編モードは履歴上リポジトリに存在しますが、このリリースでは公開機能として扱いません。公開モード一覧から除外し、全項目ランダムから除外し、長編ラベルが検出された場合は生成入口で止めます。公開停止中のため、長編の実装詳細はこのREADMEで機能紹介として宣伝しません。
+長編モードは、このリリースでは公開機能として停止中です。公開UIでは長編ボタンを非活性のステータスチップとして表示し、公開版の全項目ランダムから除外し、長編ラベルが検出された場合は生成入口で止めます。このREADMEでは公開挙動だけを説明し、長編をサポート済み公開出力モードとして扱いません。
+
+### Suspended Long-Mode Verification Specification / 停止中長編モードの検証仕様
+
+v4.9.8 keeps long-novel generation outside the supported public output modes, but the suspended path is being verified against a stricter structure than the earlier one-pass chapter generator. The current verification flow is:
+
+- Build a whole-story ledger before writing chapters.
+- Give each chapter its own synopsis, goal, start state, end state, props, character entries/exits, foreshadowing items, required beats, continuity locks, forbidden mistakes, and allowed term lists.
+- Split each chapter into eight small blocks: two setup blocks, two development blocks, two turn blocks, and two closing blocks.
+- Generate one block at a time, while carrying the accepted previous block and saved previous-chapter memo forward.
+- Reject blocks that are too short, repeat the previous block tail, end as preview text, add off-ledger people/props/places/events, or violate selected story axes.
+- Merge the eight blocks only after the part-level checks pass.
+- Audit the merged chapter against its chapter ledger, required beats, continuity locks, and forbidden mistakes.
+- If the merged chapter fails, rebuild the whole chapter from the recorded failure reason instead of saving a contaminated draft.
+- Save only accepted chapters into the readable manuscript and carry a compact memo into the next chapter.
+- Keep rule names, ledger text, failure reasons, JSON-like structures, and audit messages out of the manuscript body.
+
+In the latest local QA pass, Gemini completed all 10 planned chapters with this staged flow. The run saved 58,583 characters, performed block regenerations and chapter rebuilds when checks found drift, and the final manuscript scan found no internal audit text, mojibake, or object serialization leak. The result still leaves room to strengthen the final story landing before the mode can be treated as a public feature.
+
+v4.9.8では、長編生成は引き続き公開対象出力モードから外しています。ただし停止中経路は、以前の一括章生成ではなく、より厳しい分割・検査構造で検証しています。現在の検証フローは次の通りです。
+
+- 本文生成前に、作品全体の台帳を作成します。
+- 各章に、章あらすじ、目的、開始状態、終了状態、小物、人物の入退場、伏線、必須ビート、継続ロック、禁止ミス、許可語リストを持たせます。
+- 各章を、起2ブロック、承2ブロック、転2ブロック、結2ブロックの合計8ブロックへ分割します。
+- 採用済みの前ブロックと保存済み前章メモを渡しながら、1ブロックずつ生成します。
+- 短すぎるブロック、直前末尾の重複、予告文型の章末、台帳外の人物・小物・場所・出来事、選択軸からの逸脱を検出した場合は採用しません。
+- 各パートの検査を通過した後にのみ、8ブロックを章本文へ合算します。
+- 合算後の章を、章台帳、必須ビート、継続ロック、禁止ミスに照らして再確認します。
+- 章全体が失敗した場合、汚染された草稿を保存せず、失敗理由をもとに章全体を再構成します。
+- 採用済み章だけを読み取り用本文へ保存し、次章には圧縮メモだけを渡します。
+- ルール名、台帳本文、失敗理由、JSON風構造、監査メッセージは本文へ出さないようにします。
+
+直近のローカルQAでは、この段階式フローでGeminiが全10章を完走しました。保存本文は58,583字で、検査によりブロック再生成と章再構成が発生し、最終本文スキャンでは内部監査文、文字化け、オブジェクト表記漏れは検出されませんでした。一方で、物語としての最終的な着地にはまだ強化余地があるため、公開機能として扱う前に終章の終止感をさらに検証します。
 
 ## Output And Export / 出力と保存
 
@@ -626,7 +660,7 @@ Before public-facing release work, the repository should be checked for:
 - accidental API-key-like strings
 - public wording that over-explains non-user-facing implementation details
 - tag and release body bilingual text
-- release notes that explain user-facing changes without exposing internal implementation labels
+- release notes that explain user-facing changes without exposing non-user-facing implementation labels
 - long-mode promotional text, which should remain absent while the mode is suspended
 
 公開向けリリース作業では、次を確認します。
@@ -636,7 +670,7 @@ Before public-facing release work, the repository should be checked for:
 - Markdown の文字化け
 - README の文字化け痕跡
 - APIキーらしき文字列の混入
-- 内部補助の詳細が分かる公開文言
+- ユーザー向けではない実装ラベルが分かる公開文言
 - tag と release body の英日併記
 - ユーザー向け変更を説明しつつ内部実装ラベルを出しすぎないリリースノート
 - 公開停止中の長編を宣伝する文言が残っていないこと
@@ -644,7 +678,7 @@ Before public-facing release work, the repository should be checked for:
 ## Local Development / ローカル開発
 
 ```powershell
-cd C:\Users\sx717\Antigravity\story-maker
+cd story-maker
 npm install
 npm run dev -- --host 127.0.0.1 --port 5179
 ```
@@ -788,6 +822,36 @@ Story Maker は、周辺の創作ワークフローに対する上流のアイ�
 - JSONによる作風データの他AI文章ツールへの再利用
 
 ## Changelog / 変更履歴
+
+### v4.9.8 (2026-06-08)
+
+- Kept public long-novel mode paused while strengthening consistency checks for the suspended path.
+- Added a suspended long-mode verification specification to the README: whole-story ledger, per-chapter ledgers, eight-block chapter generation, staged block/part/chapter checks, chapter rebuilds, and manuscript contamination guards.
+- Completed a local Gemini long-mode QA run through all 10 planned chapters with 58,583 saved characters, while preserving API mask/read-only state and keeping internal audit text out of the manuscript.
+- Reconfirmed that public all-random does not select long mode.
+- Reconfirmed same-tab API restore without shipping API keys in repository or release assets.
+- Reconfirmed Gemini and OpenAI short-mode generation after the long-mode pause changes.
+
+- 公開版の長編停止状態を維持したまま、停止中経路の整合性チェックを強化。
+- READMEに停止中長編モードの検証仕様を追記。全体台帳、章別台帳、章内8ブロック生成、ブロック/パート/章の段階チェック、章再構成、本文汚染防止を説明。
+- Geminiのローカル長編QAで全10章・58,583字の完走を確認。API欄のマスク/readOnlyを維持し、内部監査文を本文へ混入させないことを確認。
+- 公開版の全項目ランダムで長編が選ばれないことを再確認。
+- APIキーをリポジトリやリリース成果物に含めず、同一タブ内のAPI復元が動くことを再確認。
+- 長編停止まわりの変更後も、Gemini/OpenAIの短い公開モード生成が動くことを再確認。
+
+### v4.9.7 (2026-06-08)
+
+- Restored the long-novel button as a visible disabled/paused status chip instead of removing it from the public UI.
+- Kept long mode excluded from public all-random and output-mode random selection.
+- Kept public generation blocked when long-mode labels are detected.
+- Restored same-tab API key restore across reloads without putting keys into repository or release files.
+- Strengthened letter-mode Japanese output handling without applying that guard to unrelated public modes.
+
+- 長編ボタンを公開UIから消さず、「機能停止中」の非活性チップとして表示する形へ復元。
+- 公開版の全項目ランダムおよび出力モードランダムから長編モードを除外。
+- 長編ラベルが検出された場合、公開生成入口で止める挙動を維持。
+- APIキーをリポジトリやリリースファイルへ含めず、同じタブのリロード復元を回復。
+- 手紙モードの日本語出力ガードを強化しつつ、無関係な公開モードへ広げないよう調整。
 
 ### v4.9.6 (2026-06-08)
 

@@ -200,6 +200,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .chip{padding:4px 11px;border-radius:18px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--font-sans);transition:var(--transition);font-weight:600;white-space:nowrap}
 .chip:hover{border-color:rgba(255,255,255,.25);color:var(--text);background:rgba(255,255,255,.06)}
 .chip.active{border-color:var(--accent);background:var(--accent-glow);color:var(--accent);font-weight:700;box-shadow:0 0 10px var(--accent-glow);-webkit-user-select:none;user-select:none}
+.chip.is-disabled,.chip:disabled{opacity:.48;cursor:not-allowed;border-style:dashed;filter:grayscale(.25)}
+.chip.is-disabled:hover,.chip:disabled:hover{border-color:var(--border2);color:var(--text2);background:rgba(255,255,255,.03);box-shadow:none}
 .chip.cat-chip{background:var(--surface3);border-color:var(--border2);font-weight:700;color:var(--text)}
 .chip.cat-chip.active{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
 .chip.sub-chip{font-size:11px;background:var(--bg)}.chip.sub-chip.active{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
