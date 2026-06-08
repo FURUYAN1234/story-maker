@@ -32,7 +32,7 @@
         <span class="api-link-sep">/</span>
         <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="api-link api-link-openai">OpenAI API</a>
         <span class="api-link-sep">—</span>
-        <span class="api-notice-security">⚠️ キーはメモリ内のみ保持・ページを閉じると消去・外部送信一切なし</span>
+        <span class="api-notice-security">⚠️ キーは公開ファイルに含めず・ページを閉じると消去・API通信時のみ選択中の提供元へ送信</span>
         <span class="api-link-sep">|</span>
         <span class="api-notice-security">🔄「API切替」は入力内容やキーを保持したままAPIのみを切り替えます</span>
       </div>
@@ -123,7 +123,7 @@
           <div class="s-label-actions">
             <button class="btn-lock" data-section="chars" title="この項目をロックしてランダム変更から保護">🔓</button>
             <button class="btn-rnd" id="btn-rand-chars-content" title="現在の人数を維持して、全キャラの名前・役割・性格・メモをランダム化">🎲 内容ランダム</button>
-            <button class="btn-rnd" id="btn-rand-chars-all" title="短編向けの人数(1~4名)もランダムに決定し、全キャラの内容もランダム化。長編ではAIが必要に応じて追加人物を設計します">🎲 人数＋内容ランダム</button>
+            <button class="btn-rnd" id="btn-rand-chars-all" title="短編向けの人数(1~4名)もランダムに決定し、全キャラの内容もランダム化します">🎲 人数＋内容ランダム</button>
             <button class="btn-section-clear" data-section="chars" title="クリア">🗑️</button>
           </div>
         </div>
@@ -154,7 +154,7 @@
           📷 <strong>キャラシートがある場合</strong> → 上のエリアに画像をドロップ（複数枚OK）<br>
           ✍️ <strong>手動設定の場合</strong> → ＋/− で人数を追加して各項目を入力・メニュー選択<br>
           🎲 <strong>おまかせの場合</strong> → 0人のまま生成、または「人数＋内容ランダム」で自動生成<br>
-          📖 <strong>長編の場合</strong> → 設定した人物は必須登場人物になり、AIが物語規模に応じて追加人物も設計
+          📖 <strong>長編モード</strong> → 現在は公開停止中です。短編・中編など公開モードを選択してください
         </p>
       </section>
 
