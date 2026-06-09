@@ -1,5 +1,5 @@
 // ============================================================
-// data.js - Story Maker v4.9.8
+// data.js - Story Maker v4.9.9
 // Shared clean data for the modular source files.
 // ============================================================
 
@@ -10,7 +10,7 @@ export const GEMINI_MODELS = [
   { value: 'gemini-pro-latest', label: 'Gemini Pro (Latest)' }
 ];
 
-export const MODES = [
+const ALL_MODES = [
   { value: '4koma', label: '4コマ漫画風' },
   { value: '4koma_scenario', label: 'AI 4koma シナリオ連携（STEP2）' },
   { value: 'short_short', label: 'ショート(〜1000字)' },
@@ -27,6 +27,8 @@ export const MODES = [
   { value: 'documentary', label: 'ドキュメンタリー' },
   { value: 'radio', label: 'ラジオドラマ' }
 ];
+
+export const MODES = ALL_MODES.filter(mode => mode.value !== 'long');
 
 export const THEME_CATEGORIES = {
   '日常・生活': ['コンビニ', '通学路', 'お昼休み', '雨の日', '洗濯物', '引っ越し', '忘れ物', '遅刻', '卒業式', '初デート'],

@@ -2,6 +2,25 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, personal paths, billing data, private tokens, or unpublished implementation mechanics.
 
+## 2026-06-09 v4.9.9 Long-Novel QA Update
+
+### Current Root-Fix Status
+
+- Browser state: in-app browser remains on `http://localhost:5179/`, Gemini API is saved/masked/read-only, and no reload/tab close was performed after the user re-entered keys. Do not ask the user to paste a key into chat or write it to files.
+- Root cause found: later guardrail work made AI drafts fail more often, then the local-safe fallback path turned those failures into saved manuscript prose. That made the original block-by-block design optimize for completion and forbidden-token avoidance instead of natural fiction.
+- Current `src/main.js` root fixes: local-safe block/chapter text is no longer adopted as saved manuscript text; failed blocks get natural-prose rescue regeneration; chapter-level failures throw and rebuild rather than recomposing local-safe chapters; local prose gates reject known safe-filler phrases; honorific aliases such as `健太さん` can match existing ledger names like `高橋健太`.
+- Verification currently passing after the root fix: `node --check src/main.js`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, and `npm run build`.
+- Next step: restart Gemini long QA from the current browser without reloading, monitor with long browser timeouts, and final-scan chapter count, visible labels, category terms, local-safe filler phrases, broken grammar, mojibake, and off-ledger recurring names before considering OpenAI.
+
+- Target: local Story Maker on port `5179`.
+- Deploy/tag/backup are still paused by user request.
+- Current objective: fresh Gemini long-novel QA first; OpenAI QA only after Gemini passes.
+- Important blocker: browser is ready with `mode-custom=長編小説`, but the API key must be entered and saved manually in the UI. Do not ask the user to paste a key into chat or write it to files.
+- Recent Gemini QA attempts were intentionally stopped before final completion because saved/prospective text exposed quality leaks: visible event labels, quoted category labels such as `未対応の出来事`, broken fallback grammar such as `...を使うを進める`, and repeated side-character/person-name drift.
+- Current `src/main.js` fixes include: event-label actionization, visible category-label rejection/repair, stronger Japanese full-name drift detection without canonizing previous generated body text, local-dev long-chip enablement, and generate-button long-mode synchronization.
+- Verification currently passing: `node --check src/main.js`, `npm run lint --if-present`, `git diff --check -- . ':!dist'`, and `npm run build`.
+- Next step after user enters/saves the key: restart Gemini long QA from the current browser, monitor with long browser timeouts, and perform final scans for chapter count, visible labels, category terms, broken grammar, mojibake, and off-ledger recurring names before considering OpenAI.
+
 このファイルは公開リポジトリに置かれる前提の引き継ぎメモです。APIキー、認証情報、個人パス、課金情報、秘密トークン、未公開の実装手順を書かないでください。
 
 ## Current Status / 現状
