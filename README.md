@@ -4,20 +4,6 @@ Story Maker is a static web application for generating short-form creative text 
 
 Story Maker は、Google Gemini API または OpenAI API を使って短い創作文を生成する静的Webアプリです。単なるプロンプト入力欄ではなく、出力モード、テーマ、ジャンル、世界観、読者層、時代、結末、語り口、登場人物、素材入力、画像入力、作風解析を組み合わせて、生成用の契約を組み立てます。
 
-## Current Release / 現在のリリース
-
-- Current public version: `v5.0.0`
-- Build target: static Vite app deployed to GitHub Pages
-- Supported public output modes: 14
-- Verified providers in this release pass: Gemini and OpenAI
-- Public documentation intentionally describes only the supported public feature set.
-
-- 現在の公開版: `v5.0.0`
-- ビルド対象: GitHub Pages に配置する静的 Vite アプリ
-- 対応する公開出力モード: 14
-- 今回の検証済みAPI: Gemini / OpenAI
-- 公開READMEでは、現在サポート対象の公開機能だけを説明します。
-
 ## API Key Safety / APIキーの安全性
 
 API keys are entered by the user in the browser UI. The repository, README, release notes, release assets, and deployed static files must not contain API keys, private credentials, billing data, or personal secrets.
@@ -162,50 +148,6 @@ npm run build
 ```
 
 ビルドでは、Viteビルド前に修正器とガードを実行します。
-
-## Verified v5.0.0 Output Matrix / v5.0.0 検証済み出力マトリクス
-
-The v5.0.0 release verification used the in-app browser on `localhost:5179` with user-entered provider keys. API key values were not printed, copied, committed, or included in release assets. The table records release-scope pass/fail and body length only; generated sample bodies are not stored as permanent documentation because provider behavior can change.
-
-v5.0.0のリリース検証では、`localhost:5179` のアプリ画面で、ユーザーが入力したAPIキーを使いました。APIキーの値は表示、コピー、コミット、リリース成果物への同梱をしていません。この表はリリース範囲の合否と本文文字数だけを記録します。API提供元の挙動は変わり得るため、生成サンプル本文は恒久的な公開文書として保存しません。
-
-OpenAI public-mode QA passed all 14 modes:
-
-| Mode | Result | Body Characters |
-|---|---:|---:|
-| `4koma` | pass | 420 |
-| `4koma_scenario` | pass | 841 |
-| `short_short` | pass | 959 |
-| `novel` | pass | 3,000 |
-| `medium` | pass | 3,889 |
-| `scenario` | pass | 3,970 |
-| `manga` | pass | 4,109 |
-| `essay` | pass | 3,385 |
-| `poem` | pass | 308 |
-| `fairy` | pass | 2,204 |
-| `letter` | pass | 935 |
-| `diary` | pass | 1,344 |
-| `documentary` | pass | 3,366 |
-| `radio` | pass | 3,374 |
-
-Gemini public-mode QA passed all 14 modes:
-
-| Mode | Result | Body Characters |
-|---|---:|---:|
-| `4koma` | pass | 332 |
-| `4koma_scenario` | pass | 769 |
-| `short_short` | pass | 940 |
-| `novel` | pass | 3,091 |
-| `medium` | pass | 3,779 |
-| `scenario` | pass | 3,950 |
-| `manga` | pass | 3,921 |
-| `essay` | pass | 3,220 |
-| `poem` | pass | 320 |
-| `fairy` | pass | 2,203 |
-| `letter` | pass | 894 |
-| `diary` | pass | 1,379 |
-| `documentary` | pass | 3,523 |
-| `radio` | pass | 3,772 |
 
 ## UI Overview / UI概要
 
@@ -360,74 +302,6 @@ Generated text can be copied from the output panel. The app also supports text e
 Export files are local user actions. The repository should not receive generated text, API keys, or user settings as part of normal app usage.
 
 書き出しファイルはユーザーのローカル操作です。通常利用で、生成本文、APIキー、ユーザー設定がリポジトリへ書き戻されることは想定していません。
-
-## Local Development / ローカル開発
-
-Install dependencies:
-
-```powershell
-npm install
-```
-
-Start the local development server:
-
-```powershell
-npm run dev -- --host 127.0.0.1 --port 5179
-```
-
-Build for release:
-
-```powershell
-npm run build
-```
-
-Run public-rule guard:
-
-```powershell
-npm run check:generic-rules
-```
-
-依存関係のインストール:
-
-```powershell
-npm install
-```
-
-ローカル開発サーバー:
-
-```powershell
-npm run dev -- --host 127.0.0.1 --port 5179
-```
-
-リリースビルド:
-
-```powershell
-npm run build
-```
-
-公開ルール検査:
-
-```powershell
-npm run check:generic-rules
-```
-
-## Deployment / デプロイ
-
-The project is a static Vite app. GitHub Pages deployment can be run with:
-
-```powershell
-npm run deploy
-```
-
-The deploy script builds the app and publishes the `dist` directory with `gh-pages`.
-
-このプロジェクトは静的 Vite アプリです。GitHub Pages へのデプロイは次で実行できます。
-
-```powershell
-npm run deploy
-```
-
-デプロイスクリプトはビルド後、`gh-pages` で `dist` ディレクトリを公開します。
 
 ## Release Checklist / リリースチェックリスト
 
