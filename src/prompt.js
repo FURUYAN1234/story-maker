@@ -1,5 +1,5 @@
 // ============================================================
-// prompt.js - Story Maker v4.9.9
+// prompt.js - Story Maker v5.0.0
 // Clean compatibility prompt helpers for modular source files.
 // The production app currently uses src/main.js directly.
 // ============================================================

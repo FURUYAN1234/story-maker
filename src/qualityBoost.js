@@ -1,4 +1,4 @@
-// Story Maker v4.9.9 public-mode quality booster.
+// Story Maker v5.0.0 public-mode quality booster.
 // Thin runtime layer: prompt rules live in modeContracts.js.
 
 import {
@@ -11,7 +11,7 @@ import {
   shouldSkipQualityPrompt,
 } from './modeContracts.js';
 
-const OPENAI_SYSTEM_MARKER = '[SMK_OPENAI_PUBLIC_MODE_SYSTEM_V499]';
+const OPENAI_SYSTEM_MARKER = '[SMK_OPENAI_PUBLIC_MODE_SYSTEM_V500]';
 
 const OPENAI_SYSTEM_LENGTH_RULES = {
   short_short: '本文は日本語600〜1200字。導入、揺れ、反転、余韻を本文で書き、あらすじや説明だけで終えない。',

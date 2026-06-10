@@ -1,7 +1,7 @@
-// Story Maker v4.9.9 public-mode contracts.
+// Story Maker v5.0.0 public-mode contracts.
 // Keep mode names, final prompt contracts, and public-mode detection outside main.js.
 
-export const QUALITY_MARKER = '[SMK_PUBLIC_MODE_QUALITY_BOOST_V499]';
+export const QUALITY_MARKER = '[SMK_PUBLIC_MODE_QUALITY_BOOST_V500]';
 
 export const PUBLIC_MODES = [
   { value: '4koma', label: '4コマ漫画風' },

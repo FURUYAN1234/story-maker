@@ -2129,7 +2129,7 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 }
 
 
-/* v4.9.9: keep the dormant long-novel mode out of the public UI without touching preset setup. */
+/* v5.0.0: keep the dormant long-novel mode out of the public UI without touching preset setup. */
 #mode-chips button[data-v="long"] {
   display: none !important;
 }

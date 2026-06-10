@@ -1,4 +1,4 @@
-# Story Maker v4.9.9 / AI物語メーカー
+# Story Maker v5.0.0 / AI物語メーカー
 
 Story Maker is a static web application for generating short-form creative text with Google Gemini API or OpenAI API. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -6,13 +6,13 @@ Story Maker は、Google Gemini API または OpenAI API を使って短い創�
 
 ## Current Release / 現在のリリース
 
-- Current public version: `v4.9.9`
+- Current public version: `v5.0.0`
 - Build target: static Vite app deployed to GitHub Pages
 - Supported public output modes: 14
 - Verified providers in this release pass: Gemini and OpenAI
 - Public documentation intentionally describes only the supported public feature set.
 
-- 現在の公開版: `v4.9.9`
+- 現在の公開版: `v5.0.0`
 - ビルド対象: GitHub Pages に配置する静的 Vite アプリ
 - 対応する公開出力モード: 14
 - 今回の検証済みAPI: Gemini / OpenAI
@@ -91,11 +91,11 @@ The public release supports the following 14 output modes. Each mode has a mode 
 | `documentary` | ドキュメンタリー | Narration, testimony, observation, unresolved question, and factual-feeling structure. |
 | `radio` | ラジオドラマ | BGM, SE, narration, dialogue, and sound-driven scene movement. |
 
-## v4.9.9 Quality System / v4.9.9 品質システム
+## v5.0.0 Quality System / v5.0.0 品質システム
 
-v4.9.9 adds a public-mode quality layer outside the older large application file. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
+v5.0.0 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
 
-v4.9.9では、既存の巨大なアプリ本体の外側に、公開モード用の品質レイヤーを追加しました。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
+v5.0.0では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
 
 ### Selected-Mode Priority / 選択モード優先
 
@@ -111,13 +111,31 @@ Every supported mode receives a mode-specific contract before generation. The co
 
 ### Under-Length Rewrite / 短すぎる初稿の改稿
 
-For both Gemini and OpenAI streaming generation, v4.9.9 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
+For both Gemini and OpenAI streaming generation, v5.0.0 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
 
 Gemini と OpenAI のストリーム生成では、出力欄へ最終表示する前に、公開モードの本文長を確認します。対応モードで短すぎる初稿が返った場合、同じ入力条件を使って、選択中のAPIに完成稿として全面改稿させます。短すぎる初稿を、そのまま最終表示として採用しません。
 
 This is intentionally mode-generic. It expands by adding action, dialogue, silence, physical sensation, aftermath, and relationship change from the selected inputs and draft content, not by injecting hard-coded places, people, jobs, shop names, products, or evidence items.
 
 この仕組みはモード汎用です。会話、行動、沈黙、身体感覚、後始末、関係変化を、選択済み入力と初稿内容から増やします。固定の舞台、人物、職業、店名、商品、証拠品を勝手に差し込むための仕組みではありません。
+
+### Provider-Specific Tuning / API別チューニング
+
+Gemini and OpenAI use the same public-mode contract, but the runtime adjusts how the contract is delivered. Gemini receives additional rewrite pressure when the answer is too neat, explanatory, or short. OpenAI receives a system-level public-mode contract that suppresses analysis text, checklist fragments, and over-short endings while keeping the selected mode strict.
+
+Gemini と OpenAI は同じ公開モード契約を使いますが、実行時の渡し方をAPIごとに調整します。Gemini には、整いすぎる説明文・短すぎる回答を避けるための改稿圧を加えます。OpenAI には、分析文、チェックリスト断片、短すぎる締めを抑え、選択モードを厳守する system レベルの公開モード契約を追加します。
+
+### Final Output Cleanup / 最終出力整形
+
+Before the generated text is treated as the visible final output, the public cleanup layer removes prompt artifacts, stale completion markers, and internal footer text. It also keeps mode-specific readability: letters are paragraphized, poems are kept line-based, essays are capped at a readable finished length, and manga/script-like outputs are trimmed at a complete sentence or panel boundary.
+
+生成本文を画面に出す最終稿として扱う前に、公開出力整形レイヤーが、プロンプト断片、古い完了マーカー、内部フッターを取り除きます。あわせて、手紙は段落化し、詩は行形式を守り、エッセイは読み切れる完成稿の長さに収め、漫画・脚本系は文またはコマの区切りで自然に閉じます。
+
+### Dormant Long-Form Path / 長編再開余地
+
+The public release does not expose long-novel generation as a supported mode. The runtime hides the long-mode chip, excludes it from random mode selection, and strips the dormant long-novel control panel from the production build. The internal path is intentionally left behind the implementation boundary so development can resume later if model reliability becomes high enough, but it is not documented as a public feature.
+
+公開版では、長編生成をサポート対象モードとして表示しません。実行時は長編チップを非表示にし、ランダム選択から除外し、本番ビルドでは休止中の長編コントロールパネルを取り除きます。将来、モデルの信頼性が十分に上がった場合に開発を再開できるよう実装上の余地だけは残しますが、公開機能としては記載しません。
 
 ### Generic Rule Guard / 汎用ルールガード
 
@@ -145,49 +163,49 @@ npm run build
 
 ビルドでは、Viteビルド前に修正器とガードを実行します。
 
-## Verified v4.9.9 Output Matrix / v4.9.9 検証済み出力マトリクス
+## Verified v5.0.0 Output Matrix / v5.0.0 検証済み出力マトリクス
 
-The v4.9.9 release verification used the in-app browser on `localhost:5179` with user-entered provider keys. API key values were not printed, copied, committed, or included in release assets.
+The v5.0.0 release verification used the in-app browser on `localhost:5179` with user-entered provider keys. API key values were not printed, copied, committed, or included in release assets. The table records release-scope pass/fail and body length only; generated sample bodies are not stored as permanent documentation because provider behavior can change.
 
-v4.9.9のリリース検証では、`localhost:5179` のアプリ画面で、ユーザーが入力したAPIキーを使いました。APIキーの値は表示、コピー、コミット、リリース成果物への同梱をしていません。
+v5.0.0のリリース検証では、`localhost:5179` のアプリ画面で、ユーザーが入力したAPIキーを使いました。APIキーの値は表示、コピー、コミット、リリース成果物への同梱をしていません。この表はリリース範囲の合否と本文文字数だけを記録します。API提供元の挙動は変わり得るため、生成サンプル本文は恒久的な公開文書として保存しません。
 
 OpenAI public-mode QA passed all 14 modes:
 
 | Mode | Result | Body Characters |
 |---|---:|---:|
-| `4koma` | pass | 580 |
-| `4koma_scenario` | pass | 2,295 |
-| `short_short` | pass | 816 |
-| `novel` | pass | 5,247 |
-| `medium` | pass | 2,628 |
-| `scenario` | pass | 2,085 |
-| `manga` | pass | 2,188 |
-| `essay` | pass | 2,907 |
-| `poem` | pass | 426 |
-| `fairy` | pass | 982 |
-| `letter` | pass | 1,231 |
-| `diary` | pass | 1,433 |
-| `documentary` | pass | 2,161 |
-| `radio` | pass | 2,143 |
+| `4koma` | pass | 420 |
+| `4koma_scenario` | pass | 841 |
+| `short_short` | pass | 959 |
+| `novel` | pass | 3,000 |
+| `medium` | pass | 3,889 |
+| `scenario` | pass | 3,970 |
+| `manga` | pass | 4,109 |
+| `essay` | pass | 3,385 |
+| `poem` | pass | 308 |
+| `fairy` | pass | 2,204 |
+| `letter` | pass | 935 |
+| `diary` | pass | 1,344 |
+| `documentary` | pass | 3,366 |
+| `radio` | pass | 3,374 |
 
 Gemini public-mode QA passed all 14 modes:
 
 | Mode | Result | Body Characters |
 |---|---:|---:|
-| `4koma` | pass | 1,229 |
-| `4koma_scenario` | pass | 3,212 |
-| `short_short` | pass | 877 |
-| `novel` | pass | 2,235 |
-| `medium` | pass | 3,367 |
-| `scenario` | pass | 3,859 |
-| `manga` | pass | 4,601 |
-| `essay` | pass | 1,405 |
-| `poem` | pass | 269 |
-| `fairy` | pass | 1,939 |
-| `letter` | pass | 1,901 |
-| `diary` | pass | 1,114 |
-| `documentary` | pass | 3,645 |
-| `radio` | pass | 4,332 |
+| `4koma` | pass | 332 |
+| `4koma_scenario` | pass | 769 |
+| `short_short` | pass | 940 |
+| `novel` | pass | 3,091 |
+| `medium` | pass | 3,779 |
+| `scenario` | pass | 3,950 |
+| `manga` | pass | 3,921 |
+| `essay` | pass | 3,220 |
+| `poem` | pass | 320 |
+| `fairy` | pass | 2,203 |
+| `letter` | pass | 894 |
+| `diary` | pass | 1,379 |
+| `documentary` | pass | 3,523 |
+| `radio` | pass | 3,772 |
 
 ## UI Overview / UI概要
 
@@ -468,6 +486,22 @@ Do not use this project to:
 - 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
 
 ## Release History / 変更履歴
+
+### v5.0.0 (2026-06-10)
+
+- Bumped the public release line from `v4.9.9` to `v5.0.0`.
+- Kept supported public generation focused on the 14 non-long output modes.
+- Hid dormant long-novel controls in the runtime and strips the dormant long-novel panel from production builds unless an explicit development flag is used.
+- Strengthened provider-specific public-mode tuning for Gemini and OpenAI while keeping the rules generic.
+- Restored final output cleanup for paragraphing, completion-marker removal, poem endings, essay caps, and manga/script boundary trimming.
+- Updated the README to describe the current public specification and the v5.0.0 browser QA scope.
+
+- 公開版の系統を `v4.9.9` から `v5.0.0` に更新しました。
+- サポート対象の公開生成は、長編以外の14出力モードに絞っています。
+- 実行時に休止中の長編UIを非表示にし、明示的な開発フラグがない本番ビルドでは休止中の長編パネルを取り除きます。
+- 汎用ルールを保ったまま、Gemini / OpenAI それぞれの公開モード補正を強化しました。
+- 段落整形、完了マーカー除去、詩の終端、エッセイの長さ調整、漫画・脚本系の自然な区切りでの整形を復旧しました。
+- READMEを現在の公開仕様と v5.0.0 のブラウザQA範囲に合わせて更新しました。
 
 ### v4.9.9 (2026-06-09)
 

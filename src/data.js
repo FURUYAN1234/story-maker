@@ -1,5 +1,5 @@
 // ============================================================
-// data.js - Story Maker v4.9.9
+// data.js - Story Maker v5.0.0
 // Shared clean data for the modular source files.
 // ============================================================
 

@@ -1,5 +1,40 @@
 import { defineConfig } from 'vite';
 
+function removeDivById(html, id) {
+  const emptyPlaceholder = `<div id="${id}" class="long-novel-panel hidden" aria-hidden="true"></div>`;
+  const marker = `id="${id}"`;
+  const markerIndex = html.indexOf(marker);
+  if (markerIndex < 0) return html;
+
+  const start = html.lastIndexOf('<div', markerIndex);
+  if (start < 0) return html;
+
+  const tagPattern = /<\/?div\b[^>]*>/gi;
+  tagPattern.lastIndex = start;
+  let depth = 0;
+  let match;
+  while ((match = tagPattern.exec(html))) {
+    const tag = match[0];
+    depth += tag.startsWith('</') ? -1 : 1;
+    if (depth === 0) {
+      return html.slice(0, start) + emptyPlaceholder + html.slice(tagPattern.lastIndex);
+    }
+  }
+
+  return html;
+}
+
+function stripDormantLongNovelPanel() {
+  return {
+    name: 'story-maker-strip-dormant-long-novel-panel',
+    apply: 'build',
+    transformIndexHtml(html) {
+      if (process.env.VITE_ENABLE_LONG_NOVEL_DEV === '1') return html;
+      return removeDivById(html, 'long-novel-panel');
+    }
+  };
+}
+
 function publicAssetGuard() {
   const blockedSignatures = [
     ['q', 'a', 'A', 'p', 'i', 'S', 'e', 's', 's', 'i', 'o', 'n'].join(''),
@@ -31,7 +66,7 @@ function publicAssetGuard() {
 
 export default defineConfig({
   base: './',
-  plugins: [publicAssetGuard()],
+  plugins: [stripDormantLongNovelPanel(), publicAssetGuard()],
   server: {
     port: 5179,
     strictPort: true,
