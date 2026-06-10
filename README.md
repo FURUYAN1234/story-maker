@@ -251,38 +251,6 @@ Before the generated text is treated as the visible final output, the public cle
 
 生成本文を画面に出す最終稿として扱う前に、公開出力整形レイヤーが、プロンプト断片、古い完了マーカー、内部フッターを取り除きます。あわせて、手紙は段落化し、詩は行形式を守り、エッセイは読み切れる完成稿の長さに収め、漫画・脚本系は文またはコマの区切りで自然に閉じます。
 
-### Dormant Long-Form Path / 長編再開余地
-
-The public release does not expose long-novel generation as a supported mode. The runtime hides the long-mode chip, excludes it from random mode selection, and strips the dormant long-novel control panel from the production build. The internal path is intentionally left behind the implementation boundary so development can resume later if model reliability becomes high enough, but it is not documented as a public feature.
-
-公開版では、長編生成をサポート対象モードとして表示しません。実行時は長編チップを非表示にし、ランダム選択から除外し、本番ビルドでは休止中の長編コントロールパネルを取り除きます。将来、モデルの信頼性が十分に上がった場合に開発を再開できるよう実装上の余地だけは残しますが、公開機能としては記載しません。
-
-### Generic Rule Guard / 汎用ルールガード
-
-The repository includes a public-rule guard:
-
-```powershell
-npm run check:generic-rules
-```
-
-It scans the public rule files for known non-generic examples, stale local-only wording, and mojibake sentinel terms that should not be present in release-facing rules.
-
-リポジトリには公開ルール用のガードがあります。
-
-```powershell
-npm run check:generic-rules
-```
-
-公開ルールに、特定条件に寄りすぎた例、古い局所ルール、公開前に残すべきではない文字化け検出語が混ざっていないかを確認します。
-
-The build script runs the fixer and guard before Vite build:
-
-```powershell
-npm run build
-```
-
-ビルドでは、Viteビルド前に修正器とガードを実行します。
-
 ## API Engine / APIエンジン
 
 ### Gemini / Gemini API
@@ -608,50 +576,6 @@ Generated text can be copied from the output panel. The app also supports text e
 Export files are local user actions. The repository should not receive generated text, API keys, or user settings as part of normal app usage.
 
 書き出しファイルはユーザーのローカル操作です。通常利用で、生成本文、APIキー、ユーザー設定がリポジトリへ書き戻されることは想定していません。
-
-## Release Checklist / リリースチェックリスト
-
-Before a public release, check:
-
-- build, lint, and syntax checks pass
-- public-rule guard passes
-- no API-key-like strings are present in repository or release assets
-- no private credentials, billing data, or sensitive personal data are present
-- generated garbage, temporary verification artifacts, and local scratch files are not published
-- public documentation describes only supported public behavior
-- release tag message is bilingual English/Japanese
-- GitHub Release body is bilingual English/Japanese
-- public page loads with the expected version
-
-公開リリース前に確認すること:
-
-- build、lint、構文チェックが通ること
-- 公開ルールガードが通ること
-- APIキーらしき文字列がリポジトリやリリース成果物にないこと
-- 秘密資格情報、課金情報、機微な個人情報がないこと
-- 生成ゴミ、一時検証ファイル、ローカル scratch が公開されないこと
-- 公開文書がサポート対象の公開挙動だけを説明していること
-- tag メッセージが英日併記であること
-- GitHub Release 本文が英日併記であること
-- 公開ページが期待バージョンで読み込めること
-
-## Public Safety Boundaries / 公開上の注意
-
-Do not use this project to:
-
-- publish API keys or private credentials
-- upload billing data or secrets into public documents
-- treat generated fiction as verified factual reporting
-- claim model output is legally reviewed or publication-safe by default
-- expose private personal information through prompts, screenshots, release notes, or issues
-
-このプロジェクトでは、次の扱いをしないでください。
-
-- APIキーや秘密資格情報を公開する
-- 課金情報や秘密情報を公開文書へ入れる
-- 生成された創作文を検証済みの事実報道として扱う
-- モデル出力が法的確認済み、または無条件に公開安全だと主張する
-- プロンプト、スクリーンショット、リリースノート、Issueを通じて個人情報を公開する
 
 ## Known Limitations / 既知の制限
 
