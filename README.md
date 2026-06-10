@@ -6,9 +6,9 @@ Story Maker は、Google Gemini API または OpenAI API を使って短い創�
 
 ## API Key Safety / APIキーの安全性
 
-API keys are entered by the user in the browser UI. The repository, README, release notes, release assets, and deployed static files must not contain API keys, private credentials, billing data, or personal secrets.
+API keys are entered by the user in the browser UI. The repository, README, release notes, release assets, and public static files must not contain API keys, private credentials, billing data, or personal secrets.
 
-APIキーはユーザーがブラウザUIへ入力します。リポジトリ、README、リリースノート、リリース成果物、デプロイ済み静的ファイルには、APIキー、秘密資格情報、課金情報、個人的な秘密情報を含めてはいけません。
+APIキーはユーザーがブラウザUIへ入力します。リポジトリ、README、リリースノート、リリース成果物、公開静的ファイルには、APIキー、秘密資格情報、課金情報、個人的な秘密情報を含めてはいけません。
 
 API keys are sent only to the selected provider when an API request is made for generation, image understanding, style analysis, or news-grounded keyword assistance. Story Maker does not send API keys to the repository, issue tracker, release system, documentation, or unrelated external services.
 
@@ -54,6 +54,126 @@ Main axes:
 - 補足メモ
 - 任意の作風解析
 
+### How Request Assembly Works / 生成条件の組み立て
+
+Story Maker treats each visible selection as a separate creative constraint. The final request is assembled from the selected output form, the story seed, the genre pressure, the setting logic, the audience level, the era, the ending shape, the narrative voice, the characters, the universal input, and any style-analysis result. This makes the request easier to inspect than one large hidden prompt.
+
+Story Maker は、画面上の各選択を別々の創作条件として扱います。最終リクエストは、出力形式、物語の種、ジャンル圧、舞台論理、読者層、時代、結末型、語り口、登場人物、万能インプット、作風解析結果を組み合わせて作られます。巨大な隠しプロンプト一つに任せるより、どの条件が効いているかを確認しやすくするためです。
+
+The intent is not to force every work into the same template. The contract tells the model what shape must be preserved, while the selected axes decide the content, conflict, tone, and texture.
+
+目的は、すべての作品を同じ型へ押し込むことではありません。契約は守るべき形を指定し、選択軸が内容、葛藤、トーン、質感を決めます。
+
+## Feature Map / 機能マップ
+
+| Area | Feature | Details |
+|---|---|---|
+| API | Gemini / OpenAI switching | Switch the selected provider from the UI while keeping the visible creative settings. |
+| API | Runtime key entry | API keys are typed into the browser UI by the user and must not be committed or published. |
+| API | Provider links | Header links help the user reach Gemini API and OpenAI API key pages. |
+| Generation | 14 public output modes | Each public mode has its own expected structure and cleanup behavior. |
+| Generation | Selected-mode priority | The selected output chip wins over incidental words inside prompts or source material. |
+| Randomization | All-random | Randomizes the visible creative axes and starts generation immediately. |
+| Randomization | Per-section random | Individual sections can be randomized without changing the whole request. |
+| Locking | Section locks | Locked sections are protected from randomization and reset where applicable. |
+| Characters | Character count controls | Add or remove character slots with plus/minus controls. |
+| Characters | Manual character fields | Name, sex, role, personality, and notes can be edited per character. |
+| Characters | Character randomization | Randomize current character content, or randomize count plus content. |
+| Characters | Character sheet image import | Drop PNG/JPG/WEBP character sheets and convert visible traits into character settings. |
+| Intake | Universal Input | Add text, Markdown, URLs, local text files, and images as story context. |
+| Intake | Asset list | Added materials can be reviewed and cleared from the intake area. |
+| News | News keywords | Gemini search grounding can turn current Japanese news topics into creative seeds. |
+| Style | Style analyzer | Analyze text or images into writing-style parameters. |
+| Style | JSON export | Export style analysis as structured JSON for external writing workflows. |
+| Style | Style rewrite | Rewrite generated output using the analyzed style while keeping the plot direction. |
+| Output | Character counter | Output area shows current character count. |
+| Output | Tags | Output tags show selected provider/model/mode and major generation axes. |
+| Output | Copy and text export | Generated text can be copied or exported as a timestamped `.txt` file. |
+| Progress | Thought log | Shows progress messages while API communication is running. |
+| Quality | Mode contracts | Each public mode receives a required output shape. |
+| Quality | Short-draft rewrite | Too-short public drafts are rewritten before they are accepted as final output. |
+| Quality | Final cleanup | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display. |
+
+| 領域 | 機能 | 詳細 |
+|---|---|---|
+| API | Gemini / OpenAI 切り替え | 画面上の創作設定を保ったまま、利用するAPI提供元を切り替えます。 |
+| API | 実行時キー入力 | APIキーはユーザーがブラウザUIへ入力し、リポジトリや公開物へ含めません。 |
+| API | キー取得リンク | ヘッダーから Gemini API と OpenAI API のキー取得ページへ移動できます。 |
+| 生成 | 14公開出力モード | 各公開モードには、期待される構造と整形処理があります。 |
+| 生成 | 選択モード優先 | プロンプトや素材文中の偶然の語より、選択中の出力チップを優先します。 |
+| ランダム | 全項目ランダム | 見えている創作軸をまとめてランダム化し、そのまま生成します。 |
+| ランダム | セクション別ランダム | 全体を変えず、特定セクションだけを個別にランダム化できます。 |
+| 固定 | セクションロック | ロックした欄は、対応するランダム化やリセットから保護されます。 |
+| 人物 | 人数調整 | プラス/マイナスで登場人物枠を増減できます。 |
+| 人物 | 手動項目 | 名前、性別、役割、性格、メモを人物ごとに編集できます。 |
+| 人物 | 人物ランダム | 現在人数のまま内容だけ、または人数込みで人物をランダム生成できます。 |
+| 人物 | キャラクターシート画像 | PNG/JPG/WEBP画像から人物情報を読み取り、設定へ反映します。 |
+| 素材 | 万能インプット | テキスト、Markdown、URL、ローカルテキスト、画像を文脈として投入できます。 |
+| 素材 | 素材一覧 | 追加した素材を一覧で確認・クリアできます。 |
+| ニュース | ニュースキーワード | Gemini検索グラウンディングで日本語ニュース話題を創作の種にできます。 |
+| 作風 | 作風解析 | テキストや画像から文体パラメータを抽出します。 |
+| 作風 | JSON出力 | 作風解析結果を外部の文章ワークフロー向けJSONとして出力できます。 |
+| 作風 | 作風リライト | 生成済み出力の筋を保ったまま、解析した文体で書き換えます。 |
+| 出力 | 文字数表示 | 出力欄で現在の文字数を表示します。 |
+| 出力 | タグ表示 | API、モデル、モード、主要軸をタグとして表示します。 |
+| 出力 | コピーとテキスト出力 | 生成結果をコピーまたはタイムスタンプ付き `.txt` として書き出せます。 |
+| 進捗 | 思考ログ | API通信中の進行メッセージを表示します。 |
+| 品質 | モード契約 | 公開モードごとに必須の出力形を指定します。 |
+| 品質 | 短すぎる初稿の改稿 | 公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
+| 品質 | 最終出力整形 | プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
+
+## Technology Highlights / 技術ハイライト
+
+Story Maker is designed as a small static application, but the generation pipeline is closer to a creative-control engine than a single textarea. The technical value is in how the app converts visible user choices into a stable, provider-aware writing contract.
+
+Story Maker は小さな静的Webアプリとして動きますが、生成パイプラインは単一のテキスト欄ではなく、創作制御エンジンに近い構造です。技術的な価値は、画面上の選択を、API提供元ごとの癖まで考慮した安定した文章生成契約へ変換する点にあります。
+
+### Multi-Axis Prompt Compiler / 多軸プロンプトコンパイラ
+
+The app compiles many independent axes into one request: output mode, theme, genre, worldview, target reader, era, ending type, narration, characters, source material, supplemental constraints, and optional style-analysis results. This reduces the risk that one vague prompt will collapse into a generic summary.
+
+このアプリは、出力モード、テーマ、ジャンル、世界観、読者層、時代、結末型、語り口、登場人物、素材、補足条件、任意の作風解析結果をまとめて一つのリクエストへコンパイルします。曖昧な一文プロンプトが、ありがちな要約文へ崩れるリスクを下げるためです。
+
+The compiler keeps form and content separate. Output mode decides the finished shape, while the other axes decide material, tone, conflict, reader distance, and ending pressure.
+
+コンパイラは「形式」と「内容」を分けて扱います。出力モードが完成形を決め、その他の軸が素材、トーン、葛藤、読者との距離、結末圧を決めます。
+
+### Provider Adapter Layer / API別アダプタ層
+
+Gemini and OpenAI are not treated as identical black boxes. They receive the same public-mode intent, but the app adjusts the delivery. Gemini receives extra pressure against tidy explanation, bland summary, and short closure. OpenAI receives stricter system-level mode constraints and stronger suppression of analysis fragments. The goal is to make both providers produce usable public-mode writing from the same UI.
+
+Gemini と OpenAI を同じ黒箱として扱いません。同じ公開モード意図を渡しつつ、渡し方を調整します。Gemini には、整いすぎた説明、無難な要約、短い締めを避ける圧を追加します。OpenAI には、system レベルでモード制約を強く入れ、分析断片の混入を抑えます。同じUIから、両APIで使える文章を出すための層です。
+
+### Multimodal Intake / マルチモーダル素材取り込み
+
+The app can use text, Markdown, local text files, URLs, pasted notes, and supported images as source material. Character-sheet images and universal image input are converted into usable writing context instead of remaining as decorative attachments.
+
+テキスト、Markdown、ローカルテキストファイル、URL、貼り付けメモ、対応画像を素材として扱えます。キャラクターシート画像や万能インプットの画像は、単なる添付物ではなく、文章生成に使える文脈へ変換されます。
+
+### Style Analyzer And Rewrite Engine / 作風解析とリライトエンジン
+
+The style analyzer extracts reusable writing-style signals from user-provided text or images. It can produce a readable analysis, structured JSON for external workflows, and a rewrite that keeps the generated plot direction while changing rhythm, diction, density, sensory focus, and tone.
+
+作風解析は、ユーザーが与えた文章や画像から再利用できる文体信号を抽出します。読みやすい解析、外部ワークフロー向けの構造化JSON、生成済み本文の筋を保ったままリズム、語彙、密度、感覚描写、トーンを変えるリライトを出せます。
+
+### Human-Texture Writing Controls / 人間味を出す文章制御
+
+The quality layer does not only ask for "better writing." It pushes for specific craft signals: concrete action, uneven reaction, silence, physical sensation, relationship change, aftermath, information order, and a last line that changes or concentrates the meaning. These rules are kept generic so they work across many themes instead of depending on one fixed scenario.
+
+品質レイヤーは、単に「良い文章にして」と頼むだけではありません。具体的な行動、均一でない反応、沈黙、身体感覚、関係変化、後始末、情報開示の順番、意味を反転または凝縮する最後の一文など、文章の手触りを作る要素を要求します。これらは固定シナリオに依存しない汎用ルールとして保ちます。
+
+### Rewrite And Cleanup Pipeline / 改稿・整形パイプライン
+
+Generated text passes through public-mode checks before it is treated as final. Too-short drafts can be rewritten by the selected provider. Final cleanup removes prompt residue, stale completion markers, analysis fragments, and awkward endings while preserving mode-specific readability such as poem line breaks, letter paragraphs, manga panel boundaries, and script labels.
+
+生成本文は、最終出力として扱う前に公開モード用の検査を通ります。短すぎる初稿は、選択中のAPIで改稿できます。最終整形では、プロンプト残骸、古い完了マーカー、分析断片、不自然な終端を取り除きつつ、詩の行分け、手紙の段落、漫画のコマ境界、脚本ラベルなど、モードごとの読みやすさを守ります。
+
+### Static Safety And Release Discipline / 静的公開と安全管理
+
+The app is built for static hosting. Normal use does not require a custom backend, server-side account system, or repository writes. Public build checks also strip dormant unsupported controls, scan for non-generic rule leakage, and keep API keys, generated text, billing data, and private credentials out of release-facing files.
+
+このアプリは静的ホスティングを前提にしています。通常利用に専用バックエンド、サーバー側アカウント、リポジトリへの書き込みは必要ありません。公開ビルドの確認では、休止中の非対応UIを除去し、非汎用ルールの混入を検査し、APIキー、生成本文、課金情報、秘密資格情報を公開向けファイルへ入れないようにしています。
+
 ## Supported Public Output Modes / 対応公開出力モード
 
 The public release supports the following 14 output modes. Each mode has a mode contract, so the label is not decorative: the generated text is expected to follow the shape of that mode.
@@ -63,19 +183,33 @@ The public release supports the following 14 output modes. Each mode has a mode 
 | Mode | Japanese Label | Expected Output Shape |
 |---|---|---|
 | `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. |
-| `4koma_scenario` | AI 4koma シナリオ連携 | Topic, logline, location, outfit, punchline, and panel-ready scenario details. |
-| `short_short` | ショート | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. |
-| `novel` | 短編小説 | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. |
-| `medium` | 中編小説 | Multi-section prose with stronger development and a larger emotional arc. |
-| `scenario` | 脚本/台本 | Character list, scene direction, stage directions, and speaker-based dialogue. |
-| `manga` | ストーリー漫画 | Page and panel descriptions, separated visual direction, dialogue, and staging. |
-| `essay` | エッセイ | Four blocks: `主張:`, `観察:`, `考察:`, `結論:`. No fictional scene ending marker. |
-| `poem` | 詩・ポエム | Line-based poetic output with concrete images and no explanatory afterword. |
+| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Topic, logline, location, outfit, punchline, scenario notes, and four panel blocks with emotion/camera/dialogue cues. |
+| `short_short` | ショート（〜1000字） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. |
+| `novel` | 短編小説（〜3000字） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. |
+| `medium` | 中編小説（〜4000字） | Three-section prose with stronger development, scene movement, and a larger emotional arc. |
+| `scenario` | 脚本/台本 | `タイトル:`, `登場人物:`, `場面:` plus stage directions and character-name dialogue. |
+| `manga` | ストーリー漫画 | Page and panel descriptions, separated `絵:`, `セリフ:`, and `演出:` details. |
+| `essay` | エッセイ | Claim, observation, reflection, and conclusion without escaping into incident-resolution fiction. |
+| `poem` | 詩・ポエム | Title plus line-based poetic output with concrete images and no explanatory afterword. |
 | `fairy` | 童話/絵本 | Gentle story form with visible action, lesson-like change, and child-readable clarity. |
-| `letter` | 手紙/書簡体 | Addressee, body, closing, sender, and relationship change through written voice. |
-| `diary` | 日記/独白体 | Date-like or diary-like first-person reflection with self-deception and small truth. |
-| `documentary` | ドキュメンタリー | Narration, testimony, observation, unresolved question, and factual-feeling structure. |
-| `radio` | ラジオドラマ | BGM, SE, narration, dialogue, and sound-driven scene movement. |
+| `letter` | 手紙/書簡体 | `宛先:`, paragraphized body, closing, sender, and relationship change through written voice. |
+| `diary` | 日記/独白体 | Date-like or diary-like first-person reflection with self-deception and a small truth. |
+| `documentary` | ドキュメンタリー | `ナレーション:`, testimony, observation, unresolved question, and factual-feeling structure. |
+| `radio` | ラジオドラマ | `BGM:`, `SE:`, narration, dialogue, and sound-driven scene movement. |
+
+### Mode Behavior / モード別の動作
+
+- Narrative modes prioritize setup, conflict, payoff, character function, scene motion, and emotional landing.
+- Comedy and 4-panel modes emphasize expectation gaps, misdirection, reversal, and punchline timing.
+- Script, manga, documentary, and radio modes prioritize readable labels and production-friendly units.
+- Essay, poem, letter, and diary modes protect their form instead of forcing story-like foreshadowing.
+- All modes reject visible prompt analysis, self-evaluation, checklist fragments, and unfinished planning notes.
+
+- 物語系モードでは、導入、葛藤、回収、人物機能、シーンの動き、感情の着地を重視します。
+- コメディ/4コマ系では、期待とのズレ、ミスリード、反転、オチのタイミングを重視します。
+- 脚本、漫画、ドキュメンタリー、ラジオでは、制作に使いやすいラベルと単位を重視します。
+- エッセイ、詩、手紙、日記では、物語風の伏線を無理に足すより、その形式自体を守ります。
+- すべてのモードで、見える本文中のプロンプト分析、自己評価、チェックリスト断片、未完成の設計メモを拒否します。
 
 ## v5.0.0 Quality System / v5.0.0 品質システム
 
@@ -148,6 +282,58 @@ npm run build
 ```
 
 ビルドでは、Viteビルド前に修正器とガードを実行します。
+
+## API Engine / APIエンジン
+
+### Gemini / Gemini API
+
+Gemini can be used for standard generation, image-aware character sheet reading, Universal Input image understanding, style analysis, and search-grounded news keyword assistance. In public writing modes, Gemini receives additional constraints against overly neat explanation, thin summaries, and short endings.
+
+Gemini は、通常生成、キャラクターシート画像の読み取り、万能インプットの画像理解、作風解析、検索グラウンディングによるニュースキーワード補助に使えます。公開文章モードでは、整いすぎた説明、薄い要約、短い締めへ寄りすぎないよう追加制御を入れます。
+
+### OpenAI / OpenAI API
+
+OpenAI can be used for text generation and style-sensitive prose drafting. The app keeps visible settings intact while switching providers, so users can compare output tendencies without rebuilding the entire prompt by hand. Public writing modes receive stricter mode and cleanup instructions to prevent analysis text from leaking into the final output.
+
+OpenAI は、文章生成と文体重視の散文生成に使えます。API提供元を切り替えても画面上の設定は維持されるため、プロンプトを手作業で組み直さずに出力傾向を比較できます。公開文章モードでは、分析文が最終出力へ混ざらないよう、モード契約と整形指示を強めています。
+
+### Provider Switching / 提供元切り替え
+
+- The provider switch changes Gemini/OpenAI selection while keeping the visible creative settings.
+- Provider switching is useful when one provider is rate-limited or when the user wants to compare writing tendencies.
+- The app does not write API keys, generated text, or user settings back to the repository.
+- The visible provider label helps the user confirm which API is currently selected before generation.
+
+- 提供元切り替えは、画面上の創作設定を残したまま Gemini/OpenAI の選択を変えます。
+- 片方のAPIが制限中の場合や、出力傾向を比較したい場合に使えます。
+- アプリはAPIキー、生成本文、ユーザー設定をリポジトリへ書き戻しません。
+- 画面上のAPI表示で、生成前に現在の選択元を確認できます。
+
+## Narrative Engineering / 物語設計
+
+The writing layer uses recurring narrative methods rather than one-off prompt slogans. These methods are intentionally generic, so they can work with many themes, genres, and formats.
+
+文章生成層は、一回限りの飾り文句ではなく、繰り返し使える物語設計メソッドを使います。これらはテーマ、ジャンル、形式が変わっても働くよう、意図的に汎用化しています。
+
+| Method | Purpose |
+|---|---|
+| Desire and cost | Make the character want something and pay something, even in a short piece. |
+| Choice focus | Avoid ending only with an event; make someone choose, refuse, hide, or accept something. |
+| Information order | Control what the reader knows first, what is withheld, and what is reinterpreted at the end. |
+| Relationship change | Make at least one distance, trust level, misunderstanding, or obligation shift. |
+| Sensory anchoring | Add touch, smell, sound, light, weight, or bodily discomfort to reduce abstract summary. |
+| Anti-template pressure | Avoid the most obvious genre route and over-familiar moral closure. |
+| Last-line design | Use the final line to turn, collect, echo, or sharpen the meaning instead of merely stopping. |
+
+| メソッド | 目的 |
+|---|---|
+| 欲望と代償 | 短い文章でも、人物が何かを望み、何かを払う構造を作ります。 |
+| 選択の焦点化 | 出来事だけで終わらせず、誰かが選ぶ、拒む、隠す、受け入れる瞬間を作ります。 |
+| 情報開示の順番 | 読者が先に知ること、伏せること、最後に意味が変わることを制御します。 |
+| 関係変化 | 距離、信頼、誤解、義務のどれかが変わるようにします。 |
+| 感覚の接地 | 触覚、匂い、音、光、重さ、身体の違和感を入れ、抽象的な要約を避けます。 |
+| テンプレ回避 | もっともありがちなジャンル展開や安易な教訓で終わらないようにします。 |
+| 最後の一文設計 | ただ止めるのではなく、意味を反転、回収、反響、凝縮する一文を狙います。 |
 
 ## UI Overview / UI概要
 
@@ -237,11 +423,63 @@ Individual section random buttons are available for focused exploration, such as
 
 個別セクションのランダムボタンもあり、テーマだけ、登場人物だけ、ジャンルだけなど、範囲を絞って試せます。
 
+### Independent Axes / 独立軸
+
+| Axis | Role |
+|---|---|
+| Output mode | Decides the final format and required labels. |
+| Theme / seed | Provides premise, incident, topic, or emotional trigger. |
+| Genre | Sets story pressure, expectation, pacing, and payoff style. |
+| Worldview | Sets setting logic, props, social rules, and atmosphere. |
+| Target reader | Adjusts density, accessibility, tone, and genre literacy. |
+| Era | Controls technology level, vocabulary, social background, and anachronism risk. |
+| Ending type | Sets closure pattern, twist, open question, circular return, or emotional residue. |
+| Narration | Sets viewpoint, distance, voice, and presentation style. |
+| Characters | Supplies roles, relationships, personalities, and conflict engines. |
+| Universal Input | Adds external text or image context. |
+| Supplement | Adds constraints that do not fit the preset sections. |
+| Style analysis | Adds extracted writing-style parameters for rewrite or guidance. |
+
+| 軸 | 役割 |
+|---|---|
+| 出力モード | 完成形式と必須ラベルを決めます。 |
+| テーマ・シード | 前提、事件、話題、感情の起点を与えます。 |
+| ジャンル | 物語圧、期待、テンポ、回収の方向を決めます。 |
+| 世界観 | 舞台論理、小道具、社会ルール、空気感を決めます。 |
+| 読者層 | 密度、読みやすさ、トーン、ジャンル文脈の前提を調整します。 |
+| 時代 | 技術水準、語彙、社会背景、時代錯誤リスクを調整します。 |
+| 結末 | 閉じ方、反転、問い、円環、余韻を決めます。 |
+| 語り口 | 視点、距離、声、見せ方を決めます。 |
+| 登場人物 | 役割、関係、性格、葛藤のエンジンを与えます。 |
+| 万能インプット | 外部テキストや画像の文脈を追加します。 |
+| 補足メモ | プリセット欄に入らない制約を追加します。 |
+| 作風解析 | リライトや生成補助に使う文体パラメータを追加します。 |
+
+### Locks / ロック
+
+- Each major section has a lock button where protection is useful.
+- Locked sections are skipped by all-random and section-random actions.
+- This supports workflows such as keeping the same characters while testing several genres, or keeping one theme while changing the output format.
+- Universal Input can be protected so source materials survive broad reset operations.
+
+- 主要セクションには、保護が必要な場面で使えるロックがあります。
+- ロックされたセクションは、全項目ランダムや個別ランダムの対象から外れます。
+- 同じ人物で複数ジャンルを試す、同じテーマで出力形式だけ変える、といった使い方ができます。
+- 万能インプットは、広いリセット操作でも素材を残すために保護できます。
+
 ## Character Controls / 登場人物操作
 
 The character section can set the number of characters and generate roles or descriptions. Roles are intended as story functions, such as protagonist, rival, helper, observer, witness, trickster, or fixer. The app should avoid making every character equally reasonable or equally explanatory.
 
 登場人物欄では、人数、役割、説明を設定できます。役割は、主人公、ライバル、協力者、観測者、目撃者、トリックスター、解決役など、物語内での機能として扱います。全員が同じように物分かりよく説明する状態を避けるためです。
+
+Each character can carry name, sex, role, personality, and notes. The role is not just profile decoration. It changes how the prompt assigns conflict, reaction, dialogue, scene movement, and emotional distance.
+
+各人物には、名前、性別、役割、性格、メモを持たせられます。役割はプロフィール装飾ではありません。葛藤、反応、会話、シーン移動、感情距離の割り当てに影響します。
+
+Character randomization can fill the current number of characters or change count and content together. Manual edits remain useful because the app treats entered characters as important generation context.
+
+人物ランダムは、現在人数のまま内容を埋めることも、人数と内容をまとめて変えることもできます。手動編集した人物は、生成上の重要文脈として扱われます。
 
 ## Character Sheet Image Import / キャラクターシート画像読み取り
 
@@ -263,6 +501,10 @@ Supported use cases:
 - 複数人物の参照
 - 画像を使った物語シード作成
 
+The import is intentionally practical. It looks for visible traits such as outfit, expression, age impression, posture, props, relationship hints, and written notes, then translates them into text settings that the generation request can use.
+
+取り込みは実用目的です。服装、表情、年齢印象、姿勢、小物、関係性の手がかり、シート上の文字情報などを読み取り、生成リクエストで使えるテキスト設定へ変換します。
+
 ## Universal Input / 万能インプット
 
 Universal Input accepts free-form text or supported image material. It can be used as a source memo, character note, scene hint, style reference, or object reference.
@@ -273,6 +515,40 @@ The app should treat Universal Input as source material, not as a command to exp
 
 万能インプットは素材として扱います。非公開情報を公開したり、隠れた情報を外へ出したりする命令として扱うものではありません。
 
+### Supported Source Types / 対応素材
+
+| Source Type | Behavior |
+|---|---|
+| Plain text | Added directly as source context. |
+| Markdown | Keeps headings and structured notes useful for prompt context. |
+| `.txt` / `.md` files | Reads local text files into the intake list. |
+| URL | Adds a source reference where the current workflow supports it. |
+| Image | Uses image understanding where the selected provider supports it. |
+| Multiple assets | Combines several pieces of material with the selected generation settings. |
+
+| 素材種別 | 動作 |
+|---|---|
+| 通常テキスト | そのまま素材文脈として追加します。 |
+| Markdown | 見出しや構造化メモを文脈として活かします。 |
+| `.txt` / `.md` ファイル | ローカルテキストファイルを取り込み一覧へ読み込みます。 |
+| URL | 現在のワークフローで対応できる範囲で参照素材として追加します。 |
+| 画像 | 選択中のAPIが対応する場合、画像理解を使います。 |
+| 複数素材 | 複数の素材を、選択済み生成条件と組み合わせて扱います。 |
+
+### Intake Controls / 取り込み操作
+
+- Drag and drop images, URLs, text files, or text snippets.
+- Paste directly into the intake zone.
+- Add direct text from the input row.
+- Review and clear the intake list.
+- Lock the intake section to keep materials while changing other settings.
+
+- 画像、URL、テキストファイル、テキスト断片をドラッグ&ドロップできます。
+- 取り込み欄へ直接貼り付けられます。
+- 入力行から直接テキストを追加できます。
+- 取り込み一覧を確認・クリアできます。
+- 万能インプット欄をロックし、他の設定を変えても素材を残せます。
+
 ## Style Analyzer / 作風解析
 
 The style analyzer is an experimental assistant for extracting style hints from user-provided text or images. It can produce structured JSON and a rewrite result for the user's local workflow.
@@ -282,6 +558,36 @@ The style analyzer is an experimental assistant for extracting style hints from 
 It is designed as a creative aid. It is not a guarantee of author identification, copyright status, or legal safety.
 
 これは創作補助です。作者識別、著作権状態、法的安全性を保証するものではありません。
+
+### Extracted Style Signals / 抽出する作風信号
+
+- sentence rhythm
+- vocabulary level
+- rhetorical pattern
+- dialogue ratio
+- description focus
+- sensory density
+- emotional curve
+- camera distance
+- tone intensity
+- recurring motifs or image clusters
+
+- 文のリズム
+- 語彙レベル
+- 修辞パターン
+- 会話比率
+- 描写の焦点
+- 感覚密度
+- 感情曲線
+- カメラ距離
+- トーンの濃度
+- 反復モチーフやイメージ群
+
+### Rewrite Use / リライト用途
+
+After generation, the rewrite workflow can apply the extracted style to the output while keeping the rough plot direction. The aim is not to impersonate a protected author; it is to give the user a reusable analysis layer for their own local writing workflow.
+
+生成後、リライト機能は抽出した作風を本文へ適用しつつ、大まかな筋の方向を保ちます。目的は保護された作者の模倣ではなく、ユーザー自身のローカル文章ワークフローで再利用できる解析層を提供することです。
 
 ## News Keyword Assistance / ニュースキーワード補助
 
@@ -315,7 +621,7 @@ Before a public release, check:
 - public documentation describes only supported public behavior
 - release tag message is bilingual English/Japanese
 - GitHub Release body is bilingual English/Japanese
-- deployed page loads with the expected version
+- public page loads with the expected version
 
 公開リリース前に確認すること:
 
@@ -327,7 +633,7 @@ Before a public release, check:
 - 公開文書がサポート対象の公開挙動だけを説明していること
 - tag メッセージが英日併記であること
 - GitHub Release 本文が英日併記であること
-- デプロイ済みページが期待バージョンで読み込めること
+- 公開ページが期待バージョンで読み込めること
 
 ## Public Safety Boundaries / 公開上の注意
 
@@ -384,14 +690,14 @@ Do not use this project to:
 - Added generic public-rule guard checks.
 - Added provider-side rewrite handling for under-length public drafts before display.
 - Verified all 14 supported public modes on both Gemini and OpenAI in the in-app browser.
-- Kept API keys out of repository files, release notes, release assets, and deployed static files.
+- Kept API keys out of repository files, release notes, release assets, and public static files.
 
 - 公開READMEを、現在サポート中の公開機能に合わせて全面整理しました。
 - 画面で選択中の出力モードを優先する公開品質契約を追加しました。
 - 汎用公開ルールガードを追加しました。
 - 短すぎる公開モード初稿を表示前に同じAPIで改稿する処理を追加しました。
 - Gemini / OpenAI の両方で、対応14公開モードを実ブラウザ検証しました。
-- APIキーをリポジトリ、リリースノート、リリース成果物、デプロイ済み静的ファイルへ含めないことを確認しました。
+- APIキーをリポジトリ、リリースノート、リリース成果物、公開静的ファイルへ含めないことを確認しました。
 
 ### v4.9.6 to v4.9.8 / v4.9.6〜v4.9.8
 
@@ -415,9 +721,9 @@ Do not use this project to:
 
 ### Earlier Versions / 以前のバージョン
 
-- Built the core static story generator, multi-axis randomization, character controls, style-analysis support, image-assisted input, and GitHub Pages deployment workflow.
+- Built the core static story generator, multi-axis randomization, character controls, style-analysis support, image-assisted input, and GitHub Pages publishing workflow.
 
-- 静的な物語生成基盤、多軸ランダム、登場人物操作、作風解析補助、画像入力補助、GitHub Pages デプロイ手順を構築しました。
+- 静的な物語生成基盤、多軸ランダム、登場人物操作、作風解析補助、画像入力補助、GitHub Pages 公開手順を構築しました。
 
 ## License / ライセンス
 
