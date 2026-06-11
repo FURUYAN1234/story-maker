@@ -1,21 +1,21 @@
-// Story Maker v5.0.0 public output cleanup.
+// Story Maker v5.0.1 public output cleanup.
 // Mode-scoped final formatting only: remove artifacts, preserve story content.
 
 import {
+  MODE_LENGTH_TARGETS,
   PUBLIC_MODE_VALUES,
   detectModeFromText,
 } from './modeContracts.js';
 
-const MODE_MAX_CHARS = {
-  novel: 3400,
-  medium: 4300,
-  scenario: 4200,
-  manga: 4200,
-  essay: 3400,
-  fairy: 2600,
-  documentary: 3600,
-  radio: 3600,
-};
+const MODE_MAX_CHARS = Object.fromEntries(
+  Object.entries(MODE_LENGTH_TARGETS)
+    .filter(([, spec]) => Number(spec.cleanupMax) > 0)
+    .map(([mode, spec]) => [mode, spec.cleanupMax]),
+);
+
+const FOOTER_TEXT = 'Created By AI Story Maker V5.0.1';
+const FOOTER_PATTERN = /\n*\s*(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i;
+const TOOL_NAME_PATTERN = /AI\s*Story\s*Maker|Story\s*Maker|ストーリーメーカー|物語メーカー|生成ツール|作成ツール|ChatGPT|Gemini|OpenAI/i;
 
 function charLength(text) {
   return Array.from(String(text || '')).length;
@@ -48,9 +48,46 @@ function normalizeBreaks(text) {
 
 function stripPublicArtifacts(text) {
   return normalizeBreaks(stripInternalLead(text)
-    .replace(/\n*\s*Generated\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i, '')
-    .replace(/\n?【完】\s*(?=\n|$)/g, '')
+    .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+    .replace(/<thought>[\s\S]*$/gi, '')
+    .replace(/<\/?thought>/gi, '')
+    .replace(/\n?【?\s*\d+\s*出力モード厳守[\s\S]*$/u, '')
+    .replace(/\n?【?[^\n]{0,40}この見出しは本文に出力しない[^\n]*】?[\s\S]*$/u, '')
+    .replace(/\n?今回の出力モードは[「『][^」』]+[」』]です。[\s\S]*$/u, '')
+    .replace(/\n?ジャンル・テーマよりも出力形式を優先してください。[\s\S]*$/u, '')
+    .replace(/\n*(?:【最終自己採点結果】|\[進捗\]|自己採点[:：]|評価理由[:：]|伏線回収度[:：]|起承転結の構造[:：]|制約遵守度[:：]|\*\*修正版プロット\*\*|修正版プロット[:：]|-{8,}|─{8,})[\s\S]*$/u, '')
+    .replace(FOOTER_PATTERN, '')
+    .replace(/\n?【完】\s*/g, '\n')
     .replace(/\n?完結\s*(?=\n|$)/g, ''));
+}
+
+function stripFooter(text) {
+  return String(text || '').replace(FOOTER_PATTERN, '').trimEnd();
+}
+
+function hasPromptArtifact(text) {
+  return /<thought|<\/thought>|出力モード厳守|この見出しは本文に出力しない|今回の出力モードは|ジャンル・テーマよりも出力形式を優先してください|以下の必須形式を満たさない出力は禁止|【最終自己採点結果】|\[進捗\]|自己採点[:：]|評価理由[:：]|伏線回収度[:：]|起承転結の構造[:：]|制約遵守度[:：]|\*\*修正版プロット\*\*|修正版プロット[:：]|AI\s*Story\s*Maker|Story\s*Maker|ストーリーメーカー|物語メーカー|生成ツール|作成ツール|ChatGPT|Gemini|OpenAI/i.test(String(text || ''));
+}
+
+function normalizeFormatLabelMarkdown(text) {
+  const labels = [
+    '主張', '観察', '考察', '結論',
+    '宛先', '本文', '結び', '差出人',
+    '日付', '天気',
+    'タイトル', '登場人物',
+    'ナレーション', '記録映像', '証言', 'インタビュー', '締め',
+    'BGM', 'SE',
+  ].join('|');
+  const labelPattern = new RegExp(`^(\\s*)\\*\\*\\s*(${labels})\\s*[:：]\\s*\\*\\*\\s*`, 'gm');
+  return String(text || '')
+    .replace(labelPattern, '$1$2:')
+    .replace(new RegExp(`^(\\s*)\\*\\*\\s*(${labels})\\s*\\*\\*\\s*[:：]\\s*`, 'gm'), '$1$2:');
+}
+
+function normalizeLeadingTitle(text) {
+  return String(text || '')
+    .replace(/^\s*【\s*#{1,6}\s*([^】\n]+?)\s*】/u, 'タイトル: $1')
+    .replace(/^\s*#{1,6}\s*([^\n]+?)\s*$/u, 'タイトル: $1');
 }
 
 function trimToSentencePreserveBreaks(text, maxChars) {
@@ -84,6 +121,66 @@ function removeDanglingTail(text) {
   return normalizeBreaks(lines.join('\n'));
 }
 
+function removeUnclosedTail(text) {
+  let next = normalizeBreaks(text);
+  if (!next) return next;
+  const pairs = [
+    ['「', '」'],
+    ['『', '』'],
+    ['（', '）'],
+    ['(', ')'],
+    ['【', '】'],
+  ];
+  for (const [open, close] of pairs) {
+    const lastOpen = next.lastIndexOf(open);
+    const lastClose = next.lastIndexOf(close);
+    if (lastOpen > lastClose && lastOpen >= Math.max(0, next.length - 900)) {
+      next = normalizeBreaks(next.slice(0, lastOpen));
+    }
+  }
+  return next;
+}
+
+function finishPublicText(text) {
+  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeUnclosedTail(removeDanglingTail(text))))).trimEnd();
+  return body ? `${body}\n\n${FOOTER_TEXT}` : '';
+}
+
+function removeTrailingHeaderRestart(text) {
+  return normalizeBreaks(text).replace(
+    /([。！？」』）])\s*(?:タイトル\s*[:：][^\n]{0,120}\n(?=(?:登場人物|場面|主張|宛先|日付|ナレーション|BGM)\s*[:：])|【[^】\n]{1,80}】\n(?=(?:登場人物|場面|主張|宛先|日付|ナレーション|BGM)\s*[:：]))[\s\S]*$/u,
+    '$1',
+  );
+}
+
+function removeRestartedDrafts(text) {
+  const source = removeTrailingHeaderRestart(text);
+  const restarts = [...source.matchAll(/(?:^|\n)(?:タイトル[:：]|【[^】\n]{1,80}】)/g)];
+  if (restarts.length < 2) return source;
+  const candidates = restarts
+    .map((match, index) => {
+      const start = match.index + (match[0].startsWith('\n') ? 1 : 0);
+      const end = restarts[index + 1]
+        ? restarts[index + 1].index + (restarts[index + 1][0].startsWith('\n') ? 1 : 0)
+        : source.length;
+      return source.slice(start, end).trim();
+    })
+    .filter(Boolean);
+  if (!candidates.length) return source;
+  return candidates.reduce((best, candidate) => (
+    charLength(candidate) >= charLength(best) ? candidate : best
+  ), candidates[0]);
+}
+
+function finishPublicTextPreserveBody(text) {
+  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(normalizeBreaks(text)))).trimEnd();
+  return body ? `${body}\n\n${FOOTER_TEXT}` : '';
+}
+
+function bodyLength(text) {
+  return charLength(stripFooter(String(text || '')).trim());
+}
+
 function paragraphizeSentences(text, sentencesPerParagraph = 2) {
   const source = normalizeBreaks(text);
   if ((source.match(/\n/g) || []).length >= 2 || charLength(source) < 500) return source;
@@ -95,45 +192,499 @@ function paragraphizeSentences(text, sentencesPerParagraph = 2) {
   return paragraphs.filter(Boolean).join('\n\n');
 }
 
+function normalizeSenderCandidate(value) {
+  return String(value || '')
+    .trim()
+    .replace(/[ 　]+/g, '')
+    .replace(/[（(][^）)\n]{0,40}[）)]/g, '')
+    .trim();
+}
+
+function likelyLetterSenderName(value) {
+  const candidate = normalizeSenderCandidate(value);
+  if (!candidate) return '';
+  if (TOOL_NAME_PATTERN.test(candidate)) return '';
+  if (/^(宛先|本文|結び|追伸|タイトル|日付|天気|主張|観察|考察|結論)$/.test(candidate)) return '';
+  if (/[。、！？「」『』:：]/.test(candidate)) return '';
+  if (/どうして|本当|本当に|心から|景色|気が|見て|書いて|終え|読んで|思い|感じ|なりません|ください|ありがとう|よろしく|もっと|きっと|ずっと|そして|しかし|けれど/.test(candidate)) return '';
+  if (!/^[一-龠ぁ-んァ-ンーA-Za-z0-9・]+$/.test(candidate)) return '';
+  const length = charLength(candidate);
+  if (length < 2 || length > 14) {
+    if (!/^(私|わたし|僕|俺|父|母|兄|姉|弟|妹)$/.test(candidate)) return '';
+  }
+  if (!/^(私|わたし|僕|俺)$/.test(candidate) && /^[ぁ-んー]+$/.test(candidate) && length > 6) return '';
+  return candidate;
+}
+
+function inferLetterSender(text) {
+  const source = stripFooter(normalizeBreaks(text));
+  const beforeClosing = source.split(/\n結び\s*[:：]/)[0] || source;
+  const signoffLines = beforeClosing
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .slice(-10)
+    .reverse();
+  for (const line of signoffLines) {
+    const candidate = likelyLetterSenderName(line);
+    if (candidate) return candidate;
+  }
+  const signoff = source.match(/\n([一-龠ぁ-んァ-ンーA-Za-z0-9・]{2,18})(?:[（(][^）)\n]{0,40}[）)])?\n\s*結び\s*[:：]/);
+  const signoffName = likelyLetterSenderName(signoff?.[1]);
+  if (signoffName) return signoffName;
+  const patterns = [
+    /(?:私|わたし|僕|俺)[、,]\s*([一-龠ぁ-んァ-ンーA-Za-z0-9・]{2,18})(?:は|が|です)/,
+  ];
+  for (const pattern of patterns) {
+    const match = source.match(pattern);
+    const name = likelyLetterSenderName(match?.[1]);
+    if (name) return name;
+  }
+  if (/僕/.test(source)) return '僕';
+  if (/俺/.test(source)) return '俺';
+  if (/私/.test(source)) return '私';
+  if (/わたし/.test(source)) return 'わたし';
+  return '私';
+}
+
+function invalidLetterSender(sender) {
+  const value = String(sender || '').trim();
+  if (!value) return true;
+  return !likelyLetterSenderName(value);
+}
+
+function repairLetterSender(text) {
+  return normalizeBreaks(text).replace(/^(差出人\s*[:：]\s*)([^\n]*)$/m, (line, label, sender) => {
+    if (!invalidLetterSender(sender)) return line;
+    return `${label}${inferLetterSender(text)}`;
+  });
+}
+
+function normalizeEssayStructure(text) {
+  let next = normalizeBreaks(text)
+    .replace(/^【\s*(主張|観察|考察|結論)\s*[:：]?\s*】\s*$/gm, '$1:')
+    .replace(/([^\n])\s*【\s*(主張|観察|考察|結論)\s*[:：]?\s*】/g, '$1\n\n$2:')
+    .replace(/([^\n])\s*(観察|考察|結論)\s*[:：]/g, '$1\n\n$2:');
+  const hasConclusion = /^結論\s*[:：]/m.test(next);
+  if (hasConclusion) return next;
+
+  const paragraphs = next.split(/\n{2,}/).map(part => part.trim()).filter(Boolean);
+  if (paragraphs.length < 2) return next;
+  const last = paragraphs[paragraphs.length - 1];
+  if (/^(主張|観察|考察)\s*[:：]/.test(last)) return next;
+  paragraphs[paragraphs.length - 1] = `結論:${last}`;
+  return paragraphs.join('\n\n');
+}
+
+function ensureEssayLabels(text) {
+  const source = normalizeBreaks(text);
+  const required = ['主張', '観察', '考察', '結論'];
+  const counts = Object.fromEntries(required.map(label => [
+    label,
+    (source.match(new RegExp(`^${label}\\s*[:：]`, 'gm')) || []).length,
+  ]));
+  if (required.every(label => counts[label] === 1)) return source;
+
+  const min = Number(MODE_LENGTH_TARGETS.essay?.min || 0);
+  if (min && bodyLength(source) < min) return source;
+
+  let units = source
+    .split(/\n{2,}/)
+    .map(part => part.trim().replace(/^(主張|観察|考察|結論)\s*[:：]\s*/u, '').trim())
+    .filter(Boolean);
+  if (units.length < 4) {
+    units = (source.match(/[^。！？\n]+[。！？]+(?:[」』）\]])?/gu) || [])
+      .map(part => part.trim().replace(/^(主張|観察|考察|結論)\s*[:：]\s*/u, '').trim())
+      .filter(part => charLength(part) >= 24);
+  }
+  if (units.length < 4) {
+    const plain = source
+      .replace(/^(主張|観察|考察|結論)\s*[:：]\s*/gmu, '')
+      .replace(/\n+/g, ' ')
+      .trim();
+    const chars = Array.from(plain);
+    const chunkSize = Math.ceil(chars.length / 4);
+    units = required
+      .map((_, index) => chars.slice(index * chunkSize, (index + 1) * chunkSize).join('').trim())
+      .filter(Boolean);
+  }
+  if (units.length < 4) return source;
+
+  const groups = required.map(() => []);
+  units.forEach((unit, index) => {
+    const groupIndex = Math.min(3, Math.floor(index * 4 / units.length));
+    groups[groupIndex].push(unit);
+  });
+  if (groups.some(group => !group.length)) return source;
+  return groups
+    .map((group, index) => `${required[index]}:\n${group.join('\n\n')}`)
+    .join('\n\n');
+}
+
+function keepSingleEssayDraft(text) {
+  const source = normalizeBreaks(text);
+  const starts = [...source.matchAll(/^主張\s*[:：]/gm)];
+  if (starts.length < 2) return source;
+  const candidates = starts.map((match, index) => {
+    const start = match.index;
+    const end = starts[index + 1]?.index ?? source.length;
+    return source.slice(start, end).trim();
+  }).filter(candidate => (
+    /^主張\s*[:：]/m.test(candidate)
+    && /^観察\s*[:：]/m.test(candidate)
+    && /^考察\s*[:：]/m.test(candidate)
+    && /^結論\s*[:：]/m.test(candidate)
+  ));
+  if (!candidates.length) return source;
+  return candidates.reduce((best, candidate) => (
+    charLength(candidate) >= charLength(best) ? candidate : best
+  ), candidates[0]);
+}
+
+function keepFirstEssayCycle(text) {
+  const source = normalizeBreaks(text);
+  const labels = [...source.matchAll(/^(主張|観察|考察|結論)\s*[:：]/gm)]
+    .map(match => ({ label: match[1], index: match.index }));
+  const claim = labels.find(item => item.label === '主張');
+  const observation = labels.find(item => item.label === '観察' && (!claim || item.index > claim.index));
+  const consideration = labels.find(item => item.label === '考察' && observation && item.index > observation.index);
+  const conclusion = labels.find(item => item.label === '結論' && consideration && item.index > consideration.index);
+  if (!claim || !observation || !consideration || !conclusion) return source;
+
+  const nextRestart = labels.find(item => item.index > conclusion.index && item.label !== '結論');
+  if (!nextRestart) return source;
+  const candidate = source.slice(claim.index, nextRestart.index).trim();
+  const min = Number(MODE_LENGTH_TARGETS.essay?.min || 0);
+  return !min || bodyLength(candidate) >= min ? candidate : source;
+}
+
+function demoteRepeatedEssayLabels(text) {
+  const lines = normalizeBreaks(text).split('\n');
+  const labelLines = lines
+    .map((line, index) => ({ index, match: line.match(/^(主張|観察|考察|結論)\s*[:：]\s*(.*)$/) }))
+    .filter(item => item.match);
+  if (labelLines.length <= 4) return lines.join('\n');
+
+  const seen = new Set();
+  const conclusionLines = labelLines.filter(item => item.match[1] === '結論');
+  const lastConclusionIndex = conclusionLines[conclusionLines.length - 1]?.index;
+  const demotions = {
+    主張: '言い換えるなら、',
+    観察: '別の場面でも、',
+    考察: 'さらに考えると、',
+    結論: 'ここで一度言えるのは、',
+  };
+
+  for (const item of labelLines) {
+    const label = item.match[1];
+    const content = item.match[2] || '';
+    if (label === '結論') {
+      if (item.index === lastConclusionIndex && !seen.has(label)) {
+        seen.add(label);
+      } else {
+        lines[item.index] = `${demotions[label]}${content}`;
+      }
+      continue;
+    }
+    if (seen.has(label)) {
+      lines[item.index] = `${demotions[label]}${content}`;
+    } else {
+      seen.add(label);
+    }
+  }
+  return normalizeBreaks(lines.join('\n'));
+}
+
+function removeTrailingEssayRestart(text) {
+  const source = normalizeBreaks(text);
+  const conclusion = source.search(/^結論[:：]/m);
+  if (conclusion < 0) return source;
+  const afterConclusion = source.slice(conclusion);
+  const inlineRestart = afterConclusion.search(/(?:。|\n)\s*タイトル[:：][^\n]{0,120}主張[:：]/);
+  const labelRestart = afterConclusion.search(/\n\s*主張[:：]/);
+  const restarts = [inlineRestart, labelRestart].filter(index => index >= 0);
+  if (!restarts.length) return source;
+  const cutAt = conclusion + Math.min(...restarts) + 1;
+  return normalizeBreaks(source.slice(0, cutAt));
+}
+
+function hasDraftRestartArtifact(text, mode) {
+  const source = normalizeBreaks(stripFooter(String(text || '')));
+  if (!source) return false;
+  if (mode === 'essay') {
+    if ((source.match(/^主張[:：]/gm) || []).length > 1) return true;
+    return /^結論[:：][\s\S]+(?:。|\n)\s*タイトル[:：][^\n]{0,120}主張[:：]/m.test(source);
+  }
+  if (mode === 'letter') return (source.match(/^宛先[:：]/gm) || []).length > 1;
+  if (mode === 'diary') return (source.match(/^日付[:：]/gm) || []).length > 1;
+  if (mode === 'documentary') return (source.match(/^ナレーション[:：]/gm) || []).length > 1;
+  if (mode === 'radio') return (source.match(/^タイトル[:：]/gm) || []).length > 1;
+  if (mode === '4koma_scenario') return (source.match(/^Topic:/gm) || []).length > 1;
+  if (mode === '4koma') return (source.match(/(?:^|\n)1コマ目/g) || []).length > 1;
+  return (source.match(/(?:^|\n)タイトル[:：]/g) || []).length > 1;
+}
+
+const JP_LABEL = {
+  claim: '\u4e3b\u5f35',
+  observation: '\u89b3\u5bdf',
+  consideration: '\u8003\u5bdf',
+  conclusion: '\u7d50\u8ad6',
+  title: '\u30bf\u30a4\u30c8\u30eb',
+  address: '\u5b9b\u5148',
+  date: '\u65e5\u4ed8',
+  narration: '\u30ca\u30ec\u30fc\u30b7\u30e7\u30f3',
+  cast: '\u767b\u5834\u4eba\u7269',
+};
+
+function cleanJapaneseEssayRestarts(text) {
+  const source = normalizeFormatLabelMarkdown(normalizeBreaks(text));
+  const claim = source.search(new RegExp(`^${JP_LABEL.claim}[:\uff1a]`, 'm'));
+  const observation = source.search(new RegExp(`^${JP_LABEL.observation}[:\uff1a]`, 'm'));
+  const consideration = source.search(new RegExp(`^${JP_LABEL.consideration}[:\uff1a]`, 'm'));
+  const conclusion = source.search(new RegExp(`^${JP_LABEL.conclusion}[:\uff1a]`, 'm'));
+  if (claim < 0 || observation < claim || consideration < observation || conclusion < consideration) {
+    return source;
+  }
+  const afterConclusion = source.slice(conclusion);
+  const titleRestart = afterConclusion.search(new RegExp(`(?:\u3002|\\n)\\s*${JP_LABEL.title}[:\uff1a][^\\n]{0,240}${JP_LABEL.claim}[:\uff1a]`));
+  const titleOnlyRestart = afterConclusion.search(new RegExp(`(?:\u3002|\\n)\\s*${JP_LABEL.title}[:\uff1a]`));
+  const claimRestart = afterConclusion.search(new RegExp(`\\n\\s*${JP_LABEL.claim}[:\uff1a]`));
+  const restarts = [titleRestart, titleOnlyRestart, claimRestart].filter(index => index >= 0);
+  if (!restarts.length) return source;
+  const candidate = normalizeBreaks(source.slice(claim, conclusion + Math.min(...restarts) + 1));
+  const min = Number(MODE_LENGTH_TARGETS.essay?.min || 0);
+  return !min || bodyLength(candidate) >= min ? candidate : source;
+}
+
+function hasJapaneseDraftRestartArtifact(text, mode) {
+  const source = normalizeFormatLabelMarkdown(normalizeBreaks(stripFooter(String(text || ''))));
+  if (!source) return false;
+  if (mode === 'essay') {
+    if ((source.match(new RegExp(`^${JP_LABEL.claim}[:\uff1a]`, 'gm')) || []).length > 1) return true;
+    return new RegExp(`^${JP_LABEL.conclusion}[:\uff1a][\\s\\S]+(?:\u3002|\\n)\\s*${JP_LABEL.title}[:\uff1a]`, 'm').test(source);
+  }
+  if (mode === 'letter') return (source.match(new RegExp(`^${JP_LABEL.address}[:\uff1a]`, 'gm')) || []).length > 1;
+  if (mode === 'diary') return (source.match(new RegExp(`^${JP_LABEL.date}[:\uff1a]`, 'gm')) || []).length > 1;
+  if (mode === 'documentary') return (source.match(new RegExp(`^${JP_LABEL.narration}[:\uff1a]`, 'gm')) || []).length > 1;
+  if (mode === 'radio') return (source.match(new RegExp(`^${JP_LABEL.title}[:\uff1a]`, 'gm')) || []).length > 1;
+  return false;
+}
+
 function cleanEssay(text) {
   let next = stripPublicArtifacts(text);
+  next = normalizeEssayStructure(next);
+  next = ensureEssayLabels(next);
+  next = keepSingleEssayDraft(next);
+  next = keepFirstEssayCycle(next);
+  next = demoteRepeatedEssayLabels(next);
+  next = removeTrailingEssayRestart(next);
+  next = cleanJapaneseEssayRestarts(next);
   const firstBlock = next.search(/主張:/);
   if (firstBlock > 0 && firstBlock < 220) next = next.slice(firstBlock);
   next = next.replace(/^タイトル:[^\n]*(?=主張:)/u, '');
+  const firstJapaneseBlock = next.search(new RegExp(`${JP_LABEL.claim}[:\uff1a]`));
+  if (firstJapaneseBlock > 0 && firstJapaneseBlock < 220) next = next.slice(firstJapaneseBlock);
+  next = next.replace(new RegExp(`^${JP_LABEL.title}[:\uff1a][^\\n]*(?=${JP_LABEL.claim}[:\uff1a])`, 'u'), '');
   next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS.essay);
-  return removeDanglingTail(next);
+  return finishPublicText(next);
 }
 
 function cleanPoem(text) {
   let next = stripPublicArtifacts(text)
     .replace(/^タイトル[:：]\s*([^\n]{1,60})\n+/u, '【$1】\n');
   const lines = next.split('\n').map(line => line.trim()).filter(Boolean);
-  if (lines.length > 16) {
+  const maxPoemLines = 80;
+  if (lines.length > maxPoemLines) {
     const title = /^【[^】]{1,60}】$/.test(lines[0]) ? [lines[0]] : [];
-    const body = lines.slice(title.length, title.length + (16 - title.length));
+    const body = lines.slice(title.length, title.length + (maxPoemLines - title.length));
     next = [...title, ...body].join('\n');
   }
-  return removeDanglingTail(next);
+  return finishPublicText(next);
 }
 
 function cleanLetter(text) {
-  const next = stripPublicArtifacts(text)
+  let next = stripPublicArtifacts(text)
     .replace(/(拝啓|前略|親愛なる[^\n。、]{1,40}へ)\s*/u, '$1\n\n')
-    .replace(/\s*(敬具|草々|かしこ|追伸[:：]?)/u, '\n\n$1');
-  return paragraphizeSentences(next, 2);
+    .replace(/\s*(敬具|草々|かしこ|追伸[:：]?)/u, '\n\n$1')
+    .replace(/\n{2,}[、,]\s*/g, '\n\n');
+  next = next.replace(
+    /^宛先\s*[:：]\s*\n+\s*本文\s*[:：]\s*\n+([^\n]{2,80})\n+/m,
+    '宛先: $1\n\n本文:\n',
+  );
+  next = next
+    .replace(/^宛先\s*[:：]\s*\n+([^\n]{1,80})/m, '宛先: $1')
+    .replace(/^差出人\s*[:：]\s*\n+([^\n]{1,80})/m, '差出人: $1')
+    .replace(/([^\n])\n(本文|結び|差出人|追伸)\s*[:：]/g, '$1\n\n$2:');
+  const firstAddress = next.search(/^宛先:/m);
+  if (firstAddress > 0 && firstAddress < 400) next = next.slice(firstAddress);
+  next = repairLetterSender(next);
+  return finishPublicText(paragraphizeSentences(next, 2));
+}
+
+function demoteRepeatedLineLabel(text, label, replacement) {
+  let seen = false;
+  const pattern = new RegExp(`^(${label})\\s*[:\\uff1a]`, 'u');
+  return normalizeBreaks(text).split('\n').map(line => {
+    if (!pattern.test(line.trim())) return line;
+    if (!seen) {
+      seen = true;
+      return line;
+    }
+    return line.replace(pattern, replacement);
+  }).join('\n');
+}
+
+function cleanDiary(text) {
+  let next = stripPublicArtifacts(text)
+    .replace(/^【\s*日付\s*[:：]\s*([^】]+)】/u, '日付: $1')
+    .replace(/^天気\s*[:：]\s*([^\n]+)\n(?!\s*本文\s*[:：])/m, '天気: $1\n\n本文:\n');
+  next = demoteRepeatedLineLabel(next, '日付', 'この日の記録');
+  next = demoteRepeatedLineLabel(next, '天気', '空模様');
+  next = demoteRepeatedLineLabel(next, '本文', 'この日の続き');
+  return finishPublicText(paragraphizeSentences(next, 2));
+}
+
+function cleanRadio(text) {
+  let next = stripPublicArtifacts(text)
+    .replace(/^【([^】\n]{1,80})】\n+/u, 'タイトル: $1\n\n');
+  if (!/^タイトル\s*[:：]/m.test(next)) {
+    const firstLine = next.split('\n').find(line => line.trim());
+    if (firstLine && charLength(firstLine.trim()) <= 80 && !/[:：]$/.test(firstLine.trim())) {
+      next = next.replace(firstLine, `タイトル: ${firstLine.trim()}`);
+    }
+  }
+  return finishPublicText(next);
 }
 
 function cleanManga(text) {
   let next = stripPublicArtifacts(text);
   next = next.replace(/\n+(?:P?\d+ページ|第?\d+コマ|ページ|コマ|セリフ|構図|背景|演出)[:：]?\s*$/u, '');
   next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS.manga);
-  return removeDanglingTail(next);
+  return finishPublicText(next);
+}
+
+function clean4koma(text) {
+  let next = stripPublicArtifacts(text)
+    .replace(/\n?\s*(?:狙い|意図|解説)\s*[:：][^\n]*(?=\n|$)/g, '');
+  const lines = next.split('\n');
+  let inSpeechBlock = false;
+  next = lines.filter(line => {
+    const trimmed = line.trim();
+    if (/^[1-4１-４一二三四]\s*コマ目/.test(trimmed) || /^絵\/状況[:：]/.test(trimmed)) {
+      inSpeechBlock = false;
+      return true;
+    }
+    if (/^セリフ[:：]/.test(trimmed)) {
+      inSpeechBlock = true;
+      return true;
+    }
+    if (
+      inSpeechBlock
+      && trimmed.length > 18
+      && !/[「」『』]/.test(trimmed)
+      && !/[！？!?]$/.test(trimmed)
+      && !/^[^:：]{1,14}[:：]/.test(trimmed)
+    ) {
+      return false;
+    }
+    return true;
+  }).join('\n');
+  next = normalizeBreaks(next);
+  return finishPublicText(next);
+}
+
+function scenarioChunkIsComplete(text) {
+  const source = String(text || '');
+  return /^Topic:/m.test(source)
+    && /^Scenario:/m.test(source)
+    && /\[1コマ目/m.test(source)
+    && /\[2コマ目/m.test(source)
+    && /\[3コマ目/m.test(source)
+    && /\[4コマ目/m.test(source)
+    && (source.match(/\[EMOTION:/g) || []).length >= 4
+    && (source.match(/\[Camera:/g) || []).length >= 4
+    && (source.match(/^絵:/gm) || []).length >= 4
+    && (source.match(/^セリフ:/gm) || []).length >= 4
+    && (source.match(/^演出:/gm) || []).length >= 4
+    && (source.match(/^狙い:/gm) || []).length >= 4;
+}
+
+function keepFirstComplete4komaScenario(text) {
+  const source = normalizeBreaks(text);
+  const repeatedTopic = source.indexOf('Topic:', 1);
+  if (repeatedTopic > 0) {
+    const beforeRepeatedTopic = source.slice(0, repeatedTopic).trim();
+    if (scenarioChunkIsComplete(beforeRepeatedTopic)) return beforeRepeatedTopic;
+  }
+
+  const starts = [...source.matchAll(/^\[1コマ目(?::\s*[起承転結])?\]/gm)];
+  if (starts.length <= 1) return source;
+  const firstPass = source.slice(0, starts[1].index).trim();
+  if (scenarioChunkIsComplete(firstPass)) return firstPass;
+
+  for (let index = 1; index < starts.length; index += 1) {
+    const end = starts[index + 1]?.index ?? source.length;
+    const candidate = source.slice(0, end).trim();
+    if (scenarioChunkIsComplete(candidate)) return candidate;
+  }
+  return source;
+}
+
+function trimAfterFinalScenarioAim(text) {
+  const source = normalizeBreaks(text);
+  const aims = [...source.matchAll(/^狙い:[^\n]*/gm)];
+  if (aims.length < 4) return source;
+  const finalAim = aims[aims.length - 1];
+  const lineEnd = source.indexOf('\n', finalAim.index);
+  if (lineEnd < 0) return source;
+  return normalizeBreaks(source.slice(0, lineEnd));
+}
+
+function balanceScenarioTopicLine(text) {
+  return String(text || '').replace(/^Topic:[^\n]*/m, line => {
+    const openCount = (line.match(/「/g) || []).length;
+    const closeCount = (line.match(/」/g) || []).length;
+    if (openCount <= closeCount) return line;
+    return `${line}${'」'.repeat(openCount - closeCount)}`;
+  });
+}
+
+function normalizeScenarioPanelLabels(text) {
+  return String(text || '').replace(
+    /^\[([1-4１２３４一二三四])\s*コマ目(?:\s*[:：]\s*[起承転結])?\]\s*$/gm,
+    (_, panel) => {
+      const normalized = { '１': '1', '２': '2', '３': '3', '４': '4', '一': '1', '二': '2', '三': '3', '四': '4' }[panel] || panel;
+      return `[${normalized}コマ目]`;
+    },
+  );
+}
+
+function clean4komaScenario(text) {
+  let next = stripPublicArtifacts(text);
+  const firstTopic = next.search(/^Topic:/m);
+  if (firstTopic > 0) next = next.slice(firstTopic);
+  const chunks = next.split(/(?=^Topic:)/m).map(chunk => chunk.trim()).filter(Boolean);
+  if (chunks.length > 1) {
+    next = chunks.find(scenarioChunkIsComplete)
+      || chunks.slice().reverse().find(chunk => /\[4コマ目/m.test(chunk))
+      || chunks[0];
+  }
+  next = next
+    .replace(/^【Topic:\s*([^】]+)】/u, 'Topic: $1')
+    .replace(/\n+(?:このプロットでシナリオを作成します|全て基準値を超えています)[\s\S]*$/u, '');
+  next = normalizeScenarioPanelLabels(next);
+  next = balanceScenarioTopicLine(trimAfterFinalScenarioAim(keepFirstComplete4komaScenario(next)));
+  if (MODE_MAX_CHARS['4koma_scenario']) {
+    next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS['4koma_scenario']);
+  }
+  return finishPublicText(next);
 }
 
 function cleanGenericPublicMode(text, mode) {
   let next = stripPublicArtifacts(String(text || ''));
+  next = removeRestartedDrafts(next);
   if (MODE_MAX_CHARS[mode]) next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS[mode]);
-  return removeDanglingTail(next);
+  return finishPublicText(next);
 }
 
 export function cleanOutputForPublicMode(text, mode = currentMode()) {
@@ -141,13 +692,23 @@ export function cleanOutputForPublicMode(text, mode = currentMode()) {
   if (mode === 'essay') return cleanEssay(text);
   if (mode === 'poem') return cleanPoem(text);
   if (mode === 'letter') return cleanLetter(text);
+  if (mode === 'diary') return cleanDiary(text);
+  if (mode === 'radio') return cleanRadio(text);
   if (mode === 'manga') return cleanManga(text);
+  if (mode === '4koma') return clean4koma(text);
+  if (mode === '4koma_scenario') return clean4komaScenario(text);
   return cleanGenericPublicMode(text, mode);
 }
 
 function updateOutputCounter(text) {
   const counter = document.querySelector('.char-counter');
   if (counter) counter.textContent = `${charLength(text).toLocaleString()} 字`;
+}
+
+function isGenerationInProgress(output) {
+  const generateButton = document.getElementById('btn-generate');
+  const text = output?.innerText || output?.textContent || '';
+  return !!generateButton?.disabled || /^AIの思考を待っています/.test(text);
 }
 
 export function installPublicOutputCleanup() {
@@ -157,11 +718,24 @@ export function installPublicOutputCleanup() {
   let applying = false;
   const apply = () => {
     if (applying) return;
+    if (isGenerationInProgress(output)) return;
     const mode = currentMode();
     if (!PUBLIC_MODE_VALUES.includes(mode)) return;
     const text = output.innerText || output.textContent || '';
     if (!text || /^はじめ方\s*\n/.test(text) || charLength(text) < 80) return;
-    const cleaned = cleanOutputForPublicMode(text, mode);
+    let cleaned = cleanOutputForPublicMode(text, mode);
+    const minChars = Number(MODE_LENGTH_TARGETS[mode]?.min || 0);
+    if (minChars && bodyLength(cleaned) < minChars) {
+      const sourceBody = stripPublicArtifacts(text);
+      if (
+        bodyLength(sourceBody) >= minChars
+        && !hasPromptArtifact(sourceBody)
+        && !hasDraftRestartArtifact(sourceBody, mode)
+        && !hasJapaneseDraftRestartArtifact(sourceBody, mode)
+      ) {
+        cleaned = finishPublicTextPreserveBody(sourceBody);
+      }
+    }
     if (cleaned === text) return;
     applying = true;
     output.textContent = cleaned;

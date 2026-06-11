@@ -1,4 +1,4 @@
-# Story Maker v5.0.0 / AI物語メーカー
+# Story Maker v5.0.1 / AI物語メーカー
 
 Story Maker is a static web application for generating short-form creative text with Google Gemini API or OpenAI API. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -184,9 +184,9 @@ The public release supports the following 14 output modes. Each mode has a mode 
 |---|---|---|
 | `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. |
 | `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Topic, logline, location, outfit, punchline, scenario notes, and four panel blocks with emotion/camera/dialogue cues. |
-| `short_short` | ショート（〜1000字） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. |
-| `novel` | 短編小説（〜3000字） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. |
-| `medium` | 中編小説（〜4000字） | Three-section prose with stronger development, scene movement, and a larger emotional arc. |
+| `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. |
+| `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. |
+| `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc. |
 | `scenario` | 脚本/台本 | `タイトル:`, `登場人物:`, `場面:` plus stage directions and character-name dialogue. |
 | `manga` | ストーリー漫画 | Page and panel descriptions, separated `絵:`, `セリフ:`, and `演出:` details. |
 | `essay` | エッセイ | Claim, observation, reflection, and conclusion without escaping into incident-resolution fiction. |
@@ -211,11 +211,11 @@ The public release supports the following 14 output modes. Each mode has a mode 
 - エッセイ、詩、手紙、日記では、物語風の伏線を無理に足すより、その形式自体を守ります。
 - すべてのモードで、見える本文中のプロンプト分析、自己評価、チェックリスト断片、未完成の設計メモを拒否します。
 
-## v5.0.0 Quality System / v5.0.0 品質システム
+## v5.0.1 Quality System / v5.0.1 品質システム
 
-v5.0.0 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
+v5.0.1 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
 
-v5.0.0では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
+v5.0.1では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
 
 ### Selected-Mode Priority / 選択モード優先
 
@@ -231,7 +231,7 @@ Every supported mode receives a mode-specific contract before generation. The co
 
 ### Under-Length Rewrite / 短すぎる初稿の改稿
 
-For both Gemini and OpenAI streaming generation, v5.0.0 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
+For both Gemini and OpenAI streaming generation, v5.0.1 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
 
 Gemini と OpenAI のストリーム生成では、出力欄へ最終表示する前に、公開モードの本文長を確認します。対応モードで短すぎる初稿が返った場合、同じ入力条件を使って、選択中のAPIに完成稿として全面改稿させます。短すぎる初稿を、そのまま最終表示として採用しません。
 
@@ -759,6 +759,20 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
 
 ## Release History / 変更履歴
+
+### v5.0.1 (2026-06-11)
+
+- Raised the public release line from `v5.0.0` to `v5.0.1`.
+- Preserved user-entered API keys across local hot reloads and tab-local reloads without committing keys to repository files.
+- Strengthened public output cleanup for all supported modes, including footer retention, prompt-artifact removal, letter paragraphing, diary labels, documentary/radio labels, and complete 4-koma scenario trimming.
+- Added generic Essay structure recovery so long unlabeled drafts can be reshaped into `主張`, `観察`, `考察`, and `結論` without adding topic-specific local rules.
+- Rechecked Gemini and OpenAI public modes for length, visible format, footer retention, and human-texture quality in the in-app browser.
+
+- 公開版の系統を `v5.0.0` から `v5.0.1` に更新しました。
+- ユーザーが画面で入力したAPIキーを、リロードやホットリロードをまたいでタブ内に保持できるようにしつつ、リポジトリ内のファイルには保存しない設計を維持しました。
+- フッター保持、プロンプト断片の除去、手紙の段落、日記ラベル、ドキュメンタリー/ラジオのラベル、4コマシナリオの完結位置など、対応公開モード全体の最終出力整形を強化しました。
+- 長いエッセイ初稿がラベルなしで返った場合でも、話題固有の局所ルールを足さず、`主張`、`観察`、`考察`、`結論` へ汎用的に復元する処理を追加しました。
+- Gemini / OpenAI の公開モードについて、文字数、表示形式、フッター保持、人間味のある具体性を内蔵ブラウザで再確認しました。
 
 ### v5.0.0 (2026-06-10)
 

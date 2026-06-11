@@ -1,5 +1,5 @@
 // ============================================================
-// data.js - Story Maker v5.0.0
+// data.js - Story Maker v5.0.1
 // Shared clean data for the modular source files.
 // ============================================================
 
@@ -13,9 +13,9 @@ export const GEMINI_MODELS = [
 const ALL_MODES = [
   { value: '4koma', label: '4コマ漫画風' },
   { value: '4koma_scenario', label: 'AI 4koma シナリオ連携（STEP2）' },
-  { value: 'short_short', label: 'ショート(〜1000字)' },
-  { value: 'novel', label: '短編小説(〜3000字)' },
-  { value: 'medium', label: '中編小説(〜4000字)' },
+  { value: 'short_short', label: 'ショート（1500字～）' },
+  { value: 'novel', label: '短編小説（4500字～）' },
+  { value: 'medium', label: '中編小説（5500字～）' },
   { value: 'long', label: '長編小説（機能停止中）' },
   { value: 'scenario', label: '脚本/台本' },
   { value: 'manga', label: 'ストーリー漫画' },
