@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Axis Chip Markup Split
+
+### What Changed
+
+- Added `src/axisChipMarkup.js` and moved axis category/subchip HTML construction out of `src/legacyMain.js`.
+- `src/legacyMain.js` now calls `createCategoryChipMarkup(i, Ce)` and `createSubChipMarkup(t, Ce)` while keeping all chip click handlers, state changes, randomization, and default filling local.
+- Added `tests/axisChipMarkup.test.js` to pin category markup, subchip markup, empty input handling, default escaping, and custom escaping.
+- Axis category rendering, subchip click behavior, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/axisChipMarkup.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visibly available;
+  - the long-form mode button remains hidden and disabled;
+  - default active mode is `4コマ漫画風`;
+  - all seven axis category groups render visible chips and first subchips;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Mode Chip Markup Split
 
 ### What Changed
