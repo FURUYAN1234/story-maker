@@ -4,6 +4,31 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Result Formatter Split
+
+### What Changed
+
+- Added `src/styleAnalyzerResultFormatter.js` and moved style-analysis result text formatting out of `src/legacyMain.js`.
+- `src/legacyMain.js` now keeps `Rf(...)` as a DOM wrapper that clears the error class and assigns `formatStyleAnalysisResult(...)` output to `#sa-result`.
+- Added `tests/styleAnalyzerResultFormatter.test.js` to pin narrative voice, sentence style, rhetoric, dialogue, structure, unique features, anti-patterns, and fallback reproduction-prompt formatting.
+- Style analyzer API calls, JSON parsing/repair, result storage, copy/download actions, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerResultFormatter.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and heading show `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - style analyzer section and result box render;
+  - no Vite error overlay or parse overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Style Analyzer Control State Split
 
 ### What Changed
