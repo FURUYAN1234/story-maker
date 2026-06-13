@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Long Settings Formatter Split
+
+### What Changed
+
+- Added `src/longSettingsFormatter.js` and moved the long-form settings formatter `rt` out of `src/legacyMain.js`.
+- `src/legacyMain.js` now imports `rt` while keeping long-form orchestration, state handling, UI wiring, and API calls local.
+- Added `tests/longSettingsFormatter.test.js` to pin default fallback values, specified character formatting, supplemental instruction forwarding, era-rule injection, category guide injection, and character-count chapter guidance.
+- Long-form prompt wording, API handling, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/longSettingsFormatter.test.js` passed.
+- Existing helper tests passed, including style analyzer, character import parsing, prompt builder, era lore, legacy option data, axis prompt details, provider clients, model data, thought parsing, settings snapshot, character inference, axis state, mode default, file IO, API key, long-novel number, footer, DOM, selection, and API error helpers.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Style Analyzer Helper Split
 
 ### What Changed
