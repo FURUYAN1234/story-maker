@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Consistency Audit Helper Split
+
+### What Changed
+
+- Added `src/consistencyAuditHelpers.js` and moved the consistency-audit prompt builders/parsers (`qf`, `Ko`, `E`, `Hf`, `ep`, `rs`, `tp`) out of `src/legacyMain.js`.
+- `src/legacyMain.js` keeps `pn` and mutable local aliases for the extracted helpers so the existing later `E` / `Ko` rule wrappers still apply.
+- Added `tests/consistencyAuditHelpers.test.js` to pin character/world formatting, standard/long audit prompts, issue JSON extraction, repair prompt text, and fixed-issue logging.
+- API request flow, contradiction repair behavior, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/consistencyAuditHelpers.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels and the generation button are visible;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Style Analyzer Prompt Split
 
 ### What Changed

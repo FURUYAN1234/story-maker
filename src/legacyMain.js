@@ -26,9 +26,11 @@ import { buildGenerationSettingsSnapshot, formatAxisDetail } from './settingsSna
 import { Af, Mf, ya } from './styleAnalyzerHelpers.js';
 import { ca } from './styleAnalyzerPrompt.js';
 import { Yd, Zs, Xd } from './styleAnalyzerUiState.js';
+import { E as buildConsistencyRepairPrompt, Hf as parseConsistencyIssues, Ko as buildLongConsistencyAuditPrompt, ep as formatConsistencyFixLog, qf as buildStandardConsistencyAuditPrompt, rs as formatConsistencyCharacters, tp as formatConsistencyWorld } from './consistencyAuditHelpers.js';
 import { da } from './thoughtParsingHelpers.js';
 import { SYSTEM_VERSION } from './version.js';
 
+let qf=buildStandardConsistencyAuditPrompt,Ko=buildLongConsistencyAuditPrompt,E=buildConsistencyRepairPrompt,Hf=parseConsistencyIssues,ep=formatConsistencyFixLog,rs=formatConsistencyCharacters,tp=formatConsistencyWorld;
 let Jo=buildPromptBase,A=buildLongContextPrompt;function O(e){const t=rt(e),n=(s.longNovel&&s.longNovel.chapterRetryNotes||{})[1]||"",o=`あなたはプロのベストセラー小説家です。以下の設定に基づき、本格的な長編小説の**第1章**を執筆してください。
 このアプリケーションが章ごとに指示を出します。あなたは指示された1章分のみを全力で書いてください。
 
@@ -323,126 +325,7 @@ ${M}
 
 ※文字数上限（トークンオーバー）で出力が途切れています。上記の続きの文字から、そのまま物語を再開してください。これまでの文章の繰り返しや前置きは一切不要です。続きのみを生成し、必ず最後は「【完】」で締めくくってください。`;j=(await yt(e,j,Z,K,G,{disableGoogleSearch:!0,maxTokens:16384,maxOutputTokens:16384,timeoutMs:3e5})).usedModel}y&&(clearInterval(y),y=null),o.innerHTML='<span class="spinner"></span>最終推敲中...';let se=M.replace(/^```(markdown)?\s*/i,"").replace(/\s*```$/,"");un=se,a.textContent=se;const B=V("sa-reflect-counter");B&&(B.textContent=`${se.length.toLocaleString()} 字`),p&&(p.textContent="AI進捗・思考ログ: リライト完了"),S("[システム] 作風リライト文の生成・推敲が正常に完了しました。"),v=`[進捗] リライトが正常に完了しました。
 ・最終文字数: ${se.length.toLocaleString()} 字
-・ステータス: 完了`,h="",b(),r.scrollIntoView({behavior:"smooth",block:"start"})}catch($){y&&(clearInterval(y),y=null),h="",b(),a.textContent=`リライトエラー: ${$.message}`}finally{o.disabled=!1,o.innerHTML="🎨 この作風でリライト実行",Xd()}}function Bf(){if(!at)return;const e=V("sa-result").textContent;navigator.clipboard.writeText(e).then(()=>{const t=V("btn-sa-copy");t.textContent="✅ コピー完了",setTimeout(()=>t.textContent="📋 コピー",2e3)})}function Ff(){if(!at)return;downloadJsonObjectWithTimestamp(at,at.style_name||"style_analysis")}function Df(){un&&navigator.clipboard.writeText(un).then(()=>{const e=V("btn-sa-reflect-copy");e.textContent="✅ コピー完了",setTimeout(()=>e.textContent="📋 コピー",2e3)})}function Vf(){if(!un)return;downloadTextWithTimestamp(un,"style_rewrite")}function Gf(){var e,t,n,o;ze.forEach(a=>{a.previewUrl&&URL.revokeObjectURL(a.previewUrl)}),Pe=[],ze=[],at=null,un="",Er(),os();const r=V("sa-direct-text");r&&(r.value=""),zo(),V("sa-dropzone").classList.remove("sa-has-files"),(e=V("sa-file-count"))==null||e.classList.add("hidden"),ut(),ln(),V("sa-result").textContent="",(t=V("sa-result-wrap"))==null||t.classList.add("hidden"),(n=V("sa-reflect-wrap"))==null||n.classList.add("hidden"),(o=V("sa-reflect-result-wrap"))==null||o.classList.add("hidden")}function Kf(){const e=V("sa-direct-text");if(!e)return;const t=e.value.trim();t&&(Pe.push({name:`直接入力テキスト_${Pe.length+1}`,text:t,charCount:t.length}),e.value="",Er(),V("sa-dropzone").classList.add("sa-has-files"),ut(),zo())}function zo(){const e=V("btn-sa-add-text");if(!e)return;const t=V("sa-direct-text"),n=t&&t.value.trim().length>0;e.disabled=!n}function dn(){const e=V("sa-section");e&&(typeof Kt=="function"&&Kt()?e.classList.remove("sa-inactive"):e.classList.add("sa-inactive"))}function ut(){const e=V("btn-sa-analyze");if(!e)return;const t=typeof Kt=="function"?Kt():"",n=Pe.length>0,o=ze.length>0,r=V("sa-direct-text"),a=r?r.value:"",i=a.trim().length>0,c=n||o||i;let p=a.length;Pe.forEach(h=>p+=h.content?h.content.length:0);const g=document.getElementById("api-engine");if(g&&g.value==="openai"&&p>8e4){e.disabled=!0,e.textContent="⚠ 文字数超過 (OpenAI制限)",e.title="OpenAIモデルの入力上限を超える可能性が高いため実行できません。テキストを削るか、Geminiをご利用ください。";return}e.disabled=!(t&&c),e.textContent="🔬 超強引！作風解析を実行",e.title=""}function ln(){const e=V("btn-sa-reflect");if(!e)return;const t=typeof Wo=="function"?Wo():"",n=V("output"),o=t&&t.length>=10&&n&&!n.classList.contains("empty"),r=at!==null;e.disabled=!(o&&r)}function Uf(e,t){var n,o,r,a,i,c,p,g;Kt=e,Wo=t,Ef(),(n=V("btn-sa-analyze"))==null||n.addEventListener("click",jf),(o=V("btn-sa-reflect"))==null||o.addEventListener("click",Pf),(r=V("btn-sa-copy"))==null||r.addEventListener("click",Bf),(a=V("btn-sa-json"))==null||a.addEventListener("click",Ff),(i=V("btn-sa-reflect-copy"))==null||i.addEventListener("click",Df),(c=V("btn-sa-reflect-dl"))==null||c.addEventListener("click",Vf),(p=V("btn-sa-clear"))==null||p.addEventListener("click",Gf),(g=V("btn-sa-add-text"))==null||g.addEventListener("click",Kf);const h=V("sa-direct-text");h&&h.addEventListener("input",()=>{ut(),zo()}),dn(),zo()}function qf(e,t){const n=rs(t),o=tp(t);return`あなたはプロの校閲者・整合性チェッカーです。以下の物語テキストを精査し、**明確な事実矛盾**のみを検出してください。
-
-## 最重要ルール
-- **面白さ・創造性を損なう指摘は絶対に禁止**。物語のエンタメ性を優先すること。
-- 検出対象は「客観的に矛盾している事実」のみ。主観的な品質判断（「伏線が弱い」「展開が急」等）は対象外。
-- 意図的なフィクション設定（魔法、超能力、異世界ルール等）は矛盾ではない。
-- 矛盾が無ければ、空の配列 \`[]\` を返すこと。無理に矛盾を見つけようとしないこと。
-
-## 検出対象（これらのみ）
-1. **キャラクター不整合**: 名前・性別・外見・性格が途中で変わる（意図的な変身・変装を除く）
-2. **時系列エラー**: 朝→夜→朝のような不自然な時間遷移、「3日前に起きた」事件が次の段落で「昨日」に変わる等
-3. **時代考証違反**: 設定された時代に存在しない物・概念の使用（例：江戸時代にスマートフォン）
-4. **設定矛盾**: 「一人っ子」と述べたキャラに兄弟が登場する等の論理的不整合
-5. **空間矛盾**: キャラの所在地が説明なく変わる
-6. **退場キャラの不整合**: 明確に死亡・退場したキャラが説明なく再登場
-
-## 入力情報
-
-### ユーザー指定のキャラクター設定:
-${n}
-
-### 時代・世界観設定:
-${o}
-
-### 検査対象テキスト:
-${e}
-
-## 出力フォーマット（JSON配列で出力。矛盾がなければ空配列 \`[]\`）
-\`\`\`json
-[
-  {
-    "type": "矛盾の種類（キャラクター不整合/時系列エラー/時代考証違反/設定矛盾/空間矛盾/退場キャラの不整合）",
-    "severity": "重大 or 軽微",
-    "location": "矛盾が発生している箇所の引用（20字程度）",
-    "description": "何がどう矛盾しているかの簡潔な説明"
-  }
-]
-\`\`\`
-矛盾がない場合は必ず \`[]\` のみを出力すること。`}function Ko(e,t,n,o,r,a=!1){const i=rs(n),c=tp(n);return`あなたはプロの校閲者・整合性チェッカーです。長編小説の**第${t}章**を精査し、過去の章との間で**明確な事実矛盾**のみを検出してください。
-
-## 最重要ルール
-- **面白さ・創造性を損なう指摘は絶対に禁止**。物語のエンタメ性を優先すること。
-- 検出対象は「客観的に矛盾している事実」のみ。主観的な品質判断は対象外。
-- 意図的なフィクション設定（魔法、超能力、異世界ルール等）は矛盾ではない。
-- 矛盾が無ければ、空の配列 \`[]\` を返すこと。無理に矛盾を見つけようとしないこと。
-
-## 検出対象（事実関係の矛盾のみ）
-1. **キャラクター不整合**: 名前・性別・外見・性格が前章と矛盾する（意図的な変身・変装を除く）
-2. **時系列エラー**: 前章との時間的な繋がりが不自然
-3. **時代考証違反**: 設定された時代に存在しない物・概念の使用（例：江戸時代にスマートフォン）
-4. **設定矛盾**: 前章で確立された設定との論理的不整合（「一人っ子」と述べたキャラに兄弟が登場するなど）
-5. **空間矛盾**: 前章終了時の所在地と本章冒頭の所在地が説明なく変わる
-6. **退場キャラの不整合**: 前章で退場・死亡したキャラが説明なく再登場する
-7. **伏線の矛盾**: 文脈メモに記録された回収待ち伏線・設定・モチーフの扱いが矛盾する
-8. **別ルート混入**: 過去章・Story Bible・ユーザー設定に存在しない主人公名、能力名、組織名、初期候補設定の混入
-
-## 入力情報
-
-### ユーザー指定のキャラクター設定:
-${i}
-
-### 時代・世界観設定:
-${c}
-
-### 終了記号ルール:
-この章は${a?"最終章です。本文の最後の独立行に一度だけ「【完】」が必要です。":"最終章ではありません。「【完】」が本文に含まれている場合は設定矛盾として検出してください。"}
-
-### 過去の章の文脈維持メモ:
-${o||"（第1章のため過去メモなし）"}
-
-### 直近の章の全文（参照用）:
-${r||"（第1章のため参照なし）"}
-
-### 検査対象（第${t}章の本文）:
-${e}
-
-## 出力フォーマット（JSON配列で出力。矛盾がなければ空配列 \`[]\`）
-\`\`\`json
-[
-  {
-    "type": "矛盾の種類（キャラクター不整合/時系列エラー/時代考証違反/設定矛盾/空間矛盾/退場キャラの不整合/伏線の矛盾/別ルート混入）",
-    "severity": "重大 or 軽微",
-    "location": "矛盾が発生している箇所の引用（20字程度）",
-    "description": "何がどう矛盾しているかの簡潔な説明"
-  }
-]
-\`\`\`
-矛盾がない場合は必ず \`[]\` のみを出力すること。`}function E(e,t,n,o){const r=t.map((c,p)=>`${p+1}. 【${c.type}】${c.description}（箇所：『${c.location}』）`).join(`
-`),a=rs(n);let i="";return o&&(i=`
-### 過去の章の文脈（整合性を保つために参照すること）:
-${o.recentChaptersFull||""}
-
-### 文脈メモ（伏線・モチーフ・設定の記録）:
-${o.allContextMemos||""}
-`),`あなたはプロの小説家兼校閲者です。以下のテキストに含まれる設定・事実関係の矛盾箇所を修正してください。
-
-## 最重要ルール
-1. **物語の面白さ・テンポ・文体を絶対に損なわないこと**。矛盾の修正は最小限の変更で行う。
-2. **修正対象は指摘された矛盾箇所のみ**。矛盾と無関係な文章を書き換えてはならない。
-3. **文字数を大きく変えないこと**。元テキストの90%〜110%の範囲に収めること。
-4. **プロット・展開・オチは一切変更しない**。矛盾する事実の記述のみを正しい設定に合わせて修正する。
-5. 修正結果の本文のみを出力する。メタ解説、注釈、「以下は修正結果です」等の前置きは一切付けない。
-6. **修正によって新しい矛盾を生まないこと**。矛盾箇所を直す際は、前後の章で確立された設定・数値・事実関係を必ず参照し、存在しないキャラクターや出来事を勝手に追加しないこと。
-7. **名前・固有名詞の正確性**: 修正時に既存キャラクターの名前を誤記したり、存在しない人物名を挿入したりしないこと。
-8. **自己校正メタの絶対禁止**: 「修正する」「修正後のテキスト」「OK」「おっと、見出しに」「No, there is no other」「Let's double check」など、あなたの判断過程・検査過程・修正ログを本文へ出力しないこと。修正済み本文だけを返すこと。
-
-### ユーザー指定のキャラクター設定（正とする）:
-${a}
-${i}
-
-## 検出された矛盾:
-${r}
-
-## 修正対象テキスト:
-${e}
-
-## 修正後のテキスト（本文のみ出力）:`}function Hf(e){if(!e||!e.trim())return[];let t=e.trim();t=t.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"");try{const n=JSON.parse(t);return Array.isArray(n)?n.filter(o=>o&&typeof o=="object"&&o.type&&o.description).map(o=>({type:String(o.type||""),severity:String(o.severity||"軽微"),location:String(o.location||""),description:String(o.description||"")})):[]}catch{const n=t.match(/\[[\s\S]*\]/);if(n)try{const o=JSON.parse(n[0]);if(Array.isArray(o))return o.filter(r=>r&&typeof r=="object"&&r.type&&r.description).map(r=>({type:String(r.type||""),severity:String(r.severity||"軽微"),location:String(r.location||""),description:String(r.description||"")}))}catch(o){console.warn("矛盾検査結果のパースに失敗しました:",o.message)}return[]}}function ep(e,t){if(!e||e.length===0)return"";const n=[`【矛盾検査記録（第${t}章）— 修正済み】`];return e.forEach((o,r)=>{n.push(`  ${r+1}. [${o.severity}] ${o.type}: ${o.description}`)}),n.join(`
-`)}async function pn(e,t,n,o={}){const{onStatus:r,onFallback:a,maxFixAttempts:i=8,chapterNum:c,allContextMemos:p,recentChaptersFull:g,fixMinorIssues:h=!1,isLastChapter:v=!1,failOnAuditError:y=!1,validateFixedText:S}=o,b=Tn[0].value,$=c!=null,k=$?`第${c}章: `:"";let x=t,I=[],M=!1,T=0,K=[];for(let G=0;G<=i;G++){const j=G>0;if(r){const U=$?`第${c}章の`:"";r(`[検査] ${U}設定整合性チェックを実行中...${j?`（再検査 ${G}回目）`:""}`)}let W;$?W=Ko(x,c,n,p,g,v):W=qf(x,n);let se;try{se=(await Gt(e,b,W,a,{temperature:.1,responseMimeType:"application/json",disableGoogleSearch:!0,maxTokens:4096,maxOutputTokens:4096,timeoutMs:$?7e4:12e4,maxModelAttempts:$?2:void 0})).text}catch(U){if(console.warn("矛盾検査APIコールが失敗しました:",U.message),y)throw r&&r("[検査] 検査APIエラー — 保存前に章設計へ戻します"),new Error(`矛盾検査APIエラー: ${U.message}`);return r&&r("[検査] 検査APIエラー — スキップして続行します"),{text:x,issues:I,wasFixed:M,remainingCriticalCount:0,remainingIssues:[]}}const B=Hf(se);K=B;const Z=B.filter(U=>U.severity==="重大"),R=B.filter(U=>U.severity!=="重大");T=Z.length,B.length>0&&(I=I.concat(B),r&&(r(`[検査] ${k}${B.length}件の指摘を検出（重大: ${Z.length}件, 軽微: ${R.length}件）`),Z.forEach((U,ue)=>{r(`[検査]   ⛔ 重大${ue+1}: [${U.type}] ${U.description}${U.location?`（箇所:『${U.location}』）`:""}`)}),R.forEach((U,ue)=>{r(`[検査]   ⚠ 軽微${ue+1}: [${U.type}] ${U.description}`)})));const H=h?B:Z;if(H.length===0)return r&&(B.length===0?r(`[検査] ${k}矛盾は検出されませんでした ✅`):r(h?`[検査] ${k}修正対象の矛盾は残っていません ✅`:`[検査] ${k}重大な矛盾なし。軽微な指摘${R.length}件は許容範囲です ✅`)),{text:x,issues:I,wasFixed:M,remainingCriticalCount:0,remainingIssues:[]};if(G>=i)break;if(r){const U=h?`矛盾${H.length}件`:`重大な矛盾${Z.length}件`;r(`[修正] ${k}${U}を修正中...（試行 ${G+1}/${i}）`)}const fe=E(x,H,n,$?{recentChaptersFull:g,allContextMemos:p}:null);try{let U=(await Gt(e,b,fe,a,{temperature:.3,disableGoogleSearch:!0,maxTokens:16384,maxOutputTokens:16384,timeoutMs:$?9e4:12e4,maxModelAttempts:$?2:void 0})).text.trim();if(typeof o.sanitizeText=="function"&&(U=o.sanitizeText(U)),typeof S=="function"){const be=S(U)||[];if(be.length>0){console.warn(`修正結果を品質ゲートで棄却: ${be.join(" / ")}`),r&&r(`[修正] 修正結果に本文破損の兆候があるため棄却します（${be.slice(0,3).join(" / ")}）`);const je={type:"Rejected repair",severity:"critical",location:"repair candidate",description:`Repair candidate failed quality gate: ${be.slice(0,3).join(" / ")}`};return{text:x,issues:I.concat(je),wasFixed:M,remainingCriticalCount:Math.max(T,1),remainingIssues:K.length?K:[je]}}}const ue=U.length/x.length;if(ue<.5||ue>2){console.warn(`修正結果の文字数比率が異常 (${(ue*100).toFixed(0)}%)。修正を棄却します。`),r&&r(`[修正] 修正結果の文字数が異常に変動（${(ue*100).toFixed(0)}%）。この修正を棄却します`);const be={type:"Rejected repair",severity:"critical",location:"repair candidate",description:`Repair candidate changed length too much: ${(ue*100).toFixed(0)}%`};return{text:x,issues:I.concat(be),wasFixed:M,remainingCriticalCount:Math.max(T,1),remainingIssues:K.length?K:[be]}}x=U,M=!0,r&&r(`[修正] ${k}修正完了。再検査を実行します...`)}catch(U){return console.warn("矛盾修正APIコールが失敗しました:",U.message),r&&r(y?"[修正] 修正APIエラー — 残存矛盾があれば保存前に章設計へ戻します":"[修正] 修正APIエラー — 現状のテキストで続行します"),{text:x,issues:I,wasFixed:M,remainingCriticalCount:T,remainingIssues:K}}}return r&&r(`[検査] ${k}修正上限（${i}回）に達しましたが、重大な矛盾が${T}件残存しています ⚠️`),{text:x,issues:I,wasFixed:M,remainingCriticalCount:T,remainingIssues:K}}function rs(e){return!e||!e.characters||e.characters.length===0?"（キャラクター設定なし — AIが自由に設定）":e.characters.map((t,n)=>{const o=[`${n+1}. ${t.name||"（名前未設定）"}`];return t.sex&&o.push(`性別: ${t.sex}`),t.role&&o.push(`役割: ${t.role}`),t.personality&&o.push(`性格: ${t.personality}`),t.note&&o.push(`詳細: ${t.note}`),o.join(" / ")}).join(`
-`)}function tp(e){if(!e)return"（設定なし）";const t=[],n=e.eraCustom||e.era,o=e.worldviewCustom||e.worldview,r=e.genreCustom||e.genre;return n&&t.push(`時代: ${n}`),o&&t.push(`世界観: ${o}`),r&&t.push(`ジャンル: ${r}`),t.length>0?t.join(`
-`):"（特定の時代・世界観設定なし）"}function Jf(e,t="standard"){const n=rt(e||{}),o=t==="long",r=o?"each chapter and the completed long novel":"the visible narrative output",a=/^(?:essay|poem|letter|diary)$/i.test(String(e&&e.mode||""));return`
+・ステータス: 完了`,h="",b(),r.scrollIntoView({behavior:"smooth",block:"start"})}catch($){y&&(clearInterval(y),y=null),h="",b(),a.textContent=`リライトエラー: ${$.message}`}finally{o.disabled=!1,o.innerHTML="🎨 この作風でリライト実行",Xd()}}function Bf(){if(!at)return;const e=V("sa-result").textContent;navigator.clipboard.writeText(e).then(()=>{const t=V("btn-sa-copy");t.textContent="✅ コピー完了",setTimeout(()=>t.textContent="📋 コピー",2e3)})}function Ff(){if(!at)return;downloadJsonObjectWithTimestamp(at,at.style_name||"style_analysis")}function Df(){un&&navigator.clipboard.writeText(un).then(()=>{const e=V("btn-sa-reflect-copy");e.textContent="✅ コピー完了",setTimeout(()=>e.textContent="📋 コピー",2e3)})}function Vf(){if(!un)return;downloadTextWithTimestamp(un,"style_rewrite")}function Gf(){var e,t,n,o;ze.forEach(a=>{a.previewUrl&&URL.revokeObjectURL(a.previewUrl)}),Pe=[],ze=[],at=null,un="",Er(),os();const r=V("sa-direct-text");r&&(r.value=""),zo(),V("sa-dropzone").classList.remove("sa-has-files"),(e=V("sa-file-count"))==null||e.classList.add("hidden"),ut(),ln(),V("sa-result").textContent="",(t=V("sa-result-wrap"))==null||t.classList.add("hidden"),(n=V("sa-reflect-wrap"))==null||n.classList.add("hidden"),(o=V("sa-reflect-result-wrap"))==null||o.classList.add("hidden")}function Kf(){const e=V("sa-direct-text");if(!e)return;const t=e.value.trim();t&&(Pe.push({name:`直接入力テキスト_${Pe.length+1}`,text:t,charCount:t.length}),e.value="",Er(),V("sa-dropzone").classList.add("sa-has-files"),ut(),zo())}function zo(){const e=V("btn-sa-add-text");if(!e)return;const t=V("sa-direct-text"),n=t&&t.value.trim().length>0;e.disabled=!n}function dn(){const e=V("sa-section");e&&(typeof Kt=="function"&&Kt()?e.classList.remove("sa-inactive"):e.classList.add("sa-inactive"))}function ut(){const e=V("btn-sa-analyze");if(!e)return;const t=typeof Kt=="function"?Kt():"",n=Pe.length>0,o=ze.length>0,r=V("sa-direct-text"),a=r?r.value:"",i=a.trim().length>0,c=n||o||i;let p=a.length;Pe.forEach(h=>p+=h.content?h.content.length:0);const g=document.getElementById("api-engine");if(g&&g.value==="openai"&&p>8e4){e.disabled=!0,e.textContent="⚠ 文字数超過 (OpenAI制限)",e.title="OpenAIモデルの入力上限を超える可能性が高いため実行できません。テキストを削るか、Geminiをご利用ください。";return}e.disabled=!(t&&c),e.textContent="🔬 超強引！作風解析を実行",e.title=""}function ln(){const e=V("btn-sa-reflect");if(!e)return;const t=typeof Wo=="function"?Wo():"",n=V("output"),o=t&&t.length>=10&&n&&!n.classList.contains("empty"),r=at!==null;e.disabled=!(o&&r)}function Uf(e,t){var n,o,r,a,i,c,p,g;Kt=e,Wo=t,Ef(),(n=V("btn-sa-analyze"))==null||n.addEventListener("click",jf),(o=V("btn-sa-reflect"))==null||o.addEventListener("click",Pf),(r=V("btn-sa-copy"))==null||r.addEventListener("click",Bf),(a=V("btn-sa-json"))==null||a.addEventListener("click",Ff),(i=V("btn-sa-reflect-copy"))==null||i.addEventListener("click",Df),(c=V("btn-sa-reflect-dl"))==null||c.addEventListener("click",Vf),(p=V("btn-sa-clear"))==null||p.addEventListener("click",Gf),(g=V("btn-sa-add-text"))==null||g.addEventListener("click",Kf);const h=V("sa-direct-text");h&&h.addEventListener("input",()=>{ut(),zo()}),dn(),zo()}async function pn(e,t,n,o={}){const{onStatus:r,onFallback:a,maxFixAttempts:i=8,chapterNum:c,allContextMemos:p,recentChaptersFull:g,fixMinorIssues:h=!1,isLastChapter:v=!1,failOnAuditError:y=!1,validateFixedText:S}=o,b=Tn[0].value,$=c!=null,k=$?`第${c}章: `:"";let x=t,I=[],M=!1,T=0,K=[];for(let G=0;G<=i;G++){const j=G>0;if(r){const U=$?`第${c}章の`:"";r(`[検査] ${U}設定整合性チェックを実行中...${j?`（再検査 ${G}回目）`:""}`)}let W;$?W=Ko(x,c,n,p,g,v):W=qf(x,n);let se;try{se=(await Gt(e,b,W,a,{temperature:.1,responseMimeType:"application/json",disableGoogleSearch:!0,maxTokens:4096,maxOutputTokens:4096,timeoutMs:$?7e4:12e4,maxModelAttempts:$?2:void 0})).text}catch(U){if(console.warn("矛盾検査APIコールが失敗しました:",U.message),y)throw r&&r("[検査] 検査APIエラー — 保存前に章設計へ戻します"),new Error(`矛盾検査APIエラー: ${U.message}`);return r&&r("[検査] 検査APIエラー — スキップして続行します"),{text:x,issues:I,wasFixed:M,remainingCriticalCount:0,remainingIssues:[]}}const B=Hf(se);K=B;const Z=B.filter(U=>U.severity==="重大"),R=B.filter(U=>U.severity!=="重大");T=Z.length,B.length>0&&(I=I.concat(B),r&&(r(`[検査] ${k}${B.length}件の指摘を検出（重大: ${Z.length}件, 軽微: ${R.length}件）`),Z.forEach((U,ue)=>{r(`[検査]   ⛔ 重大${ue+1}: [${U.type}] ${U.description}${U.location?`（箇所:『${U.location}』）`:""}`)}),R.forEach((U,ue)=>{r(`[検査]   ⚠ 軽微${ue+1}: [${U.type}] ${U.description}`)})));const H=h?B:Z;if(H.length===0)return r&&(B.length===0?r(`[検査] ${k}矛盾は検出されませんでした ✅`):r(h?`[検査] ${k}修正対象の矛盾は残っていません ✅`:`[検査] ${k}重大な矛盾なし。軽微な指摘${R.length}件は許容範囲です ✅`)),{text:x,issues:I,wasFixed:M,remainingCriticalCount:0,remainingIssues:[]};if(G>=i)break;if(r){const U=h?`矛盾${H.length}件`:`重大な矛盾${Z.length}件`;r(`[修正] ${k}${U}を修正中...（試行 ${G+1}/${i}）`)}const fe=E(x,H,n,$?{recentChaptersFull:g,allContextMemos:p}:null);try{let U=(await Gt(e,b,fe,a,{temperature:.3,disableGoogleSearch:!0,maxTokens:16384,maxOutputTokens:16384,timeoutMs:$?9e4:12e4,maxModelAttempts:$?2:void 0})).text.trim();if(typeof o.sanitizeText=="function"&&(U=o.sanitizeText(U)),typeof S=="function"){const be=S(U)||[];if(be.length>0){console.warn(`修正結果を品質ゲートで棄却: ${be.join(" / ")}`),r&&r(`[修正] 修正結果に本文破損の兆候があるため棄却します（${be.slice(0,3).join(" / ")}）`);const je={type:"Rejected repair",severity:"critical",location:"repair candidate",description:`Repair candidate failed quality gate: ${be.slice(0,3).join(" / ")}`};return{text:x,issues:I.concat(je),wasFixed:M,remainingCriticalCount:Math.max(T,1),remainingIssues:K.length?K:[je]}}}const ue=U.length/x.length;if(ue<.5||ue>2){console.warn(`修正結果の文字数比率が異常 (${(ue*100).toFixed(0)}%)。修正を棄却します。`),r&&r(`[修正] 修正結果の文字数が異常に変動（${(ue*100).toFixed(0)}%）。この修正を棄却します`);const be={type:"Rejected repair",severity:"critical",location:"repair candidate",description:`Repair candidate changed length too much: ${(ue*100).toFixed(0)}%`};return{text:x,issues:I.concat(be),wasFixed:M,remainingCriticalCount:Math.max(T,1),remainingIssues:K.length?K:[be]}}x=U,M=!0,r&&r(`[修正] ${k}修正完了。再検査を実行します...`)}catch(U){return console.warn("矛盾修正APIコールが失敗しました:",U.message),r&&r(y?"[修正] 修正APIエラー — 残存矛盾があれば保存前に章設計へ戻します":"[修正] 修正APIエラー — 現状のテキストで続行します"),{text:x,issues:I,wasFixed:M,remainingCriticalCount:T,remainingIssues:K}}}return r&&r(`[検査] ${k}修正上限（${i}回）に達しましたが、重大な矛盾が${T}件残存しています ⚠️`),{text:x,issues:I,wasFixed:M,remainingCriticalCount:T,remainingIssues:K}}function Jf(e,t="standard"){const n=rt(e||{}),o=t==="long",r=o?"each chapter and the completed long novel":"the visible narrative output",a=/^(?:essay|poem|letter|diary)$/i.test(String(e&&e.mode||""));return`
 
 [Story Maker narrative method stack / internal only]
 - Apply the README narrative-engineering stack to ${r}${a?" where the selected format is narrative; do not force foreshadowing into a non-narrative form.":"."}
