@@ -4,6 +4,31 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Progress Log Split
+
+### What Changed
+
+- Added `src/styleAnalyzerProgressLog.js` and moved style-rewrite progress-log string assembly out of the nested `b()` function in `src/legacyMain.js`.
+- `src/legacyMain.js` now keeps DOM assignment and scroll syncing local while delegating the history/transient/detail text formatting to `formatStyleRewriteProgressLog(...)`.
+- Added `tests/styleAnalyzerProgressLog.test.js` to pin empty output, history-line trailing newline, transient-line formatting, and detail-block separation.
+- Style analyzer rewrite API calls, streaming handling, fallback handling, progress scrolling, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerProgressLog.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title shows `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - style analyzer section, progress log, and reflect button render;
+  - no Vite error overlay or parse overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Style Analyzer File Count Label Split
 
 ### What Changed
