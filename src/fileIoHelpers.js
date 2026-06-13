@@ -53,7 +53,10 @@ export function downloadTimestampedTextFile(content, title, label) {
 }
 
 export {
+  readFileAsBase64 as If,
   readFileAsBase64 as vh,
+  readFileAsText as Lf,
   readFileAsText as bh,
   downloadTimestampedTextFile as Cp,
+  formatTimestamp as Qd,
 };

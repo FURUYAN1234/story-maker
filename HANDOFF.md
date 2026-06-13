@@ -4,6 +4,37 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer File Helper Alias Split
+
+### What Changed
+
+- Reused `src/fileIoHelpers.js` for the style-analyzer file read aliases `Lf` and `If`.
+- Reused `src/fileIoHelpers.js` for the style-analyzer timestamp alias `Qd`.
+- Removed inline `Lf`, `If`, and `Qd` declarations from `src/legacyMain.js`.
+- Expanded `tests/fileIoHelpers.test.js` to pin the `Qd` alias.
+- No provider request code, prompt contracts, UI mode contracts, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - the style analyzer panel is visible;
+  - the current page has no Vite error overlay.
+- Note: the browser dev log retained a stale HMR duplicate-identifier error from the middle of the edit, before the inline helpers were removed. The fresh current page DOM and production build are clean.
+
 ## 2026-06-13 File IO Helper Split
 
 ### What Changed
