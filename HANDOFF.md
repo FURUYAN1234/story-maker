@@ -4,6 +4,40 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 API Key Helper Split
+
+### What Changed
+
+- Added `src/apiKeyHelpers.js` for API key normalization, mask detection, summary generation, validation, default model selection, and provider label selection.
+- `src/legacyMain.js` now imports legacy aliases `Oe`, `Yf`, `Xf`, `Lt`, `gn`, and `Qf` from that module.
+- Removed the inline API-key helper declarations from `src/legacyMain.js`.
+- Kept `as()` and `Zf()` inside `src/legacyMain.js` because they write and restore the live legacy state object.
+- Added `tests/apiKeyHelpers.test.js` to pin sanitized input, masked keys, short-key messages, bad-character messages, provider/model inference, and valid-key pass-through behavior.
+- No API key values, API storage format, provider switching behavior, provider request code, prompt contracts, or UI mode contracts were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - API未設定 label is visible;
+  - API input exists and is editable in unset state;
+  - no Vite error overlay is present.
+
 ## 2026-06-13 Long Novel Number Helper Split
 
 ### What Changed
