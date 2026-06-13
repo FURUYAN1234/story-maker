@@ -4,6 +4,45 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 OpenAI Model Data Reuse
+
+### What Changed
+
+- Added `OPENAI_TEXT_MODELS` and `OPENAI_VISION_MODELS` to `src/data.js`.
+- `src/legacyMain.js` now imports those arrays as the legacy aliases `qn` and `Ws`.
+- Removed the inline OpenAI text and vision model arrays from `src/legacyMain.js`; the multimodal helper now reuses the same `Ws` vision-model order.
+- Added `tests/modelData.test.js` to pin Gemini model order plus OpenAI text/vision model order.
+- Model order, fallback behavior, API key handling, provider request structure, prompt contracts, UI mode labels, and long-form engine behavior were not changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/modelData.test.js` passed.
+- `node tests/thoughtParsingHelpers.test.js` passed.
+- `node tests/settingsSnapshotHelpers.test.js` passed.
+- `node tests/characterInferenceHelpers.test.js` passed.
+- `node tests/axisStateHelpers.test.js` passed.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Thought Parser Helper Split
 
 ### What Changed

@@ -10,6 +10,9 @@ export const GEMINI_MODELS = [
   { value: 'gemini-pro-latest', label: 'Gemini Pro (Latest)' }
 ];
 
+export const OPENAI_TEXT_MODELS = ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o'];
+export const OPENAI_VISION_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4.1-mini'];
+
 const ALL_MODES = [
   { value: '4koma', label: '4コマ漫画風' },
   { value: '4koma_scenario', label: 'AI 4koma シナリオ連携（STEP2）' },
