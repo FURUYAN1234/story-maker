@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Direct Text Entry Split
+
+### What Changed
+
+- Added `src/styleAnalyzerTextEntry.js` and moved direct-style-text entry construction out of `src/legacyMain.js`.
+- `src/legacyMain.js` now delegates trimming, sequential entry naming, and character-count calculation to `createDirectStyleTextEntry(...)` while keeping the `Pe` array mutation, field clearing, list rerender, and button refresh local.
+- Added `tests/styleAnalyzerTextEntry.test.js` to pin blank-input rejection, whitespace trimming, sequential `直接入力テキスト_N` naming, and character counting.
+- Style analyzer API calls, file-drop handling, list rendering, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerTextEntry.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/control smoke on `http://127.0.0.1:5179/` confirmed:
+  - title shows `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - typing direct style text enables the add-text button;
+  - API-unset smoke tab keeps `.settings-panel.disabled-panel` with `pointer-events: none`, so actual add-button clicking is intentionally blocked without a saved API key;
+  - no Vite error overlay or parse overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Style Analyzer Result Formatter Split
 
 ### What Changed
