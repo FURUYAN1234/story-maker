@@ -4,6 +4,31 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Character Datalist Markup Split
+
+### What Changed
+
+- Added `src/characterDatalistsMarkup.js` and moved the character role/personality/sex datalist HTML construction out of `src/legacyMain.js`.
+- `src/legacyMain.js` now calls `createCharacterDatalistsMarkup(At, Et, void 0, Ce)` inside `et()` while keeping character card rendering, field event listeners, randomization, and state mutation local.
+- Added `tests/characterDatalistsMarkup.test.js` to pin datalist markup, default sex options, empty input handling, default escaping, and custom escaping.
+- Character card behavior, character randomization, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/characterDatalistsMarkup.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - character datalists render expected option counts: roles 18, personalities 18, sex 4;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Axis Chip Markup Split
 
 ### What Changed
