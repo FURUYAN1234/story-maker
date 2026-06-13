@@ -18,6 +18,9 @@ const FOOTER_TEXT = STORY_MAKER_FOOTER;
 const FOOTER_PATTERN = /\n*\s*(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i;
 const TOOL_NAME_PATTERN = /AI\s*Story\s*Maker|Story\s*Maker|ストーリーメーカー|物語メーカー|生成ツール|作成ツール|ChatGPT|Gemini|OpenAI/i;
 const NARRATIVE_RESTART_MODES = new Set(['short_short', 'novel', 'medium', 'fairy']);
+const TITLE_LABEL_PATTERN = '\\u30bf\\u30a4\\u30c8\\u30eb';
+const TITLE_SEPARATOR_PATTERN = '[:\\uff1a]';
+const TITLE_LINE_PATTERN = `${TITLE_LABEL_PATTERN}\\s*${TITLE_SEPARATOR_PATTERN}`;
 
 function charLength(text) {
   return Array.from(String(text || '')).length;
@@ -143,8 +146,15 @@ function removeUnclosedTail(text) {
   return next;
 }
 
+function removeTrailingJapaneseTitleArtifact(text) {
+  const trailingTitlePattern = new RegExp(`(?:\\n+\\s*|\\s+|(?<=[\\u3002\\uff01\\uff1f!?\\.]))${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
+  return normalizeBreaks(text)
+    .replace(trailingTitlePattern, '')
+    .trimEnd();
+}
+
 function finishPublicText(text) {
-  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeUnclosedTail(removeDanglingTail(text))))).trimEnd();
+  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(removeUnclosedTail(removeDanglingTail(text)))))).trimEnd();
   return body ? `${body}\n\n${FOOTER_TEXT}` : '';
 }
 
@@ -206,13 +216,15 @@ function removeNarrativeDraftRestart(text, mode) {
 
 function removeTrailingNarrativeTitleArtifact(text, mode) {
   if (!NARRATIVE_RESTART_MODES.has(mode)) return text;
+  const trailingTitlePattern = new RegExp(`(?:\\n+\\s*|\\s+|(?<=[\\u3002\\uff01\\uff1f!?\\.]))${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
   return normalizeBreaks(text)
+    .replace(trailingTitlePattern, '')
     .replace(/\n+\s*タイトル\s*[:：][^\n]{1,120}\s*$/u, '')
     .trimEnd();
 }
 
 function finishPublicTextPreserveBody(text) {
-  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(normalizeBreaks(text)))).trimEnd();
+  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(normalizeBreaks(text))))).trimEnd();
   return body ? `${body}\n\n${FOOTER_TEXT}` : '';
 }
 

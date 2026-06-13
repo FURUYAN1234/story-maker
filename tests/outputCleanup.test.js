@@ -42,7 +42,7 @@ Scenario:
 const cleanedScenario = cleanOutputForPublicMode(scenarioWithMultilineAim, '4koma_scenario');
 assert.match(cleanedScenario, /狙い:\nアカネが失敗を隠さず謝り/);
 assert.doesNotMatch(cleanedScenario, /狙い:\s*\n\s*Created By AI Story Maker/);
-assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.4/);
+assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.5/);
 
 const documentaryWithoutClosing = `ナレーション: 商店街の小さなコンビニは、今日も朝から油の匂いを漂わせている。
 
@@ -55,7 +55,7 @@ const documentaryWithoutClosing = `ナレーション: 商店街の小さなコ�
 
 const cleanedDocumentary = cleanOutputForPublicMode(documentaryWithoutClosing, 'documentary');
 assert.match(cleanedDocumentary, /^締め:\n店主は最後に/m);
-assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.4/);
+assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.5/);
 
 const documentaryFootageClosing = `ナレーション: 店はまだ薄暗い。
 
@@ -89,7 +89,7 @@ assert.match(cleanedMedium, /^第3節/m);
 assert.doesNotMatch(cleanedMedium, /これは二周目の下書き/);
 assert.doesNotMatch(cleanedMedium, /\nタイトル: 鈴の音は森に還る\n\n第1節/);
 assert.equal((cleanedMedium.match(/^第1節/gm) || []).length, 1);
-assert.match(cleanedMedium, /Created By AI Story Maker V5\.0\.4/);
+assert.match(cleanedMedium, /Created By AI Story Maker V5\.0\.5/);
 
 const mediumWithTrailingTitle = `【ミニショップ陽だまりの一日】
 
@@ -106,6 +106,86 @@ const mediumWithTrailingTitle = `【ミニショップ陽だまりの一日】
 const cleanedMediumTrailingTitle = cleanOutputForPublicMode(mediumWithTrailingTitle, 'medium');
 assert.doesNotMatch(cleanedMediumTrailingTitle, /\nタイトル: ミニショップ陽だまりの一日\s*\n\nCreated By AI Story Maker/);
 assert.match(cleanedMediumTrailingTitle, /どら焼きを分け合い/);
-assert.match(cleanedMediumTrailingTitle, /Created By AI Story Maker V5\.0\.4/);
+assert.match(cleanedMediumTrailingTitle, /Created By AI Story Maker V5\.0\.5/);
+
+const mediumWithInlineTrailingTitle = `【さびしき駆け込みコンビニ】
+
+第1節
+レジの蛍光灯が鳴っていた。
+
+第2節
+客は小さく礼を言った。
+
+第3節
+残り香、油の匂い、指に残る冷たさ。どれもがここに集まった人々の証だった。タイトル: さびしき駆け込みコンビニ`;
+
+const cleanedMediumInlineTrailingTitle = cleanOutputForPublicMode(mediumWithInlineTrailingTitle, 'medium');
+assert.doesNotMatch(cleanedMediumInlineTrailingTitle, /タイトル: さびしき駆け込みコンビニ/);
+assert.match(cleanedMediumInlineTrailingTitle, /ここに集まった人々の証だった。/);
+assert.match(cleanedMediumInlineTrailingTitle, /Created By AI Story Maker V5\.0\.5/);
+
+const trailingTitleAcrossModes = {
+  '4koma': `タイトル: 小さな会計
+1コマ目: レジ前で客が小銭を探す。
+2コマ目: 店員が袋を開く。
+3コマ目: 後ろの客が笑う。
+4コマ目: みんなで小さく頭を下げる。タイトル: 余計な下書き`,
+  '4koma_scenario': `Topic: 小さな会計
+Logline: レジ前の小さな混乱が笑いに変わる。
+Location: コンビニ
+Outfit: エプロン
+Punchline: 小銭がポケットから出る
+Scenario:
+[1コマ目]
+[2コマ目]
+[3コマ目]
+[4コマ目]
+狙い: 最後は関係の変化で閉じる。タイトル: 余計な下書き`,
+  short_short: `短い出来事が一度だけ起き、主人公は黙って会釈した。タイトル: 余計な下書き`,
+  novel: `店内の空気が変わり、主人公は置き忘れた傘をそっと返した。タイトル: 余計な下書き`,
+  medium: mediumWithInlineTrailingTitle,
+  scenario: `タイトル: 小さな会計
+登場人物: 店員、客
+場面: レジ前
+店員: こちらで大丈夫です。タイトル: 余計な下書き`,
+  manga: `タイトル: 小さな会計
+ページ1
+コマ1: レジ前。
+セリフ: こちらで大丈夫です。タイトル: 余計な下書き`,
+  essay: `主張: 日常の小さな確認は、人の距離を少し近づける。
+
+観察: レジ前の短い沈黙にも、互いを待つ姿勢が出る。
+
+考察: その間合いは効率とは別の信頼を作る。
+
+結論: 小さな手間は、場の空気を変える。タイトル: 余計な下書き`,
+  poem: `タイトル: 小さな灯
+夜のレジ
+指先の硬貨
+少しだけ笑う。タイトル: 余計な下書き`,
+  fairy: `小さな店の奥で、少年はなくしたボタンを見つけ、店主に笑って返した。タイトル: 余計な下書き`,
+  letter: `宛先: 友人へ
+
+本文: 今日は助けてくれてありがとう。
+
+結び: また明日。
+
+差出人: 私。タイトル: 余計な下書き`,
+  diary: `日付: 今日
+天気: 晴れ
+本文: レジで小さな失敗をしたが、最後には笑えた。タイトル: 余計な下書き`,
+  documentary: `ナレーション: 夕方の店内には短い列ができていた。
+証言: 常連客は、いつもの会釈が戻ったと語った。タイトル: 余計な下書き`,
+  radio: `タイトル: 小さな会計
+登場人物: 店員、客
+BGM: 小さく
+店員: こちらで大丈夫です。タイトル: 余計な下書き`,
+};
+
+for (const [mode, sample] of Object.entries(trailingTitleAcrossModes)) {
+  const cleaned = cleanOutputForPublicMode(sample, mode);
+  assert.doesNotMatch(cleaned, /タイトル: 余計な下書き/, `${mode} should remove trailing title artifacts`);
+  assert.match(cleaned, /Created By AI Story Maker V5\.0\.5/, `${mode} should keep the footer`);
+}
 
 console.log('outputCleanup tests passed');
