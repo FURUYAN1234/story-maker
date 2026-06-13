@@ -4,6 +4,43 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Settings Snapshot Helper Split
+
+### What Changed
+
+- Added `src/settingsSnapshotHelpers.js` for axis detail formatting and generation-settings snapshot construction.
+- `src/legacyMain.js` still reads DOM/state values locally, but delegates the `Dt` formatting and `Yn` settings-object construction to the new helper module.
+- Added `tests/settingsSnapshotHelpers.test.js` to pin category/value/custom formatting and the generated settings snapshot shape.
+- API key handling, provider request behavior, prompt contracts, UI mode labels, randomization, character UI, and long-form engine behavior were not changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/settingsSnapshotHelpers.test.js` passed.
+- `node tests/characterInferenceHelpers.test.js` passed.
+- `node tests/axisStateHelpers.test.js` passed.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - mode custom value is populated;
+  - supplement field exists;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Character Inference Helper Split
 
 ### What Changed
