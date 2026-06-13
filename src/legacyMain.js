@@ -11,6 +11,7 @@ import { Ce, N } from './domHelpers.js';
 import { Cp, If, Lf, Qd, bh, downloadJsonObjectWithTimestamp, downloadTextWithTimestamp, vh } from './fileIoHelpers.js';
 import { Lr, jt, zf } from './footerHelpers.js';
 import { Ih, er, fp, hp, nr, or, tr } from './longNovelNumberHelpers.js';
+import { A as buildLongContextPrompt, Zd, mf } from './longContextMemoHelpers.js';
 import { rt } from './longSettingsFormatter.js';
 import { We, Un, Ja, Wa, za, Za, Ya, Xa, At, Et, Qa, es, ts, Ug, Fd, Dd, qg, Hg, Jg, Wg, zg, Zg, Yg, Xg, Qg, ef } from './legacyOptionData.js';
 import { Je as buildDefaultAxisPreset, Sa as findModeLabel } from './modeDefaultHelpers.js';
@@ -22,7 +23,7 @@ import { Af, Mf, ya } from './styleAnalyzerHelpers.js';
 import { da } from './thoughtParsingHelpers.js';
 import { SYSTEM_VERSION } from './version.js';
 
-let Jo=buildPromptBase;const la=e=>e[Math.floor(Math.random()*e.length)];function ff(){const e=Object.fromEntries(Object.entries(Un).filter(([n])=>!ns(n)&&!Wd(n)));let t=ma(e,null,!1)||ma(Un,null,!1);return t=t?t[1]:la(ho(Xg,!1)),Math.random()<.55&&(t+=" "+la(Qg)),Math.random()<.35&&(t+=" "+la(ef)),t}const zd=`
+let Jo=buildPromptBase,A=buildLongContextPrompt;const la=e=>e[Math.floor(Math.random()*e.length)];function ff(){const e=Object.fromEntries(Object.entries(Un).filter(([n])=>!ns(n)&&!Wd(n)));let t=ma(e,null,!1)||ma(Un,null,!1);return t=t?t[1]:la(ho(Xg,!1)),Math.random()<.55&&(t+=" "+la(Qg)),Math.random()<.35&&(t+=" "+la(ef)),t}const zd=`
 【伏線・構成ルール（各章で厳守）】
 1. 伏線の事前配置：後半で重要な要素は、必ず序盤〜前半の章に自然に言及・暗示しておくこと。後半で唐突に新設定を投入することを禁止。
 2. シーンの駆動力（GMC+S）：各場面に「目的（Goal）」「動機（Motivation）」「障害（Conflict）」「賭け金（Stakes）」を明確に設定すること。
@@ -145,31 +146,7 @@ ${n}
 【モチーフ＆サブキャラ追跡メモ】回帰モチーフの状態と、サブキャラの現在地・状況
 【次章のシーン設計（GMC+S）】次章のGoal/Motivation/Conflict/Stakes
 
-★★★ 文脈維持メモまで出力したら出力を停止してください。「続けますか？」等の質問は不要です（アプリが自動制御します）。★★★`,r=["長編小説",t.genre,t.theme,t.era].filter(Boolean);return{prompt:o,tags:r}}function Zd(e){const t=String(e||"").trim();if(!t)return"";const n=t.split(/(?=---\s*第[\d０-９一二三四五六七八九十]+章の文脈メモ\s*---)/).map(o=>o.trim()).filter(Boolean);return n.length?n[n.length-1]:t}function mf(e,t){const n=Zd(e);if(!n)return"";const o=[new RegExp(`【第${t}章のシーン設計（GMC\\+S）】([\\s\\S]*?)(?=\\n【|\\n---|$)`),/【次章のシーン設計（GMC\+S）】([\s\S]*?)(?=\n【|\n---|$)/,/【次章のシーン設計】([\s\S]*?)(?=\n【|\n---|$)/];for(const r of o){const a=n.match(r);if(a!=null&&a[1])return a[1].trim()}return""}function A(e,t,n=""){const o=Zd(t),r=mf(t,e),a=o?o.slice(0,1800):"（直近の文脈メモなし）";return`
-【第${e}章の連続性ガード・最優先】
-以下は元のプロット概要より優先する。過去章の出来事を再演・巻き戻し・別角度で再説明してはならない。
-・第${e}章は、直近章の最後で確定した状態の「後」から始める。
-・直近章の最後の段落を起点にし、直近章の冒頭・移動・到着・発見・戦闘・目撃を第${e}章の冒頭でやり直さない。
-・直近章で到達済みの場所、確認済みの現象、完了済みの送信・救出・逃走・崩壊は「既成事実」として扱い、次の障害・代償・選択へ進める。
-・直近章または文脈メモで、発生済み／紛失済み／負傷済み／回収済み／退場済みになった出来事を、第${e}章で初めて起きる出来事として描かない。
-・同じ道具、証拠、負傷、敵対、会話を使う場合は、「すでに起きた結果を受けた次の行動」として扱う。
-・直近メモの「第${e}章のシーン設計」または「次章のシーン設計（GMC+S）」を第${e}章の開始条件として最優先する。
-・過去章のイベントをもう一度見せたい場合でも、回想・要約・再演で水増ししない。現在進行の新しい対立、調査、発見、決断へ進める。
-・第${e}章が最終章ではない場合、物語全体の勝利・全面契約・会社再建完了・黒幕完全敗北などの総決算を描かない。章末には必ず未解決の対立、新しい危機、次章への代償を残す。
-
-【第${e}章で優先する最新GMC+S】
-${r||"（直近メモに明示された次章GMC+Sがない場合は、直近章の結末直後から新しい展開を作る）"}
-
-【直近文脈メモ抜粋】
-${a}
-
-NEAR-END STRUCTURE LOCK (never output this heading):
-- Unless this is explicitly the final chapter, do not complete the whole-novel objective, final contract, final victory, total defeat of the antagonist, all foreshadowing payoff, or everyone's ending. Leave a concrete unresolved core for the final chapter.
-- A chapter immediately before the final chapter must end at the maximum crisis or last irreversible choice, not at mission accomplished.
-
-${n?`【前回失敗からの再生成指示】
-${n}
-`:""}`}function Go(e,t,n,o,r,a,i,c=""){const p=rt(n),g=A(e,a,c),h=String(r||"").trim().slice(-900);let v="",y="";return i&&(v=`
+★★★ 文脈維持メモまで出力したら出力を停止してください。「続けますか？」等の質問は不要です（アプリが自動制御します）。★★★`,r=["長編小説",t.genre,t.theme,t.era].filter(Boolean);return{prompt:o,tags:r}}function Go(e,t,n,o,r,a,i,c=""){const p=rt(n),g=A(e,a,c),h=String(r||"").trim().slice(-900);let v="",y="";return i&&(v=`
 ★★★ これは最終章（第${e}章 / 全${t}章）です。以下を必ず実行してください ★★★
 ・全ての伏線（チェーホフの銃を含む）を完全に回収すること
 ・全てのモチーフを最終的な形で登場させ、感情的ピークと接続させること
