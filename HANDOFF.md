@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Prompt Split
+
+### What Changed
+
+- Added `src/styleAnalyzerPrompt.js` and moved the style-analyzer base prompt constant `ca` out of `src/legacyMain.js`.
+- `src/legacyMain.js` now imports `ca` while keeping file intake, prompt variant replacement, API calls, JSON repair, result rendering, and rewrite flow local.
+- Added `tests/styleAnalyzerPrompt.test.js` to pin the analyzer JSON schema, style reproduction fields, image/low-information completion instruction, and JSON-escaping guard.
+- Style analyzer behavior, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerPrompt.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels and the style analyzer controls are visible;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Character Import Prompt Split
 
 ### What Changed

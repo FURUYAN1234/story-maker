@@ -24,6 +24,7 @@ import { Gd, Gt, go, lf, yt } from './providerClients.js';
 import { Wd, ho, ma, ns, pickRandom as Ae } from './selectionHelpers.js';
 import { buildGenerationSettingsSnapshot, formatAxisDetail } from './settingsSnapshotHelpers.js';
 import { Af, Mf, ya } from './styleAnalyzerHelpers.js';
+import { ca } from './styleAnalyzerPrompt.js';
 import { Yd, Zs, Xd } from './styleAnalyzerUiState.js';
 import { da } from './thoughtParsingHelpers.js';
 import { SYSTEM_VERSION } from './version.js';
@@ -268,96 +269,7 @@ ${t.plotOutline||"（上記設定に基づきAIが設計）"}
 
 --- ここまでコピー ---
 `}function Nf(e,t){const n=document.getElementById("ci-modal");n&&(n.querySelectorAll(".ci-role-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-role-input[data-idx="${r}"]`),i=At.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=At.find(p=>p===a.value);o.value=c||""})}),n.querySelectorAll(".ci-personality-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-personality-input[data-idx="${r}"]`),i=Et.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=Et.find(p=>p===a.value);o.value=c||""})}),document.getElementById("ci-modal-close").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-cancel").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-register").addEventListener("click",()=>{const o=[];n.querySelectorAll(".ci-check").forEach(r=>{var a,i,c,p,g;if(!r.checked)return;const h=parseInt(r.dataset.idx),v=((a=n.querySelector(`.ci-name[data-idx="${h}"]`))==null?void 0:a.value)||"",y=((i=n.querySelector(`.ci-sex[data-idx="${h}"]`))==null?void 0:i.value)||"",S=((c=n.querySelector(`.ci-role-input[data-idx="${h}"]`))==null?void 0:c.value)||"",b=((p=n.querySelector(`.ci-personality-input[data-idx="${h}"]`))==null?void 0:p.value)||"",$=((g=n.querySelector(`.ci-note[data-idx="${h}"]`))==null?void 0:g.value)||"";o.push({name:v,sex:y,role:S,personality:b,note:$})}),t(o),n.remove()}))}function kf(e,t,n){const o=document.getElementById("ci-dropzone"),r=document.getElementById("ci-file-input"),a=document.getElementById("ci-status");if(!o||!r)return;o.addEventListener("dragover",p=>{p.preventDefault(),!(e.locked&&e.locked.chars)&&o.classList.add("ci-dragover")}),o.addEventListener("dragleave",()=>{o.classList.remove("ci-dragover")}),o.addEventListener("drop",p=>{if(p.preventDefault(),o.classList.remove("ci-dragover"),e.locked&&e.locked.chars)return;const g=Array.from(p.dataTransfer.files).filter(h=>h.type.startsWith("image/"));g.length>0&&i(g)}),o.addEventListener("click",()=>{e.locked&&e.locked.chars||r.click()}),r.addEventListener("change",p=>{if(e.locked&&e.locked.chars)return;const g=Array.from(p.target.files).filter(h=>h.type.startsWith("image/"));g.length>0&&(i(g),p.target.value="")});async function i(p){if(e.locked&&e.locked.chars)return;const g=n();if(!g){alert("APIキーを先に保存してください");return}const h=["image/png","image/jpeg","image/webp","image/gif"],v=p.filter($=>h.includes($.type)?!0:(console.warn(`非対応形式スキップ: ${$.name} (${$.type})`),!1));if(v.length===0){alert(`対応する画像ファイルがありません。
-PNG/JPG/WEBP/GIF のみ対応しています。`);return}o.classList.add("ci-loading");const y=document.getElementById("global-alert");y&&(y.innerHTML="⚠️ <strong>画像認識中:</strong> AIがキャラクターシートを解析しています。完了まで数秒〜数十秒お待ちください。",y.style.display="flex"),a&&(a.textContent=`🔍 ${v.length}枚の画像を解析中...（数秒〜数十秒）`,a.classList.remove("hidden"));const S=[],b=[];try{for(let $=0;$<v.length;$++){const k=v[$];a&&v.length>1&&(a.textContent=`🔍 画像 ${$+1}/${v.length} を解析中...`),y&&v.length>1&&(y.innerHTML=`⚠️ <strong>画像認識中 (${$+1}/${v.length}):</strong> AIがキャラクターシートを解析しています...`);const x=await If(k);b.push(`data:${k.type};base64,${x}`);const{text:I}=await Gd(g,yf,x,k.type,void 0,{responseMimeType:"application/json"}),M=wf(I);M&&M.length>0&&(M.forEach(T=>{T.role=$f(T.role),T.personality=Sf(T.personality)}),S.push(...M))}if(S.length===0)throw new Error("キャラクター情報を検出できませんでした。設定テキストが含まれた画像をお試しください。");c(S,b),a&&(a.textContent=`✅ ${S.length}キャラクター検出！確認してください。`)}catch($){console.error("Character import error:",$),a&&(a.textContent=`❌ エラー: ${$.message}`),setTimeout(()=>{a&&a.classList.add("hidden")},5e3)}finally{o.classList.remove("ci-loading"),y&&(y.style.display="none")}}function c(p,g){var h;(h=document.getElementById("ci-modal"))==null||h.remove();const v=document.createElement("div");v.innerHTML=Cf(p,g),document.body.appendChild(v.firstElementChild),Nf(p,y=>{y.forEach(S=>{e.characters.push({name:S.name||"",sex:S.sex||"",role:S.role||"",personality:S.personality||"",note:S.note||""})}),t(),a&&(a.textContent=`✅ ${y.length}キャラクターを登録しました！`,setTimeout(()=>a.classList.add("hidden"),3e3))})}}const V=e=>document.getElementById(e);let Pe=[],ze=[],at=null,un="",Kt=()=>"",Wo=()=>"";const ca=`あなたはプロの文芸批評家・計量文体学の専門家です。
-以下のテキスト群を精密に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。
-
-## 出力フォーマット（必ずこのJSON形式で出力。各項目は詳細に記述すること）
-
-\`\`\`json
-{
-  "style_name": "この作風を一言で表す名前",
-  "tone": "全体のトーン・雰囲気（複合的に記述）",
-  "narrative_voice": {
-    "person": "人称（一人称/二人称/三人称/混合）",
-    "distance": "語り手と物語の距離感（密着型/中距離/俯瞰型）",
-    "reliability": "語り手の信頼度（信頼できる語り手/不確かな語り手/意図的な嘘つき）",
-    "intrusion": "語り手の介入度（透明/時折コメント/頻繁に介入/メタフィクション的）"
-  },
-  "sentence_style": {
-    "avg_length": "一文の平均的な長さ（短文主体○字前後/中文/長文主体○字前後）",
-    "length_variation": "文長のばらつき（均一/やや変化/激しい緩急）",
-    "ending_patterns": "文末パターン上位3つ（例：だ。/である。/体言止め。の比率）",
-    "rhythm": "文のリズム感の詳細",
-    "paragraph_length": "段落の長さ傾向（短段落○行/中段落/長段落○行）",
-    "paragraph_structure": "段落の構成パターン（トピックセンテンス型/帰納型/散文型）"
-  },
-  "vocabulary": {
-    "level": "語彙レベル（日常的/文学的/専門的/混合）",
-    "density": "情報密度（疎/標準/濃密）",
-    "register": "言語レジスター（口語/文語/混合/コードスイッチング）",
-    "quirks": "語彙の癖・特徴的な語彙選択",
-    "foreign_words": "外来語・カタカナ語の使用傾向",
-    "archaic_modern": "古語・現代語のバランス"
-  },
-  "rhetoric": {
-    "metaphor_style": "比喩の傾向（直喩多用/暗喩中心/擬人法/換喩/提喩）",
-    "metaphor_source": "比喩の素材（自然/都市/身体/テクノロジー/食物等）",
-    "repetition": "反復技法の使用（アナフォラ/エピフォラ/畳語/なし）",
-    "irony_level": "アイロニーの度合い（なし/軽微/中程度/全編的）",
-    "humor_type": "ユーモアの型（不条理/風刺/自虐/言葉遊び/ブラック/なし）",
-    "other_techniques": "その他の修辞技法（倒置/省略/列挙/対句等）"
-  },
-  "description_focus": {
-    "visual": "視覚描写（色彩傾向・画角・光と影の使い方）",
-    "auditory": "聴覚描写（音の種類・静寂の扱い）",
-    "tactile": "触覚描写（温度・質感・痛覚）",
-    "olfactory_gustatory": "嗅覚・味覚描写の有無と傾向",
-    "kinesthetic": "運動感覚・身体感覚の描写傾向",
-    "spatial": "空間把握の方法（広角/クローズアップ/移動視点）",
-    "psychological_depth": "心理描写の深度と手法",
-    "show_tell_ratio": "Show:Tellの推定比率（例：7:3）と手法"
-  },
-  "dialogue": {
-    "style": "セリフの文体的特徴",
-    "function": "セリフの機能的役割（情報伝達/性格描写/プロット推進/雰囲気構築）",
-    "tag_style": "地の文とセリフの接続方法（最小限/動作付き/心理付き）",
-    "dialect_sociolect": "方言・社会方言の使用（標準語/方言/階層差/キャラ語尾）",
-    "subtext": "言外の意味の使い方（直接的/暗示的/多層的）"
-  },
-  "structure": {
-    "pacing": "テンポの詳細（加速パターン・減速パターン）",
-    "scene_transition": "場面転換の手法（カット/フェード/ブリッジ/意識の流れ）",
-    "time_handling": "時制の使い方（直線的/回想多用/時系列シャッフル）",
-    "tension_curve": "緊張の曲線パターン（漸増/波状/急転直下/持続型）",
-    "opening_style": "冒頭の特徴的パターン",
-    "closing_style": "結末の特徴的パターン"
-  },
-  "emotional_architecture": {
-    "dominant_emotions": "主要な感情（上位3つ）",
-    "emotional_range": "感情の振り幅（狭い/中程度/広い）",
-    "catharsis_method": "カタルシスの与え方",
-    "reader_distance": "読者との感情的距離（共感誘導/突き放し/観察的）"
-  },
-  "themes_tendency": "テーマの傾向（詳細に）",
-  "literary_influences": "文学的影響を感じる作家・流派（推定）",
-  "unique_features": ["この作者固有の表現技法・癖を5つ以上箇条書き"],
-  "anti_patterns": ["この作者が意図的に避けていると思われる表現"],
-  "reproduction_prompt": "この作風を他のAI（ChatGPT/Claude/Gemini等）で完全に再現するための詳細な指示文。600字以上で、文体・語彙・修辞・構造・感情設計の全側面を網羅すること"
-}
-\`\`\`
-
-## 重要指示:
-- 各項目は「一言」ではなく「具体的根拠を含む2〜3文」で記述すること
-- unique_featuresは最低5項目、具体的な用例を添えること
-- reproduction_promptは他のAIにそのままコピペして使える完成度にすること
-- 【最重要】値の文字列内で二重引用符を使用する場合は、生の半角ダブルクォーテーション（"）を出力することを完全に禁止します。もし引用やコードブロックなどで二重引用符を出力する必要がある場合は、必ず全角の二重引用符（””）か二重山括弧（『』）に置換して出力してください。生の半角ダブルクォーテーション（"）は、JSONのキー名と値の囲み記号としてのみしか使用してはなりません。値の文字列の中に生の半角ダブルクォーテーション（"）が混入するとJSONの構文エラーになるため、このルールは絶対に遵守してください。
-- **画像のみの入力、あるいは情報が少ない入力に対する指示**:
-  - 入力されたテキストが短い単語・一文のみである場合、または画像（イラスト）のみの入力である場合は、その言葉や絵の空気感から想起される背景、世界観、感情、言外のニュアンス、またはポップカルチャーや文化的背景を最大限に想像・補完してください。
-  - 特に画像のみの解析時におけるテキスト固有の項目（文体、語彙、セリフ、修辞、テンポ等）については、「もしこのイラストを描いた作者が文章を執筆するならば、どのような文体、語彙、テンポ、語り口にするか」を想像力をフルに働かせて具体的に推測・補完してください。
-  - 情報不足を理由にした「判定不可」「画像のみのため解析不能」「不明」といった出力や簡素すぎる記述は絶対に禁止します。エンターテインメントとしての面白さを重視し、すべての項目を具体的かつクリエイティブな想像力で詳細に埋めてください。
-
-## 分析対象テキスト:
-`;function Ef(){const e=V("sa-dropzone"),t=V("sa-file-input");!e||!t||(e.addEventListener("click",()=>t.click()),e.addEventListener("dragover",n=>{n.preventDefault(),e.classList.add("sa-dragover")}),e.addEventListener("dragleave",()=>{e.classList.remove("sa-dragover")}),e.addEventListener("drop",n=>{n.preventDefault(),e.classList.remove("sa-dragover"),Ys(n.dataTransfer.files)}),t.addEventListener("change",n=>{Ys(n.target.files),t.value=""}))}async function Ys(e){const t=Array.from(e),n=t.filter(r=>r.type==="text/plain"||r.name.endsWith(".txt")||r.name.endsWith(".md")||r.name.endsWith(".csv")||r.type===""),o=t.filter(r=>r.type.startsWith("image/"));if(n.length===0&&o.length===0){alert("テキストファイル (.txt, .md) または画像ファイルをドロップしてください");return}for(const r of n)try{const a=await Lf(r);a.trim().length>0&&Pe.push({name:r.name,text:a.trim(),charCount:a.trim().length})}catch(a){console.warn(`ファイル読み込み失敗: ${r.name}`,a)}for(const r of o)try{const a=await If(r),i=URL.createObjectURL(r);ze.push({name:r.name,base64:a,mimeType:r.type,previewUrl:i})}catch(a){console.warn(`画像ファイル読み込み失敗: ${r.name}`,a)}Er(),os(),(Pe.length>0||ze.length>0)&&V("sa-dropzone").classList.add("sa-has-files"),ut()}function Er(){const e=V("sa-file-list");if(!e)return;const t=Pe.reduce((o,r)=>o+r.charCount,0),n=V("sa-file-count");n&&(n.textContent=`${Pe.length}件 / ${t.toLocaleString()}字`,n.classList.remove("hidden")),e.innerHTML=Pe.map((o,r)=>`
+PNG/JPG/WEBP/GIF のみ対応しています。`);return}o.classList.add("ci-loading");const y=document.getElementById("global-alert");y&&(y.innerHTML="⚠️ <strong>画像認識中:</strong> AIがキャラクターシートを解析しています。完了まで数秒〜数十秒お待ちください。",y.style.display="flex"),a&&(a.textContent=`🔍 ${v.length}枚の画像を解析中...（数秒〜数十秒）`,a.classList.remove("hidden"));const S=[],b=[];try{for(let $=0;$<v.length;$++){const k=v[$];a&&v.length>1&&(a.textContent=`🔍 画像 ${$+1}/${v.length} を解析中...`),y&&v.length>1&&(y.innerHTML=`⚠️ <strong>画像認識中 (${$+1}/${v.length}):</strong> AIがキャラクターシートを解析しています...`);const x=await If(k);b.push(`data:${k.type};base64,${x}`);const{text:I}=await Gd(g,yf,x,k.type,void 0,{responseMimeType:"application/json"}),M=wf(I);M&&M.length>0&&(M.forEach(T=>{T.role=$f(T.role),T.personality=Sf(T.personality)}),S.push(...M))}if(S.length===0)throw new Error("キャラクター情報を検出できませんでした。設定テキストが含まれた画像をお試しください。");c(S,b),a&&(a.textContent=`✅ ${S.length}キャラクター検出！確認してください。`)}catch($){console.error("Character import error:",$),a&&(a.textContent=`❌ エラー: ${$.message}`),setTimeout(()=>{a&&a.classList.add("hidden")},5e3)}finally{o.classList.remove("ci-loading"),y&&(y.style.display="none")}}function c(p,g){var h;(h=document.getElementById("ci-modal"))==null||h.remove();const v=document.createElement("div");v.innerHTML=Cf(p,g),document.body.appendChild(v.firstElementChild),Nf(p,y=>{y.forEach(S=>{e.characters.push({name:S.name||"",sex:S.sex||"",role:S.role||"",personality:S.personality||"",note:S.note||""})}),t(),a&&(a.textContent=`✅ ${y.length}キャラクターを登録しました！`,setTimeout(()=>a.classList.add("hidden"),3e3))})}}const V=e=>document.getElementById(e);let Pe=[],ze=[],at=null,un="",Kt=()=>"",Wo=()=>"";function Ef(){const e=V("sa-dropzone"),t=V("sa-file-input");!e||!t||(e.addEventListener("click",()=>t.click()),e.addEventListener("dragover",n=>{n.preventDefault(),e.classList.add("sa-dragover")}),e.addEventListener("dragleave",()=>{e.classList.remove("sa-dragover")}),e.addEventListener("drop",n=>{n.preventDefault(),e.classList.remove("sa-dragover"),Ys(n.dataTransfer.files)}),t.addEventListener("change",n=>{Ys(n.target.files),t.value=""}))}async function Ys(e){const t=Array.from(e),n=t.filter(r=>r.type==="text/plain"||r.name.endsWith(".txt")||r.name.endsWith(".md")||r.name.endsWith(".csv")||r.type===""),o=t.filter(r=>r.type.startsWith("image/"));if(n.length===0&&o.length===0){alert("テキストファイル (.txt, .md) または画像ファイルをドロップしてください");return}for(const r of n)try{const a=await Lf(r);a.trim().length>0&&Pe.push({name:r.name,text:a.trim(),charCount:a.trim().length})}catch(a){console.warn(`ファイル読み込み失敗: ${r.name}`,a)}for(const r of o)try{const a=await If(r),i=URL.createObjectURL(r);ze.push({name:r.name,base64:a,mimeType:r.type,previewUrl:i})}catch(a){console.warn(`画像ファイル読み込み失敗: ${r.name}`,a)}Er(),os(),(Pe.length>0||ze.length>0)&&V("sa-dropzone").classList.add("sa-has-files"),ut()}function Er(){const e=V("sa-file-list");if(!e)return;const t=Pe.reduce((o,r)=>o+r.charCount,0),n=V("sa-file-count");n&&(n.textContent=`${Pe.length}件 / ${t.toLocaleString()}字`,n.classList.remove("hidden")),e.innerHTML=Pe.map((o,r)=>`
     <div class="sa-file-item">
       <span class="sa-file-name">📄 ${Ce(o.name)}</span>
       <span class="sa-file-chars">${o.charCount.toLocaleString()}字</span>
