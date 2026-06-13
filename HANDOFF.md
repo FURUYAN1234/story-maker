@@ -6,6 +6,29 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 Entry-Point Split Refactor
 
+## 2026-06-13 ModulePreload Bootstrap Split
+
+### What Changed
+
+- Added `src/modulePreloadPolyfill.js` as the single owner of the runtime `modulepreload` compatibility shim.
+- `src/main.js` now imports that shim before `qualityBoost`, `legacyMain`, and `publicRuntime`.
+- Removed the repeated leading `modulepreload` boilerplate from `src/legacyMain.js`.
+- No generation prompts, provider calls, UI mode contracts, or long-form engine logic were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - browser error log is empty.
+
 ### What Changed
 
 - `src/main.js` is now a small ordered runtime entrypoint.
