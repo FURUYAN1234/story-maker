@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Prompt Builder Split
+
+### What Changed
+
+- Added `src/promptBuilder.js` and moved the standard-mode prompt builder `Jo` out of `src/legacyMain.js`.
+- `src/legacyMain.js` imports the base prompt builder as `buildPromptBase`, then keeps a local mutable `Jo` alias so the existing quality-booster wrapper can still layer on top of it.
+- Added `tests/promptBuilder.test.js` to pin representative standard prompt text, time-period rule injection, lore/RAG injection, character count tags, and asset tags.
+- Prompt wording, mode labels, quality-booster wrapping, API handling, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/promptBuilder.test.js` passed.
+- Existing helper tests passed, including era lore, legacy option data, axis prompt details, provider clients, model data, thought parsing, settings snapshot, character inference, axis state, mode default, file IO, API key, long-novel number, footer, DOM, selection, and API error helpers.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Era Lore Helper Split
 
 ### What Changed
