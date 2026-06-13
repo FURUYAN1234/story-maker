@@ -4,6 +4,34 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Provider Client Module Split
+
+### What Changed
+
+- Added `src/providerClients.js` and moved the Gemini/OpenAI text, vision, multimodal, streaming, fallback, timeout, and diagnostic client functions out of `src/legacyMain.js`.
+- `src/legacyMain.js` now imports only the provider functions it calls directly: `Gd`, `Gt`, `go`, `lf`, and `yt`.
+- Removed now-unused provider-only imports from `src/legacyMain.js`.
+- Added `tests/providerClients.test.js` to pin provider exports, no-key fail-fast behavior, and a no-network fake-fetch Gemini request/response path.
+- API key handling, retry/fallback order, request payload structure, prompt contracts, UI labels, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/providerClients.test.js` passed.
+- Existing helper tests passed: model data, thought parsing, settings snapshot, character inference, axis state, mode default, file IO, API key, long-novel number, footer, DOM, selection, and API error helpers.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Gemini Model Value Reuse
 
 ### What Changed
