@@ -4,6 +4,40 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Axis State Helper Split
+
+### What Changed
+
+- Added `src/axisStateHelpers.js` for axis state-key mapping, axis source mutation, default-filled cleanup, user-owned axis detection, and randomizable-axis detection.
+- `src/legacyMain.js` now keeps its legacy wrapper names (`lp`, `ct`, `th`, `nh`, `oh`, `wa`, `Zo`) but delegates their state logic to the new helper module.
+- Added `tests/axisStateHelpers.test.js` to pin source setting/clearing, default-filled cleanup, state selection detection, locked/manual/default/random behavior, and randomizable-axis decisions.
+- DOM reads, chip rendering, mode/category data, API key handling, provider request behavior, prompt contracts, UI mode labels, and long-form engine behavior were not changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/axisStateHelpers.test.js` passed.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - API譛ｪ險ｭ螳・label is visible;
+  - no Vite error overlay is present;
+  - browser error log is empty.
+
 ## 2026-06-13 Mode Default Helper Split
 
 ### What Changed
