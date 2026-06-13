@@ -4,6 +4,31 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer List Markup Split
+
+### What Changed
+
+- Added `src/styleAnalyzerListMarkup.js` and moved style-analyzer text-file/image-file list HTML construction out of `src/legacyMain.js`.
+- `src/legacyMain.js` now calls `createStyleAnalyzerTextFileListMarkup(Pe, Ce)` and `createStyleAnalyzerImageListMarkup(ze, Ce)` while keeping file state arrays, remove-button handlers, object URL revocation, and analyze-button state local.
+- Added `tests/styleAnalyzerListMarkup.test.js` to pin text list rows, image list rows, empty input handling, escaping, and index attributes.
+- Style analyzer file intake, image preview state, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerListMarkup.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - style analyzer section, text-file list, and image-file list containers render;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Character Datalist Markup Split
 
 ### What Changed
