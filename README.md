@@ -1,4 +1,4 @@
-# Story Maker v5.0.2 / AI物語メーカー
+# Story Maker v5.0.3 / AI物語メーカー
 
 Story Maker is a static web application for generating short-form creative text with Google Gemini API or OpenAI API. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -20,9 +20,9 @@ APIキーを Issue、Pull Request、リリースノート、スクリーンシ�
 
 ## Core Concept / 基本コンセプト
 
-The app builds a generation request from multiple visible axes instead of relying on one free-form prompt. The goal is to make quick generation more stable, more mode-aware, and less likely to collapse into generic AI prose.
+The app builds a generation request from multiple visible axes instead of relying on one free-form prompt. The goal is to move generated stories away from the similar, overly neat, AI-like patterns that often appear by default, and toward outputs that at least pursue a decent level of interestingness through concrete conflict, timing, texture, and mode-specific endings.
 
-このアプリは、自由入力だけに頼らず、複数の見える創作軸から生成リクエストを組み立てます。狙いは、短時間の生成でも、出力形式を守り、選択内容と整合し、AIらしい均一な説明文へ崩れにくくすることです。
+このアプリは、自由入力だけに頼らず、複数の見える創作軸から生成リクエストを組み立てます。狙いは、AI特有の似たり寄ったりで整いすぎたストーリーから離れ、短時間の生成でも、具体的な葛藤、間、手触り、モードごとの締めによって、そこそこ面白いところを追求することです。
 
 Main axes:
 
@@ -93,6 +93,7 @@ The intent is not to force every work into the same template. The contract tells
 | Quality | Mode contracts | Each public mode receives a required output shape. |
 | Quality | Short-draft rewrite | Too-short public drafts are rewritten before they are accepted as final output. |
 | Quality | Final cleanup | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display. |
+| Quality | Completion gates | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored. |
 
 | 領域 | 機能 | 詳細 |
 |---|---|---|
@@ -121,6 +122,7 @@ The intent is not to force every work into the same template. The contract tells
 | 品質 | モード契約 | 公開モードごとに必須の出力形を指定します。 |
 | 品質 | 短すぎる初稿の改稿 | 公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
 | 品質 | 最終出力整形 | プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
+| 品質 | 完走ゲート | 4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
 
 ## Technology Highlights / 技術ハイライト
 
@@ -211,15 +213,15 @@ The public release supports the following 14 output modes. Each mode has a mode 
 - エッセイ、詩、手紙、日記では、物語風の伏線を無理に足すより、その形式自体を守ります。
 - すべてのモードで、見える本文中のプロンプト分析、自己評価、チェックリスト断片、未完成の設計メモを拒否します。
 
-## v5.0.2 Quality System / v5.0.2 品質システム
+## v5.0.3 Quality System / v5.0.3 品質システム
 
-v5.0.2 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
+v5.0.3 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, completion gates, and generic-rule checks. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
 
-v5.0.2では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
+v5.0.3では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、完走ゲート、汎用ルール検査の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
 
-v5.0.2 also moves release identity, footer text, and browser API-session persistence into small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
+The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
-v5.0.2では、リリース識別、フッター表記、ブラウザ内APIセッション保持も小さな実行時モジュールへ分離しています。`src/main.js` はまだ既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーのタブ内保持と復元は `src/apiSession.js` に分けました。これにより、APIキーをソースへ保存せずに、公開表記とキー保持挙動を揃えています。
+現在のリリース系統では、リリース識別、フッター表記、ブラウザ内APIセッション保持も小さな実行時モジュールへ分離しています。`src/main.js` はまだ既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーのタブ内保持と復元は `src/apiSession.js` に分けました。これにより、APIキーをソースへ保存せずに、公開表記とキー保持挙動を揃えています。
 
 ### Selected-Mode Priority / 選択モード優先
 
@@ -235,7 +237,7 @@ Every supported mode receives a mode-specific contract before generation. The co
 
 ### Under-Length Rewrite / 短すぎる初稿の改稿
 
-For both Gemini and OpenAI streaming generation, v5.0.2 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
+For both Gemini and OpenAI streaming generation, the current quality layer checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
 
 Gemini と OpenAI のストリーム生成では、出力欄へ最終表示する前に、公開モードの本文長を確認します。対応モードで短すぎる初稿が返った場合、同じ入力条件を使って、選択中のAPIに完成稿として全面改稿させます。短すぎる初稿を、そのまま最終表示として採用しません。
 
@@ -254,6 +256,12 @@ Gemini と OpenAI は同じ公開モード契約を使いますが、実行時�
 Before the generated text is treated as the visible final output, the public cleanup layer removes prompt artifacts, stale completion markers, and internal footer text. It also keeps mode-specific readability: letters are paragraphized, poems are kept line-based, essays are capped at a readable finished length, and manga/script-like outputs are trimmed at a complete sentence or panel boundary.
 
 生成本文を画面に出す最終稿として扱う前に、公開出力整形レイヤーが、プロンプト断片、古い完了マーカー、内部フッターを取り除きます。あわせて、手紙は段落化し、詩は行形式を守り、エッセイは読み切れる完成稿の長さに収め、漫画・脚本系は文またはコマの区切りで自然に閉じます。
+
+### Completion And Interest Gates / 完走と面白さのゲート
+
+The app does not treat "some text appeared" as enough. Mode-specific completion gates check whether the output reached the part that makes the mode usable: for example, `4koma_scenario` must preserve a real final `狙い:` block for the fourth panel, and `documentary` must end with a documentary-style closing label instead of drifting into unlabeled prose. The browser QA then checks real Gemini/OpenAI outputs for concrete objects, friction, dialogue, choices, and non-generic endings.
+
+このアプリでは、「何か文章が出た」だけでは合格にしません。モード別の完走ゲートで、その形式として使える終端まで到達したかを見ます。たとえば `4koma_scenario` では4コマ目の実質ある `狙い:` を保持し、`documentary` ではラベルなしの散文へ流れず、ドキュメンタリーとしての締めを残します。そのうえで、実ブラウザQAでは Gemini / OpenAI の実出力について、具体物、摩擦、会話、選択、汎用的すぎない終わり方を確認します。
 
 ## API Engine / APIエンジン
 
@@ -294,8 +302,12 @@ The writing layer uses recurring narrative methods rather than one-off prompt sl
 | Information order | Control what the reader knows first, what is withheld, and what is reinterpreted at the end. |
 | Relationship change | Make at least one distance, trust level, misunderstanding, or obligation shift. |
 | Sensory anchoring | Add touch, smell, sound, light, weight, or bodily discomfort to reduce abstract summary. |
+| Human friction | Add hesitation, misunderstanding, minor failure, awkward silence, fatigue, or small damage so the scene does not become too smooth. |
+| Aftermath visibility | Show what remains after the gag, decision, or conflict: cleanup, a shifted object, embarrassment, debt, relief, or a changed distance. |
 | Anti-template pressure | Avoid the most obvious genre route and over-familiar moral closure. |
 | Last-line design | Use the final line to turn, collect, echo, or sharpen the meaning instead of merely stopping. |
+| Mode-complete ending | Finish in the shape the selected mode needs, not in a generic prose ending. |
+| Browser-backed calibration | Judge the method by actual Gemini/OpenAI browser outputs across modes, not by prompt intent alone. |
 
 | メソッド | 目的 |
 |---|---|
@@ -304,8 +316,12 @@ The writing layer uses recurring narrative methods rather than one-off prompt sl
 | 情報開示の順番 | 読者が先に知ること、伏せること、最後に意味が変わることを制御します。 |
 | 関係変化 | 距離、信頼、誤解、義務のどれかが変わるようにします。 |
 | 感覚の接地 | 触覚、匂い、音、光、重さ、身体の違和感を入れ、抽象的な要約を避けます。 |
+| 人間的な摩擦 | ためらい、勘違い、小さな失敗、気まずい沈黙、疲れ、少しの損を入れ、場面が滑らかすぎないようにします。 |
+| 後始末の可視化 | ギャグ、決断、衝突のあとに残る片付け、動いた物、恥、借り、安堵、変わった距離を見せます。 |
 | テンプレ回避 | もっともありがちなジャンル展開や安易な教訓で終わらないようにします。 |
 | 最後の一文設計 | ただ止めるのではなく、意味を反転、回収、反響、凝縮する一文を狙います。 |
+| モードとしての完走 | 汎用的な小説風の終わりではなく、選択された形式に必要な終端まで書き切ります。 |
+| ブラウザ実出力での調整 | プロンプト上の意図だけでなく、Gemini / OpenAI の実ブラウザ出力をモード別に見て判断します。 |
 
 ## UI Overview / UI概要
 
@@ -763,6 +779,22 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
 
 ## Release History / 変更履歴
+
+### v5.0.3 (2026-06-13)
+
+- Reframed the app concept around moving away from similar AI-default stories and pursuing reasonably interesting outputs through concrete conflict, timing, texture, and mode-specific endings.
+- Documented the current interestingness methods: human friction, aftermath visibility, mode-complete endings, and browser-backed calibration across Gemini/OpenAI outputs.
+- Fixed `4koma_scenario` cleanup so a multi-line final fourth-panel `狙い:` block is preserved instead of being trimmed into an empty footer-only ending.
+- Added stricter `4koma_scenario` rewrite gating so incomplete final aim blocks are rejected before the text is accepted.
+- Added documentary cleanup that restores or normalizes a closing `締め:` label when the generated text has a documentary closing but lacks the required final label.
+- Verified all 14 visible non-long public modes on both Gemini and OpenAI in the in-app browser after the fixes.
+
+- アプリのコンセプトを、AI特有の似たり寄ったりなストーリーから離れ、具体的な葛藤、間、手触り、モード別の締めによって、そこそこ面白い出力を追求する方向へ整理しました。
+- 現在の面白さメソッドとして、人間的な摩擦、後始末の可視化、モードとしての完走、Gemini / OpenAI 実ブラウザ出力での調整をREADMEへ追記しました。
+- `4koma_scenario` の最終整形で、4コマ目の複数行 `狙い:` が削られてフッターだけになる問題を修正しました。
+- `4koma_scenario` の改稿ゲートを強化し、4コマ目の狙いが実質未完成の出力を採用しないようにしました。
+- ドキュメンタリー出力で、締めに相当する段落があるのに `締め:` ラベルが欠ける場合、最終整形で復元・正規化するようにしました。
+- 修正後、内蔵ブラウザで Gemini / OpenAI の両方について、可視の非長編14公開モードすべてを再確認しました。
 
 ### v5.0.2 (2026-06-13)
 

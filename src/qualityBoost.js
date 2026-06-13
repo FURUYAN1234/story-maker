@@ -233,6 +233,29 @@ function stripPrematureEnding(text) {
     .trim();
 }
 
+function finalScenarioAimBlock(text) {
+  const source = normalizeFormatLabelMarkdown(stripPrematureEnding(text));
+  const finalPanelMatch = [...source.matchAll(/^\[4コマ目\]/gm)].pop();
+  const finalPanelStart = finalPanelMatch ? finalPanelMatch.index : source.lastIndexOf('[4コマ目]');
+  const finalPanel = finalPanelStart >= 0 ? source.slice(finalPanelStart) : source;
+  const aims = [...finalPanel.matchAll(/^狙い\s*[:：]/gm)];
+  if (!aims.length) return '';
+  const aimStart = aims[aims.length - 1].index;
+  const afterAim = finalPanel.slice(aimStart);
+  const restartMatch = afterAim.match(/\n\s*(?:Topic:|Logline:|Location:|Outfit:|Punchline:|Scenario:|\[[1-4]コマ目\])/);
+  const aimEnd = restartMatch?.index > 0 ? restartMatch.index : afterAim.length;
+  return afterAim.slice(0, aimEnd).trim();
+}
+
+function scenarioFinalAimIsComplete(text) {
+  const content = finalScenarioAimBlock(text)
+    .replace(/^狙い\s*[:：]\s*/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return countBodyChars(content) >= 24
+    && !/^(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker/i.test(content);
+}
+
 function internalArtifactIssue(body) {
   if (/<thought|<\/thought>/i.test(body)) return '思考タグが本文に混入しています';
   if (/【最終自己採点結果】|\[進捗\]|自己採点[:：]|評価理由[:：]|伏線回収度[:：]|起承転結の構造[:：]|制約遵守度[:：]/.test(body)) {
@@ -340,7 +363,7 @@ function rewriteIssue(mode, text, min, options = {}) {
     const labelIssue = requiredLabelIssue(mode, body);
     if (labelIssue) return labelIssue;
   }
-  if (mode === '4koma_scenario' && !/^狙い\s*[:：]\s*\S+/m.test(body.split(/\[4コマ目\]/).pop() || '')) {
+  if (mode === '4koma_scenario' && !scenarioFinalAimIsComplete(body)) {
     return '4コマ目の狙い欄が未完成です';
   }
   return '';

@@ -607,7 +607,31 @@ function scenarioChunkIsComplete(text) {
     && (source.match(/^絵:/gm) || []).length >= 4
     && (source.match(/^セリフ:/gm) || []).length >= 4
     && (source.match(/^演出:/gm) || []).length >= 4
-    && (source.match(/^狙い:/gm) || []).length >= 4;
+    && (source.match(/^狙い:/gm) || []).length >= 4
+    && scenarioFinalAimIsComplete(source);
+}
+
+function finalScenarioAimBlock(text) {
+  const source = stripFooter(normalizeBreaks(text));
+  const finalPanelMatch = [...source.matchAll(/^\[4コマ目\]/gm)].pop();
+  const finalPanelStart = finalPanelMatch ? finalPanelMatch.index : source.lastIndexOf('[4コマ目]');
+  const finalPanel = finalPanelStart >= 0 ? source.slice(finalPanelStart) : source;
+  const aims = [...finalPanel.matchAll(/^狙い\s*[:：]/gm)];
+  if (!aims.length) return '';
+  const aimStart = aims[aims.length - 1].index;
+  const afterAim = finalPanel.slice(aimStart);
+  const restartMatch = afterAim.match(/\n\s*(?:Topic:|Logline:|Location:|Outfit:|Punchline:|Scenario:|\[[1-4]コマ目\])/);
+  const aimEnd = restartMatch?.index > 0 ? restartMatch.index : afterAim.length;
+  return afterAim.slice(0, aimEnd).trim();
+}
+
+function scenarioFinalAimIsComplete(text) {
+  const content = finalScenarioAimBlock(text)
+    .replace(/^狙い\s*[:：]\s*/u, '')
+    .replace(FOOTER_PATTERN, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return charLength(content) >= 24 && !/^(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker/i.test(content);
 }
 
 function keepFirstComplete4komaScenario(text) {
@@ -636,9 +660,10 @@ function trimAfterFinalScenarioAim(text) {
   const aims = [...source.matchAll(/^狙い:[^\n]*/gm)];
   if (aims.length < 4) return source;
   const finalAim = aims[aims.length - 1];
-  const lineEnd = source.indexOf('\n', finalAim.index);
-  if (lineEnd < 0) return source;
-  return normalizeBreaks(source.slice(0, lineEnd));
+  const afterAim = source.slice(finalAim.index);
+  const restartMatch = afterAim.match(/\n\s*(?:Topic:|Logline:|Location:|Outfit:|Punchline:|Scenario:|\[[1-4]コマ目\])/);
+  if (!restartMatch || restartMatch.index <= 0) return source;
+  return normalizeBreaks(source.slice(0, finalAim.index + restartMatch.index));
 }
 
 function balanceScenarioTopicLine(text) {
@@ -681,6 +706,29 @@ function clean4komaScenario(text) {
   return finishPublicText(next);
 }
 
+function ensureDocumentaryClosingLabel(text) {
+  let source = normalizeBreaks(text);
+  source = source.replace(/^記録映像（締め）\s*[:：]\s*/m, '締め: ');
+  if (/^締め\s*[:：]\s*\S+/m.test(source)) return source;
+
+  const parts = source.split(/\n{2,}/).map(part => part.trim()).filter(Boolean);
+  if (!parts.length) return source;
+  const lastIndex = parts.length - 1;
+  if (/^(?:ナレーション|記録映像|証言|インタビュー)\s*[:：]/.test(parts[lastIndex])) {
+    parts[lastIndex] = parts[lastIndex].replace(/^(?:ナレーション|記録映像|証言|インタビュー)\s*[:：]\s*/u, '締め: ');
+  } else {
+    parts[lastIndex] = `締め:\n${parts[lastIndex]}`;
+  }
+  return normalizeBreaks(parts.join('\n\n'));
+}
+
+function cleanDocumentary(text) {
+  let next = stripPublicArtifacts(text);
+  next = removeRestartedDrafts(next);
+  next = ensureDocumentaryClosingLabel(next);
+  return finishPublicText(next);
+}
+
 function cleanGenericPublicMode(text, mode) {
   let next = stripPublicArtifacts(String(text || ''));
   next = removeRestartedDrafts(next);
@@ -694,6 +742,7 @@ export function cleanOutputForPublicMode(text, mode = currentMode()) {
   if (mode === 'poem') return cleanPoem(text);
   if (mode === 'letter') return cleanLetter(text);
   if (mode === 'diary') return cleanDiary(text);
+  if (mode === 'documentary') return cleanDocumentary(text);
   if (mode === 'radio') return cleanRadio(text);
   if (mode === 'manga') return cleanManga(text);
   if (mode === '4koma') return clean4koma(text);
