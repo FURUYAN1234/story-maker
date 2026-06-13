@@ -6,6 +6,7 @@ import { restoreApiSession as restoreApiSessionState, writeApiSession as writeAp
 import { canRandomizeAxis, clearDefaultFilledForStateKey, getAxisSource, hasAxisStateSelection, isAxisUserOwned, setAxisSource, stateKeyToAxis } from './axisStateHelpers.js';
 import { Ca, Na } from './characterInferenceHelpers.js';
 import { Sf, wf, $f } from './characterImportParsing.js';
+import { Cf } from './characterImportModalMarkup.js';
 import { GEMINI_MODELS as Tn } from './data.js';
 import { Ce, N } from './domHelpers.js';
 import { Cp, If, Lf, Qd, bh, downloadJsonObjectWithTimestamp, downloadTextWithTimestamp, vh } from './fileIoHelpers.js';
@@ -329,69 +330,7 @@ ${t.plotOutline||"（上記設定に基づきAIが設計）"}
 - JSONはコードブロックで囲まず、純粋なJSON文字列のみ出力すること
 
 出力例:
-[{"name":"アカリ","sex":"女性","role":"主人公(推定)","personality":"元気","note":"内巻きのミディアムボブ, オレンジ髪, セーラー服, ロングヘア厳禁, 眼鏡厳禁, 甘いものが大好き"}]`;function vf(e){return new Promise((t,n)=>{const o=new FileReader;o.onload=()=>{const r=o.result.split(",")[1];t(r)},o.onerror=n,o.readAsDataURL(e)})}function Cf(e,t){const n=At.map(c=>`<option value="${c}">${c}</option>`).join(""),o=Et.map(c=>`<option value="${c}">${c}</option>`).join(""),r=e.map((c,p)=>`
-    <div class="ci-char-card">
-      <div class="ci-char-header">
-        <label class="ci-check-label">
-          <input type="checkbox" class="ci-check" data-idx="${p}" checked>
-          <span class="ci-char-name-display">${c.name||`キャラ${p+1}`}</span>
-        </label>
-        <span class="ci-char-badge">${c.role.includes("(推定)")?"🤖 AI推定":"📖 テキスト読取"}</span>
-      </div>
-      <div class="ci-char-fields">
-        <div class="ci-field">
-          <label class="ci-field-label">名前</label>
-          <input type="text" class="ci-input ci-name" data-idx="${p}" value="${(c.name||"").replace(/"/g,"&quot;")}">
-        </div>
-        <div class="ci-field">
-          <label class="ci-field-label">性別</label>
-          <input type="text" class="ci-input ci-sex" data-idx="${p}" value="${(c.sex||"").replace(/"/g,"&quot;")}">
-        </div>
-        <div class="ci-field">
-          <label class="ci-field-label">役割</label>
-          <div class="ci-select-wrap">
-            <select class="ci-select ci-role-select" data-idx="${p}">
-              <option value="">-- 自由入力に切替 --</option>
-              ${n}
-            </select>
-            <input type="text" class="ci-input ci-role-input" data-idx="${p}" value="${(c.role||"").replace(/\(推定\)/g,"").trim().replace(/"/g,"&quot;")}" placeholder="自由入力...">
-          </div>
-        </div>
-        <div class="ci-field">
-          <label class="ci-field-label">性格</label>
-          <div class="ci-select-wrap">
-            <select class="ci-select ci-personality-select" data-idx="${p}">
-              <option value="">-- 自由入力に切替 --</option>
-              ${o}
-            </select>
-            <input type="text" class="ci-input ci-personality-input" data-idx="${p}" value="${(c.personality||"").replace(/\(推定\)/g,"").trim().replace(/"/g,"&quot;")}" placeholder="自由入力...">
-          </div>
-        </div>
-        <div class="ci-field ci-field-full">
-          <label class="ci-field-label">詳細メモ</label>
-          <textarea class="ci-textarea ci-note" data-idx="${p}" rows="3">${(c.note||"").replace(/</g,"&lt;")}</textarea>
-        </div>
-      </div>
-    </div>
-  `).join(""),a=Array.isArray(t)?t:t?[t]:[],i=a.length>0?`<div class="ci-thumbnail-wrap">${a.map((c,p)=>`<img src="${c}" class="ci-thumbnail" alt="解析元画像 ${p+1}">`).join("")}</div>`:"";return`
-    <div class="ci-modal-overlay" id="ci-modal">
-      <div class="ci-modal">
-        <div class="ci-modal-header">
-          <h3 class="ci-modal-title">📷 キャラクター認識結果</h3>
-          <span class="ci-modal-count">${e.length} キャラクター検出</span>
-          <button class="ci-modal-close" id="ci-modal-close">✕</button>
-        </div>
-        ${i}
-        <div class="ci-char-list">
-          ${r}
-        </div>
-        <div class="ci-modal-actions">
-          <button class="ci-btn ci-btn-primary" id="ci-btn-register">✅ 選択したキャラを登録</button>
-          <button class="ci-btn ci-btn-secondary" id="ci-btn-cancel">キャンセル</button>
-        </div>
-      </div>
-    </div>
-  `}function Nf(e,t){const n=document.getElementById("ci-modal");n&&(n.querySelectorAll(".ci-role-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-role-input[data-idx="${r}"]`),i=At.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=At.find(p=>p===a.value);o.value=c||""})}),n.querySelectorAll(".ci-personality-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-personality-input[data-idx="${r}"]`),i=Et.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=Et.find(p=>p===a.value);o.value=c||""})}),document.getElementById("ci-modal-close").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-cancel").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-register").addEventListener("click",()=>{const o=[];n.querySelectorAll(".ci-check").forEach(r=>{var a,i,c,p,g;if(!r.checked)return;const h=parseInt(r.dataset.idx),v=((a=n.querySelector(`.ci-name[data-idx="${h}"]`))==null?void 0:a.value)||"",y=((i=n.querySelector(`.ci-sex[data-idx="${h}"]`))==null?void 0:i.value)||"",S=((c=n.querySelector(`.ci-role-input[data-idx="${h}"]`))==null?void 0:c.value)||"",b=((p=n.querySelector(`.ci-personality-input[data-idx="${h}"]`))==null?void 0:p.value)||"",$=((g=n.querySelector(`.ci-note[data-idx="${h}"]`))==null?void 0:g.value)||"";o.push({name:v,sex:y,role:S,personality:b,note:$})}),t(o),n.remove()}))}function kf(e,t,n){const o=document.getElementById("ci-dropzone"),r=document.getElementById("ci-file-input"),a=document.getElementById("ci-status");if(!o||!r)return;o.addEventListener("dragover",p=>{p.preventDefault(),!(e.locked&&e.locked.chars)&&o.classList.add("ci-dragover")}),o.addEventListener("dragleave",()=>{o.classList.remove("ci-dragover")}),o.addEventListener("drop",p=>{if(p.preventDefault(),o.classList.remove("ci-dragover"),e.locked&&e.locked.chars)return;const g=Array.from(p.dataTransfer.files).filter(h=>h.type.startsWith("image/"));g.length>0&&i(g)}),o.addEventListener("click",()=>{e.locked&&e.locked.chars||r.click()}),r.addEventListener("change",p=>{if(e.locked&&e.locked.chars)return;const g=Array.from(p.target.files).filter(h=>h.type.startsWith("image/"));g.length>0&&(i(g),p.target.value="")});async function i(p){if(e.locked&&e.locked.chars)return;const g=n();if(!g){alert("APIキーを先に保存してください");return}const h=["image/png","image/jpeg","image/webp","image/gif"],v=p.filter($=>h.includes($.type)?!0:(console.warn(`非対応形式スキップ: ${$.name} (${$.type})`),!1));if(v.length===0){alert(`対応する画像ファイルがありません。
+[{"name":"アカリ","sex":"女性","role":"主人公(推定)","personality":"元気","note":"内巻きのミディアムボブ, オレンジ髪, セーラー服, ロングヘア厳禁, 眼鏡厳禁, 甘いものが大好き"}]`;function vf(e){return new Promise((t,n)=>{const o=new FileReader;o.onload=()=>{const r=o.result.split(",")[1];t(r)},o.onerror=n,o.readAsDataURL(e)})}function Nf(e,t){const n=document.getElementById("ci-modal");n&&(n.querySelectorAll(".ci-role-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-role-input[data-idx="${r}"]`),i=At.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=At.find(p=>p===a.value);o.value=c||""})}),n.querySelectorAll(".ci-personality-select").forEach(o=>{const r=o.dataset.idx,a=n.querySelector(`.ci-personality-input[data-idx="${r}"]`),i=Et.find(c=>c===a.value);i&&(o.value=i),o.addEventListener("change",()=>{o.value&&(a.value=o.value)}),a.addEventListener("input",()=>{const c=Et.find(p=>p===a.value);o.value=c||""})}),document.getElementById("ci-modal-close").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-cancel").addEventListener("click",()=>n.remove()),document.getElementById("ci-btn-register").addEventListener("click",()=>{const o=[];n.querySelectorAll(".ci-check").forEach(r=>{var a,i,c,p,g;if(!r.checked)return;const h=parseInt(r.dataset.idx),v=((a=n.querySelector(`.ci-name[data-idx="${h}"]`))==null?void 0:a.value)||"",y=((i=n.querySelector(`.ci-sex[data-idx="${h}"]`))==null?void 0:i.value)||"",S=((c=n.querySelector(`.ci-role-input[data-idx="${h}"]`))==null?void 0:c.value)||"",b=((p=n.querySelector(`.ci-personality-input[data-idx="${h}"]`))==null?void 0:p.value)||"",$=((g=n.querySelector(`.ci-note[data-idx="${h}"]`))==null?void 0:g.value)||"";o.push({name:v,sex:y,role:S,personality:b,note:$})}),t(o),n.remove()}))}function kf(e,t,n){const o=document.getElementById("ci-dropzone"),r=document.getElementById("ci-file-input"),a=document.getElementById("ci-status");if(!o||!r)return;o.addEventListener("dragover",p=>{p.preventDefault(),!(e.locked&&e.locked.chars)&&o.classList.add("ci-dragover")}),o.addEventListener("dragleave",()=>{o.classList.remove("ci-dragover")}),o.addEventListener("drop",p=>{if(p.preventDefault(),o.classList.remove("ci-dragover"),e.locked&&e.locked.chars)return;const g=Array.from(p.dataTransfer.files).filter(h=>h.type.startsWith("image/"));g.length>0&&i(g)}),o.addEventListener("click",()=>{e.locked&&e.locked.chars||r.click()}),r.addEventListener("change",p=>{if(e.locked&&e.locked.chars)return;const g=Array.from(p.target.files).filter(h=>h.type.startsWith("image/"));g.length>0&&(i(g),p.target.value="")});async function i(p){if(e.locked&&e.locked.chars)return;const g=n();if(!g){alert("APIキーを先に保存してください");return}const h=["image/png","image/jpeg","image/webp","image/gif"],v=p.filter($=>h.includes($.type)?!0:(console.warn(`非対応形式スキップ: ${$.name} (${$.type})`),!1));if(v.length===0){alert(`対応する画像ファイルがありません。
 PNG/JPG/WEBP/GIF のみ対応しています。`);return}o.classList.add("ci-loading");const y=document.getElementById("global-alert");y&&(y.innerHTML="⚠️ <strong>画像認識中:</strong> AIがキャラクターシートを解析しています。完了まで数秒〜数十秒お待ちください。",y.style.display="flex"),a&&(a.textContent=`🔍 ${v.length}枚の画像を解析中...（数秒〜数十秒）`,a.classList.remove("hidden"));const S=[],b=[];try{for(let $=0;$<v.length;$++){const k=v[$];a&&v.length>1&&(a.textContent=`🔍 画像 ${$+1}/${v.length} を解析中...`),y&&v.length>1&&(y.innerHTML=`⚠️ <strong>画像認識中 (${$+1}/${v.length}):</strong> AIがキャラクターシートを解析しています...`);const x=await vf(k);b.push(`data:${k.type};base64,${x}`);const{text:I}=await Gd(g,yf,x,k.type,void 0,{responseMimeType:"application/json"}),M=wf(I);M&&M.length>0&&(M.forEach(T=>{T.role=$f(T.role),T.personality=Sf(T.personality)}),S.push(...M))}if(S.length===0)throw new Error("キャラクター情報を検出できませんでした。設定テキストが含まれた画像をお試しください。");c(S,b),a&&(a.textContent=`✅ ${S.length}キャラクター検出！確認してください。`)}catch($){console.error("Character import error:",$),a&&(a.textContent=`❌ エラー: ${$.message}`),setTimeout(()=>{a&&a.classList.add("hidden")},5e3)}finally{o.classList.remove("ci-loading"),y&&(y.style.display="none")}}function c(p,g){var h;(h=document.getElementById("ci-modal"))==null||h.remove();const v=document.createElement("div");v.innerHTML=Cf(p,g),document.body.appendChild(v.firstElementChild),Nf(p,y=>{y.forEach(S=>{e.characters.push({name:S.name||"",sex:S.sex||"",role:S.role||"",personality:S.personality||"",note:S.note||""})}),t(),a&&(a.textContent=`✅ ${y.length}キャラクターを登録しました！`,setTimeout(()=>a.classList.add("hidden"),3e3))})}}const V=e=>document.getElementById(e);let Pe=[],ze=[],at=null,un="",Kt=()=>"",Wo=()=>"";const ca=`あなたはプロの文芸批評家・計量文体学の専門家です。
 以下のテキスト群を精密に分析し、この作者の「作風」を他のAIで完全再現可能なパラメータとして抽出してください。
 
