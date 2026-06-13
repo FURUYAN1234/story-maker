@@ -1,7 +1,7 @@
 // ============================================================
 // prompt.js - Story Maker v5.0.2
 // Clean compatibility prompt helpers for modular source files.
-// The production app currently uses src/main.js directly.
+// The production app enters through src/main.js; legacy UI code is isolated in src/legacyMain.js.
 // ============================================================
 
 import {

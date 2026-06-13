@@ -4,6 +4,42 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Entry-Point Split Refactor
+
+### What Changed
+
+- `src/main.js` is now a small ordered runtime entrypoint.
+- The previous large runtime body moved to `src/legacyMain.js`.
+- `index.html` now loads only `src/main.js` for the JavaScript runtime.
+- `src/main.js` imports runtime side effects in this order:
+  1. `src/qualityBoost.js`
+  2. `src/legacyMain.js`
+  3. `src/publicRuntime.js`
+- `src/prompt.js` comments now describe the new entrypoint / legacy-core split.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on the local public URL confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - public runtime guard is active;
+  - quality boost runtime is ready;
+  - 14 output-mode buttons are visible;
+  - the long-form button is hidden and disabled;
+  - visible page text does not expose the long-form mode;
+  - browser error log is empty.
+
+### Remaining Refactor Direction
+
+- `src/legacyMain.js` is still the large compatibility file.
+- Future safe cuts should extract provider/API client flow, DOM event binding, randomization/lock state, and generation pipeline orchestration into focused modules.
+- Avoid adding new behavior directly to `src/legacyMain.js` unless the change cannot be made safely elsewhere.
+
 ### Current Scope
 
 - Public release line: `v5.0.2`.
