@@ -16,6 +16,7 @@ import { rt } from './longSettingsFormatter.js';
 import { We, Un, Ja, Wa, za, Za, Ya, Xa, At, Et, Qa, es, ts, Ug, Fd, Dd, qg, Hg, Jg, Wg, zg, Zg, Yg, Xg, Qg, ef } from './legacyOptionData.js';
 import { Je as buildDefaultAxisPreset, Sa as findModeLabel } from './modeDefaultHelpers.js';
 import { Jo as buildPromptBase } from './promptBuilder.js';
+import { ff } from './randomThemeFallback.js';
 import { Gd, Gt, go, lf, yt } from './providerClients.js';
 import { Wd, ho, ma, ns, pickRandom as Ae } from './selectionHelpers.js';
 import { buildGenerationSettingsSnapshot, formatAxisDetail } from './settingsSnapshotHelpers.js';
@@ -23,7 +24,7 @@ import { Af, Mf, ya } from './styleAnalyzerHelpers.js';
 import { da } from './thoughtParsingHelpers.js';
 import { SYSTEM_VERSION } from './version.js';
 
-let Jo=buildPromptBase,A=buildLongContextPrompt;const la=e=>e[Math.floor(Math.random()*e.length)];function ff(){const e=Object.fromEntries(Object.entries(Un).filter(([n])=>!ns(n)&&!Wd(n)));let t=ma(e,null,!1)||ma(Un,null,!1);return t=t?t[1]:la(ho(Xg,!1)),Math.random()<.55&&(t+=" "+la(Qg)),Math.random()<.35&&(t+=" "+la(ef)),t}const zd=`
+let Jo=buildPromptBase,A=buildLongContextPrompt;const zd=`
 【伏線・構成ルール（各章で厳守）】
 1. 伏線の事前配置：後半で重要な要素は、必ず序盤〜前半の章に自然に言及・暗示しておくこと。後半で唐突に新設定を投入することを禁止。
 2. シーンの駆動力（GMC+S）：各場面に「目的（Goal）」「動機（Motivation）」「障害（Conflict）」「賭け金（Stakes）」を明確に設定すること。
