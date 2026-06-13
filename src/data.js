@@ -10,6 +10,7 @@ export const GEMINI_MODELS = [
   { value: 'gemini-pro-latest', label: 'Gemini Pro (Latest)' }
 ];
 
+export const GEMINI_MODEL_VALUES = GEMINI_MODELS.map(model => model.value);
 export const OPENAI_TEXT_MODELS = ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o'];
 export const OPENAI_VISION_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4.1-mini'];
 

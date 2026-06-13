@@ -4,6 +4,44 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Gemini Model Value Reuse
+
+### What Changed
+
+- Added `GEMINI_MODEL_VALUES` to `src/data.js`, derived from `GEMINI_MODELS`.
+- `src/legacyMain.js` now imports `GEMINI_MODEL_VALUES` and reuses it in Gemini text, vision, multimodal, and streaming fallback paths.
+- Expanded `tests/modelData.test.js` to pin the Gemini value order.
+- Model order, fallback behavior, API key handling, provider request structure, prompt contracts, UI mode labels, and long-form engine behavior were not changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/modelData.test.js` passed.
+- `node tests/thoughtParsingHelpers.test.js` passed.
+- `node tests/settingsSnapshotHelpers.test.js` passed.
+- `node tests/characterInferenceHelpers.test.js` passed.
+- `node tests/axisStateHelpers.test.js` passed.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 OpenAI Model Data Reuse
 
 ### What Changed
