@@ -4,6 +4,40 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Mode Default Helper Split
+
+### What Changed
+
+- Added `src/modeDefaultHelpers.js` for mode-label lookup and default axis preset selection.
+- `src/legacyMain.js` now keeps local mode/category data but delegates pure label lookup and default axis tuple construction to that module.
+- Removed the inline `Bt` helper and reduced inline `Sa`/`Je` to compatibility wrappers.
+- Added `tests/modeDefaultHelpers.test.js` to pin mode fallback labels, category tuple fallback, and default preset construction.
+- No API key handling, provider request behavior, prompt contracts, UI mode labels, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - API譛ｪ險ｭ螳・label is visible;
+  - no Vite error overlay is present;
+  - browser error log is empty.
+
 ## 2026-06-13 Gemini Model Data Reuse
 
 ### What Changed
