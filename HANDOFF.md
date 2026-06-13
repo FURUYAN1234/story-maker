@@ -4,6 +4,41 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Character Inference Helper Split
+
+### What Changed
+
+- Added `src/characterInferenceHelpers.js` for character sex inference from Japanese name suffixes and sex-description text.
+- `src/legacyMain.js` now imports the legacy aliases `Ca` and `Na` from that helper instead of defining the suffix arrays and inference functions inline.
+- Added `tests/characterInferenceHelpers.test.js` to pin male/female/name-missing and sex-description branches.
+- Character UI rendering, random character generation pools, API key handling, provider request behavior, prompt contracts, UI mode labels, and long-form engine behavior were not changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/characterInferenceHelpers.test.js` passed.
+- `node tests/axisStateHelpers.test.js` passed.
+- `node tests/modeDefaultHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - the character section is visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Axis State Helper Split
 
 ### What Changed
