@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Era Lore Helper Split
+
+### What Changed
+
+- Added `src/eraLoreHelpers.js` and moved the era/worldview supplemental lore dictionary plus `df` RAG-detail builder out of `src/legacyMain.js`.
+- `src/legacyMain.js` now imports `df` from the new helper module.
+- Added `tests/eraLoreHelpers.test.js` to pin representative lore lookup behavior and empty fallback behavior.
+- Prompt text assembly, selected-axis behavior, public mode visibility, API handling, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/eraLoreHelpers.test.js` passed.
+- Existing helper tests passed, including legacy option data, axis prompt details, provider clients, model data, thought parsing, settings snapshot, character inference, axis state, mode default, file IO, API key, long-novel number, footer, DOM, selection, and API error helpers.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser current-load DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current-load browser error log is empty.
+
 ## 2026-06-13 Legacy Option Data Split
 
 ### What Changed
