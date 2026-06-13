@@ -8,6 +8,31 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 ModulePreload Bootstrap Split
 
+## 2026-06-13 API Error Helper Split
+
+### What Changed
+
+- Added `src/apiErrorHelpers.js` for API failure classification and user-facing API error message construction.
+- `src/legacyMain.js` now imports the existing legacy helper aliases from `src/apiErrorHelpers.js`.
+- Removed the inline `Ho`, `kr`, `Hs`, `Js`, `fo`, `Vd`, `ia`, and `xr` helper declarations from `src/legacyMain.js`.
+- Added `tests/apiErrorHelpers.test.js` to pin safety, quota, auth, model/request, and vision-message branches.
+- No provider request code, prompt contracts, UI mode contracts, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - browser error log is empty.
+
 ### What Changed
 
 - Added `src/modulePreloadPolyfill.js` as the single owner of the runtime `modulepreload` compatibility shim.
