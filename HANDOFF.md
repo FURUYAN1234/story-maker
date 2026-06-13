@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Editorial Evaluation Helper Split
+
+### What Changed
+
+- Added `src/editorialEvaluationHelpers.js` and moved narrative method stack, quality contract, editorial evaluation prompt, evaluation JSON parser, and evaluation formatter (`Jf`, `_`, `Wf`, `np`, `op`) out of `src/legacyMain.js`.
+- `src/legacyMain.js` keeps `rp` and mutable local aliases for the extracted helpers so the existing later `_` wrappers still apply.
+- Added `tests/editorialEvaluationHelpers.test.js` to pin method-stack injection, quality-contract text, evaluation prompt fields, score clamping, finding limits, pass flag parsing, and formatted evaluation output.
+- Editorial evaluation API flow, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/editorialEvaluationHelpers.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels and the output panel are visible;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Consistency Audit Helper Split
 
 ### What Changed
