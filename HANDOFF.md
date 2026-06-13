@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Control State Split
+
+### What Changed
+
+- Added `src/styleAnalyzerControlState.js` and moved style-analyzer button state decisions out of `src/legacyMain.js`.
+- `src/legacyMain.js` now delegates direct-text add enablement, analyze-button enablement/label/title, and reflect-button enablement to the new pure helper module while keeping DOM reads, file arrays, API execution, and result rendering local.
+- Added `tests/styleAnalyzerControlState.test.js` to pin direct text detection, text-character counting, OpenAI text-limit disabling, API/file/input readiness, and reflect-button gating.
+- Style analyzer API calls, file intake, output rendering, public mode visibility, and long-form public sealing were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/styleAnalyzerControlState.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/control smoke on `http://127.0.0.1:5179/` confirmed:
+  - title shows `Story Maker v5.0.2`;
+  - all 14 public output modes remain visibly available and long-form mode remains hidden;
+  - style analyzer section, file list, and image list containers render;
+  - with API unset and empty direct text, add/analyze/reflect controls are disabled;
+  - after filling direct style text, add-text becomes enabled while analyze remains disabled because no API key is set;
+  - no Vite error overlay or parse overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Style Analyzer List Markup Split
 
 ### What Changed
