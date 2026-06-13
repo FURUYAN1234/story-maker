@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Character Import Prompt Split
+
+### What Changed
+
+- Added `src/characterImportPrompt.js` and moved the character-sheet image analysis prompt constant `yf` out of `src/legacyMain.js`.
+- `src/legacyMain.js` now imports `yf` while keeping drag/drop, base64 reads, Gemini vision calls, response parsing, and modal registration local.
+- Added `tests/characterImportPrompt.test.js` to pin the JSON-array character extraction schema and no-markdown response contract.
+- Character import API handling, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/characterImportPrompt.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - Gemini/OpenAI labels and the character-sheet dropzone are visible;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Long Novel Prompt Rules Split
 
 ### What Changed
