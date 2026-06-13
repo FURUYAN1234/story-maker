@@ -1,4 +1,4 @@
-// Story Maker v5.0.1 public output cleanup.
+// Story Maker v5.0.2 public output cleanup.
 // Mode-scoped final formatting only: remove artifacts, preserve story content.
 
 import {
@@ -6,6 +6,7 @@ import {
   PUBLIC_MODE_VALUES,
   detectModeFromText,
 } from './modeContracts.js';
+import { STORY_MAKER_FOOTER } from './version.js';
 
 const MODE_MAX_CHARS = Object.fromEntries(
   Object.entries(MODE_LENGTH_TARGETS)
@@ -13,7 +14,7 @@ const MODE_MAX_CHARS = Object.fromEntries(
     .map(([mode, spec]) => [mode, spec.cleanupMax]),
 );
 
-const FOOTER_TEXT = 'Created By AI Story Maker V5.0.1';
+const FOOTER_TEXT = STORY_MAKER_FOOTER;
 const FOOTER_PATTERN = /\n*\s*(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i;
 const TOOL_NAME_PATTERN = /AI\s*Story\s*Maker|Story\s*Maker|ストーリーメーカー|物語メーカー|生成ツール|作成ツール|ChatGPT|Gemini|OpenAI/i;
 

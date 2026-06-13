@@ -35,6 +35,20 @@ function stripDormantLongNovelPanel() {
   };
 }
 
+function injectLongNovelDevEntry() {
+  const snippet = '<script type="module" src="/src/longNovel/devEntry.js"></script>';
+
+  return {
+    name: 'story-maker-long-novel-dev-entry',
+    apply: 'serve',
+    transformIndexHtml(html) {
+      return html.includes('/src/longNovel/devEntry.js')
+        ? html
+        : html.replace('</body>', `${snippet}\n</body>`);
+    }
+  };
+}
+
 function publicAssetGuard() {
   const blockedSignatures = [
     ['q', 'a', 'A', 'p', 'i', 'S', 'e', 's', 's', 'i', 'o', 'n'].join(''),
@@ -66,7 +80,7 @@ function publicAssetGuard() {
 
 export default defineConfig({
   base: './',
-  plugins: [stripDormantLongNovelPanel(), publicAssetGuard()],
+  plugins: [injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
   server: {
     port: 5179,
     strictPort: true,

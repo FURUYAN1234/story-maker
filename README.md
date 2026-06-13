@@ -1,4 +1,4 @@
-# Story Maker v5.0.1 / AI物語メーカー
+# Story Maker v5.0.2 / AI物語メーカー
 
 Story Maker is a static web application for generating short-form creative text with Google Gemini API or OpenAI API. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -211,11 +211,15 @@ The public release supports the following 14 output modes. Each mode has a mode 
 - エッセイ、詩、手紙、日記では、物語風の伏線を無理に足すより、その形式自体を守ります。
 - すべてのモードで、見える本文中のプロンプト分析、自己評価、チェックリスト断片、未完成の設計メモを拒否します。
 
-## v5.0.1 Quality System / v5.0.1 品質システム
+## v5.0.2 Quality System / v5.0.2 品質システム
 
-v5.0.1 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
+v5.0.2 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, and generic-rule checks. Its purpose is to make the current public modes stronger without adding one-off rules tied to a specific setting, shop, job, person, object, or clue.
 
-v5.0.1では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
+v5.0.2では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、汎用ルール検査の安定した置き場所として扱います。目的は、特定の舞台、店、職業、人物、物、証拠品に依存した局所ルールを増やさず、現在の公開モード全体を強くすることです。
+
+v5.0.2 also moves release identity, footer text, and browser API-session persistence into small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
+
+v5.0.2では、リリース識別、フッター表記、ブラウザ内APIセッション保持も小さな実行時モジュールへ分離しています。`src/main.js` はまだ既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーのタブ内保持と復元は `src/apiSession.js` に分けました。これにより、APIキーをソースへ保存せずに、公開表記とキー保持挙動を揃えています。
 
 ### Selected-Mode Priority / 選択モード優先
 
@@ -231,7 +235,7 @@ Every supported mode receives a mode-specific contract before generation. The co
 
 ### Under-Length Rewrite / 短すぎる初稿の改稿
 
-For both Gemini and OpenAI streaming generation, v5.0.1 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
+For both Gemini and OpenAI streaming generation, v5.0.2 checks public-mode draft length before the final text reaches the output panel. If a supported mode returns a draft that is too short for the mode, the app asks the selected provider to rewrite the draft into a fuller final piece using the same input conditions. The short draft is not accepted as the final displayed result.
 
 Gemini と OpenAI のストリーム生成では、出力欄へ最終表示する前に、公開モードの本文長を確認します。対応モードで短すぎる初稿が返った場合、同じ入力条件を使って、選択中のAPIに完成稿として全面改稿させます。短すぎる初稿を、そのまま最終表示として採用しません。
 
@@ -759,6 +763,18 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
 
 ## Release History / 変更履歴
+
+### v5.0.2 (2026-06-13)
+
+- Centralized the public release version and Story Maker footer text in `src/version.js`.
+- Moved browser API-session persistence used by the legacy UI flow into `src/apiSession.js`.
+- Connected `src/main.js`, public cleanup, and the long-form assembler to the shared version/footer module so release bumps no longer require scattered footer edits.
+- Kept the long-form development path hidden from the public UI unless it is explicitly enabled for development.
+
+- 公開版数と Story Maker フッター表記を `src/version.js` に集約しました。
+- 既存UIフローが使うブラウザ内APIセッション保持を `src/apiSession.js` へ分離しました。
+- `src/main.js`、公開出力整形、長編アセンブラを共通の版数・フッターモジュールにつなぎ、リリース時の表記ずれを起こしにくくしました。
+- 長編開発ルートは、開発用に明示的に有効化した場合を除き、公開UIに出ない状態を維持しました。
 
 ### v5.0.1 (2026-06-11)
 

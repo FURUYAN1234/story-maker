@@ -1,4 +1,4 @@
-// Story Maker v5.0.1 public-mode quality booster.
+// Story Maker v5.0.2 public-mode quality booster.
 // Thin runtime layer: prompt rules live in modeContracts.js.
 
 import {

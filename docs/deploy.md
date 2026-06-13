@@ -54,7 +54,7 @@ npm run deploy
 - 余計な `-Command` ラッパーやウィンドウタイトル設定は付けない。`-File` で `backup_full.ps1` を直接実行する。
 - 実行コマンド:
 ```powershell
-Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-NoExit','-File','C:\Users\sx717\Antigravity\scripts\backup_full.ps1') -WorkingDirectory 'C:\Users\sx717\Antigravity' -WindowStyle Normal
+Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-NoExit','-File',"$env:USERPROFILE\Antigravity\scripts\backup_full.ps1") -WorkingDirectory "$env:USERPROFILE\Antigravity" -WindowStyle Normal
 ```
 
 ## 10. Rollback Procedure

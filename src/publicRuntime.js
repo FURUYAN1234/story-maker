@@ -1,4 +1,4 @@
-// Story Maker v5.0.1 public runtime guards.
+// Story Maker v5.0.2 public runtime guards.
 // Keep public UI safety outside the legacy bundled main.js.
 
 import {
