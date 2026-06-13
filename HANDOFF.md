@@ -10,6 +10,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 API Error Helper Split
 
+## 2026-06-13 Selection Helper Split
+
+### What Changed
+
+- Added `src/selectionHelpers.js` for stateless selection filtering, category-item picking, future/SF keyword checks, and Japanese character-count parsing.
+- `src/legacyMain.js` now imports the existing legacy helper aliases `Wd`, `ns`, `ho`, `ma`, and `hf` from `src/selectionHelpers.js`.
+- Removed the inline future/SF regexes plus `Wd`, `ns`, `ho`, `ma`, and `hf` helper declarations from `src/legacyMain.js`.
+- Left `ff` in `src/legacyMain.js` because it is still tied to legacy theme data and UI-era behavior.
+- Added `tests/selectionHelpers.test.js` to pin future/SF filtering, all-filtered fallback behavior, deterministic category picking, and Japanese count parsing.
+- No provider request code, prompt contracts, UI mode contracts, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - browser error log is empty.
+
 ### What Changed
 
 - Added `src/apiErrorHelpers.js` for API failure classification and user-facing API error message construction.
