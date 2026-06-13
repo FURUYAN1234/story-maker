@@ -39,6 +39,36 @@ export function buildTimestampedTextFileName(title, label, date = new Date()) {
   return `${title}_${label}_${formatTimestamp(date)}.txt`;
 }
 
+export function sanitizeFileNamePart(value, fallback = 'download') {
+  return String(value || fallback).replace(/[\s/\\:*?"<>|]/g, '_') || fallback;
+}
+
+export function buildTimestampedJsonFileName(baseName, date = new Date()) {
+  return `${sanitizeFileNamePart(baseName, 'style_analysis')}_${formatTimestamp(date)}.json`;
+}
+
+export function buildTimestampedPlainTextFileName(baseName, date = new Date()) {
+  return `${sanitizeFileNamePart(baseName, 'text')}_${formatTimestamp(date)}.txt`;
+}
+
+export function downloadBlobWithFileName(blob, filename) {
+  const anchor = document.createElement('a');
+  anchor.href = URL.createObjectURL(blob);
+  anchor.download = filename;
+  anchor.click();
+}
+
+export function downloadJsonObjectWithTimestamp(data, baseName) {
+  const content = JSON.stringify(data, null, 2);
+  const blob = new Blob([content], { type: 'application/json' });
+  downloadBlobWithFileName(blob, buildTimestampedJsonFileName(baseName));
+}
+
+export function downloadTextWithTimestamp(content, baseName) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  downloadBlobWithFileName(blob, buildTimestampedPlainTextFileName(baseName));
+}
+
 export function downloadTimestampedTextFile(content, title, label) {
   const filename = buildTimestampedTextFileName(title, label);
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });

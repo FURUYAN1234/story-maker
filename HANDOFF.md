@@ -4,6 +4,38 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Style Analyzer Download Helper Split
+
+### What Changed
+
+- Expanded `src/fileIoHelpers.js` with filename sanitizing, timestamped JSON filename generation, timestamped plain-text filename generation, generic Blob download, JSON-object download, and text download helpers.
+- `src/legacyMain.js` now keeps the state checks in `Ff()` and `Vf()`, but delegates JSON/TXT Blob and filename creation to `src/fileIoHelpers.js`.
+- Expanded `tests/fileIoHelpers.test.js` to pin filename sanitizing and style-analyzer JSON/TXT filename formats.
+- No API key handling, provider request code, prompt contracts, UI mode contracts, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - the style analyzer panel is visible;
+  - API未設定 label is visible;
+  - no Vite error overlay is present.
+
 ## 2026-06-13 API Key Helper Split
 
 ### What Changed
