@@ -4,6 +4,37 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Gemini Model Data Reuse
+
+### What Changed
+
+- `src/legacyMain.js` now imports `GEMINI_MODELS as Tn` from `src/data.js`.
+- Removed only the inline Gemini model array declaration from `src/legacyMain.js`.
+- Left public mode/category data in `src/legacyMain.js` untouched for this step to avoid a broad data migration.
+- No API key handling, provider request behavior, prompt contracts, UI mode labels, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/apiKeyHelpers.test.js` passed.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - API未設定 label is visible;
+  - no Vite error overlay is present.
+
 ## 2026-06-13 Style Analyzer Download Helper Split
 
 ### What Changed
