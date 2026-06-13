@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Mode Default Preset Split
+
+### What Changed
+
+- Added `src/modeDefaultPresets.js` and moved the mode-specific default axis preset map (`Xs`) out of `src/legacyMain.js`.
+- `src/legacyMain.js` now keeps the `Je(...)` adapter local and initializes `Xs` with `createModeDefaultPresets(Je)`, so mode selection, DOM updates, and state mutation remain unchanged.
+- Added `tests/modeDefaultPresets.test.js` to pin the public mode preset keys, shared default preset reuse for `default` / `4koma` / `4koma_scenario`, and representative axis indexes for every specialized preset.
+- Public mode visibility, long-form public sealing, and default axis application were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/modeDefaultPresets.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visibly available;
+  - the long-form mode button remains hidden, disabled, and `aria-disabled`;
+  - default active mode is `4コマ漫画風`;
+  - all seven axis category groups render visible chips;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Axis UI Config Split
 
 ### What Changed
