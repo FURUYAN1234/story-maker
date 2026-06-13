@@ -4,6 +4,35 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 File IO Helper Split
+
+### What Changed
+
+- Added `src/fileIoHelpers.js` for browser file read helpers and timestamped text download helper.
+- `src/legacyMain.js` now imports legacy aliases `vh`, `bh`, and `Cp` from that module.
+- Removed inline `vh`, `bh`, and `Cp` helper declarations from `src/legacyMain.js`.
+- Added `tests/fileIoHelpers.test.js` to pin timestamp and filename behavior.
+- No provider request code, prompt contracts, UI mode contracts, or long-form engine behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - browser error log is empty.
+
 ## 2026-06-13 Entry-Point Split Refactor
 
 ## 2026-06-13 ModulePreload Bootstrap Split
