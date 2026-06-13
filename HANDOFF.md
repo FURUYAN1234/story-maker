@@ -4,6 +4,38 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Long Novel Number Helper Split
+
+### What Changed
+
+- Added `src/longNovelNumberHelpers.js` for long-form numeric normalization, Japanese chapter-number parsing, target character count parsing, chapter-count calculation, chapter minimum calculation, and long-form request options.
+- `src/legacyMain.js` now imports legacy aliases `Ih`, `fp`, `er`, `hp`, `tr`, `nr`, and `or` from that module.
+- Removed the inline long-form numeric helper block from `src/legacyMain.js`.
+- Kept `ei` and `Ir` in `src/legacyMain.js` because later compatibility patches still reference them directly.
+- Added `tests/longNovelNumberHelpers.test.js` to pin full-width digit cleanup, Japanese numeral parsing, lower-bound character logic, chapter-count logic, and request-option defaults.
+- No provider request code, prompt contracts, UI mode contracts, or public long-form visibility behavior were changed in this step.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/longNovelNumberHelpers.test.js` passed.
+- `node tests/fileIoHelpers.test.js` passed.
+- `node tests/footerHelpers.test.js` passed.
+- `node tests/domHelpers.test.js` passed.
+- `node tests/selectionHelpers.test.js` passed.
+- `node tests/apiErrorHelpers.test.js` passed.
+- `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - the style analyzer panel is visible;
+  - no Vite error overlay is present.
+
 ## 2026-06-13 Style Analyzer File Helper Alias Split
 
 ### What Changed
