@@ -17,6 +17,7 @@ const MODE_MAX_CHARS = Object.fromEntries(
 const FOOTER_TEXT = STORY_MAKER_FOOTER;
 const FOOTER_PATTERN = /\n*\s*(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i;
 const TOOL_NAME_PATTERN = /AI\s*Story\s*Maker|Story\s*Maker|ストーリーメーカー|物語メーカー|生成ツール|作成ツール|ChatGPT|Gemini|OpenAI/i;
+const NARRATIVE_RESTART_MODES = new Set(['short_short', 'novel', 'medium', 'fairy']);
 
 function charLength(text) {
   return Array.from(String(text || '')).length;
@@ -171,6 +172,43 @@ function removeRestartedDrafts(text) {
   return candidates.reduce((best, candidate) => (
     charLength(candidate) >= charLength(best) ? candidate : best
   ), candidates[0]);
+}
+
+function removeNarrativeDraftRestart(text, mode) {
+  if (!NARRATIVE_RESTART_MODES.has(mode)) return text;
+  const source = normalizeBreaks(text);
+  const min = Number(MODE_LENGTH_TARGETS[mode]?.min || 0);
+  const candidates = [];
+  const pushCandidate = index => {
+    if (index <= 0) return;
+    const before = source.slice(0, index).trim();
+    const enoughBody = !min || bodyLength(before) >= Math.min(min, 6000);
+    const completedMedium = mode === 'medium' && /^第3節/m.test(before);
+    if (enoughBody || completedMedium) candidates.push(index);
+  };
+
+  for (const match of source.matchAll(/\n\s*タイトル\s*[:：][^\n]{1,120}\n+\s*(?:第1節|第1章|一[、.．]|1[.．])/g)) {
+    pushCandidate(match.index);
+  }
+
+  if (mode === 'medium') {
+    const section3 = source.search(/^第3節/m);
+    if (section3 >= 0) {
+      const afterSection3 = source.slice(section3 + 1);
+      const sectionRestart = afterSection3.search(/\n\s*第1節(?=\s|$)/m);
+      if (sectionRestart >= 0) pushCandidate(section3 + 1 + sectionRestart);
+    }
+  }
+
+  if (!candidates.length) return source;
+  return normalizeBreaks(source.slice(0, Math.min(...candidates))).trim();
+}
+
+function removeTrailingNarrativeTitleArtifact(text, mode) {
+  if (!NARRATIVE_RESTART_MODES.has(mode)) return text;
+  return normalizeBreaks(text)
+    .replace(/\n+\s*タイトル\s*[:：][^\n]{1,120}\s*$/u, '')
+    .trimEnd();
 }
 
 function finishPublicTextPreserveBody(text) {
@@ -422,6 +460,14 @@ function hasDraftRestartArtifact(text, mode) {
   if (mode === 'radio') return (source.match(/^タイトル[:：]/gm) || []).length > 1;
   if (mode === '4koma_scenario') return (source.match(/^Topic:/gm) || []).length > 1;
   if (mode === '4koma') return (source.match(/(?:^|\n)1コマ目/g) || []).length > 1;
+  if (mode === 'medium') {
+    const section3 = source.search(/^第3節/m);
+    if (section3 >= 0) {
+      const afterSection3 = source.slice(section3 + 1);
+      if (/\n\s*タイトル\s*[:：][^\n]{1,120}\n+\s*第1節/m.test(afterSection3)) return true;
+      if (/\n\s*第1節(?=\s|$)/m.test(afterSection3)) return true;
+    }
+  }
   return (source.match(/(?:^|\n)タイトル[:：]/g) || []).length > 1;
 }
 
@@ -732,6 +778,8 @@ function cleanDocumentary(text) {
 function cleanGenericPublicMode(text, mode) {
   let next = stripPublicArtifacts(String(text || ''));
   next = removeRestartedDrafts(next);
+  next = removeNarrativeDraftRestart(next, mode);
+  next = removeTrailingNarrativeTitleArtifact(next, mode);
   if (MODE_MAX_CHARS[mode]) next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS[mode]);
   return finishPublicText(next);
 }

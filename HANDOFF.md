@@ -2,6 +2,27 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-06-13 v5.0.4 Release State
+
+### What Changed
+
+- Restored smooth typewriter-style live preview for standard public generation so large provider chunks are shown progressively in the output box.
+- Kept output-panel auto-scroll anchored to the live manuscript, preventing jumps into the style analyzer area during streaming and final rendering.
+- Added standard-generation progress signals for current phase, dialogue count, sensory detail count, and choice/action signals.
+- Hardened public narrative cleanup and quality checks for medium stories so completed drafts are not followed by a restarted `タイトル:` / `第1節` second draft, and trailing title-only artifacts are removed before the footer.
+- Bumped public release identity to v5.0.4.
+
+### Verification
+
+- `node --check` passed for the changed JavaScript files.
+- `node tests/outputCleanup.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed with only the existing LF-to-CRLF warnings.
+- `npm run build` passed with the existing large chunk warning.
+- `npm run deploy` published GitHub Pages.
+- `origin/gh-pages:index.html` and the live GitHub Pages URL returned `Story Maker v5.0.4` with asset `index-Dn5sh9Zx.js`.
+- No full workspace backup was run because this task was deploy-only.
+
 ## 2026-06-13 v5.0.2 Release State
 
 ## 2026-06-13 Style Analyzer Progress Log Split

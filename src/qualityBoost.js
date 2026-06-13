@@ -342,6 +342,21 @@ function draftRestartIssue(mode, body) {
   if (mode === 'radio' && countLines(/^タイトル\s*[:：]/gm) > 1) return '完成後にラジオドラマの先頭ラベルが再出現しています';
   if (mode === '4koma_scenario' && countLines(/^Topic:/gm) > 1) return '完成後に4コマシナリオの先頭ラベルが再出現しています';
   if (mode === '4koma' && countLines(/(?:^|\n)1コマ目/g) > 1) return '完成後に4コマの先頭ラベルが再出現しています';
+  if (mode === 'medium') {
+    const section3 = source.search(/^第3節/m);
+    if (section3 >= 0) {
+      const afterSection3 = source.slice(section3 + 1);
+      if (/\n\s*タイトル\s*[:：][^\n]{1,120}\n+\s*第1節/m.test(afterSection3)) {
+        return '完成後に中編小説の別下書きが再開しています';
+      }
+      if (/\n\s*第1節(?=\s|$)/m.test(afterSection3)) {
+        return '完成後に中編小説の第1節が再出現しています';
+      }
+    }
+  }
+  if (['short_short', 'novel', 'medium', 'fairy'].includes(mode) && /\n\s*タイトル\s*[:：][^\n]{1,120}\s*$/m.test(source.trim())) {
+    return '本文末尾に別下書きのタイトルだけが残っています';
+  }
   if (!['poem', 'scenario', 'manga'].includes(mode) && countLines(/(?:^|\n)タイトル\s*[:：]/g) > 1) {
     return '完成後にタイトルから別下書きが再開しています';
   }

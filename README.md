@@ -1,4 +1,4 @@
-# Story Maker v5.0.3 / AI物語メーカー
+# Story Maker v5.0.4 / AI物語メーカー
 
 Story Maker is a static web application for generating short-form creative text with Google Gemini API or OpenAI API. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -213,11 +213,11 @@ The public release supports the following 14 output modes. Each mode has a mode 
 - エッセイ、詩、手紙、日記では、物語風の伏線を無理に足すより、その形式自体を守ります。
 - すべてのモードで、見える本文中のプロンプト分析、自己評価、チェックリスト断片、未完成の設計メモを拒否します。
 
-## v5.0.3 Quality System / v5.0.3 品質システム
+## v5.0.4 Quality System / v5.0.4 品質システム
 
-v5.0.3 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, completion gates, and generic-rule checks. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
+v5.0.4 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, and generic-rule checks. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
 
-v5.0.3では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、完走ゲート、汎用ルール検査の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
+v5.0.4では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -779,6 +779,17 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
 
 ## Release History / 変更履歴
+
+### v5.0.4 (2026-06-13)
+
+- Restored smooth typewriter-style live output for standard public generation so large API chunks no longer appear as one sudden burst.
+- Kept the output panel scroll anchored to the live manuscript instead of jumping down into the style analyzer section while text is streaming.
+- Added more informative standard-generation progress signals, including current phase, dialogue count, sensory detail count, and choice/action signals.
+- Removed medium-novel restart artifacts where a completed three-section draft could begin again from `タイトル:` / `第1節`, and trimmed trailing title-only artifacts before the footer.
+- 標準公開生成の本文ライブ表示をタイプライター風に戻し、大きなAPIチャンクが一気に表示されたように見えないようにしました。
+- 本文ストリーム中のスクロール位置をOutput本文に固定し、作風解析エンジンの下へ勝手に飛ばないようにしました。
+- 標準生成の進捗ログに、現在フェーズ、会話数、感覚描写数、選択・行動シグナルを追加しました。
+- 中編小説で完結後に `タイトル:` / `第1節` から再開する生成アーティファクトと、末尾タイトルだけ残るアーティファクトを除去しました。
 
 ### v5.0.3 (2026-06-13)
 

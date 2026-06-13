@@ -42,7 +42,7 @@ Scenario:
 const cleanedScenario = cleanOutputForPublicMode(scenarioWithMultilineAim, '4koma_scenario');
 assert.match(cleanedScenario, /狙い:\nアカネが失敗を隠さず謝り/);
 assert.doesNotMatch(cleanedScenario, /狙い:\s*\n\s*Created By AI Story Maker/);
-assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.3/);
+assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.4/);
 
 const documentaryWithoutClosing = `ナレーション: 商店街の小さなコンビニは、今日も朝から油の匂いを漂わせている。
 
@@ -55,7 +55,7 @@ const documentaryWithoutClosing = `ナレーション: 商店街の小さなコ�
 
 const cleanedDocumentary = cleanOutputForPublicMode(documentaryWithoutClosing, 'documentary');
 assert.match(cleanedDocumentary, /^締め:\n店主は最後に/m);
-assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.3/);
+assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.4/);
 
 const documentaryFootageClosing = `ナレーション: 店はまだ薄暗い。
 
@@ -67,5 +67,45 @@ const documentaryFootageClosing = `ナレーション: 店はまだ薄暗い。
 
 const cleanedFootageClosing = cleanOutputForPublicMode(documentaryFootageClosing, 'documentary');
 assert.match(cleanedFootageClosing, /^締め: 夕暮れの店先/m);
+
+const mediumWithRestart = `【鈴の音は森に還る】
+
+第1節
+朝露に濡れた森で、高橋千尋はまた同じ朝を迎えた。苔の匂い、冷えた指先、遠くの鐘の音がすべて昨日と同じで、彼女はこの世界が巻き戻っていることを理解していた。村の広場では誰もが優しく見えるのに、夜になると火事が起こり、千尋だけが犯人として責められる。その繰り返しに、彼女の胸には怒りと諦めが沈んでいた。
+
+第2節
+森の泉で出会ったエルフの少年リルは、千尋と同じようにループを覚えていた。彼は火事の夜に銀の鈴を失くしたと打ち明けるが、肝心なことになると目を逸らす。千尋は彼を責めたが、自分もまた夜の記憶から逃げていた。長老アリアの静かな問いかけを受け、千尋は「自分だけが被害者なのか」と初めて疑い始める。
+
+第3節
+神木の根元で見つけた鈴に触れた瞬間、千尋はあの夜の自分がリルを拒み、鈴を返さなかったことを思い出した。ふたりは火の前で互いの弱さを認め、鈴をアリアへ差し出す。鈴の音が森へ広がると、炎は消え、翌朝は初めて巻き戻らなかった。千尋は罪悪感を抱えたまま、リルと並んで村の小道を歩き出した。
+
+タイトル: 鈴の音は森に還る
+
+第1節
+これは二周目の下書きで、完成済みの中編小説の後ろに誤って再開した断片である。`;
+
+const cleanedMedium = cleanOutputForPublicMode(mediumWithRestart, 'medium');
+assert.match(cleanedMedium, /^第3節/m);
+assert.doesNotMatch(cleanedMedium, /これは二周目の下書き/);
+assert.doesNotMatch(cleanedMedium, /\nタイトル: 鈴の音は森に還る\n\n第1節/);
+assert.equal((cleanedMedium.match(/^第1節/gm) || []).length, 1);
+assert.match(cleanedMedium, /Created By AI Story Maker V5\.0\.4/);
+
+const mediumWithTrailingTitle = `【ミニショップ陽だまりの一日】
+
+第1節
+朝の店内で副店長の和真は、突然休んだ店長の代わりに慌ただしくレジへ立った。
+
+第2節
+新人の茜は値札を間違え、客は笑い、和真は怒るよりも先に店を回すしかなかった。
+
+第3節
+閉店後、ふたりは売れ残ったどら焼きを分け合い、今日一日をやり切った手応えを黙って確かめた。
+タイトル: ミニショップ陽だまりの一日`;
+
+const cleanedMediumTrailingTitle = cleanOutputForPublicMode(mediumWithTrailingTitle, 'medium');
+assert.doesNotMatch(cleanedMediumTrailingTitle, /\nタイトル: ミニショップ陽だまりの一日\s*\n\nCreated By AI Story Maker/);
+assert.match(cleanedMediumTrailingTitle, /どら焼きを分け合い/);
+assert.match(cleanedMediumTrailingTitle, /Created By AI Story Maker V5\.0\.4/);
 
 console.log('outputCleanup tests passed');
