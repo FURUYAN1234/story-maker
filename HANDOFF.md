@@ -4,6 +4,32 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Axis UI Config Split
+
+### What Changed
+
+- Added `src/axisUiConfig.js` and moved the axis settings UI configuration object (`mt`) out of `src/legacyMain.js`.
+- `src/legacyMain.js` now creates `mt` with `createAxisUiConfig({ theme, genre, worldview, target, era, ending, narr })` while keeping all DOM wiring and state mutation local.
+- Added `tests/axisUiConfig.test.js` to pin axis DOM ids, state keys, category keys, lock keys, and category object references.
+- Axis randomization, lock handling, category/subchip rendering, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/axisUiConfig.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - long-form mode remains hidden from visible page text;
+  - all seven axis category groups render chips;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Initial State Factory Split
 
 ### What Changed
