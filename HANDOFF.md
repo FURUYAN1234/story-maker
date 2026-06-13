@@ -4,6 +4,33 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-13 v5.0.2 Release State
 
+## 2026-06-13 Initial State Factory Split
+
+### What Changed
+
+- Added `src/initialState.js` and moved the initial runtime state object construction out of `src/legacyMain.js`.
+- `src/legacyMain.js` now keeps the version alias `ap` local and initializes `s` with `createInitialState()`.
+- Added `tests/initialState.test.js` to pin default API provider, default mode, long-form state defaults, lock defaults, axis-source defaults, and fresh nested object allocation.
+- Runtime state shape, API session restore/save behavior, public mode visibility, and long-form dev gating were not intentionally changed.
+
+### Verification
+
+- `node --check` passed for all JavaScript files under `src/`.
+- `node tests/initialState.test.js` passed.
+- Existing helper tests and `tests/long/*.test.js` passed.
+- `npm run lint --if-present` passed.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+- Public `dist` scan found no `longdev`, `src/longNovel`, development entry, personal path, or API-key-shaped strings.
+- In-app browser DOM/overlay smoke on `http://127.0.0.1:5179/` confirmed:
+  - title and header show `Story Maker v5.0.2`;
+  - all 14 public output modes are visible;
+  - default active mode is `4コマ漫画風`;
+  - long-form mode remains hidden from visible page text;
+  - API-unset state and Gemini/OpenAI labels are visible;
+  - no Vite error overlay is present;
+  - current browser error log is empty.
+
 ## 2026-06-13 Editorial Evaluation Helper Split
 
 ### What Changed
