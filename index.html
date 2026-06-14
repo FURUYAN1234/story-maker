@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v5.0.5</title>
+  <title>Story Maker v5.0.7</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <script type="module" crossorigin src="./src/main.js"></script>
   <link rel="stylesheet" crossorigin href="./src/style.css">
@@ -14,7 +14,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.0.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.0.7</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
@@ -325,8 +325,12 @@
           <div class="output-title">OUTPUT</div>
           <div id="char-counter" class="char-counter">0 字</div>
           <div class="output-actions">
-            <button id="btn-copy" class="btn-secondary hidden">📋 コピー</button>
+            <button id="btn-copy" class="btn-secondary hidden">📋 全文Copy</button>
             <button id="btn-download" class="btn-secondary hidden">📄 .txt保存</button>
+            <button id="btn-output-paste" class="btn-secondary" title="クリップボードの小説本文をOutputへ貼り付け">📋 貼り付け</button>
+            <button id="btn-output-import" class="btn-secondary" title="TXT/MDファイルの小説本文をOutputへインポート">📥 TXTインポート</button>
+            <button id="btn-output-clear" class="btn-secondary" title="Outputを空に戻す">🗑️ クリア</button>
+            <input id="output-import-file" class="hidden" type="file" accept=".txt,.md,text/plain,text/markdown">
           </div>
         </div>
         <div id="tag-row" class="tag-row"></div>
@@ -406,9 +410,67 @@
             <li>左の設定パネルで出力モード・テーマ等を選択</li>
             <li>「ストーリー生成」を押す</li>
             <li>「🎲 全項目ランダム」で一括ランダム設定も可能</li>
+            <li>他で作った本文はOutputへ貼り付け、またはTXT/MDインポートすると、Kakuyomuプレビューと「この小説を長編化」の元本文として使えます</li>
           </ol>
         </div>
       </div>
+
+      <section class="kakuyomu-assist" id="kakuyomu-assist" aria-label="Kakuyomu form-style preview">
+        <div class="kakuyomu-assist-head">
+          <label class="charcount-toggle kakuyomu-assist-toggle" for="kakuyomu-assist-enable">
+            <input type="checkbox" id="kakuyomu-assist-enable">
+            <span class="charcount-toggle-label">Kakuyomuフォーム風プレビュー</span>
+          </label>
+          <span class="kakuyomu-assist-status" id="kakuyomu-assist-status">出力後に表示</span>
+        </div>
+        <div class="kakuyomu-assist-body hidden" id="kakuyomu-assist-body">
+          <div class="kakuyomu-assist-toolbar">
+            <button type="button" class="btn-secondary kakuyomu-copy-btn" data-copy-kind="all" title="このプレビューの全推奨項目をまとめてコピー">全項目コピー</button>
+            <button type="button" class="btn-secondary kakuyomu-save-btn" data-save-kind="all" title="このプレビューの全推奨項目をTXTで保存">全項目TXT保存</button>
+          </div>
+          <div class="kakuyomu-form-preview" id="kakuyomu-form-preview" aria-live="polite"></div>
+        </div>
+      </section>
+      <section class="longify-beta is-unavailable" id="longify-beta" aria-label="Longify beta" aria-disabled="true">
+        <div class="longify-beta-head">
+          <div class="longify-beta-copy">
+            <div class="longify-beta-titleline">
+              <span class="longify-beta-badge" aria-label="β版">📘 β版</span>
+              <div class="longify-beta-title">この小説を長編化</div>
+            </div>
+            <div class="longify-beta-status" id="longify-beta-status">Output生成・貼り付け・TXTインポート後に使用できます</div>
+          </div>
+          <div class="longify-beta-actions">
+            <button type="button" class="btn-secondary longify-beta-button" id="btn-longify-beta" disabled>
+              この小説を長編化
+            </button>
+            <button type="button" class="btn-secondary longify-stop-button hidden" id="btn-longify-stop" disabled>
+              中断
+            </button>
+          </div>
+        </div>
+        <div class="longify-beta-controls" aria-label="Longify beta settings">
+          <label class="longify-beta-field" for="longify-target-chars">
+            <span>最低文字数（空白・改行除外）</span>
+            <select id="longify-target-chars" disabled>
+              <option value="10000">最低10,000字</option>
+              <option value="20000">最低20,000字</option>
+              <option value="30000" selected>最低30,000字</option>
+              <option value="50000">最低50,000字</option>
+              <option value="80000">最低80,000字</option>
+              <option value="100000">最低100,000字</option>
+              <option value="120000">最低120,000字</option>
+              <option value="150000">最低150,000字</option>
+            </select>
+          </label>
+          <label class="longify-beta-check" for="longify-auto-brushup-until-pass">
+            <input type="checkbox" id="longify-auto-brushup-until-pass" checked>
+            <span>合格点まで自動ブラッシュアップ（最大3回）</span>
+            <small>OFFなら押すたびに1回だけ実行</small>
+          </label>
+        </div>
+        <div class="longify-beta-review hidden" id="longify-beta-review" aria-live="polite"></div>
+      </section>
 
       <!-- ============================================================
            🧪 β版: 超強引！作風解析エンジン (Super Forced! Style Analyzer Engine)

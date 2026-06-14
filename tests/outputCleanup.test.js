@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cleanOutputForPublicMode } from '../src/outputCleanup.js';
+import { cleanOutputForPublicMode, isGenerationInProgress } from '../src/outputCleanup.js';
 
 const scenarioWithMultilineAim = `Topic: おでんとホットスナックの交差点
 Logline: 朝のコンビニでホットスナック騒動が起きる。
@@ -42,7 +42,7 @@ Scenario:
 const cleanedScenario = cleanOutputForPublicMode(scenarioWithMultilineAim, '4koma_scenario');
 assert.match(cleanedScenario, /狙い:\nアカネが失敗を隠さず謝り/);
 assert.doesNotMatch(cleanedScenario, /狙い:\s*\n\s*Created By AI Story Maker/);
-assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.5/);
+assert.match(cleanedScenario, /Created By AI Story Maker V5\.0\.6/);
 
 const documentaryWithoutClosing = `ナレーション: 商店街の小さなコンビニは、今日も朝から油の匂いを漂わせている。
 
@@ -55,7 +55,7 @@ const documentaryWithoutClosing = `ナレーション: 商店街の小さなコ�
 
 const cleanedDocumentary = cleanOutputForPublicMode(documentaryWithoutClosing, 'documentary');
 assert.match(cleanedDocumentary, /^締め:\n店主は最後に/m);
-assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.5/);
+assert.match(cleanedDocumentary, /Created By AI Story Maker V5\.0\.6/);
 
 const documentaryFootageClosing = `ナレーション: 店はまだ薄暗い。
 
@@ -89,7 +89,7 @@ assert.match(cleanedMedium, /^第3節/m);
 assert.doesNotMatch(cleanedMedium, /これは二周目の下書き/);
 assert.doesNotMatch(cleanedMedium, /\nタイトル: 鈴の音は森に還る\n\n第1節/);
 assert.equal((cleanedMedium.match(/^第1節/gm) || []).length, 1);
-assert.match(cleanedMedium, /Created By AI Story Maker V5\.0\.5/);
+assert.match(cleanedMedium, /Created By AI Story Maker V5\.0\.6/);
 
 const mediumWithTrailingTitle = `【ミニショップ陽だまりの一日】
 
@@ -106,7 +106,7 @@ const mediumWithTrailingTitle = `【ミニショップ陽だまりの一日】
 const cleanedMediumTrailingTitle = cleanOutputForPublicMode(mediumWithTrailingTitle, 'medium');
 assert.doesNotMatch(cleanedMediumTrailingTitle, /\nタイトル: ミニショップ陽だまりの一日\s*\n\nCreated By AI Story Maker/);
 assert.match(cleanedMediumTrailingTitle, /どら焼きを分け合い/);
-assert.match(cleanedMediumTrailingTitle, /Created By AI Story Maker V5\.0\.5/);
+assert.match(cleanedMediumTrailingTitle, /Created By AI Story Maker V5\.0\.6/);
 
 const mediumWithInlineTrailingTitle = `【さびしき駆け込みコンビニ】
 
@@ -122,7 +122,17 @@ const mediumWithInlineTrailingTitle = `【さびしき駆け込みコンビニ�
 const cleanedMediumInlineTrailingTitle = cleanOutputForPublicMode(mediumWithInlineTrailingTitle, 'medium');
 assert.doesNotMatch(cleanedMediumInlineTrailingTitle, /タイトル: さびしき駆け込みコンビニ/);
 assert.match(cleanedMediumInlineTrailingTitle, /ここに集まった人々の証だった。/);
-assert.match(cleanedMediumInlineTrailingTitle, /Created By AI Story Maker V5\.0\.5/);
+assert.match(cleanedMediumInlineTrailingTitle, /Created By AI Story Maker V5\.0\.6/);
+
+const mediumTrailingChoiceTitle = `明日もどうせ、誰かの大事に巻き込まれながら、また一日が始まるのだ。(ア) タイトル: ヘイワマートの客は止まらない`;
+const cleanedMediumTrailingChoiceTitle = cleanOutputForPublicMode(mediumTrailingChoiceTitle, 'medium');
+assert.doesNotMatch(cleanedMediumTrailingChoiceTitle, /\(ア\)|タイトル: ヘイワマート/);
+assert.match(cleanedMediumTrailingChoiceTitle, /また一日が始まるのだ。\n\nCreated By AI Story Maker V5\.0\.6/);
+
+const mediumTrailingChoiceTitleWithoutPeriod = `明日もどうせ、誰かの大事に巻き込まれながら、また一日が始まるのだ (ア) タイトル: ヘイワマートの客は止まらない`;
+const cleanedMediumTrailingChoiceTitleWithoutPeriod = cleanOutputForPublicMode(mediumTrailingChoiceTitleWithoutPeriod, 'medium');
+assert.doesNotMatch(cleanedMediumTrailingChoiceTitleWithoutPeriod, /\(ア\)|タイトル: ヘイワマート/);
+assert.match(cleanedMediumTrailingChoiceTitleWithoutPeriod, /また一日が始まるのだ。\n\nCreated By AI Story Maker V5\.0\.6/);
 
 const trailingTitleAcrossModes = {
   '4koma': `タイトル: 小さな会計
@@ -185,7 +195,32 @@ BGM: 小さく
 for (const [mode, sample] of Object.entries(trailingTitleAcrossModes)) {
   const cleaned = cleanOutputForPublicMode(sample, mode);
   assert.doesNotMatch(cleaned, /タイトル: 余計な下書き/, `${mode} should remove trailing title artifacts`);
-  assert.match(cleaned, /Created By AI Story Maker V5\.0\.5/, `${mode} should keep the footer`);
+  assert.match(cleaned, /Created By AI Story Maker V5\.0\.6/, `${mode} should keep the footer`);
+}
+
+const originalDocument = globalThis.document;
+try {
+  const fakeGenerateButton = { disabled: false };
+  globalThis.document = {
+    documentElement: { dataset: {} },
+    getElementById(id) {
+      return id === 'btn-generate' ? fakeGenerateButton : null;
+    },
+  };
+
+  assert.equal(isGenerationInProgress({ textContent: 'AIの思考を待っています...', dataset: {} }), true);
+  assert.equal(isGenerationInProgress({ textContent: 'AIが考えています... 10秒経過', dataset: {} }), true);
+  assert.equal(isGenerationInProgress({ textContent: '受信待機中... 10秒経過', dataset: {} }), true);
+  assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: { longifyRendering: 'true' } }), true);
+  assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: {} }), false);
+  globalThis.document.documentElement.dataset.longifyRendering = 'true';
+  assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: {} }), true);
+  delete globalThis.document.documentElement.dataset.longifyRendering;
+  fakeGenerateButton.disabled = true;
+  assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: {} }), true);
+} finally {
+  if (originalDocument === undefined) delete globalThis.document;
+  else globalThis.document = originalDocument;
 }
 
 console.log('outputCleanup tests passed');

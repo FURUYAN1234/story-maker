@@ -21,6 +21,10 @@ const NARRATIVE_RESTART_MODES = new Set(['short_short', 'novel', 'medium', 'fair
 const TITLE_LABEL_PATTERN = '\\u30bf\\u30a4\\u30c8\\u30eb';
 const TITLE_SEPARATOR_PATTERN = '[:\\uff1a]';
 const TITLE_LINE_PATTERN = `${TITLE_LABEL_PATTERN}\\s*${TITLE_SEPARATOR_PATTERN}`;
+const TITLE_CHOICE_MARKER_PATTERN = '(?:[\\(\\uff08][^\\)\\uff09\\n]{1,8}[\\)\\uff09]\\s*)?';
+const TITLE_TRAILING_PREFIX_PATTERN = `(?:\\n+\\s*|\\s+|(?<=[\\u3002\\uff01\\uff1f!?\\.]))${TITLE_CHOICE_MARKER_PATTERN}`;
+const SENTENCE_END_PATTERN = /[\u3002\uff01\uff1f!?\u300d\u300f\uff09\)]$/u;
+const SENTENCE_TAIL_PATTERN = /[\u3040-\u30ff\u3400-\u9fff\u3005\u30fcA-Za-z0-9]$/u;
 
 function charLength(text) {
   return Array.from(String(text || '')).length;
@@ -147,10 +151,16 @@ function removeUnclosedTail(text) {
 }
 
 function removeTrailingJapaneseTitleArtifact(text) {
-  const trailingTitlePattern = new RegExp(`(?:\\n+\\s*|\\s+|(?<=[\\u3002\\uff01\\uff1f!?\\.]))${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
-  return normalizeBreaks(text)
-    .replace(trailingTitlePattern, '')
-    .trimEnd();
+  const source = normalizeBreaks(text);
+  const trailingTitlePattern = new RegExp(`${TITLE_TRAILING_PREFIX_PATTERN}${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
+  const next = source.replace(trailingTitlePattern, '').trimEnd();
+  return restoreSentenceEndAfterTitleRemoval(source, next);
+}
+
+function restoreSentenceEndAfterTitleRemoval(source, next) {
+  if (source === next) return next;
+  if (!next || SENTENCE_END_PATTERN.test(next)) return next;
+  return SENTENCE_TAIL_PATTERN.test(next) ? `${next}\u3002` : next;
 }
 
 function finishPublicText(text) {
@@ -216,11 +226,13 @@ function removeNarrativeDraftRestart(text, mode) {
 
 function removeTrailingNarrativeTitleArtifact(text, mode) {
   if (!NARRATIVE_RESTART_MODES.has(mode)) return text;
-  const trailingTitlePattern = new RegExp(`(?:\\n+\\s*|\\s+|(?<=[\\u3002\\uff01\\uff1f!?\\.]))${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
-  return normalizeBreaks(text)
+  const source = normalizeBreaks(text);
+  const trailingTitlePattern = new RegExp(`${TITLE_TRAILING_PREFIX_PATTERN}${TITLE_LINE_PATTERN}[^\\n]{1,120}\\s*$`, 'u');
+  const next = source
     .replace(trailingTitlePattern, '')
     .replace(/\n+\s*タイトル\s*[:：][^\n]{1,120}\s*$/u, '')
     .trimEnd();
+  return restoreSentenceEndAfterTitleRemoval(source, next);
 }
 
 function finishPublicTextPreserveBody(text) {
@@ -815,10 +827,17 @@ function updateOutputCounter(text) {
   if (counter) counter.textContent = `${charLength(text).toLocaleString()} 字`;
 }
 
-function isGenerationInProgress(output) {
-  const generateButton = document.getElementById('btn-generate');
+export function isGenerationInProgress(output) {
+  if (output?.dataset?.longifyRendering === 'true') return true;
+  const doc = typeof document !== 'undefined' ? document : null;
+  if (doc?.documentElement?.dataset?.longifyRendering === 'true') return true;
+  const generateButton = doc?.getElementById?.('btn-generate');
   const text = output?.innerText || output?.textContent || '';
-  return !!generateButton?.disabled || /^AIの思考を待っています/.test(text);
+  return (
+    !!generateButton?.disabled
+    || /^AI(?:の思考を待っています|が考えています)/.test(text)
+    || /^受信待機中/.test(text)
+  );
 }
 
 export function installPublicOutputCleanup() {
@@ -829,6 +848,7 @@ export function installPublicOutputCleanup() {
   const apply = () => {
     if (applying) return;
     if (isGenerationInProgress(output)) return;
+    if (output?.dataset?.manualOutput === 'true') return;
     const mode = currentMode();
     if (!PUBLIC_MODE_VALUES.includes(mode)) return;
     const text = output.innerText || output.textContent || '';

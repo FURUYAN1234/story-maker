@@ -20,18 +20,31 @@ class ClassListStub {
   }
 }
 
-const createElement = (text = '') => ({
-  _origText: '',
-  classList: new ClassListStub(),
-  disabled: false,
-  innerHTML: '',
-  style: {},
-  textContent: text,
-});
+const createElement = (text = '', children = []) => {
+  const attributes = new Map();
+  return {
+    _origText: '',
+    classList: new ClassListStub(),
+    disabled: false,
+    innerHTML: '',
+    style: {},
+    textContent: text,
+    children,
+    getAttribute: name => attributes.get(name) ?? null,
+    hasAttribute: name => attributes.has(name),
+    removeAttribute: name => attributes.delete(name),
+    setAttribute: (name, value) => attributes.set(name, String(value)),
+    querySelectorAll: () => children,
+  };
+};
+
+const enabledStyleButton = createElement('Analyze');
+const alreadyDisabledStyleInput = createElement();
+alreadyDisabledStyleInput.disabled = true;
 
 const elements = {
   settings: createElement(),
-  'sa-section': createElement(),
+  'sa-section': createElement('', [enabledStyleButton, alreadyDisabledStyleInput]),
   'sa-api-status': createElement(),
   'sa-reflect-api-status': createElement(),
   'global-alert': createElement(),
@@ -50,6 +63,9 @@ try {
 
   assert.equal(elements.settings.classList.contains('generating'), true);
   assert.equal(elements['sa-section'].classList.contains('generating'), true);
+  assert.equal(elements['sa-section'].getAttribute('aria-disabled'), 'true');
+  assert.equal(enabledStyleButton.disabled, true);
+  assert.equal(alreadyDisabledStyleInput.disabled, true);
   assert.equal(button.disabled, true);
   assert.equal(button._origText, 'Generate');
   assert.match(button.innerHTML, /Working/);
@@ -68,6 +84,9 @@ try {
 
   assert.equal(elements.settings.classList.contains('generating'), false);
   assert.equal(elements['sa-section'].classList.contains('generating'), false);
+  assert.equal(elements['sa-section'].getAttribute('aria-disabled'), 'false');
+  assert.equal(enabledStyleButton.disabled, false);
+  assert.equal(alreadyDisabledStyleInput.disabled, true);
   assert.equal(button.disabled, false);
   assert.equal(button.textContent, 'Generate');
   assert.equal(elements['sa-api-status'].classList.contains('hidden'), true);
@@ -80,4 +99,3 @@ try {
     delete globalThis.document;
   }
 }
-

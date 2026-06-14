@@ -3,11 +3,15 @@
 ## 🚨 超超強制ルール (SUPER CRITICAL RULES) - 絶対遵守
 
 ### 1. バージョンルールの絶対厳守 (Strict Versioning Rule)
-- Readable clarification: version numbers in this app use single-digit minor and patch slots only. After `3.9.9`, the next valid version is `4.0.0`; never create a two-digit minor version.
-- バージョンの更新において、**末尾が `9` の場合（`x.y.9`）の次は必ずマイナーバージョンをインクリメントし、パッチバージョンを `0` にリセットして `x.(y+1).0` とすること**。
-  - 例：`3.3.9` の次のバージョンは、絶対に `3.3.10` ではなく **`3.4.0`** とする。
-- パッチバージョンを `9` から `10` などの2桁にする更新は、このプロジェクトにおいて「バージョンジャンプ（数字の読み飛ばし）」とみなされ、**完全なるルール違反**となる。
+- Readable clarification: every bug-fix deploy must bump the public version first. Version numbers use single-digit minor and patch slots; carry from patch to minor, and from minor to major. After `0.9.9`, the next valid version is `1.0.0`; after `9.9.9`, the next valid version is `10.0.0`. Never create a two-digit minor or patch version.
+- バグフィックス、仕様修正、UI修正、出力修正などをデプロイする場合、**必ずデプロイ前にバージョンを1段階上げること**。既存バージョンのまま `npm run deploy` や公開反映を行ってはならない。
+- バージョン更新では、末尾が `9` の場合は必ず桁上げし、minor / patch を2桁にしないこと。
+  - 例：`0.9.9` の次は **`1.0.0`**。
+  - 例：`3.3.9` の次は、絶対に `3.3.10` ではなく **`3.4.0`**。
+  - 例：`9.9.9` の次は **`10.0.0`**。
+- パッチバージョンやマイナーバージョンを `9` から `10` などの2桁にする更新は、このプロジェクトにおいて「バージョンジャンプ（数字の読み飛ばし）」とみなされ、**完全なるルール違反**となる。
 - 本ルールはすべてのファイル（`package.json`, `index.html`, `src/data.js`, `src/main.js`, `README.md`, `walkthrough.md` 等）に適用されるバージョン表記の同期時に例外なく適用される。
+- Git tag / GitHub Release の本文には、ユーザーから明示されない限り `Verification / 検証` セクションを入れない。検証内容は作業報告や `HANDOFF.md` / `PLAN.md` に記録し、tag本文・Release本文は変更内容を中心に簡潔な英日併記にする。
 
 ---
 

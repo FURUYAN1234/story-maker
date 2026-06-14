@@ -8,6 +8,14 @@ CodexおよびAntigravityがデプロイ作業を行う際の完全な手順書�
 - **Not Applicable**: Hugging Face Spaces, Vercel, Netlify
 
 ## 2. Version Bump Targets (バージョン更新対象ファイル)
+バグフィックス、仕様修正、UI修正、出力修正など、コードや公開成果物に変更を入れたあとにデプロイする場合は、必ずデプロイ前にバージョンを1段階上げること。既存バージョンのまま `npm run deploy` や公開反映を行ってはならない。
+
+バージョン番号は `major.minor.patch` とし、minor / patch は原則1桁で運用する。末尾が `9` の場合は必ず桁上げし、2桁の minor / patch を作らない。
+
+- `0.9.9` の次は `1.0.0`
+- `3.3.9` の次は `3.4.0`
+- `9.9.9` の次は `10.0.0`
+
 以下のファイルのバージョン番号 (`vX.Y.Z`) を全て一致させること。
 1. `package.json` (`"version": "X.Y.Z"`)
 2. `src/App.jsx` または主要ソースコード内 (`const SYSTEM_VERSION = "X.Y.Z"` など存在する場合)
@@ -41,6 +49,7 @@ npm run deploy
 ※ Codex側で `gh auth status` が invalid の場合はスキップし、Antigravityに引き継ぐこと。
 - タイトル: `vX.Y.Z: Feature Name / 機能名`
 - 本文: `## What's New / 更新内容` 以下に英日併記。
+- tag本文・GitHub Release本文には、ユーザーから明示されない限り `Verification / 検証` セクションを入れない。検証内容は作業報告や `HANDOFF.md` / `PLAN.md` に残す。
 - コマンド: `gh release create vX.Y.Z --title "タイトル" --notes "本文"`
 
 ## 8. ZIP Extraction (バックアップ展開先ルール)
