@@ -469,35 +469,20 @@ Individual section random buttons are available for focused exploration, such as
 
 ### Independent Axes / 独立軸
 
-| Axis | Role |
+| Axis / 軸 | Role / 役割 |
 |---|---|
-| Output mode | Decides the final format and required labels. |
-| Theme / seed | Provides premise, incident, topic, or emotional trigger. |
-| Genre | Sets story pressure, expectation, pacing, and payoff style. |
-| Worldview | Sets setting logic, props, social rules, and atmosphere. |
-| Target reader | Adjusts density, accessibility, tone, and genre literacy. |
-| Era | Controls technology level, vocabulary, social background, and anachronism risk. |
-| Ending type | Sets closure pattern, twist, open question, circular return, or emotional residue. |
-| Narration | Sets viewpoint, distance, voice, and presentation style. |
-| Characters | Supplies roles, relationships, personalities, and conflict engines. |
-| Universal Input | Adds external text or image context. |
-| Supplement | Adds constraints that do not fit the preset sections. |
-| Style analysis | Adds extracted writing-style parameters for rewrite or guidance. |
-
-| 軸 | 役割 |
-|---|---|
-| 出力モード | 完成形式と必須ラベルを決めます。 |
-| テーマ・シード | 前提、事件、話題、感情の起点を与えます。 |
-| ジャンル | 物語圧、期待、テンポ、回収の方向を決めます。 |
-| 世界観 | 舞台論理、小道具、社会ルール、空気感を決めます。 |
-| 読者層 | 密度、読みやすさ、トーン、ジャンル文脈の前提を調整します。 |
-| 時代 | 技術水準、語彙、社会背景、時代錯誤リスクを調整します。 |
-| 結末 | 閉じ方、反転、問い、円環、余韻を決めます。 |
-| 語り口 | 視点、距離、声、見せ方を決めます。 |
-| 登場人物 | 役割、関係、性格、葛藤のエンジンを与えます。 |
-| 万能インプット | 外部テキストや画像の文脈を追加します。 |
-| 補足メモ | プリセット欄に入らない制約を追加します。 |
-| 作風解析 | リライトや生成補助に使う文体パラメータを追加します。 |
+| Output mode<br>出力モード | Decides the final format and required labels.<br>完成形式と必須ラベルを決めます。 |
+| Theme / seed<br>テーマ・シード | Provides premise, incident, topic, or emotional trigger.<br>前提、事件、話題、感情の起点を与えます。 |
+| Genre<br>ジャンル | Sets story pressure, expectation, pacing, and payoff style.<br>物語圧、期待、テンポ、回収の方向を決めます。 |
+| Worldview<br>世界観 | Sets setting logic, props, social rules, and atmosphere.<br>舞台論理、小道具、社会ルール、空気感を決めます。 |
+| Target reader<br>読者層 | Adjusts density, accessibility, tone, and genre literacy.<br>密度、読みやすさ、トーン、ジャンル文脈の前提を調整します。 |
+| Era<br>時代 | Controls technology level, vocabulary, social background, and anachronism risk.<br>技術水準、語彙、社会背景、時代錯誤リスクを調整します。 |
+| Ending type<br>結末 | Sets closure pattern, twist, open question, circular return, or emotional residue.<br>閉じ方、反転、問い、円環、余韻を決めます。 |
+| Narration<br>語り口 | Sets viewpoint, distance, voice, and presentation style.<br>視点、距離、声、見せ方を決めます。 |
+| Characters<br>登場人物 | Supplies roles, relationships, personalities, and conflict engines.<br>役割、関係、性格、葛藤のエンジンを与えます。 |
+| Universal Input<br>万能インプット | Adds external text or image context.<br>外部テキストや画像の文脈を追加します。 |
+| Supplement<br>補足メモ | Adds constraints that do not fit the preset sections.<br>プリセット欄に入らない制約を追加します。 |
+| Style analysis<br>作風解析 | Adds extracted writing-style parameters for rewrite or guidance.<br>リライトや生成補助に使う文体パラメータを追加します。 |
 
 ### Locks / ロック
 
