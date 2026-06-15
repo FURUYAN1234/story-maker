@@ -800,20 +800,14 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 
 ## Known Limitations / 既知の制限
 
-| Area | Limitation | Practical meaning |
+| Area / 領域 | Limitation / 制限 | Practical meaning / 実用上の意味 |
 |---|---|---|
-| Provider behavior | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input. | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty. |
-| API挙動 | 出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | 同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
-| Rewrite layer | The rewrite layer reduces short draft failures but does not guarantee literary excellence. | It catches common structural failures, but human editing can still be necessary. |
-| 改稿レイヤー | 改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | 構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Long-form beta | Long-form expansion uses multiple provider calls for chapter generation, AI review, and optional brush-up. | It can take longer and consume more API quota than standard generation. |
-| 長編β | 長編化は、章生成、AI講評、任意のブラッシュアップで複数回API通信を行います。 | 通常生成より時間とAPI使用量が増えます。 |
-| AI review | AI review and pass/fail labels are revision aids, not publication guarantees. | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment. |
-| AI講評 | AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | 合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
-| Publication readiness | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality. | Users remain responsible for final use and publication decisions. |
-| 公開前確認 | 生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | 最終利用と公開判断の責任はユーザー側に残ります。 |
-| QA scope | Current QA verifies representative real browser output, not all possible input combinations. | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed. |
-| QA範囲 | 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
+| Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
+| Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
+| Long-form beta<br>長編β | Long-form expansion uses multiple provider calls for chapter generation, AI review, and optional brush-up.<br>長編化は、章生成、AI講評、任意のブラッシュアップで複数回API通信を行います。 | It can take longer and consume more API quota than standard generation.<br>通常生成より時間とAPI使用量が増えます。 |
+| AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
+| Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
+| QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
 
