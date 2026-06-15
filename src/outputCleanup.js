@@ -99,6 +99,11 @@ function normalizeLeadingTitle(text) {
     .replace(/^\s*#{1,6}\s*([^\n]+?)\s*$/u, 'タイトル: $1');
 }
 
+function normalizeBracketedLeadingTitle(text) {
+  return String(text || '')
+    .replace(/^\s*【([^】\n]{1,80})】\s*\n+/u, 'タイトル: $1\n\n');
+}
+
 function trimToSentencePreserveBreaks(text, maxChars) {
   const source = String(text || '');
   if (!maxChars || charLength(source) <= maxChars) return source;
@@ -164,7 +169,7 @@ function restoreSentenceEndAfterTitleRemoval(source, next) {
 }
 
 function finishPublicText(text) {
-  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(removeUnclosedTail(removeDanglingTail(text)))))).trimEnd();
+  const body = stripFooter(normalizeBracketedLeadingTitle(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(removeUnclosedTail(removeDanglingTail(text))))))).trimEnd();
   return body ? `${body}\n\n${FOOTER_TEXT}` : '';
 }
 
@@ -236,12 +241,76 @@ function removeTrailingNarrativeTitleArtifact(text, mode) {
 }
 
 function finishPublicTextPreserveBody(text) {
-  const body = stripFooter(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(normalizeBreaks(text))))).trimEnd();
+  const body = stripFooter(normalizeBracketedLeadingTitle(normalizeLeadingTitle(normalizeFormatLabelMarkdown(removeTrailingJapaneseTitleArtifact(normalizeBreaks(text)))))).trimEnd();
   return body ? `${body}\n\n${FOOTER_TEXT}` : '';
 }
 
 function bodyLength(text) {
   return charLength(stripFooter(String(text || '')).trim());
+}
+
+function documentaryMinChars() {
+  return Number(MODE_LENGTH_TARGETS.documentary?.min || 0);
+}
+
+function documentaryLabelSource(text) {
+  return normalizeFormatLabelMarkdown(normalizeBreaks(stripFooter(String(text || ''))));
+}
+
+function hasDocumentaryCoreLabels(text) {
+  const source = documentaryLabelSource(text);
+  return /^ナレーション\s*[:：](?:\s*\S+|\s*\n\s*\S+)/m.test(source)
+    && /^記録映像\s*[:：](?:\s*\S+|\s*\n\s*\S+)/m.test(source)
+    && /^(?:証言\s*(?:[\/／]\s*インタビュー)?|インタビュー)\s*[:：](?:\s*\S+|\s*\n\s*\S+)/m.test(source);
+}
+
+function hasNonEmptyDocumentaryClosing(text) {
+  return /^締め\s*[:：](?:\s*\S+|\s*\n\s*\S+)/m.test(documentaryLabelSource(text));
+}
+
+function removeEmptyTrailingDocumentaryClosing(text) {
+  const closingLabel = '\u7de0\u3081';
+  return normalizeBreaks(String(text || '').replace(
+    new RegExp(`(?:^|\\n)\\s*${closingLabel}\\s*[:\uff1a]\\s*$`, 'u'),
+    '',
+  ));
+}
+
+function documentaryCandidateSafeToCut(candidate, source) {
+  if (!hasDocumentaryCoreLabels(candidate) || !hasNonEmptyDocumentaryClosing(candidate)) return false;
+  const min = documentaryMinChars();
+  if (!min) return true;
+  const sourceLen = bodyLength(source);
+  const candidateLen = bodyLength(candidate);
+  if (sourceLen < min) return true;
+  return candidateLen >= Math.min(min, Math.ceil(sourceLen * 0.55));
+}
+
+function hasDocumentaryDraftRestartArtifact(text) {
+  const source = documentaryLabelSource(text);
+  if ((source.match(/^タイトル\s*[:：]/gm) || []).length > 1) return true;
+
+  const titleLabel = '\u30bf\u30a4\u30c8\u30eb';
+  const narrationLabel = '\u30ca\u30ec\u30fc\u30b7\u30e7\u30f3';
+  const footageLabel = '\u8a18\u9332\u6620\u50cf';
+  const testimonyLabel = '\u8a3c\u8a00';
+  const interviewLabel = '\u30a4\u30f3\u30bf\u30d3\u30e5\u30fc';
+  const closingLabel = '\u7de0\u3081';
+  const closingPattern = new RegExp(`(?:^|\\n)\\s*${closingLabel}\\s*[:\uff1a]`, 'gm');
+  const restartPattern = new RegExp(
+    `(?:\\n\\s*)?(?:${titleLabel}|${narrationLabel}|${footageLabel}|${testimonyLabel}\\s*[\\/\uff0f]\\s*${interviewLabel}|${testimonyLabel}|${interviewLabel})\\s*[:\uff1a]`,
+    'm',
+  );
+
+  for (const match of source.matchAll(closingPattern)) {
+    const afterClosingStart = match.index + match[0].length;
+    const tail = source.slice(afterClosingStart);
+    const restart = tail.search(restartPattern);
+    if (restart <= 0) continue;
+    const candidate = normalizeBreaks(source.slice(0, afterClosingStart + restart));
+    if (documentaryCandidateSafeToCut(candidate, source)) return true;
+  }
+  return false;
 }
 
 function paragraphizeSentences(text, sentencesPerParagraph = 2) {
@@ -480,7 +549,7 @@ function hasDraftRestartArtifact(text, mode) {
   }
   if (mode === 'letter') return (source.match(/^宛先[:：]/gm) || []).length > 1;
   if (mode === 'diary') return (source.match(/^日付[:：]/gm) || []).length > 1;
-  if (mode === 'documentary') return (source.match(/^ナレーション[:：]/gm) || []).length > 1;
+  if (mode === 'documentary') return hasDocumentaryDraftRestartArtifact(source);
   if (mode === 'radio') return (source.match(/^タイトル[:：]/gm) || []).length > 1;
   if (mode === '4koma_scenario') return (source.match(/^Topic:/gm) || []).length > 1;
   if (mode === '4koma') return (source.match(/(?:^|\n)1コマ目/g) || []).length > 1;
@@ -536,7 +605,7 @@ function hasJapaneseDraftRestartArtifact(text, mode) {
   }
   if (mode === 'letter') return (source.match(new RegExp(`^${JP_LABEL.address}[:\uff1a]`, 'gm')) || []).length > 1;
   if (mode === 'diary') return (source.match(new RegExp(`^${JP_LABEL.date}[:\uff1a]`, 'gm')) || []).length > 1;
-  if (mode === 'documentary') return (source.match(new RegExp(`^${JP_LABEL.narration}[:\uff1a]`, 'gm')) || []).length > 1;
+  if (mode === 'documentary') return hasDocumentaryDraftRestartArtifact(source);
   if (mode === 'radio') return (source.match(new RegExp(`^${JP_LABEL.title}[:\uff1a]`, 'gm')) || []).length > 1;
   return false;
 }
@@ -777,26 +846,86 @@ function clean4komaScenario(text) {
 }
 
 function ensureDocumentaryClosingLabel(text) {
-  let source = normalizeBreaks(text);
+  let source = removeEmptyTrailingDocumentaryClosing(text);
   source = source.replace(/^記録映像（締め）\s*[:：]\s*/m, '締め: ');
-  if (/^締め\s*[:：]\s*\S+/m.test(source)) return source;
+  if (hasNonEmptyDocumentaryClosing(source)) return source;
 
   const parts = source.split(/\n{2,}/).map(part => part.trim()).filter(Boolean);
   if (!parts.length) return source;
   const lastIndex = parts.length - 1;
-  if (/^(?:ナレーション|記録映像|証言|インタビュー)\s*[:：]/.test(parts[lastIndex])) {
-    parts[lastIndex] = parts[lastIndex].replace(/^(?:ナレーション|記録映像|証言|インタビュー)\s*[:：]\s*/u, '締め: ');
+  if (/^(?:ナレーション|記録映像|証言\s*(?:[\/／]\s*インタビュー)?|インタビュー)\s*[:：]/.test(parts[lastIndex])) {
+    parts[lastIndex] = parts[lastIndex].replace(
+      /^(?:ナレーション|記録映像|証言\s*(?:[\/／]\s*インタビュー)?|インタビュー)\s*[:：]\s*/u,
+      '締め: ',
+    );
   } else {
     parts[lastIndex] = `締め:\n${parts[lastIndex]}`;
   }
   return normalizeBreaks(parts.join('\n\n'));
 }
 
+function keepFirstDocumentaryCycle(text) {
+  const source = normalizeBreaks(text);
+  const titleLabel = '\u30bf\u30a4\u30c8\u30eb';
+  const narrationLabel = '\u30ca\u30ec\u30fc\u30b7\u30e7\u30f3';
+  const footageLabel = '\u8a18\u9332\u6620\u50cf';
+  const testimonyLabel = '\u8a3c\u8a00';
+  const interviewLabel = '\u30a4\u30f3\u30bf\u30d3\u30e5\u30fc';
+  const closingLabel = '\u7de0\u3081';
+  const closingPattern = new RegExp(`(?:^|\\n)\\s*${closingLabel}\\s*[:\uff1a]`, 'gm');
+  const restartPattern = new RegExp(
+    `(?:\\n\\s*)?(?:${titleLabel}|${narrationLabel}|${footageLabel}|${testimonyLabel}\\s*[\\/\uff0f]\\s*${interviewLabel}|${testimonyLabel}|${interviewLabel})\\s*[:\uff1a]`,
+    'm',
+  );
+  for (const match of source.matchAll(closingPattern)) {
+    const afterClosingStart = match.index + match[0].length;
+    const tail = source.slice(afterClosingStart);
+    const restart = tail.search(restartPattern);
+    if (restart <= 0) continue;
+    const candidate = normalizeBreaks(source.slice(0, afterClosingStart + restart));
+    if (documentaryCandidateSafeToCut(candidate, source)) return candidate;
+  }
+  return source;
+}
+
+function ensureDocumentaryTitleLabel(text) {
+  const lines = normalizeBreaks(text).split('\n');
+  const firstIndex = lines.findIndex(line => line.trim());
+  if (firstIndex < 0) return lines.join('\n');
+  const first = lines[firstIndex].trim();
+  const titleLabel = '\u30bf\u30a4\u30c8\u30eb';
+  const narrationLabel = '\u30ca\u30ec\u30fc\u30b7\u30e7\u30f3';
+  if (new RegExp(`^${titleLabel}\\s*[:\uff1a]`).test(first)) return lines.join('\n');
+  const next = lines.slice(firstIndex + 1, firstIndex + 5).join('\n');
+  if (charLength(first) <= 80 && !/[:\uff1a]$/.test(first) && new RegExp(`${narrationLabel}\\s*[:\uff1a]`).test(next)) {
+    lines[firstIndex] = `${titleLabel}: ${first}`;
+  }
+  return normalizeBreaks(lines.join('\n'));
+}
+
 function cleanDocumentary(text) {
-  let next = stripPublicArtifacts(text);
+  const source = stripPublicArtifacts(text);
+  let next = source;
   next = removeRestartedDrafts(next);
+  next = removeEmptyTrailingDocumentaryClosing(next);
+  next = ensureDocumentaryTitleLabel(next);
   next = ensureDocumentaryClosingLabel(next);
-  return finishPublicText(next);
+  next = keepFirstDocumentaryCycle(next);
+  const cleaned = finishPublicText(next);
+
+  const min = documentaryMinChars();
+  if (
+    min
+    && bodyLength(cleaned) < min
+    && bodyLength(source) >= min
+    && !hasPromptArtifact(source)
+  ) {
+    const fallback = finishPublicTextPreserveBody(ensureDocumentaryClosingLabel(
+      ensureDocumentaryTitleLabel(removeEmptyTrailingDocumentaryClosing(source)),
+    ));
+    if (bodyLength(fallback) >= min && hasDocumentaryCoreLabels(fallback)) return fallback;
+  }
+  return cleaned;
 }
 
 function cleanGenericPublicMode(text, mode) {

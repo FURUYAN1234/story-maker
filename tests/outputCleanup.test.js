@@ -75,6 +75,32 @@ const documentaryFootageClosing = `ナレーション: 店はまだ薄暗い。
 const cleanedFootageClosing = cleanOutputForPublicMode(documentaryFootageClosing, 'documentary');
 assert.match(cleanedFootageClosing, /^締め: 夕暮れの店先/m);
 
+const openAiDocumentaryWithEmptyClosing = `商店街の夜、コンビニの朝
+
+ナレーション:
+${'東京の外れにある商店街では、朝のコンビニと夜の小さな店が、同じ失敗を別の速度で受け止めている。揚げ物の匂い、レジ袋の音、開店前のため息が、働く人の生活をほどいていく。'.repeat(22)}
+
+記録映像:
+${'午前六時、蛍光灯の下で弁当の棚が整えられ、午後七時には商店街の看板が一つずつ消えていく。店長は売れ残りの札を直し、常連は小銭を探しながら苦笑する。'.repeat(12)}
+
+証言/インタビュー:
+${'店主は「大きな事件ではないけれど、こういう小さな失敗の後始末が店を続ける理由になる」と話す。常連客も、何度も間違えて、それでも名前を覚えてくれる場所だから戻ってくるのだと語る。'.repeat(12)}
+
+ナレーション:
+${'閉店後、シャッターの隙間から細い光が歩道へ落ちる。誰かの一日がうまくいかなかったことも、別の誰かが笑って受け止めたことも、商店街の夜はそのまま抱え込んでいく。'.repeat(15)}
+
+締め:`;
+
+const cleanedOpenAiDocumentary = cleanOutputForPublicMode(openAiDocumentaryWithEmptyClosing, 'documentary');
+const cleanedOpenAiDocumentaryBody = cleanedOpenAiDocumentary.replace(footerPattern, '').trim();
+assert.match(cleanedOpenAiDocumentaryBody, /^タイトル: 商店街の夜、コンビニの朝/m);
+assert.match(cleanedOpenAiDocumentaryBody, /^ナレーション:/m);
+assert.match(cleanedOpenAiDocumentaryBody, /^記録映像:/m);
+assert.match(cleanedOpenAiDocumentaryBody, /^証言\/インタビュー:/m);
+assert.match(cleanedOpenAiDocumentaryBody, /^締め:\s*\S/m);
+assert.ok(cleanedOpenAiDocumentaryBody.length >= 2400, `documentary body collapsed to ${cleanedOpenAiDocumentaryBody.length} chars`);
+assert.doesNotMatch(cleanedOpenAiDocumentary, /^締め:\s*\n\s*Created By AI Story Maker/m);
+
 const mediumWithRestart = `【鈴の音は森に還る】
 
 第1節
@@ -127,7 +153,8 @@ const mediumWithInlineTrailingTitle = `【さびしき駆け込みコンビニ�
 残り香、油の匂い、指に残る冷たさ。どれもがここに集まった人々の証だった。タイトル: さびしき駆け込みコンビニ`;
 
 const cleanedMediumInlineTrailingTitle = cleanOutputForPublicMode(mediumWithInlineTrailingTitle, 'medium');
-assert.doesNotMatch(cleanedMediumInlineTrailingTitle, /タイトル: さびしき駆け込みコンビニ/);
+assert.match(cleanedMediumInlineTrailingTitle, /^タイトル: さびしき駆け込みコンビニ/m);
+assert.equal((cleanedMediumInlineTrailingTitle.match(/タイトル: さびしき駆け込みコンビニ/g) || []).length, 1);
 assert.match(cleanedMediumInlineTrailingTitle, /ここに集まった人々の証だった。/);
 assert.match(cleanedMediumInlineTrailingTitle, footerPattern);
 
@@ -204,6 +231,59 @@ for (const [mode, sample] of Object.entries(trailingTitleAcrossModes)) {
   assert.doesNotMatch(cleaned, /タイトル: 余計な下書き/, `${mode} should remove trailing title artifacts`);
   assert.match(cleaned, footerPattern, `${mode} should keep the footer`);
 }
+
+const cleanedBracketedMediumTitle = cleanOutputForPublicMode(`【商店街の福引き】
+
+第1節
+
+朝の店先で準備が始まった。
+
+第2節
+
+小さな失敗が重なった。
+
+第3節
+
+最後は笑いながら片付けた。`, 'medium');
+assert.match(cleanedBracketedMediumTitle, /^タイトル: 商店街の福引き/m);
+assert.doesNotMatch(cleanedBracketedMediumTitle, /^【商店街の福引き】/m);
+assert.match(cleanedBracketedMediumTitle, footerPattern);
+
+const cleanedDocumentaryRestart = cleanOutputForPublicMode(`タイトル: 商店街の一日
+
+ナレーション:
+朝の店先に小さな緊張があった。
+
+記録映像:
+レジ横の貼り紙が揺れている。
+
+証言/インタビュー: 店主
+「今日は、なんとか店を開けたかったんです」
+
+締め:
+小さな店は、失敗ごと明日へ進んでいった。タイトル:
+
+ナレーション:
+これは二本目の下書きである。`, 'documentary');
+assert.match(cleanedDocumentaryRestart, /^締め:/m);
+assert.doesNotMatch(cleanedDocumentaryRestart, /これは二本目の下書き/);
+assert.match(cleanedDocumentaryRestart, footerPattern);
+
+const cleanedDocumentaryBareTitle = cleanOutputForPublicMode(`深夜スマイル偏愛店
+
+ナレーション:
+曇った朝、店の灯りがついた。
+
+記録映像:
+レジ横の貼り紙が揺れている。
+
+証言/インタビュー:
+店主が小さくうなずいた。
+
+締め:
+店は明日へ進んだ。`, 'documentary');
+assert.match(cleanedDocumentaryBareTitle, /^タイトル: 深夜スマイル偏愛店/m);
+assert.match(cleanedDocumentaryBareTitle, footerPattern);
 
 const originalDocument = globalThis.document;
 try {

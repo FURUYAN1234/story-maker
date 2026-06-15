@@ -11,6 +11,7 @@ import {
   shouldBoostStoryPrompt,
   shouldSkipQualityPrompt,
 } from './modeContracts.js';
+import { cleanOutputForPublicMode } from './outputCleanup.js';
 
 const OPENAI_SYSTEM_MARKER = '[SMK_OPENAI_PUBLIC_MODE_SYSTEM_V500]';
 
@@ -24,7 +25,77 @@ const OPENAI_SYSTEM_LENGTH_RULES = Object.fromEntries(
 const MODE_STRICT_MIN_CHARS = Object.fromEntries(
   Object.entries(MODE_LENGTH_TARGETS).map(([mode, spec]) => [mode, spec.min]),
 );
-const MAX_STREAM_REWRITE_ATTEMPTS = 2;
+const MAX_STREAM_REWRITE_ATTEMPTS = 3;
+const SEMANTIC_LOOP_MODES = new Set([
+  '4koma_scenario',
+  'short_short',
+  'novel',
+  'medium',
+  'scenario',
+  'manga',
+  'fairy',
+  'documentary',
+  'radio',
+]);
+
+const COMMON_KATAKANA_TOKENS = new Set([
+  '\u30a2\u30d7\u30ea',
+  '\u30a4\u30f3\u30b9\u30bf',
+  '\u30ae\u30eb\u30c9',
+  '\u30af\u30ea\u30fc\u30e0',
+  '\u30b2\u30fc\u30e0',
+  '\u30b4\u30d6\u30ea\u30f3',
+  '\u30b9\u30de\u30db',
+  '\u30bf\u30eb\u30c8',
+  '\u30c1\u30e7\u30b3',
+  '\u30d1\u30f3',
+  '\u30d5\u30a1\u30c3\u30b7\u30e7\u30f3',
+  '\u30da\u30f3\u30c0\u30f3\u30c8',
+  '\u30ec\u30c8\u30ed',
+]);
+
+const COMMON_SUBJECT_TOKENS = new Set([
+  '\u4e00\u884c',
+  '\u4e16\u754c',
+  '\u4eca\u5ea6',
+  '\u4ef2\u9593',
+  '\u5168\u54e1',
+  '\u5b50\u4f9b',
+  '\u5f7c\u5973',
+  '\u6751\u4eba',
+  '\u7269\u8a9e',
+  '\u7537\u6027',
+  '\u5c11\u5973',
+  '\u5c11\u5e74',
+  '\u9b54\u7269',
+]);
+
+const PROFILE_MARKER_PATTERNS = [
+  /\u3068\u3057\u3066/g,
+  /\u50cd\u304f\u508d\u3089/g,
+  /\u5e97\u4e3b/g,
+  /\u5f79\u5272/g,
+  /\u611b\u3055\u308c/g,
+  /\u7814\u7a76/g,
+  /\u8b72\u308a\u53d7\u3051/g,
+  /\u958b\u3044\u305f/g,
+  /\u968a\u9577/g,
+  /\u4fe1\u983c/g,
+];
+
+const CLOSING_MARKER_PATTERNS = [
+  /\u5f8c\u6094\u306f\u306a\u304b\u3063\u305f/g,
+  /\u4eba\u751f/g,
+  /\u5fc3\u304b\u3089/g,
+  /\u5e78\u305b/g,
+  /\u65b0\u3057\u3044\u81ea\u5206/g,
+  /\u6e80\u305f\u3055\u308c/g,
+  /\u6e80\u8db3/g,
+  /\u6e29\u304b/g,
+  /\u7a4f\u3084\u304b/g,
+  /\u7b11\u9854/g,
+  /\u8f1d/g,
+];
 
 function rewriteGoalText(mode, spec) {
   const min = Number(spec?.min || 0);
@@ -51,6 +122,47 @@ function rewriteGoalText(mode, spec) {
 const MODE_REWRITE_TARGETS = Object.fromEntries(
   Object.entries(MODE_LENGTH_TARGETS).map(([mode, spec]) => [mode, rewriteGoalText(mode, spec)]),
 );
+
+const STRICT_FORMAT_INSTRUCTIONS = {
+  '4koma': '4コマ漫画風として、タイトルの後に「1コマ目」「2コマ目」「3コマ目」「4コマ目」を必ず置き、各コマに「絵/状況:」「セリフ:」「狙い:」を含めること。小説本文だけで返すことは禁止。',
+  '4koma_scenario': 'AI 4komaシナリオ連携として、Topic、Logline、Location、Outfit、Punchline、Scenario、[1コマ目]から[4コマ目]を必ず置くこと。',
+  medium: '中編小説として、先頭から「タイトル:」「第1節」「第2節」「第3節」をこの順で必ず置くこと。第4節や次章予告は禁止。',
+  scenario: '脚本/台本として、先頭から「タイトル:」「登場人物:」「場面:」を必ず置くこと。本文はト書きと「人物名: セリフ」で進め、小説の地の文だけで返すことは禁止。',
+  manga: 'ストーリー漫画のネームとして、「タイトル:」「ページ1」を置き、各ページ/各コマに「絵:」「セリフ:」「演出:」を必ず書くこと。小説本文だけは禁止。',
+  essay: 'エッセイとして「主張:」「観察:」「考察:」「結論:」の4ブロックで書くこと。小説・会話劇・事件解決は禁止。',
+  poem: '詩・ポエムとして、タイトルと詩行だけで構成し、解説文や小説段落を出さないこと。',
+  letter: '手紙/書簡体として「宛先:」「本文:」「結び:」「差出人:」を必ず置くこと。',
+  diary: '日記/独白体として「日付:」「天気:」「本文:」を必ず置き、一人称の日記として書くこと。',
+  documentary: 'ドキュメンタリーとして「タイトル:」「ナレーション:」「証言/インタビュー:」「記録映像:」「締め:」を必ず置くこと。',
+  radio: 'ラジオドラマとして「タイトル:」「登場人物:」「BGM:」「SE:」を必ず置き、音だけで伝わる会話劇にすること。',
+};
+
+function strictFormatInstruction(mode) {
+  return STRICT_FORMAT_INSTRUCTIONS[mode] || '';
+}
+
+function publicMinimumInstruction(mode) {
+  const min = Number(MODE_STRICT_MIN_CHARS[mode] || 0);
+  if (!min) return '';
+  const bufferedMin = min + Math.max(120, Math.ceil(min * 0.03));
+  return `公開本文として清書・整形された後でも必ず${min}字以上を残すこと。安全余白として本文だけで${bufferedMin}字以上を書き、タイトル、見出し、フッター、完結マーカー、自己評価、説明文を文字数に含めないこと。`;
+}
+
+function rewriteRepairInstruction(reason) {
+  const source = String(reason || '');
+  const lines = [];
+  const repeatedPhrase = source.match(/repeated phrase loop detected:\s*(.+?)\s*x\d+/i);
+  if (repeatedPhrase) {
+    lines.push(`検出された反復表現「${repeatedPhrase[1]}」を使い回さない。同じ比喩、語尾、名詞句を削り、別の行動・会話・感覚に置き換える。`);
+  }
+  if (/profile-roundup loop detected/i.test(source)) {
+    lines.push('結末を人物ごとの役割紹介、幸福/信頼/人生の総括段落で並べない。最後は一つの具体的な場面、行動、会話、物音、手触りで閉じる。');
+  }
+  if (/static ending loop detected/i.test(source)) {
+    lines.push('終盤で同じ機能のまとめ段落を連ねない。未解決の小さな作業、相手の反応、具体物の変化を使って場面を前へ進める。');
+  }
+  return lines.join('\n');
+}
 
 function currentUiMode() {
   if (typeof document === 'undefined') return '';
@@ -104,7 +216,8 @@ function boostText(text) {
   const continuationFixed = rewriteContinuationPrompt(uncapped, mode);
   if (source.includes(QUALITY_MARKER)) return continuationFixed;
   if (!shouldBoostStoryPrompt(uncapped) && !currentUiMode()) return uncapped;
-  return `${continuationFixed}\n${buildQualityContract(mode)}`;
+  const strictFormat = strictFormatInstruction(mode);
+  return `${continuationFixed}\n${buildQualityContract(mode)}${strictFormat ? `\n${strictFormat}` : ''}`;
 }
 
 function rewriteContinuationPrompt(text, mode) {
@@ -210,6 +323,7 @@ function openAiSystemContract(mode) {
     OPENAI_SYSTEM_MARKER,
     'あなたはメモではなく、読者に見せる最終本文だけを書く。',
     '選択された公開出力モードを厳密に守る。内部指示、自己評価、字数カウント、チェック結果は出力しない。',
+    strictFormatInstruction(mode),
     lengthRule,
     '短く終わりそうな場合は、結末を書かずに、入力済みの項目から取れる具体物、会話、沈黙、身体感覚、後始末を追加して本文を伸ばす。',
     'Do not output analysis, checklists, prompt fragments, or this system message.',
@@ -231,6 +345,125 @@ function stripPrematureEnding(text) {
     .replace(/(?:Generated|Created) By AI Story Maker V[\d.]+/gi, '')
     .replace(/\n?\s*【完】\s*$/u, '')
     .trim();
+}
+
+function stripQualityFooter(text) {
+  return String(text || '')
+    .replace(/\n*\s*(?:Generated|Created)\s+By\s+AI\s+Story\s+Maker\s+V[\d.]+\.?\s*$/i, '')
+    .trimEnd();
+}
+
+function normalizeNarrativeText(text) {
+  return String(text || '')
+    .replace(/[\s\u3000\u300c\u300d\u300e\u300f\uff08\uff09\u3001\u3002\uff01\uff1f!?.,\u30fb\u2026\u2014\u201c\u201d\u2018\u2019\-:;]/g, '')
+    .replace(/[()[\]{}]/g, '')
+    .toLowerCase();
+}
+
+function bodyParagraphs(text) {
+  return String(text || '')
+    .replace(/(?:Generated|Created) By AI Story Maker V[\d.]+/gi, '')
+    .split(/\n\s*\n/)
+    .map(paragraph => paragraph.trim())
+    .filter(paragraph => paragraph.length >= 24)
+    .filter(paragraph => !/^\s*\u7b2c\s*[0-9\uff10-\uff19\u4e00-\u5341]+\s*[\u7bc0\u7ae0]/.test(paragraph))
+    .filter(paragraph => !(paragraph.startsWith('\u3010') && paragraph.endsWith('\u3011') && paragraph.length <= 80));
+}
+
+function extractSubjectTokens(text) {
+  const source = String(text || '');
+  const tokens = new Set();
+  const katakanaMatches = source.match(/[\u30a1-\u30f4\u30fc]{2,10}/g) || [];
+  for (const token of katakanaMatches) {
+    if (COMMON_KATAKANA_TOKENS.has(token)) continue;
+    if (/[\u30fc]{3,}/.test(token)) continue;
+    tokens.add(token);
+  }
+  const quotedNameMatches = source.match(/[\u300c\u300e]([^,\u3001\u3002\u300c\u300d\u300e\u300f]{1,8})[\u300d\u300f]\s*(?:\u306f|\u304c|\u3082|\u3092|\u306b)/g) || [];
+  for (const match of quotedNameMatches) {
+    const name = match
+      .replace(/^[\u300c\u300e]/, '')
+      .replace(/[\u300d\u300f]\s*(?:\u306f|\u304c|\u3082|\u3092|\u306b).*$/, '');
+    if (name.length >= 2 && name.length <= 8) tokens.add(name);
+  }
+  const nameMatches = source.match(/(?:[一-龯々]{2,4}|[\u3041-\u3096]{2,5})(?=\s*(?:\u306f|\u304c|\u3082|\u3092|\u306b|\u306e))/g) || [];
+  for (const token of nameMatches) {
+    if (COMMON_SUBJECT_TOKENS.has(token)) continue;
+    tokens.add(token);
+  }
+  return Array.from(tokens).filter(token => token.length >= 2).slice(0, 12);
+}
+
+function countPatternHits(text, patterns) {
+  return patterns.reduce((total, pattern) => total + ((String(text || '').match(pattern) || []).length), 0);
+}
+
+function repeatedPhraseIssue(text) {
+  const normalized = normalizeNarrativeText(text);
+  if (normalized.length < 1200) return '';
+  const repeatThreshold = normalized.length >= 8000 ? 9 : normalized.length >= 4000 ? 7 : 5;
+  const counts = new Map();
+  for (const size of [10, 12, 14]) {
+    for (let index = 0; index <= normalized.length - size; index += 1) {
+      const phrase = normalized.slice(index, index + size);
+      if (/^\d+$/.test(phrase)) continue;
+      if (/^[\u3040-\u309f]+$/.test(phrase)) continue;
+      counts.set(phrase, (counts.get(phrase) || 0) + 1);
+    }
+  }
+  const noisyRepeats = [...counts.entries()]
+    .filter(([, count]) => count >= repeatThreshold)
+    .sort((a, b) => b[1] - a[1]);
+  return noisyRepeats.length
+    ? `repeated phrase loop detected: ${noisyRepeats[0][0]} x${noisyRepeats[0][1]}`
+    : '';
+}
+
+function profileRoundupIssue(text) {
+  const paragraphs = bodyParagraphs(text);
+  if (paragraphs.length < 8) return '';
+  const tailCount = Math.min(8, Math.max(4, Math.ceil(paragraphs.length * 0.18)));
+  const tail = paragraphs.slice(-tailCount);
+  const tailText = tail.join('\n');
+  const tailSubjects = extractSubjectTokens(tailText);
+  const profileHits = countPatternHits(tailText, PROFILE_MARKER_PATTERNS);
+  const closingHits = countPatternHits(tailText, CLOSING_MARKER_PATTERNS);
+  const profileParagraphs = tail.filter(paragraph => (
+    extractSubjectTokens(paragraph).length >= 1
+    && countPatternHits(paragraph, PROFILE_MARKER_PATTERNS) >= 1
+  )).length;
+  if (tailSubjects.length >= 5 && profileHits >= 6 && closingHits >= 6 && profileParagraphs >= 4) {
+    return `profile-roundup loop detected near ending: subjects=${tailSubjects.slice(0, 6).join('/')}, profileHits=${profileHits}, closingHits=${closingHits}, profileParagraphs=${profileParagraphs}`;
+  }
+  return '';
+}
+
+function paragraphProgressionIssue(text) {
+  const paragraphs = bodyParagraphs(text);
+  if (paragraphs.length < 10) return '';
+  let maxSameFunctionRun = 0;
+  let currentRun = 0;
+  for (const paragraph of paragraphs) {
+    const profileHits = countPatternHits(paragraph, PROFILE_MARKER_PATTERNS);
+    const closingHits = countPatternHits(paragraph, CLOSING_MARKER_PATTERNS);
+    const dialogueCount = (paragraph.match(/\u300c/g) || []).length;
+    const staticRoundup = profileHits + closingHits >= 2 && dialogueCount <= 3 && paragraph.length <= 360;
+    currentRun = staticRoundup ? currentRun + 1 : 0;
+    maxSameFunctionRun = Math.max(maxSameFunctionRun, currentRun);
+  }
+  return maxSameFunctionRun >= 5
+    ? `static ending loop detected: ${maxSameFunctionRun} consecutive summary paragraphs`
+    : '';
+}
+
+function semanticLoopIssue(mode, body) {
+  if (!SEMANTIC_LOOP_MODES.has(mode)) return '';
+  return repeatedPhraseIssue(body) || profileRoundupIssue(body) || paragraphProgressionIssue(body);
+}
+
+export function detectPublicSemanticLoopIssue(mode, text) {
+  const body = normalizeFormatLabelMarkdown(stripPrematureEnding(text));
+  return semanticLoopIssue(mode, body);
 }
 
 function finalScenarioAimBlock(text) {
@@ -287,6 +520,32 @@ function normalizeFormatLabelMarkdown(text) {
 }
 
 const REQUIRED_MODE_LABELS = {
+  '4koma': [
+    ['1コマ目', /(?:^|\n)\s*(?:1|１|一)\s*コマ目/m],
+    ['2コマ目', /(?:^|\n)\s*(?:2|２|二)\s*コマ目/m],
+    ['3コマ目', /(?:^|\n)\s*(?:3|３|三)\s*コマ目/m],
+    ['4コマ目', /(?:^|\n)\s*(?:4|４|四)\s*コマ目/m],
+    ['セリフ', /(?:^|\n)\s*セリフ\s*[:：]/m],
+  ],
+  medium: [
+    ['タイトル', /(?:^|\n)\s*(?:タイトル\s*[:：]\s*\S+|【[^】\n]{1,80}】)/m],
+    ['第1節', /(?:^|\n)\s*第\s*(?:1|１|一)\s*節/m],
+    ['第2節', /(?:^|\n)\s*第\s*(?:2|２|二)\s*節/m],
+    ['第3節', /(?:^|\n)\s*第\s*(?:3|３|三)\s*節/m],
+  ],
+  scenario: [
+    ['タイトル', /(?:^|\n)\s*(?:タイトル\s*[:：]\s*\S+|【[^】\n]{1,80}】)/m],
+    ['登場人物', /(?:^|\n)\s*登場人物\s*[:：]\s*\S+/m],
+    ['場面', /(?:^|\n)\s*場面\s*[:：]\s*\S+/m],
+  ],
+  manga: [
+    ['タイトル', /(?:^|\n)\s*(?:タイトル\s*[:：]\s*\S+|【[^】\n]{1,80}】)/m],
+    ['ページ1', /(?:^|\n)\s*ページ\s*(?:1|１|一)/m],
+    ['1コマ目', /(?:^|\n)\s*(?:1|１|一)\s*コマ目/m],
+    ['絵', /(?:^|\n)\s*(?:絵|状況)\s*[:：]/m],
+    ['セリフ', /(?:^|\n)\s*セリフ\s*[:：]/m],
+    ['演出', /(?:^|\n)\s*演出\s*[:：]/m],
+  ],
   essay: [
     ['主張', /^主張\s*[:：]\s*\S+/m],
     ['観察', /^観察\s*[:：]\s*\S+/m],
@@ -321,8 +580,13 @@ const REQUIRED_MODE_LABELS = {
 function requiredLabelIssue(mode, body) {
   const labels = REQUIRED_MODE_LABELS[mode];
   if (!labels) return '';
+  const hasDocumentaryInterview = mode === 'documentary'
+    && /(?:^|\n)\s*(?:\u8a3c\u8a00\s*\/\s*\u30a4\u30f3\u30bf\u30d3\u30e5\u30fc|\u8a3c\u8a00|\u30a4\u30f3\u30bf\u30d3\u30e5\u30fc)\s*[:\uff1a](?:\s*\S+|\s*\n\s*\S+)/m.test(body);
   const missing = labels
-    .filter(([, pattern]) => !pattern.test(body))
+    .filter(([label, pattern]) => {
+      if (hasDocumentaryInterview && (/証言|インタビュー/.test(label) || String(label).includes('險ｼ險'))) return false;
+      return !pattern.test(body);
+    })
     .map(([label]) => label);
   return missing.length ? `必須形式ラベル不足: ${missing.join(' / ')}` : '';
 }
@@ -338,7 +602,14 @@ function draftRestartIssue(mode, body) {
   }
   if (mode === 'letter' && countLines(/^宛先\s*[:：]/gm) > 1) return '完成後に手紙の先頭ラベルが再出現しています';
   if (mode === 'diary' && countLines(/^日付\s*[:：]/gm) > 1) return '完成後に日記の先頭ラベルが再出現しています';
-  if (mode === 'documentary' && countLines(/^ナレーション\s*[:：]/gm) > 1) return '完成後にドキュメンタリーの先頭ラベルが再出現しています';
+  if (mode === 'documentary') {
+    if (countLines(/^タイトル\s*[:：]/gm) > 1) return '完成後にドキュメンタリーの先頭ラベルが再出現しています';
+    const closing = source.search(/^締め\s*[:：]/m);
+    if (closing >= 0 && /\n\s*タイトル\s*[:：]/m.test(source.slice(closing + 1))) {
+      return '完成後にドキュメンタリーの先頭ラベルが再出現しています';
+    }
+    return '';
+  }
   if (mode === 'radio' && countLines(/^タイトル\s*[:：]/gm) > 1) return '完成後にラジオドラマの先頭ラベルが再出現しています';
   if (mode === '4koma_scenario' && countLines(/^Topic:/gm) > 1) return '完成後に4コマシナリオの先頭ラベルが再出現しています';
   if (mode === '4koma' && countLines(/(?:^|\n)1コマ目/g) > 1) return '完成後に4コマの先頭ラベルが再出現しています';
@@ -364,13 +635,17 @@ function draftRestartIssue(mode, body) {
 }
 
 function rewriteIssue(mode, text, min, options = {}) {
-  const body = normalizeFormatLabelMarkdown(stripPrematureEnding(text));
-  const internalIssue = internalArtifactIssue(String(text || '')) || internalArtifactIssue(body);
+  const sourceWithoutFooter = stripQualityFooter(text);
+  const body = normalizeFormatLabelMarkdown(stripPrematureEnding(sourceWithoutFooter));
+  const internalIssue = internalArtifactIssue(sourceWithoutFooter) || internalArtifactIssue(body);
   if (internalIssue) return internalIssue;
-  const count = countBodyChars(body);
+  const publicBody = cleanOutputForPublicMode(body, mode);
+  const count = countBodyChars(publicBody);
   if (min && count < min) return `本文が短すぎます（${count}/${min}字）`;
   const restartIssue = draftRestartIssue(mode, body);
   if (restartIssue) return restartIssue;
+  const loopIssue = semanticLoopIssue(mode, body);
+  if (loopIssue) return loopIssue;
   if (/(?:^|\n)\s*(?:タイトル|Topic|Logline|Location|Outfit|Punchline|Scenario|絵|セリフ|演出|狙い|宛先|本文|結び|差出人|BGM|SE|ナレーション|記録映像|証言)\s*[:：]\s*$/u.test(body)) {
     return '末尾または途中に中身のない空ラベルが残っています';
   }
@@ -382,6 +657,10 @@ function rewriteIssue(mode, text, min, options = {}) {
     return '4コマ目の狙い欄が未完成です';
   }
   return '';
+}
+
+export function detectPublicRewriteIssue(mode, text, min = MODE_STRICT_MIN_CHARS[mode] || 0, options = {}) {
+  return rewriteIssue(mode, text, min, options);
 }
 
 async function readOpenAiStreamText(response) {
@@ -494,6 +773,12 @@ function geminiSseResponse(text, response) {
   });
 }
 
+function withInternalCompletionMarker(text) {
+  const body = stripPrematureEnding(text).trimEnd();
+  if (!body) return String(text || '');
+  return `${body}\n\n【完】`;
+}
+
 function continuationHeaders(init) {
   const headers = new Headers(init?.headers || {});
   headers.set('Content-Type', 'application/json');
@@ -515,6 +800,8 @@ async function rewriteShortOpenAiText(originalFetch, init, body, mode, draft, re
           'あなたは日本語の編集者です。短すぎる初稿を、読者に見せる完成稿へ全面改稿します。',
           '本文のみを出力します。解説、チェックリスト、字数報告、内部指示は出力しません。',
           openAiSystemContract(mode),
+          publicMinimumInstruction(mode),
+          rewriteRepairInstruction(reason),
         ].join('\n'),
       },
       {
@@ -569,6 +856,8 @@ async function rewriteShortGeminiText(originalFetch, input, init, body, mode, dr
     '短く閉じず、会話、行動、沈黙、身体感覚、失敗の後始末、関係変化を増やしてください。',
     '入力にない固定設定を品質向上の例として足さず、具体化は入力条件と初稿にある要素から行ってください。',
     openAiSystemContract(mode),
+    publicMinimumInstruction(mode),
+    rewriteRepairInstruction(reason),
     '',
     '【元の入力条件】',
     promptText,
@@ -625,8 +914,13 @@ async function ensureOpenAiStreamLength(input, init, response, originalFetch) {
       break;
     }
   }
+  const finalIssue = rewriteIssue(mode, text, min);
+  if (finalIssue) {
+    document.documentElement.dataset.smkQualityRewrite = `${mode}:${finalIssue}`;
+    return openAiSseResponse(withInternalCompletionMarker(text), response);
+  }
   document.documentElement.dataset.smkQualityRewrite = `${mode}:${countBodyChars(text)}`;
-  return openAiSseResponse(text, response);
+  return openAiSseResponse(withInternalCompletionMarker(text), response);
 }
 
 async function ensureGeminiStreamLength(input, init, response, originalFetch) {
@@ -651,7 +945,7 @@ async function ensureGeminiStreamLength(input, init, response, originalFetch) {
     }
   }
   for (let attempt = 0; attempt < MAX_STREAM_REWRITE_ATTEMPTS;) {
-    const issue = rewriteIssue(mode, text, min, { strictLabels: false });
+    const issue = rewriteIssue(mode, text, min);
     if (!issue) break;
     try {
       attempt += 1;
@@ -661,8 +955,13 @@ async function ensureGeminiStreamLength(input, init, response, originalFetch) {
       break;
     }
   }
+  const finalIssue = rewriteIssue(mode, text, min);
+  if (finalIssue) {
+    document.documentElement.dataset.smkQualityRewrite = `${mode}:${finalIssue}`;
+    return geminiSseResponse(withInternalCompletionMarker(text), response);
+  }
   document.documentElement.dataset.smkQualityRewrite = `${mode}:${countBodyChars(text)}`;
-  return geminiSseResponse(text, response);
+  return geminiSseResponse(withInternalCompletionMarker(text), response);
 }
 
 function withOpenAiSystemContract(body, mode) {
