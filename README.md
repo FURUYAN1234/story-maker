@@ -223,45 +223,74 @@ Long-form expansion is not a fifteenth output chip. It is a downstream workflow 
 
 長編化は15個目の出力チップではありません。現在の Output 本文を起点にする後段ワークフローです。ショート、短編小説、中編小説、貼り付け原稿、インポートしたテキストを元にできます。元の筋を芯として保持し、章立てされた長編原稿へ拡張し、選択中のAPIで結果を講評し、その講評を使ってブラッシュアップできます。
 
-### When The Button Appears / ボタンの状態
+### At A Glance / 全体像
 
-- With no usable Output, the long-form panel stays disabled.
-- With a short or medium Output, the main action is `この小説を長編化`.
-- After the Output is already recognized as long-form, the action changes to `この長編小説をブラッシュアップする`.
-- While brush-up is running, the button remains labeled as brush-up instead of reverting to longification.
-- The target-character selector is used for the first longification pass. Brush-up reuses the existing long manuscript and disables the target selector.
+| Topic | Details |
+|---|---|
+| Position in the UI | The feature appears after the main Output area. It uses the already generated or imported Output as its source. |
+| UI上の位置づけ | メインOutputの後ろにある後段機能です。生成済み、貼り付け済み、またはインポート済みのOutput本文を素材にします。 |
+| Not a normal output mode | It is not a fifteenth output chip. The 14 public output modes create the first manuscript; long-form beta expands or improves that manuscript afterward. |
+| 通常モードとの違い | 15個目の出力チップではありません。14公開モードで初稿を作り、その後に長編化βで拡張または改善します。 |
+| Main result | A chaptered long-form manuscript with one Story Maker footer, updated Output tags, and a Kakuyomu-style preview based on the latest manuscript. |
+| 主な成果物 | 章立てされた長編原稿、単一のStory Makerフッター、更新されたOutputタグ、最新原稿を元にしたKakuyomuフォーム風プレビューです。 |
+| Quality loop | Each longification or brush-up result receives an AI review. The review score controls pass/fail display and optional auto brush-up. |
+| 品質ループ | 長編化またはブラッシュアップ後にAI講評を行います。点数は合否表示と任意の自動ブラッシュアップ判定に使われます。 |
 
-- 使用できる Output がない間、長編化パネルは無効です。
-- 短中編の Output がある場合、メイン操作は `この小説を長編化` になります。
-- Output が長編原稿として認識された後は、操作が `この長編小説をブラッシュアップする` に切り替わります。
-- ブラッシュアップ中は、途中で `この小説を長編化` 表示へ戻らず、ブラッシュアップ中として表示されます。
-- 目標文字数は初回の長編化で使います。ブラッシュアップでは既存の長編原稿を対象にするため、目標文字数の選択は固定されます。
+### Source And Output / 入力元と出力先
 
-### Expansion Flow / 長編化の流れ
+| Item | Accepted / Produced | Notes |
+|---|---|---|
+| Source Output | Short story, short novel, medium novel, pasted manuscript, TXT import, or Markdown-style text import. | The workflow reads the current Output text, so the source can come from generation, paste, or import. |
+| 元Output | ショート、短編小説、中編小説、貼り付け原稿、TXTインポート、Markdown系テキストインポート。 | 現在のOutput本文を読むため、生成・貼り付け・インポートのどれでも起点にできます。 |
+| Preserved core | Title, premise, main conflict, character functions, tone, and important setup. | The goal is expansion, not replacing the story with an unrelated new one. |
+| 保持する芯 | タイトル、前提、主要葛藤、人物機能、トーン、重要な設定。 | 別作品へ作り替えるのではなく、既存作品を長編化するための保持対象です。 |
+| Final Output | Chaptered long-form manuscript shown in the normal Output panel. | Copy, text export, Kakuyomu preview, and later brush-up all use this latest Output. |
+| 最終Output | 通常のOutput欄に表示される章立て長編原稿。 | コピー、TXT保存、Kakuyomuプレビュー、次回ブラッシュアップはこの最新Outputを使います。 |
 
-1. The app reads the current Output text and derives a source title, premise, characters, conflict, tone, and chapter direction.
-2. It creates a chapter plan and a continuity ledger so later chapters do not discard the source setup.
-3. It expands chapter by chapter through the selected provider instead of asking for one giant draft in a single response.
-4. It assembles the chapter text, keeps a single Story Maker footer, and removes duplicated or draft-only artifacts.
-5. It sends the completed long-form manuscript to AI review and displays the review under the Output.
-6. The Kakuyomu-style preview uses the latest long-form Output and preserves the manuscript title instead of falling back to an unnamed novel title.
+### Button States / ボタン状態
 
-1. 現在の Output から、タイトル、前提、人物、葛藤、トーン、章方向を読み取ります。
-2. 章構成と継続管理用の台帳を作り、後半の章が元の設定を捨てないようにします。
-3. 一度に巨大な本文を書かせるのではなく、選択中のAPIで章ごとに拡張します。
-4. 各章を結合し、Story Maker フッターを一つだけ残し、重複や下書き断片を取り除きます。
-5. 完成した長編原稿をAI講評へ送り、講評を Output 下に表示します。
-6. Kakuyomuフォーム風プレビューは最新の長編 Output を使い、タイトルが `名称未設定の小説` に落ちないように元タイトルを保持します。
+| Output state | Main button | Target-character selector | Behavior |
+|---|---|---|---|
+| No usable Output | Disabled | Disabled | The panel stays unavailable until a real manuscript exists. |
+| 使用できるOutputなし | 無効 | 無効 | 原稿として使える本文が入るまでパネルは使えません。 |
+| Short or medium Output exists | `この小説を長編化` | Enabled | Starts the first long-form expansion from the current Output. |
+| 短中編Outputあり | `この小説を長編化` | 有効 | 現在のOutputを元に初回の長編化を開始します。 |
+| Long-form Output exists | `この長編小説をブラッシュアップする` | Disabled | Rewrites the current long manuscript from the latest AI review instead of starting over. |
+| 長編Outputあり | `この長編小説をブラッシュアップする` | 無効 | 短い元ネタからやり直さず、既存の長編原稿を講評に基づいて改善します。 |
+| Brush-up running | Brush-up running label | Disabled | The action remains visibly brush-up while Output is temporarily updating. |
+| ブラッシュアップ中 | ブラッシュアップ中表示 | 無効 | Output更新中に `この小説を長編化` 表示へ戻らないようにしています。 |
 
-### AI Review / AI講評
+### Expansion Pipeline / 長編化パイプライン
 
-The long-form review is designed to be an AI critique, not a local placeholder sentence. After longification or brush-up, the selected provider reviews the manuscript and returns a score, a pass/fail label, a summary, strengths, problems, and concrete chapter-level revision directions. The score is treated as the AI's own assessment for the current manuscript.
+| Step | What happens | Guard / Purpose |
+|---|---|---|
+| 1. Source reading | Reads the current Output and derives title, premise, characters, conflict, tone, and chapter direction. | Prevents the expansion from ignoring the source story. |
+| 1. 元原稿の読解 | 現在のOutputからタイトル、前提、人物、葛藤、トーン、章方向を読み取ります。 | 元作品の筋を捨てた別物化を防ぎます。 |
+| 2. Planning | Creates a chapter plan and continuity ledger. | Keeps later chapters from discarding setup, relationships, or unresolved conflict. |
+| 2. 設計 | 章構成と継続管理用の台帳を作ります。 | 後半の章が設定、関係性、未回収の葛藤を捨てないようにします。 |
+| 3. Chapter expansion | Expands chapter by chapter through the selected provider. | Avoids relying on one giant response for the entire long manuscript. |
+| 3. 章ごとの拡張 | 選択中のAPIで章ごとに本文を拡張します。 | 巨大な一括応答だけに依存しない構成です。 |
+| 4. Assembly | Joins chapters, keeps a single Story Maker footer, and removes duplicated or draft-only artifacts. | Produces a readable final Output instead of a pile of partial drafts. |
+| 4. 結合 | 各章を結合し、Story Makerフッターを一つだけ残し、重複や下書き断片を取り除きます。 | 部分原稿の寄せ集めではなく、読める最終Outputにします。 |
+| 5. AI review | Sends the completed long-form manuscript to the selected provider for critique. | The review is AI-generated, not a local placeholder. |
+| 5. AI講評 | 完成した長編原稿を選択中のAPIへ送り、講評を作らせます。 | ローカルの仮文章ではなく、AIが読んだ評価として扱います。 |
+| 6. Posting assist | Updates the Kakuyomu-style preview from the latest long-form Output. | Preserves the manuscript title instead of falling back to `名称未設定の小説`. |
+| 6. 投稿補助 | 最新の長編Outputを元にKakuyomuフォーム風プレビューを更新します。 | タイトルが `名称未設定の小説` に落ちないようにします。 |
 
-長編講評は、ローカルで作った仮の文章ではなく、AIによる批評として扱います。長編化またはブラッシュアップ後、選択中のAPIが原稿を読み、点数、合否表示、総評、長所、問題点、章ごとの具体的な改稿方向を返します。この点数は、その時点の原稿に対するAI自身の評価として扱います。
+### AI Review Fields / AI講評の中身
 
-The current passing score is 80. Scores at or above 80 are displayed as `合格点`; lower scores are displayed as `要ブラッシュアップ`. The review text is intentionally usable as the next brush-up instruction, so it should name problems such as thin conflict, weak chapter payoff, inconsistent character motivation, missing sensory detail, or underdeveloped ending pressure.
-
-現在の合格点は80点です。80点以上は `合格点`、80点未満は `要ブラッシュアップ` と表示します。講評は次のブラッシュアップ指示として使える内容を想定しているため、葛藤の薄さ、章ごとの回収不足、人物動機の不一致、感覚描写不足、終盤圧の弱さなど、具体的な問題を挙げる設計です。
+| Field | Meaning | How brush-up uses it |
+|---|---|---|
+| Score | AI総合点. The current passing score is 80. | `80+` is shown as `合格点`; below 80 is shown as `要ブラッシュアップ`. |
+| 点数 | AI総合点です。現在の合格点は80点です。 | 80点以上は `合格点`、80点未満は `要ブラッシュアップ` と表示します。 |
+| Summary | Overall diagnosis of the current long manuscript. | Helps the user judge whether the result is already usable. |
+| 総評 | 現在の長編原稿全体への診断です。 | そのまま使える段階かどうかの判断材料になります。 |
+| Strengths | What is already working, such as atmosphere, character tension, or chapter momentum. | Brush-up should preserve these instead of flattening the manuscript. |
+| 長所 | 雰囲気、人物間の緊張、章の推進力など、すでに効いている点です。 | ブラッシュアップ時に消さず、活かす対象になります。 |
+| Problems | Concrete weak points such as thin conflict, weak payoff, inconsistent motivation, missing sensory detail, or weak ending pressure. | These become the practical revision targets. |
+| 問題点 | 葛藤の薄さ、章ごとの回収不足、人物動機の不一致、感覚描写不足、終盤圧の弱さなどです。 | 次のブラッシュアップで直す具体的な対象になります。 |
+| Chapter directions | Chapter-level revision instructions. | The next brush-up can use them as direct guidance rather than vague encouragement. |
+| 章別指示 | 章ごとの改稿方向です。 | ふんわりした励ましではなく、次回改稿の具体指示として使えます。 |
 
 ### Brush-Up And Auto Retry / ブラッシュアップと自動リトライ
 
@@ -269,23 +298,21 @@ Brush-up rewrites the existing long-form manuscript from the latest AI review. I
 
 ブラッシュアップは、最新のAI講評をもとに既存の長編原稿を書き直します。短い元ネタからやり直す処理ではありません。現在の物語、章の継続、タイトル、主要人物の機能を保ったまま、長編原稿として改善することを目的にしています。
 
-The checkbox `合格点まで自動ブラッシュアップ（最大3回）` controls retry behavior:
-
-- Checked: after longification or a manual brush-up, if the AI score is below 80, the app automatically starts another brush-up. It stops when the score reaches 80 or when three attempts have run.
-- Unchecked: the app performs only one longification or one brush-up per button press, even if the score is below 80.
-- After an automatic chain finishes, the checkbox is cleared so the next brush-up does not loop again unless the user turns it on.
-
-チェックボックス `合格点まで自動ブラッシュアップ（最大3回）` は、リトライ挙動を決めます。
-
-- ON: 長編化または手動ブラッシュアップ後、AI点数が80点未満なら自動で次のブラッシュアップを開始します。80点到達、または最大3回実行で停止します。
-- OFF: 点数が80点未満でも、ボタン1回につき長編化またはブラッシュアップを1回だけ実行します。
-- 自動チェーンが終わるとチェックは外れます。次回も最大3回リトライしたい場合は、ユーザーが再度ONにします。
+| Checkbox state | Trigger | Stop condition | After finish |
+|---|---|---|---|
+| Checked / ON | After longification or manual brush-up, if the AI score is below 80, the app starts another brush-up automatically. | Stops when the AI score reaches 80 or when three attempts have run. | The checkbox is cleared so the next run does not loop unless the user turns it on again. |
+| Unchecked / OFF | The app runs only the button action the user requested. | Stops after one longification or one brush-up, even if the AI score is below 80. | The user decides whether to run another brush-up. |
+| チェックON | 長編化または手動ブラッシュアップ後、AI点数が80点未満なら自動で次のブラッシュアップを始めます。 | 80点到達、または最大3回実行で停止します。 | 自動チェーン後はチェックを外し、次回も続けたい場合はユーザーが再度ONにします。 |
+| チェックOFF | ユーザーが押したボタンの処理だけを実行します。 | 点数が80点未満でも、長編化またはブラッシュアップ1回で止まります。 | 追加ブラッシュアップするかどうかはユーザー判断です。 |
 
 ### Shortening Guards / 短縮防止
 
-Long-form brush-up can fail if a provider responds with a polished but much shorter rewrite. To reduce that failure, the app retries chapters that shrink too much and can add a final top-up pass when the assembled brush-up result falls below the long-form minimum. This is a guard against accidental compression; it is not a promise that every result will reach the selected target character count exactly.
-
-長編ブラッシュアップでは、APIが整った短い要約のような改稿を返すことがあります。これを避けるため、短くなりすぎた章は再試行し、結合後の本文が長編最低ラインを下回る場合は最後に補強生成を行います。これは意図しない圧縮を防ぐための保護であり、毎回指定文字数ぴったりに到達することを保証するものではありません。
+| Risk | Guard | Limit |
+|---|---|---|
+| Provider returns a polished but much shorter rewrite. | Chapters that shrink too much can be retried before final assembly. | This reduces accidental compression but cannot force every chapter to hit an exact character count. |
+| APIが整った短い要約のような改稿を返す。 | 短くなりすぎた章は、最終結合前に再試行できます。 | 意図しない圧縮を減らすための保護であり、各章を厳密な文字数へ固定するものではありません。 |
+| Assembled brush-up result falls below the long-form minimum. | A final top-up pass can add more material to the manuscript. | This protects the long-form minimum but does not guarantee exact match with the selected target. |
+| 結合後のブラッシュアップ結果が長編最低ラインを下回る。 | 最後に補強生成を行い、本文量を追加できます。 | 長編最低ラインを守るための保護であり、指定文字数ぴったりを保証するものではありません。 |
 
 ## v5.0.7 Quality System / v5.0.7 品質システム
 
@@ -842,19 +869,20 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 
 ## Known Limitations / 既知の制限
 
-- Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.
-- The rewrite layer reduces short draft failures but does not guarantee literary excellence.
-- Long-form expansion is a beta workflow. It uses multiple provider calls for chapter generation, AI review, and optional brush-up, so it can take longer and consume more API quota than standard generation.
-- AI review and pass/fail labels are revision aids, not publication guarantees.
-- Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.
-- Current QA verifies representative real browser output, not all possible input combinations.
-
-- 出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。
-- 改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。
-- 長編化はβワークフローです。章生成、AI講評、任意のブラッシュアップで複数回API通信を行うため、通常生成より時間とAPI使用量が増えます。
-- AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。
-- 生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。
-- 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。
+| Area | Limitation | Practical meaning |
+|---|---|---|
+| Provider behavior | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input. | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty. |
+| API挙動 | 出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | 同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
+| Rewrite layer | The rewrite layer reduces short draft failures but does not guarantee literary excellence. | It catches common structural failures, but human editing can still be necessary. |
+| 改稿レイヤー | 改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | 構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
+| Long-form beta | Long-form expansion uses multiple provider calls for chapter generation, AI review, and optional brush-up. | It can take longer and consume more API quota than standard generation. |
+| 長編β | 長編化は、章生成、AI講評、任意のブラッシュアップで複数回API通信を行います。 | 通常生成より時間とAPI使用量が増えます。 |
+| AI review | AI review and pass/fail labels are revision aids, not publication guarantees. | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment. |
+| AI講評 | AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | 合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
+| Publication readiness | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality. | Users remain responsible for final use and publication decisions. |
+| 公開前確認 | 生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | 最終利用と公開判断の責任はユーザー側に残ります。 |
+| QA scope | Current QA verifies representative real browser output, not all possible input combinations. | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed. |
+| QA範囲 | 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
 
