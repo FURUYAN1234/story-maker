@@ -518,6 +518,37 @@ function installOutputIntakeControls() {
   document.getElementById('btn-generate')?.addEventListener('click', () => {
     delete output.dataset.manualOutput;
   }, true);
+
+  installLocalQaOutputLoader();
+}
+
+function isLocalQaOrigin() {
+  return ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+}
+
+function qaOutputPathFromUrl() {
+  if (!isLocalQaOrigin()) return '';
+  const raw = new URLSearchParams(window.location.search).get('qaOutputFile') || '';
+  if (!raw || /^https?:\/\//i.test(raw)) return '';
+  try {
+    const url = new URL(raw, window.location.href);
+    if (url.origin !== window.location.origin) return '';
+    return url.pathname.startsWith('/scratch/') ? `${url.pathname}${url.search}` : '';
+  } catch {
+    return '';
+  }
+}
+
+async function installLocalQaOutputLoader() {
+  const qaPath = qaOutputPathFromUrl();
+  if (!qaPath) return;
+  try {
+    const response = await fetch(qaPath, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    setManualOutput(await response.text(), 'QAインポート本文');
+  } catch (error) {
+    console.warn('QA output import failed:', error);
+  }
 }
 
 function outputHasPotentialStory(output) {

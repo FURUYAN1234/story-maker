@@ -470,6 +470,94 @@ export function cleanLongifyDraft(text) {
     .trim();
 }
 
+function normalizeChapterNumberToken(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return 0;
+  const asciiDigits = raw.replace(/[０-９]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+  if (/^\d+$/u.test(asciiDigits)) return Number.parseInt(asciiDigits, 10) || 0;
+
+  const values = {
+    '\u4e00': 1,
+    '\u4e8c': 2,
+    '\u4e09': 3,
+    '\u56db': 4,
+    '\u4e94': 5,
+    '\u516d': 6,
+    '\u4e03': 7,
+    '\u516b': 8,
+    '\u4e5d': 9,
+  };
+  if (raw === '\u5341') return 10;
+  const tenIndex = raw.indexOf('\u5341');
+  if (tenIndex >= 0) {
+    const tens = tenIndex > 0 ? values[raw.slice(0, tenIndex)] || 0 : 1;
+    const ones = tenIndex < raw.length - 1 ? values[raw.slice(tenIndex + 1)] || 0 : 0;
+    return tens * 10 + ones;
+  }
+  return values[raw] || 0;
+}
+
+function getChapterNumberFromHeading(line) {
+  const match = String(line || '').match(/^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?(?:\u3010[\t \u3000]*)?\u7b2c[\t \u3000]*([0-9０-９一二三四五六七八九十]+)[\t \u3000]*\u7ae0/u);
+  return match ? normalizeChapterNumberToken(match[1]) : 0;
+}
+
+function hasChapterHeadingTitle(line) {
+  const remainder = String(line || '')
+    .replace(/^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?(?:\u3010[\t \u3000]*)?\u7b2c[\t \u3000]*[0-9０-９一二三四五六七八九十]+[\t \u3000]*\u7ae0/u, '')
+    .replace(/[\u3011\t \u3000:：\-ー―／/・]+/gu, '')
+    .trim();
+  return remainder.length > 0;
+}
+
+function removeDuplicateLeadingChapterHeadings(lines, chapterNumber) {
+  const result = [...lines];
+  let first = result.findIndex(line => String(line || '').trim());
+  while (first >= 0) {
+    const second = result.findIndex((line, index) => index > first && String(line || '').trim());
+    if (second < 0) break;
+    if (
+      getChapterNumberFromHeading(result[first]) !== chapterNumber
+      || getChapterNumberFromHeading(result[second]) !== chapterNumber
+    ) {
+      break;
+    }
+    if (!hasChapterHeadingTitle(result[first]) && hasChapterHeadingTitle(result[second])) {
+      result.splice(first, 1);
+    } else {
+      result.splice(second, 1);
+    }
+    first = result.findIndex(line => String(line || '').trim());
+  }
+  return result;
+}
+
+export function extractExpectedLongifyChapterDraft(text, chapterNumber) {
+  const draft = cleanLongifyDraft(text);
+  if (!draft) return '';
+
+  const expected = Number(chapterNumber) || 0;
+  if (!expected) return draft;
+
+  const lines = draft.split('\n');
+  const start = lines.findIndex(line => getChapterNumberFromHeading(line) === expected);
+  if (start < 0) return draft;
+
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    const current = getChapterNumberFromHeading(lines[index]);
+    if (current && current !== expected) {
+      end = index;
+      break;
+    }
+  }
+
+  return removeDuplicateLeadingChapterHeadings(lines.slice(start, end), expected)
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export function normalizeLongifyPublicText(text) {
   return compactBlankLines(removeStandaloneSceneSeparators(stripStoryMakerFooter(text)));
 }
@@ -640,7 +728,11 @@ export function shouldAutoBrushupContinue({
   autoEnabled = false,
   attempts = 0,
   maxAttempts = AUTO_BRUSHUP_MAX_ATTEMPTS,
+  targetMet = true,
 } = {}) {
+  if (targetMet === false) {
+    return Boolean(autoEnabled) && Number(attempts) < Number(maxAttempts);
+  }
   if (score === null || score === undefined || score === '') return false;
   const numericScore = Number(score);
   return Boolean(autoEnabled)
@@ -665,8 +757,10 @@ export function buildAiLongifyReview({
   const normalizedReview = cleanLongifyAiReviewText(reviewText);
   const chars = submissionCharLength(stripStoryMakerFooter(text));
   const chapters = chapterCount || countLongifyChapterHeadings(text);
+  const normalizedTargetChars = Math.max(0, Number(targetChars || 0));
+  const targetMet = !normalizedTargetChars || chars >= normalizedTargetChars;
   const score = extractAiReviewScore(normalizedReview);
-  const passLabel = aiReviewPassLabel(score);
+  const passLabel = targetMet ? aiReviewPassLabel(score) : aiReviewPassLabel(AI_REVIEW_PASS_SCORE - 1);
   const summary = firstReviewLine(normalizedReview) || 'AI講評本文を取得しました。';
   return {
     source: 'ai',
@@ -688,7 +782,8 @@ export function buildAiLongifyReview({
     brushupPlan: [],
     chars,
     chapters,
-    targetChars,
+    targetChars: normalizedTargetChars,
+    targetMet,
     signature: reviewTextSignature(text),
   };
 }
@@ -734,8 +829,9 @@ function formatBrushupOutput({ title = '', chapters = [], fallbackText = '' } = 
 }
 
 export function ensureChapterHeading(text, chapterNumber) {
-  const draft = cleanLongifyDraft(text);
-  if (new RegExp(`^\\s*第\\s*${chapterNumber}\\s*章`, 'u').test(draft)) return draft;
+  const draft = extractExpectedLongifyChapterDraft(text, chapterNumber);
+  const firstLine = draft.split('\n').find(line => String(line || '').trim()) || '';
+  if (getChapterNumberFromHeading(firstLine) === Number(chapterNumber)) return draft;
   return `第${chapterNumber}章\n\n${draft}`.trim();
 }
 
@@ -1080,6 +1176,7 @@ export async function runLongifyBrushupBeta({
   onProgress,
   onStage,
   priorReviewText = '',
+  targetTotalChars = 0,
 } = {}) {
   const manuscript = normalizeLongifyPublicText(storyText);
   if (!isLongifiedOutputText(manuscript)) {
@@ -1093,6 +1190,8 @@ export async function runLongifyBrushupBeta({
   const split = splitLongifyManuscript(manuscript);
   const title = split.title || extractStoryTitle(manuscript);
   const sourceChapters = split.chapters.length ? split.chapters : [manuscript];
+  const targetTotalNumber = Math.max(0, Number(targetTotalChars || 0));
+  const brushupMinimumChars = Math.max(MIN_BRUSHUP_LONG_CHARS, targetTotalNumber || 0);
   const usedModels = [];
   const callModel = callText || ((prompt, context = {}) => {
     return streamTextCall(apiKey, model, prompt, context);
@@ -1146,7 +1245,7 @@ export async function runLongifyBrushupBeta({
     const hardMinimumPolishedChars = Math.max(800, Math.floor(submissionCharLength(chapterText) * 0.55));
     const targetPolishedChars = Math.max(
       800,
-      Math.ceil(MIN_BRUSHUP_LONG_CHARS / sourceChapters.length),
+      Math.ceil(brushupMinimumChars / sourceChapters.length),
       Math.floor(submissionCharLength(chapterText) * BRUSHUP_CHAPTER_MIN_RATIO),
     );
     let polishedChapter = '';
@@ -1208,13 +1307,23 @@ export async function runLongifyBrushupBeta({
         });
       }
     }
-    if (submissionCharLength(polishedChapter) < hardMinimumPolishedChars) {
-      throw new Error(`第${chapterNumber}章の改稿結果が短すぎます。`);
+    const polishedChapterChars = submissionCharLength(polishedChapter);
+    const preserveOriginalChapter = polishedChapterChars < hardMinimumPolishedChars;
+    if (preserveOriginalChapter) {
+      report(`第${chapterNumber}章の改稿結果が短すぎるため、元章を保持します...`, {
+        phase: 'brushupChapterPreserve',
+        detail: `新改稿 ${formatNumber(polishedChapterChars)}字 / 下限 ${formatNumber(hardMinimumPolishedChars)}字。短い改稿を棄却し、元の章を返します。`,
+        chapterNumber,
+        chapterCount: sourceChapters.length,
+        completedChars: submissionCharLength(chapters.join('\n\n')),
+      });
     }
-    chapters.push(polishedChapter);
+    chapters.push(preserveOriginalChapter ? chapterText : polishedChapter);
     report(`第${chapterNumber}章のブラッシュアップ完了`, {
       phase: 'brushupChapterDone',
-      detail: '章の因果と語り口を保ったまま弱点を補強しました。',
+      detail: preserveOriginalChapter
+        ? 'AI改稿が短すぎたため、元章を保持してブラッシュアップ全体を続行しました。'
+        : '章の因果と語り口を保ったまま弱点を補強しました。',
       chapterNumber,
       chapterCount: sourceChapters.length,
       completedChars: submissionCharLength(chapters.join('\n\n')),
@@ -1222,13 +1331,14 @@ export async function runLongifyBrushupBeta({
   }
 
   let brushupTopupAttempts = 0;
-  while (submissionCharLength(chapters.join('\n\n')) < MIN_BRUSHUP_LONG_CHARS && brushupTopupAttempts < 2) {
+  const maxBrushupTopupAttempts = targetTotalNumber ? 3 : 2;
+  while (submissionCharLength(chapters.join('\n\n')) < brushupMinimumChars && brushupTopupAttempts < maxBrushupTopupAttempts) {
     throwIfAborted(signal);
     brushupTopupAttempts += 1;
     const currentText = chapters.join('\n\n');
     const currentChars = submissionCharLength(currentText);
-    const deficit = Math.max(0, MIN_BRUSHUP_LONG_CHARS - currentChars);
-    report(`ブラッシュアップ後の最低文字数を補強中... (${formatNumber(currentChars)} / ${formatNumber(MIN_BRUSHUP_LONG_CHARS)}字)`, {
+    const deficit = Math.max(0, brushupMinimumChars - currentChars);
+    report(`ブラッシュアップ後の最低文字数を補強中... (${formatNumber(currentChars)} / ${formatNumber(brushupMinimumChars)}字)`, {
       phase: 'brushupTopup',
       detail: `不足 ${formatNumber(deficit)}字。長編扱いを維持できるよう、最終章へ自然な場面を追加します。`,
       chapterNumber: sourceChapters.length,
@@ -1241,7 +1351,7 @@ export async function runLongifyBrushupBeta({
       ledgerText: critiqueText,
       currentText,
       deficitChars: deficit,
-      targetTotalChars: MIN_BRUSHUP_LONG_CHARS,
+      targetTotalChars: brushupMinimumChars,
       chapterCount: sourceChapters.length,
       styleMode: 'preserve',
       endingMode: 'keep',
@@ -1305,6 +1415,7 @@ export async function runLongifyBrushupBeta({
   const reviewResponse = await callModel(buildLongifyAiReviewPrompt(text, {
     mode: 'brushup',
     priorReviewText: critiqueText,
+    targetChars: targetTotalNumber,
     chapterCount: chapters.length,
   }), {
     stage: 'brushupReview',
@@ -1341,6 +1452,7 @@ export async function runLongifyBrushupBeta({
     reviewSource: 'ai',
     originalChars: submissionCharLength(manuscript),
     finalChars: submissionCharLength(stripStoryMakerFooter(text)),
+    targetTotalNumber,
   };
 }
 
@@ -2191,6 +2303,7 @@ export function installLongifyBeta() {
     score: review?.score,
     autoEnabled: autoBrushupChainActive && isAutoBrushupChecked(),
     attempts: autoBrushupAttempts,
+    targetMet: review?.targetMet,
   });
   const queueAutoBrushup = review => {
     const nextAttempt = autoBrushupAttempts + 1;
@@ -2248,6 +2361,7 @@ export function installLongifyBeta() {
     }
     const brushupMode = isLongifiedOutputText(storyText);
     const priorReviewText = getLongifyReviewPlainText();
+    const brushupOptions = brushupMode ? readLongifyRunOptionsFromUi() : null;
     if (!brushupMode) clearLongifyReview();
     if (brushupMode) {
       beginBrushupAutoAttempt();
@@ -2286,6 +2400,7 @@ export function installLongifyBeta() {
           model,
           signal: abortController.signal,
           priorReviewText,
+          targetTotalChars: brushupOptions?.targetTotalNumber || 0,
           onProgress(message) {
             setTextContent(statusEl, message);
           },
@@ -2319,6 +2434,7 @@ export function installLongifyBeta() {
           text: result.text,
           mode: 'brushup',
           reviewText: result.aiReviewText,
+          targetChars: brushupOptions?.targetTotalNumber || result.targetTotalNumber || 0,
           chapterCount: result.chapterCount,
         });
         renderLongifyReview(review);

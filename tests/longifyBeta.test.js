@@ -16,6 +16,7 @@ import {
   cleanLongifyDraft,
   countLongifyChapterHeadings,
   createLongifyRunOptions,
+  extractExpectedLongifyChapterDraft,
   formatLongifyOutput,
   hasLongifySeed,
   isLongifiedOutputText,
@@ -205,6 +206,40 @@ assert.equal(
   cleanLongifyDraft('\u7b2c2\u7ae0\n\nAkari waited.\n\n*\n\nShe opened the door.\n\n\uff0a\n\nThe tide moved.\n\n\u203b\n\nDawn came.'),
   '\u7b2c2\u7ae0\n\nAkari waited.\n\nShe opened the door.\n\nThe tide moved.\n\nDawn came.'
 );
+const contaminatedChapter = [
+  '\u3010Source Title\u3011',
+  '',
+  '## \u7b2c\u4e00\u7ae0\u3000One',
+  '',
+  'ONE SHOULD REMAIN. '.repeat(60),
+  '',
+  '## \u7b2c\u4e8c\u7ae0\u3000Two',
+  '',
+  'TWO SHOULD DROP. '.repeat(60),
+  '',
+  '## \u7b2c\u4e09\u7ae0\u3000Three',
+  '',
+  'THREE SHOULD DROP. '.repeat(60),
+].join('\n');
+const extractedFirstChapter = extractExpectedLongifyChapterDraft(contaminatedChapter, 1);
+assert.match(extractedFirstChapter, /^## \u7b2c\u4e00\u7ae0\u3000One/);
+assert.match(extractedFirstChapter, /ONE SHOULD REMAIN/);
+assert.doesNotMatch(extractedFirstChapter, /TWO SHOULD DROP/);
+assert.doesNotMatch(extractedFirstChapter, /THREE SHOULD DROP/);
+const duplicateHeadingChapter = extractExpectedLongifyChapterDraft([
+  '\u7b2c2\u7ae0',
+  '',
+  '## \u7b2c2\u7ae0\u3000Two',
+  '',
+  'TWO SHOULD REMAIN. '.repeat(60),
+  '',
+  '\u7b2c3\u7ae0\u3000Three',
+  '',
+  'THREE SHOULD DROP. '.repeat(60),
+].join('\n'), 2);
+assert.match(duplicateHeadingChapter, /^## \u7b2c2\u7ae0\u3000Two/);
+assert.doesNotMatch(duplicateHeadingChapter, /^\u7b2c2\u7ae0\s*$/m);
+assert.doesNotMatch(duplicateHeadingChapter, /THREE SHOULD DROP/);
 assert.equal(
   normalizeLongifyPublicText('Akari waited.\n\n\n\n*\n\n\n\nShe opened the door.\n\n\u203b\n\nDawn came.'),
   'Akari waited.\n\nShe opened the door.\n\nDawn came.'
@@ -256,6 +291,8 @@ assert.equal(shouldAutoBrushupContinue({ score: 79, autoEnabled: true, attempts:
 assert.equal(shouldAutoBrushupContinue({ score: 80, autoEnabled: true, attempts: 0 }), false);
 assert.equal(shouldAutoBrushupContinue({ score: null, autoEnabled: true, attempts: 0 }), false);
 assert.equal(shouldAutoBrushupContinue({ score: 79, autoEnabled: false, attempts: 0 }), false);
+assert.equal(shouldAutoBrushupContinue({ score: 88, autoEnabled: true, attempts: 0, targetMet: false }), true);
+assert.equal(shouldAutoBrushupContinue({ score: 88, autoEnabled: true, attempts: 3, targetMet: false }), false);
 assert.match(buildLongifyBrushupChapterPrompt({
   title: splitLong.title,
   critiqueText: '\u7b2c1\u7ae0\u306e\u611f\u60c5\u5909\u5316\u3092\u5f37\u3081\u308b',
@@ -318,6 +355,7 @@ const brushupResult = await runLongifyBrushupBeta({
   apiKey: '123456789012345678901234567890',
   model: 'gemini-test',
   priorReviewText: '\u524d\u56de\u8b1b\u8a55: \u7b2c2\u7ae0\u306e\u4f59\u97fb\u3092\u5f37\u3081\u308b',
+  targetTotalChars: 9000,
   callText: async (prompt, context) => {
     brushupCalls.push({ prompt, context });
     if (context.stage === 'brushupCritique') {
@@ -344,14 +382,32 @@ assert.ok(brushupCalls[0].prompt.includes('\u524d\u56de\u8b1b\u8a55'));
 assert.equal(brushupCalls[1].context.stage, 'brushupChapter');
 assert.equal(brushupCalls[2].context.chapterNumber, 2);
 assert.equal(brushupCalls[3].context.stage, 'brushupReview');
+assert.ok(brushupCalls[3].prompt.includes('9,000'));
 assert.equal(brushupResult.mode, 'brushup');
 assert.equal(brushupResult.chapterCount, 2);
+assert.equal(brushupResult.targetTotalNumber, 9000);
 assert.ok(brushupResult.critiqueText.includes('\u611f\u60c5\u5909\u5316'));
 assert.equal(brushupResult.reviewSource, 'ai');
 assert.ok(brushupResult.aiReviewText.includes('\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a'));
 const brushupAiReview = buildAiLongifyReview({ text: brushupResult.text, reviewText: brushupResult.aiReviewText, mode: 'brushup', chapterCount: brushupResult.chapterCount });
 assert.equal(brushupAiReview.score, 78);
 assert.equal(brushupAiReview.passLabel, '\u8981\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7');
+const brushupTargetReview = buildAiLongifyReview({
+  text: brushupResult.text,
+  reviewText: 'AI\u7dcf\u5408\u70b9: 87\u70b9\nAI\u8b1b\u8a55:\n\u6587\u7ae0\u306f\u6539\u5584\u3057\u305f\u304c\u6700\u4f4e\u6587\u5b57\u6570\u306b\u5c4a\u3044\u3066\u3044\u306a\u3044\u3002',
+  mode: 'brushup',
+  targetChars: submissionCharLength(brushupResult.text) + 1000,
+  chapterCount: brushupResult.chapterCount,
+});
+assert.equal(brushupTargetReview.score, 87);
+assert.equal(brushupTargetReview.targetMet, false);
+assert.equal(brushupTargetReview.passLabel, '\u8981\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7');
+assert.equal(shouldAutoBrushupContinue({
+  score: brushupTargetReview.score,
+  autoEnabled: true,
+  attempts: 1,
+  targetMet: brushupTargetReview.targetMet,
+}), true);
 assert.equal((brushupResult.text.match(/Created By AI Story Maker/g) || []).length, 1);
 assert.ok(brushupResult.text.includes('\u7b2c2\u7ae0\u3000Polished'));
 assert.equal(isLongifiedOutputText(brushupResult.text), true);
@@ -400,6 +456,47 @@ assert.equal(retryBrushupResult.chapterCount, 2);
 assert.ok(retryBrushupResult.text.includes('\u7b2c1\u7ae0\u3000Polished Retry'));
 assert.equal(isLongifiedOutputText(retryBrushupResult.text), true);
 
+const preserveBrushupCalls = [];
+const preserveBrushupStages = [];
+const preserveBrushupResult = await runLongifyBrushupBeta({
+  storyText: longManuscript,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  onStage: stage => preserveBrushupStages.push(stage),
+  callText: async (prompt, context) => {
+    preserveBrushupCalls.push({ prompt, context });
+    if (context.stage === 'brushupCritique') {
+      return {
+        text: '\u7b2c2\u7ae0\u306f\u60c5\u5831\u306e\u4e26\u3073\u3092\u5d29\u3055\u305a\u306b\u6574\u3048\u308b\u3002',
+        usedModel: 'mock-preserve-critique',
+      };
+    }
+    if (context.stage === 'brushupReview') {
+      return {
+        text: 'AI\u7dcf\u5408\u70b9: 82\u70b9\nAI\u8b1b\u8a55:\n\u77ed\u3059\u304e\u308b\u6539\u7a3f\u306f\u63a1\u7528\u305b\u305a\u3001\u5143\u7ae0\u306e\u60c5\u5831\u3092\u4fdd\u3063\u3066\u3044\u308b\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c2\u7ae0\u306f\u6b21\u56de\u306b\u5834\u9762\u91cf\u3092\u5897\u3084\u3059\u3002',
+        usedModel: 'mock-preserve-review',
+      };
+    }
+    if (context.stage === 'brushupChapter' && context.chapterNumber === 2) {
+      return {
+        text: '\u7b2c2\u7ae0\u3000Too Short\n\n\u77ed\u3044\u3002',
+        usedModel: 'mock-preserve-short',
+      };
+    }
+    return {
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Preserve Pass\n\n${longChapterBody.repeat(58)}The scene remained complete.`,
+      usedModel: `mock-preserve-${context.chapterNumber}`,
+    };
+  },
+});
+const preserveChapterTwoCalls = preserveBrushupCalls.filter(call => call.context.stage === 'brushupChapter' && call.context.chapterNumber === 2);
+assert.equal(preserveChapterTwoCalls.length, 2);
+assert.ok(preserveBrushupStages.some(stage => stage.phase === 'brushupChapterPreserve' && stage.chapterNumber === 2));
+assert.equal(preserveBrushupResult.chapterCount, 2);
+assert.ok(preserveBrushupResult.text.includes('\u7b2c2\u7ae0\u3000Tide'));
+assert.equal(preserveBrushupResult.reviewSource, 'ai');
+assert.equal(isLongifiedOutputText(preserveBrushupResult.text), true);
+
 const topupSourceBlock = '\u3042'.repeat(3000);
 const topupCompactBlock = '\u3044'.repeat(2300);
 const topupAdditionBlock = '\u3046'.repeat(2600);
@@ -423,6 +520,7 @@ const topupBrushupResult = await runLongifyBrushupBeta({
   storyText: topupBrushupSource,
   apiKey: '123456789012345678901234567890',
   model: 'gemini-test',
+  targetTotalChars: 14000,
   callText: async (prompt, context) => {
     topupBrushupCalls.push({ prompt, context });
     if (context.stage === 'brushupCritique') {
@@ -443,9 +541,12 @@ const topupBrushupResult = await runLongifyBrushupBeta({
     };
   },
 });
-assert.ok(topupBrushupCalls.some(call => call.context.stage === 'brushupTopup'));
+const targetTopupCalls = topupBrushupCalls.filter(call => call.context.stage === 'brushupTopup');
+assert.ok(targetTopupCalls.length >= 2);
+assert.ok(targetTopupCalls[0].prompt.includes('14,000'));
 assert.equal(isLongifiedOutputText(topupBrushupResult.text), true);
 assert.ok(topupBrushupResult.text.includes(topupAdditionBlock));
+assert.ok(submissionCharLength(topupBrushupResult.text) >= 14000);
 
 const calls = [];
 const stages = [];
@@ -473,6 +574,22 @@ const result = await runLongifyBeta({
       };
     }
     const chapterBody = 'Akari keeps looking at the absent brother, the cafe light, the tide, and the counter stains without bending the short story core. ';
+    if (context.chapterNumber === 1) {
+      return {
+        text: [
+          '\u3010Harbor Light Complete Draft\u3011',
+          '',
+          '## \u7b2c1\u7ae0\u3000Harbor',
+          '',
+          chapterBody.repeat(90),
+          '',
+          '## \u7b2c2\u7ae0\u3000Copied Source Must Drop',
+          '',
+          'THIS SOURCE CHAPTER MUST NOT REMAIN. '.repeat(40),
+        ].join('\n'),
+        usedModel: 'mock-chapter-1',
+      };
+    }
     return {
       text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Harbor\n\n${chapterBody.repeat(90)}`,
       usedModel: `mock-chapter-${context.chapterNumber}`,
@@ -496,11 +613,22 @@ const aiReview = buildAiLongifyReview({ text: result.text, reviewText: result.ai
 assert.equal(aiReview.source, 'ai');
 assert.equal(aiReview.score, 88);
 assert.equal(aiReview.passLabel, '\u5408\u683c\u70b9');
+const shortAiReview = buildAiLongifyReview({
+  text: result.text,
+  reviewText: result.aiReviewText,
+  targetChars: submissionCharLength(result.text) + 1000,
+  chapterCount: result.chapters.length,
+});
+assert.equal(shortAiReview.score, 88);
+assert.equal(shortAiReview.passLabel, '\u8981\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7');
+assert.equal(shortAiReview.targetMet, false);
 assert.ok(aiReview.aiReviewText.includes('\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a'));
 assert.equal(result.options.styleMode, 'intensify');
 assert.equal(result.options.endingMode, 'restructure');
 assert.ok(stages.some(stage => stage.phase === 'ledger'));
 assert.ok(stages.some(stage => stage.phase === 'chapterDone' && stage.chapterNumber === 3));
+assert.doesNotMatch(result.chapters[0], /Copied Source Must Drop/);
+assert.doesNotMatch(result.text, /THIS SOURCE CHAPTER MUST NOT REMAIN/);
 assert.ok(result.text.includes('\u7b2c3\u7ae0\u3000Harbor'));
 assert.equal((result.text.match(/Created By AI Story Maker/g) || []).length, 1);
 
