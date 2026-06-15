@@ -30,9 +30,9 @@ It is not disposable scaffolding, not a temporary shell, and not a place to buil
 - **4komaモード改修時**: 4komaシナリオモードを修正する際は、事前にNBP側の最新パーサー仕様を確認すること。
 
 #### 4.3 参照方法
-- **優先参照先**: `C:\nano-banana-pro-main\docs\scenario_spec.md` を最優先で参照すること。NBP側がパーサー仕様変更時にこのファイルを同期更新する義務を負っている。
-- **フォールバック**: `scenario_spec.md` が存在しない場合は `C:\nano-banana-pro-main\src\App.jsx` を読み取り専用で確認すること。
-- **参照不可時の対応**: `C:\nano-banana-pro-main` が存在しない、または古い場合は、ユーザーに確認を取ること。推測で仕様を補完しない。
+- **優先参照先**: `NBP/docs/scenario_spec.md` を最優先で参照すること。NBP側がパーサー仕様変更時にこのファイルを同期更新する義務を負っている。
+- **フォールバック**: `scenario_spec.md` が存在しない場合は `NBP/src/App.jsx` を読み取り専用で確認すること。
+- **参照不可時の対応**: NBP側の作業ツリーが存在しない、または古い場合は、ユーザーに確認を取ること。推測で仕様を補完しない。
 
 #### 4.4 プロジェクト分離の原則（厳守）
 - **書き込み禁止**: NBP 側のエージェントが story-maker のファイルを直接編集することは **禁止** する。仕様変更は Story Maker 側のエージェントが自律的に検知・対応すること。

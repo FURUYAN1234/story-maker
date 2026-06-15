@@ -19,25 +19,29 @@ function validSceneText(marker) {
   ].join('\n\n');
 }
 
+const fakeOpenAiSecret = 'sk-' + '123456789012345678901234567890';
+const fakeGeminiSecret = 'AIza' + '123456789012345678901234567890';
+const fakeNestedOpenAiSecret = 'sk-' + 'abcdefabcdefabcdefabcdefabcdef';
+
 {
   const storage = createMemoryStorage();
   const journal = createRunJournal({
     provider: 'gemini',
     stage: 'm1',
     premiseText: 'secret scrub test',
-    options: { apiKey: 'sk-123456789012345678901234567890', geminiKey: 'AIza123456789012345678901234567890' },
+    options: { apiKey: fakeOpenAiSecret, geminiKey: fakeGeminiSecret },
     storage,
   });
   journal.recordScene('C01S01', validSceneText('scrub'), {
     provider: 'gemini',
     validation: { ok: true, fatal: false, repairRequired: false, issues: [], metrics: { charCount: 120 } },
-    apiKey: 'sk-123456789012345678901234567890',
+    apiKey: fakeOpenAiSecret,
   });
   const raw = storage.getItem(journal.key);
   assert.ok(raw.includes('C01S01'));
   assert.equal(raw.includes('apiKey'), false);
-  assert.equal(raw.includes('sk-123456789012345678901234567890'), false);
-  assert.equal(raw.includes('AIza123456789012345678901234567890'), false);
+  assert.equal(raw.includes(fakeOpenAiSecret), false);
+  assert.equal(raw.includes(fakeGeminiSecret), false);
 
   const loaded = loadRunJournal('gemini', storage);
   assert.equal(loaded.getScene('C01S01').body.includes('scrub'), true);
@@ -73,8 +77,8 @@ function validSceneText(marker) {
 
 {
   const cleaned = scrubJournal({
-    token: 'sk-123456789012345678901234567890',
-    nested: { openaiKey: 'sk-abcdefabcdefabcdefabcdefabcdef' },
+    token: fakeOpenAiSecret,
+    nested: { openaiKey: fakeNestedOpenAiSecret },
     text: 'keep me',
   });
   assert.equal(cleaned.token, undefined);

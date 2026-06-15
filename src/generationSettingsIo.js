@@ -164,13 +164,17 @@ function clearSection(section) {
 
 function applyMode(settings) {
   const mode = normalizeText(settings.mode);
+  const modeButton = mode ? findByDataset('#mode-chips button[data-v]', 'v', mode) : null;
   if (mode) {
-    fireClick(findByDataset('#mode-chips button[data-v]', 'v', mode));
+    fireClick(modeButton);
   }
   const input = byId('mode-custom');
   if (input) {
-    input.value = normalizeText(settings.modeCustom);
-    dispatchInput(input);
+    const custom = normalizeText(settings.modeCustom);
+    input.value = custom;
+    if (!modeButton || settings.modeSource === 'manual') {
+      dispatchInput(input);
+    }
   }
 }
 
@@ -187,33 +191,18 @@ function applyAxis(config, axis = {}) {
     const input = byId(config.customId);
     if (input) {
       input.value = custom;
-      dispatchInput(input);
+      if (axis.source === 'manual' || (!axis.category && !axis.value)) {
+        dispatchInput(input);
+      }
     }
   }
 }
 
 function applyCharacters(characters = []) {
   clearSection('chars');
-  const addButton = byId('btn-add-char');
-  for (let index = 0; index < characters.length; index += 1) {
-    fireClick(addButton);
-  }
-  const cards = [...document.querySelectorAll('#char-list .char-card')];
-  characters.forEach((character, index) => {
-    const card = cards[index];
-    if (!card) return;
-    const setInput = (selector, value) => {
-      const element = card.querySelector(selector);
-      if (!element) return;
-      element.value = normalizeText(value);
-      dispatchInput(element);
-    };
-    setInput('.char-name-input', character.name);
-    setInput('.char-sel[data-key="sex"]', character.sex);
-    setInput('.char-sel[data-key="role"]', character.role);
-    setInput('.char-sel[data-key="personality"]', character.personality);
-    setInput('.char-memo', character.note);
-  });
+  document.dispatchEvent(new CustomEvent('story-maker:apply-imported-characters', {
+    detail: { characters },
+  }));
 }
 
 function applySupplement(value) {

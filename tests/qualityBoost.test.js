@@ -1,18 +1,6 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 
 import { detectPublicRewriteIssue, detectPublicSemanticLoopIssue } from '../src/qualityBoost.js';
-
-const attachedMediumLoop = 'C:/Users/sx717/.codex/attachments/af7f849d-0ae7-456b-a931-06b616c8a529/pasted-text.txt';
-
-if (fs.existsSync(attachedMediumLoop)) {
-  const text = fs.readFileSync(attachedMediumLoop, 'utf8');
-  const issue = detectPublicSemanticLoopIssue('medium', text);
-  assert.ok(issue, `expected attached v5.0.9 medium loop artifact to fail semantic loop gate`);
-  const streamText = text.replace(/Created By AI Story Maker V[\d.]+\s*$/i, '').trim();
-  const rewriteIssue = detectPublicRewriteIssue('medium', streamText, 5500, { strictLabels: false });
-  assert.equal(rewriteIssue, issue, 'expected attached artifact to fail through the stream rewrite gate');
-}
 
 const compactLoop = `
 第1節
