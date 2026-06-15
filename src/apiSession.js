@@ -28,10 +28,28 @@ export function getApiSessionStorage() {
   }
 }
 
+function writeApiSessionToWindowName(session) {
+  try {
+    if (typeof window === 'undefined') return;
+    window.name = `${API_WINDOW_NAME_PREFIX}${JSON.stringify(session || {})}`;
+  } catch {
+    // Ignore unavailable window.name.
+  }
+}
+
+function clearApiSessionFromWindowName() {
+  try {
+    if (typeof window === 'undefined') return;
+    if (String(window.name || '').startsWith(API_WINDOW_NAME_PREFIX)) window.name = '';
+  } catch {
+    // Ignore unavailable window.name.
+  }
+}
+
 export function writeApiSession(state) {
   try {
     const storage = getApiSessionStorage();
-    if (!storage || !state) return;
+    if (!state) return;
     const apiProvider = state.apiProvider === 'openai' ? 'openai' : 'gemini';
     const currentKey = normalizeApiKey(apiProvider === 'openai'
       ? state.openaiKey || state.apiKey
@@ -39,12 +57,26 @@ export function writeApiSession(state) {
     const openaiKey = normalizeApiKey(state.openaiKey);
     const geminiKey = normalizeApiKey(state.geminiKey);
     if (!currentKey && !openaiKey && !geminiKey) {
-      storage.removeItem(API_SESSION_KEY);
+      storage?.removeItem(API_SESSION_KEY);
+      clearApiSessionFromWindowName();
       return;
     }
-    storage.setItem(API_SESSION_KEY, JSON.stringify({ apiProvider, geminiKey, openaiKey }));
+    const session = { apiProvider, geminiKey, openaiKey };
+    storage?.setItem(API_SESSION_KEY, JSON.stringify(session));
+    writeApiSessionToWindowName(session);
   } catch {
-    // Session persistence is best-effort only.
+    try {
+      if (!state) return;
+      const apiProvider = state.apiProvider === 'openai' ? 'openai' : 'gemini';
+      const session = {
+        apiProvider,
+        geminiKey: normalizeApiKey(state.geminiKey || (apiProvider === 'gemini' ? state.apiKey : '')),
+        openaiKey: normalizeApiKey(state.openaiKey || (apiProvider === 'openai' ? state.apiKey : '')),
+      };
+      if (session.geminiKey || session.openaiKey) writeApiSessionToWindowName(session);
+    } catch {
+      // Session persistence is best-effort only.
+    }
   }
 }
 

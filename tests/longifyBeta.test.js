@@ -9,6 +9,7 @@ import {
   buildLongifyBrushupChapterPrompt,
   buildLongifyBrushupCritiquePrompt,
   buildLongifyChapterPrompt,
+  buildLongifyEndingRepairPrompt,
   buildLongifyLedgerPrompt,
   buildLongifyReview,
   buildLongifyTopupPrompt,
@@ -17,18 +18,23 @@ import {
   countLongifyChapterHeadings,
   createLongifyRunOptions,
   extractExpectedLongifyChapterDraft,
+  extractLongifyEndingAnchors,
   formatLongifyOutput,
   hasLongifySeed,
   isLongifiedOutputText,
+  longifyChapterBodyCharLength,
   normalizeLongifyPublicText,
   normalizeLongifySeed,
   resolveLongifyPanelState,
   runLongifyBrushupBeta,
   runLongifyBeta,
+  shouldAutoBrushupClearCheckbox,
   setSettingsPanelBusy,
   shouldAutoBrushupContinue,
   splitLongifyManuscript,
   submissionCharLength,
+  validateLongifyChapterDraft,
+  validateLongifyEndingCompletion,
 } from '../src/longifyBeta.js';
 
 const seedStory = `Harbor Light
@@ -240,6 +246,27 @@ const duplicateHeadingChapter = extractExpectedLongifyChapterDraft([
 assert.match(duplicateHeadingChapter, /^## \u7b2c2\u7ae0\u3000Two/);
 assert.doesNotMatch(duplicateHeadingChapter, /^\u7b2c2\u7ae0\s*$/m);
 assert.doesNotMatch(duplicateHeadingChapter, /THREE SHOULD DROP/);
+const emptyExpectedThenForeignChapterRaw = [
+  '\u7b2c1\u7ae0',
+  '',
+  '\u7b2c2\u7ae0\u3000Kitchen',
+  '',
+  'THIS BODY SHOULD BE SALVAGED. '.repeat(80),
+].join('\n');
+const emptyExpectedThenMisnumberedBody = extractExpectedLongifyChapterDraft(emptyExpectedThenForeignChapterRaw, 1);
+assert.match(emptyExpectedThenMisnumberedBody, /^\u7b2c1\u7ae0\u3000Kitchen/);
+assert.doesNotMatch(emptyExpectedThenMisnumberedBody, /^\u7b2c2\u7ae0/m);
+assert.match(emptyExpectedThenMisnumberedBody, /THIS BODY SHOULD BE SALVAGED/);
+assert.ok(longifyChapterBodyCharLength(emptyExpectedThenMisnumberedBody) > 1200);
+assert.equal(validateLongifyChapterDraft('\u7b2c1\u7ae0\n\nshort', { chapterNumber: 1, targetChars: 5000 }).ok, false);
+assert.equal(validateLongifyChapterDraft(emptyExpectedThenMisnumberedBody, { chapterNumber: 1, targetChars: 5000 }).ok, true);
+const mixedChapterValidation = validateLongifyChapterDraft(emptyExpectedThenMisnumberedBody, {
+  chapterNumber: 1,
+  targetChars: 5000,
+  rawText: emptyExpectedThenForeignChapterRaw,
+});
+assert.equal(mixedChapterValidation.ok, false);
+assert.match(mixedChapterValidation.reason, /\u5225\u7ae0/);
 assert.equal(
   normalizeLongifyPublicText('Akari waited.\n\n\n\n*\n\n\n\nShe opened the door.\n\n\u203b\n\nDawn came.'),
   'Akari waited.\n\nShe opened the door.\n\nDawn came.'
@@ -293,6 +320,15 @@ assert.equal(shouldAutoBrushupContinue({ score: null, autoEnabled: true, attempt
 assert.equal(shouldAutoBrushupContinue({ score: 79, autoEnabled: false, attempts: 0 }), false);
 assert.equal(shouldAutoBrushupContinue({ score: 88, autoEnabled: true, attempts: 0, targetMet: false }), true);
 assert.equal(shouldAutoBrushupContinue({ score: 88, autoEnabled: true, attempts: 3, targetMet: false }), false);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 80, targetMet: true }), true);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: true }), true);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 79, targetMet: true }), false);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: null, targetMet: true }), false);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: false }), false);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 79, targetMet: true, attempts: 3 }), true);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: false, attempts: 2 }), false);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: false, attempts: 3 }), true);
+assert.equal(shouldAutoBrushupClearCheckbox({ score: null, targetMet: true, attempts: 3 }), true);
 assert.match(buildLongifyBrushupChapterPrompt({
   title: splitLong.title,
   critiqueText: '\u7b2c1\u7ae0\u306e\u611f\u60c5\u5909\u5316\u3092\u5f37\u3081\u308b',
@@ -631,6 +667,244 @@ assert.doesNotMatch(result.chapters[0], /Copied Source Must Drop/);
 assert.doesNotMatch(result.text, /THIS SOURCE CHAPTER MUST NOT REMAIN/);
 assert.ok(result.text.includes('\u7b2c3\u7ae0\u3000Harbor'));
 assert.equal((result.text.match(/Created By AI Story Maker/g) || []).length, 1);
+
+const retryLongifyCalls = [];
+const retryLongifyResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 1,
+  targetTotalChars: 10000,
+  callText: async (prompt, context) => {
+    retryLongifyCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return {
+        text: 'Fixed ledger: Akari keeps the cafe light on.',
+        usedModel: 'mock-retry-ledger',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI\u7dcf\u5408\u70b9: 84\u70b9\nAI\u8b1b\u8a55:\n\u7a7a\u7ae0\u304c\u306a\u3044\u3053\u3068\u3092\u78ba\u8a8d\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c1\u7ae0\u306f\u5192\u982d\u306e\u5b58\u5728\u611f\u3092\u5f37\u3081\u308b\u3002',
+        usedModel: 'mock-retry-review',
+      };
+    }
+    if (context.stage === 'chapter' && context.chapterNumber === 1 && context.retryAttempt === 0) {
+      return {
+        text: '\u7b2c1\u7ae0\n\nshort',
+        usedModel: 'mock-short-chapter',
+      };
+    }
+    if (context.stage === 'chapter' && context.chapterNumber !== 1) {
+      return {
+        text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Follow ${context.chapterNumber}\n\n${longChapterBody.repeat(180)}`,
+        usedModel: `mock-follow-chapter-${context.chapterNumber}`,
+      };
+    }
+    return {
+      text: `\u7b2c2\u7ae0\u3000Misnumbered but substantial\n\n${longChapterBody.repeat(180)}`,
+      usedModel: 'mock-retry-chapter',
+    };
+  },
+});
+assert.ok(retryLongifyCalls.some(call => call.context.stage === 'chapter' && call.context.retryAttempt === 1));
+assert.ok(retryLongifyCalls.some(call => /\u524d\u56de\u51fa\u529b\u306f\u4e0d\u5408\u683c/.test(call.prompt)));
+assert.match(retryLongifyResult.text, /\u7b2c1\u7ae0\u3000Misnumbered but substantial/);
+assert.doesNotMatch(retryLongifyResult.chapters[0], /^\u7b2c2\u7ae0/m);
+assert.doesNotMatch(retryLongifyResult.text, /\u7b2c2\u7ae0\u3000Misnumbered but substantial/);
+assert.ok(longifyChapterBodyCharLength(retryLongifyResult.chapters[0]) > 5000);
+
+const mixedLongifyCalls = [];
+const mixedLongifyResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 1,
+  targetTotalChars: 10000,
+  callText: async (prompt, context) => {
+    mixedLongifyCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return {
+        text: 'Fixed ledger: Akari keeps the cafe light on.',
+        usedModel: 'mock-mixed-ledger',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI\u7dcf\u5408\u70b9: 85\u70b9\nAI\u8b1b\u8a55:\n\u7ae0\u6df7\u5165\u304c\u89e3\u6d88\u3055\u308c\u3066\u3044\u308b\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c1\u7ae0\u306e\u8d77\u70b9\u3092\u539a\u304f\u3059\u308b\u3002',
+        usedModel: 'mock-mixed-review',
+      };
+    }
+    if (context.stage === 'chapter' && context.chapterNumber === 1 && context.retryAttempt === 0) {
+      return {
+        text: `\u7b2c1\u7ae0\n\n\u7b2c2\u7ae0\u3000Kitchen Mixin\n\n${longChapterBody.repeat(40)}\n\n\u7b2c3\u7ae0\u3000Noise\n\n${longChapterBody.repeat(8)}`,
+        usedModel: 'mock-mixed-broken',
+      };
+    }
+    if (context.stage === 'chapter' && context.chapterNumber === 1) {
+      return {
+        text: `\u7b2c1\u7ae0\u3000Corrected Opening\n\n${longChapterBody.repeat(60)}`,
+        usedModel: 'mock-mixed-corrected',
+      };
+    }
+    return {
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Follow ${context.chapterNumber}\n\n${longChapterBody.repeat(60)}`,
+      usedModel: `mock-mixed-follow-${context.chapterNumber}`,
+    };
+  },
+});
+assert.ok(mixedLongifyCalls.some(call => call.context.stage === 'chapter' && call.context.retryAttempt === 1));
+assert.ok(mixedLongifyCalls.some(call => /\u5225\u7ae0\u304c\u6df7\u5165/.test(call.prompt)));
+assert.match(mixedLongifyResult.chapters[0], /^\u7b2c1\u7ae0\u3000Corrected Opening/);
+assert.doesNotMatch(mixedLongifyResult.chapters[0], /Kitchen Mixin/);
+
+const completedDorayakiSeed = `【どら焼き大捜査線】
+
+## 第一章　限定どら焼き
+
+アカリたちは商店街で金色の包みを買った。
+
+## 第二章　消えた包み
+
+写真を撮ったあと、包みが消え、全員で探し始めた。
+
+## 第三章　夕暮れの捜索
+
+リンのカメラにミクの袖が映っていた。
+
+## 第四章　発見
+
+ミクのポケットから金色の包みが見つかった。
+
+## 第五章　分け合う夜
+
+みんなでどら焼きを分け合い、失敗も思い出になると知った。
+
+## 第六章　日常への帰還
+
+「また明日ね」と手を振り、アカリは普通だった日常がほんの少しだけ特別へ変わったことを知った。
+春の商店街を照らす光はこれからもここにある。`;
+const incompleteDorayakiLong = `【どら焼き大捜査線】
+
+第1章　春風
+
+${'商店街の光と金色の包みを追いかける。'.repeat(100)}
+
+第2章　捜索
+
+${'アカリたちは店を回り、どら焼きの行方を探す。'.repeat(100)}
+
+第3章　発見
+
+リンが写真を見返すと、ミクの袖に包みが映っていた。
+「見つけた！」`;
+const completeDorayakiLong = `${incompleteDorayakiLong}
+
+ミクは謝り、アカリは泣きながら笑った。全員でどら焼きを分け合い、失敗も思い出になると知った。
+「また明日ね」と手を振り、アカリは普通だった日常がほんの少しだけ特別へ変わったことを知った。
+春の商店街を照らす光はこれからもここにある。`;
+assert.ok(extractLongifyEndingAnchors(completedDorayakiSeed).some(anchor => anchor.includes('春の商店街')));
+assert.equal(validateLongifyEndingCompletion(incompleteDorayakiLong, completedDorayakiSeed).ok, false);
+assert.equal(validateLongifyEndingCompletion(completeDorayakiLong, completedDorayakiSeed).ok, true);
+assert.match(buildLongifyEndingRepairPrompt({
+  seedText: completedDorayakiSeed,
+  ledgerText: '固定台帳',
+  currentText: incompleteDorayakiLong,
+  targetTotalChars: 10000,
+  chapterCount: 3,
+}), /必ずそのまま含める終盤アンカー[\s\S]*春の商店街を照らす光はこれからもここにある/);
+
+const endingRepairCalls = [];
+const endingRepairBlock = `ミクは謝り、アカリは泣きながら笑った。${'五人は包みを少しずつ分け合い、春の夜の商店街で息を合わせた。'.repeat(14)}
+「また明日ね」と手を振り、アカリは普通だった日常がほんの少しだけ特別へ変わったことを知った。
+春の商店街を照らす光はこれからもここにある。`;
+const endingRepairResult = await runLongifyBeta({
+  storyText: completedDorayakiSeed,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 3,
+  targetTotalChars: 10000,
+  callText: async (prompt, context) => {
+    endingRepairCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return {
+        text: '固定台帳: 金色の包みを探し、最後は分け合って日常へ帰る。',
+        usedModel: 'mock-ending-ledger',
+      };
+    }
+    if (context.stage === 'endingRepair') {
+      return {
+        text: endingRepairBlock,
+        usedModel: 'mock-ending-repair',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI総合点: 86点\nAI講評:\n結末回収を確認。\n章別の改稿指示:\n第3章の余韻を磨く。',
+        usedModel: 'mock-ending-review',
+      };
+    }
+    const body = '商店街の光と限定どら焼きの行方を、会話と行動で場面として厚く描く。'.repeat(170);
+    if (context.chapterNumber === 3) {
+      return {
+        text: `第3章　発見\n\n${body}\n\nリンが写真を見返すと、ミクの袖に包みが映っていた。\n「見つけた！」`,
+        usedModel: 'mock-ending-chapter-3',
+      };
+    }
+    return {
+      text: `第${context.chapterNumber}章　捜索\n\n${body}`,
+      usedModel: `mock-ending-chapter-${context.chapterNumber}`,
+    };
+  },
+});
+assert.ok(endingRepairCalls.some(call => call.context.stage === 'endingRepair'));
+assert.ok(endingRepairResult.usedModels.includes('mock-ending-repair'));
+assert.equal(validateLongifyEndingCompletion(endingRepairResult.text, completedDorayakiSeed).ok, true);
+assert.ok(endingRepairResult.text.includes('春の商店街を照らす光はこれからもここにある'));
+
+const endingFallbackReports = [];
+const endingFallbackResult = await runLongifyBeta({
+  storyText: completedDorayakiSeed,
+  apiKey: '123456789012345678901234567890',
+  model: 'openai-test',
+  chapterCount: 3,
+  targetTotalChars: 10000,
+  onProgress: entry => endingFallbackReports.push(entry),
+  callText: async (prompt, context) => {
+    if (context.stage === 'ledger') {
+      return {
+        text: '固定台帳: 金色の包みを探し、最後は分け合って日常へ帰る。',
+        usedModel: 'mock-fallback-ledger',
+      };
+    }
+    if (context.stage === 'endingRepair') {
+      return {
+        text: `ミクは謝り、アカリは笑いながら、みんなで小さなお菓子を分けた。${'夜風の中で友情を確かめ、次の日も一緒に歩こうと約束した。'.repeat(18)}`,
+        usedModel: 'mock-fallback-repair',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI総合点: 82点\nAI講評:\n結末回収を確認。\n章別の改稿指示:\n第3章の余韻を磨く。',
+        usedModel: 'mock-fallback-review',
+      };
+    }
+    const body = '商店街の光と限定どら焼きの行方を、会話と行動で場面として厚く描く。'.repeat(170);
+    if (context.chapterNumber === 3) {
+      return {
+        text: `第3章　発見\n\n${body}\n\nリンが写真を見返すと、ミクの袖に包みが映っていた。\n「見つけた！」`,
+        usedModel: 'mock-fallback-chapter-3',
+      };
+    }
+    return {
+      text: `第${context.chapterNumber}章　捜索\n\n${body}`,
+      usedModel: `mock-fallback-chapter-${context.chapterNumber}`,
+    };
+  },
+});
+assert.equal(validateLongifyEndingCompletion(endingFallbackResult.text, completedDorayakiSeed).ok, true);
+assert.ok(endingFallbackResult.text.includes('春の商店街を照らす光はこれからもここにある'));
+assert.ok(endingFallbackReports.some(entry => String(entry || '').includes('元本文の終盤を復帰')));
 
 const untitledSeed = `雨が降り続いている。斎藤文具店の硝子戸は、街灯の鈍い光だけを外から差し込んでくる。
 

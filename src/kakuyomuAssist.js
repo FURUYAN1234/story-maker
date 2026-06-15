@@ -1,4 +1,5 @@
 import { Ce } from './domHelpers.js';
+import { buildStoryExportFileName } from './fileIoHelpers.js';
 
 const AI_USE_TAG = 'AI本文利用';
 const MAX_CATCH_COPY_CHARS = 35;
@@ -614,13 +615,8 @@ async function copyText(value, button) {
   restoreButtonText(button, originalText);
 }
 
-function createTxtFileName(preview) {
-  const base = cleanTitleCandidate(preview?.title || 'kakuyomu-form-preview')
-    .replace(/[\\/:*?"<>|]/g, '_')
-    .replace(/\s+/g, '_')
-    .slice(0, 48)
-    || 'kakuyomu-form-preview';
-  return `${base}_kakuyomu_form.txt`;
+function createTxtFileName() {
+  return buildStoryExportFileName('KakuyomuForm', 'txt');
 }
 
 function saveTextFile(value, filename, button) {

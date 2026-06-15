@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v5.0.8</title>
+  <title>Story Maker v5.0.9</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <script type="module" crossorigin src="./src/main.js"></script>
   <link rel="stylesheet" crossorigin href="./src/style.css">
@@ -14,7 +14,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.0.8</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.0.9</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
@@ -68,6 +68,11 @@
             <span class="icon">🎲</span> 全項目ランダム
           </button>
           <button class="btn-util" id="btn-reset-all" title="全てリセット">🗑️ 全リセット</button>
+        </div>
+        <div class="settings-io-actions">
+          <button class="btn-util btn-settings-file" id="btn-settings-export" title="APIキーを含めず現在の生成条件をJSON保存">⬇ 条件Export</button>
+          <button class="btn-util btn-settings-file" id="btn-settings-import" title="生成条件JSONを読み込んで画面へ復元">⬆ 条件Import</button>
+          <input id="settings-import-file" class="hidden" type="file" accept=".json,application/json">
         </div>
 
         <!-- 🎬 Generate Button（メインアクション・最上部配置） -->

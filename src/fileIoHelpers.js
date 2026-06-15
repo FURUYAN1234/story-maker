@@ -35,8 +35,46 @@ export function formatTimestamp(date = new Date()) {
   ].join('');
 }
 
+const STORY_EXPORT_FEATURE_NAMES = {
+  output: 'Output',
+  story: 'Output',
+  text: 'Output',
+  body: 'LongNovel',
+  '本文': 'LongNovel',
+  memo: 'LongNovelNotes',
+  notes: 'LongNovelNotes',
+  'メモ・指示書': 'LongNovelNotes',
+  kakuyomu_form: 'KakuyomuForm',
+  'kakuyomu-form-preview': 'KakuyomuForm',
+  style_analysis: 'StyleAnalysis',
+  style_rewrite: 'StyleRewrite',
+  generation_settings: 'GenerationSettings',
+  settings: 'GenerationSettings',
+  longdev_run_log: 'LongDevRunLog',
+  longdev_log: 'LongDevRunLog',
+  longdev_json: 'LongDevSnapshot',
+  longdev_snapshot: 'LongDevSnapshot',
+};
+
+export function normalizeStoryExportFeatureName(value, fallback = 'Output') {
+  const raw = String(value || '').trim();
+  const mapped = STORY_EXPORT_FEATURE_NAMES[raw] || STORY_EXPORT_FEATURE_NAMES[raw.toLowerCase()];
+  if (mapped) return mapped;
+  const ascii = raw
+    .replace(/[^A-Za-z0-9]+(.)/g, (_, char) => String(char || '').toUpperCase())
+    .replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '')
+    .replace(/^[a-z]/, char => char.toUpperCase());
+  return ascii || fallback;
+}
+
+export function buildStoryExportFileName(featureName, extension = 'txt', date = new Date()) {
+  const feature = normalizeStoryExportFeatureName(featureName);
+  const ext = String(extension || 'txt').replace(/^\.+/, '').replace(/[^A-Za-z0-9]/g, '') || 'txt';
+  return `Story_${feature}_${formatTimestamp(date)}.${ext}`;
+}
+
 export function buildTimestampedTextFileName(title, label, date = new Date()) {
-  return `${title}_${label}_${formatTimestamp(date)}.txt`;
+  return buildStoryExportFileName(label || title || 'Output', 'txt', date);
 }
 
 export function sanitizeFileNamePart(value, fallback = 'download') {
@@ -44,11 +82,11 @@ export function sanitizeFileNamePart(value, fallback = 'download') {
 }
 
 export function buildTimestampedJsonFileName(baseName, date = new Date()) {
-  return `${sanitizeFileNamePart(baseName, 'style_analysis')}_${formatTimestamp(date)}.json`;
+  return buildStoryExportFileName(baseName || 'StyleAnalysis', 'json', date);
 }
 
 export function buildTimestampedPlainTextFileName(baseName, date = new Date()) {
-  return `${sanitizeFileNamePart(baseName, 'text')}_${formatTimestamp(date)}.txt`;
+  return buildStoryExportFileName(baseName || 'Output', 'txt', date);
 }
 
 export function downloadBlobWithFileName(blob, filename) {

@@ -8,6 +8,7 @@ import {
 } from '../apiSession.js';
 import { readLongDevApiSession } from './devApiSession.js';
 import { createRunJournal, loadRunJournal, clearRunJournal } from './runJournal.js';
+import { buildStoryExportFileName } from '../fileIoHelpers.js';
 
 const ACTIVE_RUN_KEY = 'story-maker.longdev.activeRun.v501';
 const SNAPSHOT_KEY = 'story-maker.longdev.lastSnapshot.v501';
@@ -647,8 +648,7 @@ function injectStyle() {
 }
 
 function downloadFile(content, baseName, extension) {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const fileName = `${baseName}_${timestamp}.${extension}`;
+  const fileName = buildStoryExportFileName(baseName, extension);
   const mimeType = extension === 'json' ? 'application/json;charset=utf-8' : 'text/plain;charset=utf-8';
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);

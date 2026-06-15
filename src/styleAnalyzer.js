@@ -4,6 +4,7 @@
 // ============================================================
 import { callGenerativeAI, callGenerativeAIMultimodal, callGenerativeAIStream } from './api.js';
 import { GEMINI_MODELS } from './data.js';
+import { buildStoryExportFileName } from './fileIoHelpers.js';
 
 const $ = id => document.getElementById(id);
 
@@ -1290,19 +1291,13 @@ function copyAnalysis() {
   });
 }
 
-function makeTimestamp() {
-  const now = new Date();
-  return `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
-}
-
 function saveAnalysisJson() {
   if (!analysisResult) return;
   const json = JSON.stringify(analysisResult, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  const name = (analysisResult.style_name || 'style_analysis').replace(/[\s\/\\:*?"<>|]/g, '_');
-  a.download = `${name}_${makeTimestamp()}.json`;
+  a.download = buildStoryExportFileName(analysisResult.style_name || 'StyleAnalysis', 'json');
   a.click();
 }
 
@@ -1320,7 +1315,7 @@ function saveReflectionTxt() {
   const blob = new Blob([reflectedOutput], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `style_rewrite_${makeTimestamp()}.txt`;
+  a.download = buildStoryExportFileName('StyleRewrite', 'txt');
   a.click();
 }
 

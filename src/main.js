@@ -4,8 +4,10 @@
 // 2. qualityBoost augments generation contracts before legacy UI boot.
 // 3. legacyMain owns the existing UI and generation flow.
 // 4. publicRuntime seals public-only behavior after the UI is present.
+// 5. generationSettingsIo owns settings import/export and unified save names.
 
 import './modulePreloadPolyfill.js';
 import './qualityBoost.js';
 import './legacyMain.js';
 import './publicRuntime.js';
+import './generationSettingsIo.js';

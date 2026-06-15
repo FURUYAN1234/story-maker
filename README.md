@@ -1,4 +1,4 @@
-# Story Maker v5.0.8 / AI物語メーカー
+# Story Maker v5.0.9 / AI物語メーカー
 
 Story Maker is a static web application for generating creative text with Google Gemini API or OpenAI API, including standard short-form outputs and a beta workflow that expands completed Output into a long-form manuscript. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -283,11 +283,11 @@ Brush-up rewrites the existing long-form manuscript from the latest AI review. I
 | Assembled brush-up result falls below the long-form minimum. | A final top-up pass can add more material to the manuscript. | This protects the long-form minimum but does not guarantee exact match with the selected target. |
 | 結合後のブラッシュアップ結果が長編最低ラインを下回る。 | 最後に補強生成を行い、本文量を追加できます。 | 長編最低ラインを守るための保護であり、指定文字数ぴったりを保証するものではありません。 |
 
-## v5.0.8 Quality System / v5.0.8 品質システム
+## v5.0.9 Quality System / v5.0.9 品質システム
 
-v5.0.8 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, and generic-rule checks. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
+v5.0.9 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and the long-form beta auto-brush-up completion gate. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
 
-v5.0.8では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
+v5.0.9では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、長編βの自動ブラッシュアップ完了判定の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -810,6 +810,15 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.0.9 (2026-06-15)
+
+- Fixed long-form beta auto brush-up so the default checkbox stays on for the first run and clears only after a passing review with the target length met, or after the maximum three automatic attempts.
+- Confirmed that a high AI review score is not treated as passing when the selected minimum character count is still unmet.
+- Hardened long-form ending recovery for OpenAI by preserving exact source-ending anchors when the model paraphrases the final repair.
+- 長編βの自動ブラッシュアップ初回チェックをONに保ち、目標文字数達成＋合格点、または最大3回到達時だけ自動でOFFになるよう修正しました。
+- AI講評が高得点でも、選択中の最低文字数に届いていなければ合格扱いにしないことを確認しました。
+- OpenAIが最終補強を言い換えた場合でも、元本文終盤アンカーを保持して結末回収できるよう長編化の終盤復帰を強化しました。
 
 ### v5.0.8 (2026-06-15)
 
