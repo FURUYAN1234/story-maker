@@ -66,67 +66,36 @@ The intent is not to force every work into the same template. The contract tells
 
 ## Feature Map / 機能マップ
 
-| Area | Feature | Details |
+| Area / 領域 | Feature / 機能 | Details / 詳細 |
 |---|---|---|
-| API | Gemini / OpenAI switching | Switch the selected provider from the UI while keeping the visible creative settings. |
-| API | Runtime key entry | API keys are typed into the browser UI by the user and must not be committed or published. |
-| API | Provider links | Header links help the user reach Gemini API and OpenAI API key pages. |
-| Generation | 14 public output modes | Each public mode has its own expected structure and cleanup behavior. |
-| Generation | Selected-mode priority | The selected output chip wins over incidental words inside prompts or source material. |
-| Generation | Long-form expansion beta | Expands an existing Output manuscript into a chaptered long-form draft, then can brush it up from AI review feedback. |
-| Randomization | All-random | Randomizes the visible creative axes and starts generation immediately. |
-| Randomization | Per-section random | Individual sections can be randomized without changing the whole request. |
-| Locking | Section locks | Locked sections are protected from randomization and reset where applicable. |
-| Characters | Character count controls | Add or remove character slots with plus/minus controls. |
-| Characters | Manual character fields | Name, sex, role, personality, and notes can be edited per character. |
-| Characters | Character randomization | Randomize current character content, or randomize count plus content. |
-| Characters | Character sheet image import | Drop PNG/JPG/WEBP character sheets and convert visible traits into character settings. |
-| Intake | Universal Input | Add text, Markdown, URLs, local text files, and images as story context. |
-| Intake | Asset list | Added materials can be reviewed and cleared from the intake area. |
-| News | News keywords | Gemini search grounding can turn current Japanese news topics into creative seeds. |
-| Style | Style analyzer | Analyze text or images into writing-style parameters. |
-| Style | JSON export | Export style analysis as structured JSON for external writing workflows. |
-| Style | Style rewrite | Rewrite generated output using the analyzed style while keeping the plot direction. |
-| Output | Character counter | Output area shows current character count. |
-| Output | Tags | Output tags show selected provider/model/mode and major generation axes. |
-| Output | Copy and text export | Generated text can be copied or exported as a timestamped `.txt` file. |
-| Progress | Thought log | Shows progress messages while API communication is running. |
-| Quality | Mode contracts | Each public mode receives a required output shape. |
-| Quality | Short-draft rewrite | Too-short public drafts are rewritten before they are accepted as final output. |
-| Quality | Long-form AI review | Longification and brush-up results receive an AI score, pass/fail label, and concrete revision directions. |
-| Quality | Final cleanup | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display. |
-| Quality | Completion gates | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored. |
-
-| 領域 | 機能 | 詳細 |
-|---|---|---|
-| API | Gemini / OpenAI 切り替え | 画面上の創作設定を保ったまま、利用するAPI提供元を切り替えます。 |
-| API | 実行時キー入力 | APIキーはユーザーがブラウザUIへ入力し、リポジトリや公開物へ含めません。 |
-| API | キー取得リンク | ヘッダーから Gemini API と OpenAI API のキー取得ページへ移動できます。 |
-| 生成 | 14公開出力モード | 各公開モードには、期待される構造と整形処理があります。 |
-| 生成 | 選択モード優先 | プロンプトや素材文中の偶然の語より、選択中の出力チップを優先します。 |
-| 生成 | 長編化β | 既存の Output 原稿を章立てされた長編下書きへ拡張し、AI講評をもとにブラッシュアップできます。 |
-| ランダム | 全項目ランダム | 見えている創作軸をまとめてランダム化し、そのまま生成します。 |
-| ランダム | セクション別ランダム | 全体を変えず、特定セクションだけを個別にランダム化できます。 |
-| 固定 | セクションロック | ロックした欄は、対応するランダム化やリセットから保護されます。 |
-| 人物 | 人数調整 | プラス/マイナスで登場人物枠を増減できます。 |
-| 人物 | 手動項目 | 名前、性別、役割、性格、メモを人物ごとに編集できます。 |
-| 人物 | 人物ランダム | 現在人数のまま内容だけ、または人数込みで人物をランダム生成できます。 |
-| 人物 | キャラクターシート画像 | PNG/JPG/WEBP画像から人物情報を読み取り、設定へ反映します。 |
-| 素材 | 万能インプット | テキスト、Markdown、URL、ローカルテキスト、画像を文脈として投入できます。 |
-| 素材 | 素材一覧 | 追加した素材を一覧で確認・クリアできます。 |
-| ニュース | ニュースキーワード | Gemini検索グラウンディングで日本語ニュース話題を創作の種にできます。 |
-| 作風 | 作風解析 | テキストや画像から文体パラメータを抽出します。 |
-| 作風 | JSON出力 | 作風解析結果を外部の文章ワークフロー向けJSONとして出力できます。 |
-| 作風 | 作風リライト | 生成済み出力の筋を保ったまま、解析した文体で書き換えます。 |
-| 出力 | 文字数表示 | 出力欄で現在の文字数を表示します。 |
-| 出力 | タグ表示 | API、モデル、モード、主要軸をタグとして表示します。 |
-| 出力 | コピーとテキスト出力 | 生成結果をコピーまたはタイムスタンプ付き `.txt` として書き出せます。 |
-| 進捗 | 思考ログ | API通信中の進行メッセージを表示します。 |
-| 品質 | モード契約 | 公開モードごとに必須の出力形を指定します。 |
-| 品質 | 短すぎる初稿の改稿 | 公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
-| 品質 | 長編AI講評 | 長編化とブラッシュアップの結果に、AI点数、合否表示、具体的な改稿指示を出します。 |
-| 品質 | 最終出力整形 | プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
-| 品質 | 完走ゲート | 4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
+| API<br>API | Gemini / OpenAI switching<br>Gemini / OpenAI 切り替え | Switch the selected provider from the UI while keeping the visible creative settings.<br>画面上の創作設定を保ったまま、利用するAPI提供元を切り替えます。 |
+| API<br>API | Runtime key entry<br>実行時キー入力 | API keys are typed into the browser UI by the user and must not be committed or published.<br>APIキーはユーザーがブラウザUIへ入力し、リポジトリや公開物へ含めません。 |
+| API<br>API | Provider links<br>キー取得リンク | Header links help the user reach Gemini API and OpenAI API key pages.<br>ヘッダーから Gemini API と OpenAI API のキー取得ページへ移動できます。 |
+| Generation<br>生成 | 14 public output modes<br>14公開出力モード | Each public mode has its own expected structure and cleanup behavior.<br>各公開モードには、期待される構造と整形処理があります。 |
+| Generation<br>生成 | Selected-mode priority<br>選択モード優先 | The selected output chip wins over incidental words inside prompts or source material.<br>プロンプトや素材文中の偶然の語より、選択中の出力チップを優先します。 |
+| Generation<br>生成 | Long-form expansion beta<br>長編化β | Expands an existing Output manuscript into a chaptered long-form draft, then can brush it up from AI review feedback.<br>既存の Output 原稿を章立てされた長編下書きへ拡張し、AI講評をもとにブラッシュアップできます。 |
+| Randomization<br>ランダム | All-random<br>全項目ランダム | Randomizes the visible creative axes and starts generation immediately.<br>見えている創作軸をまとめてランダム化し、そのまま生成します。 |
+| Randomization<br>ランダム | Per-section random<br>セクション別ランダム | Individual sections can be randomized without changing the whole request.<br>全体を変えず、特定セクションだけを個別にランダム化できます。 |
+| Locking<br>固定 | Section locks<br>セクションロック | Locked sections are protected from randomization and reset where applicable.<br>ロックした欄は、対応するランダム化やリセットから保護されます。 |
+| Characters<br>人物 | Character count controls<br>人数調整 | Add or remove character slots with plus/minus controls.<br>プラス/マイナスで登場人物枠を増減できます。 |
+| Characters<br>人物 | Manual character fields<br>手動項目 | Name, sex, role, personality, and notes can be edited per character.<br>名前、性別、役割、性格、メモを人物ごとに編集できます。 |
+| Characters<br>人物 | Character randomization<br>人物ランダム | Randomize current character content, or randomize count plus content.<br>現在人数のまま内容だけ、または人数込みで人物をランダム生成できます。 |
+| Characters<br>人物 | Character sheet image import<br>キャラクターシート画像 | Drop PNG/JPG/WEBP character sheets and convert visible traits into character settings.<br>PNG/JPG/WEBP画像から人物情報を読み取り、設定へ反映します。 |
+| Intake<br>素材 | Universal Input<br>万能インプット | Add text, Markdown, URLs, local text files, and images as story context.<br>テキスト、Markdown、URL、ローカルテキスト、画像を文脈として投入できます。 |
+| Intake<br>素材 | Asset list<br>素材一覧 | Added materials can be reviewed and cleared from the intake area.<br>追加した素材を一覧で確認・クリアできます。 |
+| News<br>ニュース | News keywords<br>ニュースキーワード | Gemini search grounding can turn current Japanese news topics into creative seeds.<br>Gemini検索グラウンディングで日本語ニュース話題を創作の種にできます。 |
+| Style<br>作風 | Style analyzer<br>作風解析 | Analyze text or images into writing-style parameters.<br>テキストや画像から文体パラメータを抽出します。 |
+| Style<br>作風 | JSON export<br>JSON出力 | Export style analysis as structured JSON for external writing workflows.<br>作風解析結果を外部の文章ワークフロー向けJSONとして出力できます。 |
+| Style<br>作風 | Style rewrite<br>作風リライト | Rewrite generated output using the analyzed style while keeping the plot direction.<br>生成済み出力の筋を保ったまま、解析した文体で書き換えます。 |
+| Output<br>出力 | Character counter<br>文字数表示 | Output area shows current character count.<br>出力欄で現在の文字数を表示します。 |
+| Output<br>出力 | Tags<br>タグ表示 | Output tags show selected provider/model/mode and major generation axes.<br>API、モデル、モード、主要軸をタグとして表示します。 |
+| Output<br>出力 | Copy and text export<br>コピーとテキスト出力 | Generated text can be copied or exported as a timestamped `.txt` file.<br>生成結果をコピーまたはタイムスタンプ付き `.txt` として書き出せます。 |
+| Progress<br>進捗 | Thought log<br>思考ログ | Shows progress messages while API communication is running.<br>API通信中の進行メッセージを表示します。 |
+| Quality<br>品質 | Mode contracts<br>モード契約 | Each public mode receives a required output shape.<br>公開モードごとに必須の出力形を指定します。 |
+| Quality<br>品質 | Short-draft rewrite<br>短すぎる初稿の改稿 | Too-short public drafts are rewritten before they are accepted as final output.<br>公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
+| Quality<br>品質 | Long-form AI review<br>長編AI講評 | Longification and brush-up results receive an AI score, pass/fail label, and concrete revision directions.<br>長編化とブラッシュアップの結果に、AI点数、合否表示、具体的な改稿指示を出します。 |
+| Quality<br>品質 | Final cleanup<br>最終出力整形 | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display.<br>プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
+| Quality<br>品質 | Completion gates<br>完走ゲート | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored.<br>4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
 
 ## Technology Highlights / 技術ハイライト
 
@@ -396,33 +365,19 @@ The writing layer uses recurring narrative methods rather than one-off prompt sl
 
 文章生成層は、一回限りの飾り文句ではなく、繰り返し使える物語設計メソッドを使います。これらはテーマ、ジャンル、形式が変わっても働くよう、意図的に汎用化しています。
 
-| Method | Purpose |
+| Method / メソッド | Purpose / 目的 |
 |---|---|
-| Desire and cost | Make the character want something and pay something, even in a short piece. |
-| Choice focus | Avoid ending only with an event; make someone choose, refuse, hide, or accept something. |
-| Information order | Control what the reader knows first, what is withheld, and what is reinterpreted at the end. |
-| Relationship change | Make at least one distance, trust level, misunderstanding, or obligation shift. |
-| Sensory anchoring | Add touch, smell, sound, light, weight, or bodily discomfort to reduce abstract summary. |
-| Human friction | Add hesitation, misunderstanding, minor failure, awkward silence, fatigue, or small damage so the scene does not become too smooth. |
-| Aftermath visibility | Show what remains after the gag, decision, or conflict: cleanup, a shifted object, embarrassment, debt, relief, or a changed distance. |
-| Anti-template pressure | Avoid the most obvious genre route and over-familiar moral closure. |
-| Last-line design | Use the final line to turn, collect, echo, or sharpen the meaning instead of merely stopping. |
-| Mode-complete ending | Finish in the shape the selected mode needs, not in a generic prose ending. |
-| Browser-backed calibration | Judge the method by actual Gemini/OpenAI browser outputs across modes, not by prompt intent alone. |
-
-| メソッド | 目的 |
-|---|---|
-| 欲望と代償 | 短い文章でも、人物が何かを望み、何かを払う構造を作ります。 |
-| 選択の焦点化 | 出来事だけで終わらせず、誰かが選ぶ、拒む、隠す、受け入れる瞬間を作ります。 |
-| 情報開示の順番 | 読者が先に知ること、伏せること、最後に意味が変わることを制御します。 |
-| 関係変化 | 距離、信頼、誤解、義務のどれかが変わるようにします。 |
-| 感覚の接地 | 触覚、匂い、音、光、重さ、身体の違和感を入れ、抽象的な要約を避けます。 |
-| 人間的な摩擦 | ためらい、勘違い、小さな失敗、気まずい沈黙、疲れ、少しの損を入れ、場面が滑らかすぎないようにします。 |
-| 後始末の可視化 | ギャグ、決断、衝突のあとに残る片付け、動いた物、恥、借り、安堵、変わった距離を見せます。 |
-| テンプレ回避 | もっともありがちなジャンル展開や安易な教訓で終わらないようにします。 |
-| 最後の一文設計 | ただ止めるのではなく、意味を反転、回収、反響、凝縮する一文を狙います。 |
-| モードとしての完走 | 汎用的な小説風の終わりではなく、選択された形式に必要な終端まで書き切ります。 |
-| ブラウザ実出力での調整 | プロンプト上の意図だけでなく、Gemini / OpenAI の実ブラウザ出力をモード別に見て判断します。 |
+| Desire and cost<br>欲望と代償 | Make the character want something and pay something, even in a short piece.<br>短い文章でも、人物が何かを望み、何かを払う構造を作ります。 |
+| Choice focus<br>選択の焦点化 | Avoid ending only with an event; make someone choose, refuse, hide, or accept something.<br>出来事だけで終わらせず、誰かが選ぶ、拒む、隠す、受け入れる瞬間を作ります。 |
+| Information order<br>情報開示の順番 | Control what the reader knows first, what is withheld, and what is reinterpreted at the end.<br>読者が先に知ること、伏せること、最後に意味が変わることを制御します。 |
+| Relationship change<br>関係変化 | Make at least one distance, trust level, misunderstanding, or obligation shift.<br>距離、信頼、誤解、義務のどれかが変わるようにします。 |
+| Sensory anchoring<br>感覚の接地 | Add touch, smell, sound, light, weight, or bodily discomfort to reduce abstract summary.<br>触覚、匂い、音、光、重さ、身体の違和感を入れ、抽象的な要約を避けます。 |
+| Human friction<br>人間的な摩擦 | Add hesitation, misunderstanding, minor failure, awkward silence, fatigue, or small damage so the scene does not become too smooth.<br>ためらい、勘違い、小さな失敗、気まずい沈黙、疲れ、少しの損を入れ、場面が滑らかすぎないようにします。 |
+| Aftermath visibility<br>後始末の可視化 | Show what remains after the gag, decision, or conflict: cleanup, a shifted object, embarrassment, debt, relief, or a changed distance.<br>ギャグ、決断、衝突のあとに残る片付け、動いた物、恥、借り、安堵、変わった距離を見せます。 |
+| Anti-template pressure<br>テンプレ回避 | Avoid the most obvious genre route and over-familiar moral closure.<br>もっともありがちなジャンル展開や安易な教訓で終わらないようにします。 |
+| Last-line design<br>最後の一文設計 | Use the final line to turn, collect, echo, or sharpen the meaning instead of merely stopping.<br>ただ止めるのではなく、意味を反転、回収、反響、凝縮する一文を狙います。 |
+| Mode-complete ending<br>モードとしての完走 | Finish in the shape the selected mode needs, not in a generic prose ending.<br>汎用的な小説風の終わりではなく、選択された形式に必要な終端まで書き切ります。 |
+| Browser-backed calibration<br>ブラウザ実出力での調整 | Judge the method by actual Gemini/OpenAI browser outputs across modes, not by prompt intent alone.<br>プロンプト上の意図だけでなく、Gemini / OpenAI の実ブラウザ出力をモード別に見て判断します。 |
 
 ## UI Overview / UI概要
 
@@ -606,23 +561,14 @@ The app should treat Universal Input as source material, not as a command to exp
 
 ### Supported Source Types / 対応素材
 
-| Source Type | Behavior |
+| Source Type / 素材種別 | Behavior / 動作 |
 |---|---|
-| Plain text | Added directly as source context. |
-| Markdown | Keeps headings and structured notes useful for prompt context. |
-| `.txt` / `.md` files | Reads local text files into the intake list. |
-| URL | Adds a source reference where the current workflow supports it. |
-| Image | Uses image understanding where the selected provider supports it. |
-| Multiple assets | Combines several pieces of material with the selected generation settings. |
-
-| 素材種別 | 動作 |
-|---|---|
-| 通常テキスト | そのまま素材文脈として追加します。 |
-| Markdown | 見出しや構造化メモを文脈として活かします。 |
-| `.txt` / `.md` ファイル | ローカルテキストファイルを取り込み一覧へ読み込みます。 |
-| URL | 現在のワークフローで対応できる範囲で参照素材として追加します。 |
-| 画像 | 選択中のAPIが対応する場合、画像理解を使います。 |
-| 複数素材 | 複数の素材を、選択済み生成条件と組み合わせて扱います。 |
+| Plain text<br>通常テキスト | Added directly as source context.<br>そのまま素材文脈として追加します。 |
+| Markdown<br>Markdown | Keeps headings and structured notes useful for prompt context.<br>見出しや構造化メモを文脈として活かします。 |
+| `.txt` / `.md` files<br>`.txt` / `.md` ファイル | Reads local text files into the intake list.<br>ローカルテキストファイルを取り込み一覧へ読み込みます。 |
+| URL<br>URL | Adds a source reference where the current workflow supports it.<br>現在のワークフローで対応できる範囲で参照素材として追加します。 |
+| Image<br>画像 | Uses image understanding where the selected provider supports it.<br>選択中のAPIが対応する場合、画像理解を使います。 |
+| Multiple assets<br>複数素材 | Combines several pieces of material with the selected generation settings.<br>複数の素材を、選択済み生成条件と組み合わせて扱います。 |
 
 ### Intake Controls / 取り込み操作
 
