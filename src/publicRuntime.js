@@ -429,6 +429,7 @@ function setManualOutput(text, sourceLabel = '外部本文') {
     return false;
   }
   output.dataset.manualOutput = 'true';
+  delete output.dataset.longifyOutput;
   output.className = 'output-box text-selectable';
   output.textContent = nextText;
   updateOutputCounter(nextText);
@@ -444,6 +445,7 @@ function resetManualOutput() {
   const tagRow = document.getElementById('tag-row');
   if (!output) return;
   delete output.dataset.manualOutput;
+  delete output.dataset.longifyOutput;
   output.className = 'output-box empty text-selectable';
   output.innerHTML = OUTPUT_GUIDE_HTML;
   updateOutputCounter('');
@@ -581,8 +583,10 @@ function installOutputAssistLauncher() {
   };
   const tryInstall = () => {
     queued = false;
-    if (installed || generationIsActive()) return;
-    if (outputHasPotentialStory(output) || output.dataset.manualOutput === 'true') {
+    if (installed) return;
+    const manualOutput = output.dataset.manualOutput === 'true';
+    if (generationIsActive() && !manualOutput) return;
+    if (outputHasPotentialStory(output) || manualOutput) {
       installAssistModules();
     }
   };
@@ -605,6 +609,12 @@ function installOutputAssistLauncher() {
     attributeFilter: ['disabled', 'class'],
   });
   scheduleTryInstall();
+  setTimeout(scheduleTryInstall, 250);
+  setTimeout(scheduleTryInstall, 1000);
+  setTimeout(scheduleTryInstall, 2500);
+  setTimeout(() => {
+    if (!installed) installAssistModules();
+  }, 3500);
 }
 
 function installPublicRuntime() {

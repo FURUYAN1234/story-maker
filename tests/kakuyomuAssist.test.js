@@ -42,7 +42,9 @@ assert.equal(getKakuyomuCopyValue(preview, 'body').startsWith('タイトル:'), 
 assert.equal(preview.genre, 'SF');
 assert.ok(preview.catchCopy);
 assert.ok(Array.from(preview.catchCopy).length <= 35);
+assert.equal(preview.catchCopy.includes('タイトル:'), false);
 assert.ok(preview.introduction.includes('放課後の教室'));
+assert.equal(preview.introduction.includes('タイトル:'), false);
 assert.ok(preview.selfRatings.includes('暴力描写有り'));
 assert.ok(preview.tags.includes('AI本文利用'));
 assert.ok(preview.tags.includes('SF'));
@@ -50,7 +52,7 @@ assert.ok(preview.tags.length <= 8);
 for (const tag of preview.tags) {
   assert.ok(Array.from(tag).length <= 20, tag);
 }
-assert.ok(formatKakuyomuPreview(preview).includes('AI利用タグ: AI本文利用'));
+assert.equal(formatKakuyomuPreview(preview).includes('AI利用タグ:'), false);
 assert.ok(formatKakuyomuPreview(preview).includes('投稿本文:'));
 assert.equal(formatKakuyomuPreview(preview).includes('Created By'), false);
 assert.equal(getKakuyomuCopyValue(preview, 'tag', { tagIndex: 0 }), preview.tags[0]);
@@ -60,6 +62,7 @@ const previewHtml = renderKakuyomuPreview(preview);
 assert.equal((previewHtml.match(/data-copy-kind="tag"/g) || []).length, preview.tags.length);
 assert.match(previewHtml, /data-copy-index="0"/);
 assert.equal(previewHtml.includes('タグ一覧をコピー'), false);
+assert.equal(previewHtml.includes('AI利用タグ'), false);
 
 const shortBracketTitleStory = `【最後の封筒】
 
@@ -104,6 +107,33 @@ assert.match(chapteredHtml, /全文表示/);
 assert.match(chapteredHtml, /章タイトルコピー/);
 assert.match(chapteredHtml, /本文コピー/);
 assert.match(chapteredHtml, /kakuyomu-chapter-preview/);
+
+const longifyTitleArtifactStory = `【砂糖菓子と騎士たちの誓い】
+
+第1章
+
+タイトル: 砂糖菓子と騎士たちの誓い
+
+第1節
+
+春の終わり、放課後の校舎にはいつもより長いチャイムの余韻がこだました。アカリは誰もいない廊下で、小さな砂糖菓子の包みを握りしめた。
+
+【完】
+
+第2章
+
+タイトル: 砂糖菓子と騎士たちの誓い
+
+第1節
+
+夜の校庭に灯った光は、迷っていた五人をもう一度同じ場所へ集めた。`;
+const longifyArtifactPreview = buildKakuyomuPreview({ storyText: longifyTitleArtifactStory });
+assert.equal(longifyArtifactPreview.catchCopy.includes('タイトル:'), false);
+assert.equal(longifyArtifactPreview.introduction.includes('タイトル:'), false);
+assert.equal(longifyArtifactPreview.body.includes('タイトル:'), false);
+assert.equal(longifyArtifactPreview.body.includes('第1節'), false);
+assert.equal(longifyArtifactPreview.body.includes('【完】'), false);
+assert.equal(formatKakuyomuPreview(longifyArtifactPreview).includes('AI利用タグ:'), false);
 
 const sectionedStory = `【まるみ屋、朝からドタバタ】
 

@@ -958,6 +958,7 @@ function updateOutputCounter(text) {
 
 export function isGenerationInProgress(output) {
   if (output?.dataset?.longifyRendering === 'true') return true;
+  if (output?.dataset?.longifyOutput === 'true') return true;
   const doc = typeof document !== 'undefined' ? document : null;
   if (doc?.documentElement?.dataset?.longifyRendering === 'true') return true;
   const generateButton = doc?.getElementById?.('btn-generate');

@@ -1792,6 +1792,8 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   overflow-y: auto;
   background: rgba(0, 0, 0, 0.25);
   flex-grow: 1;
+  min-height: 0;
+  scrollbar-gutter: stable;
 }
 .progress-log {
   font-family: 'SF Mono', 'Cascadia Code', monospace;
@@ -1799,8 +1801,9 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
   line-height: 1.5;
   color: var(--text2);
   white-space: pre-wrap;
-  word-break: break-all;
+  overflow-wrap: anywhere;
   margin: 0;
+  padding-bottom: 8px;
 }
 /* スコアボード */
 .thought-score-board {
