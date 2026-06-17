@@ -3595,6 +3595,9 @@ function notifyOutputDependentPanels(reason = 'longify-output-updated') {
   window.dispatchEvent(new CustomEvent('story-maker:kakuyomu-refresh', {
     detail: { reason },
   }));
+  window.dispatchEvent(new CustomEvent('story-maker:alphapolis-refresh', {
+    detail: { reason },
+  }));
 }
 
 function setControlLockState(rootEl, locked) {
@@ -4104,8 +4107,14 @@ function setKakuyomuAssistBusy(busy) {
     window.dispatchEvent(new CustomEvent('story-maker:kakuyomu-busy', {
       detail: { busy: Boolean(busy) },
     }));
+    window.dispatchEvent(new CustomEvent('story-maker:alphapolis-busy', {
+      detail: { busy: Boolean(busy) },
+    }));
     if (!busy) {
       window.dispatchEvent(new CustomEvent('story-maker:kakuyomu-refresh', {
+        detail: { reason: 'longify-output-updated' },
+      }));
+      window.dispatchEvent(new CustomEvent('story-maker:alphapolis-refresh', {
         detail: { reason: 'longify-output-updated' },
       }));
     }

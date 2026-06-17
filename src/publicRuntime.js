@@ -6,6 +6,7 @@ import {
   PUBLIC_MODE_VALUES,
   isLongModeText,
 } from './modeContracts.js';
+import { installAlphapolisAssist } from './alphapolisAssist.js';
 import { installKakuyomuAssist } from './kakuyomuAssist.js';
 import { installLongifyBeta } from './longifyBeta.js';
 import { installPublicOutputCleanup } from './outputCleanup.js';
@@ -26,7 +27,7 @@ const OUTPUT_GUIDE_HTML = `
             <li>左の設定パネルで出力モード・テーマ等を選択</li>
             <li>「ストーリー生成」を押す</li>
             <li>「🎲 全項目ランダム」で一括ランダム設定も可能</li>
-            <li>他で作った本文はOutputへ貼り付け、またはTXT/MDインポートすると、Kakuyomuプレビューと「この小説を長編化」の元本文として使えます</li>
+            <li>他で作った本文はOutputへ貼り付け、またはTXT/MDインポートすると、Kakuyomu/Alphapolisプレビューと「この小説を長編化」の元本文として使えます</li>
           </ol>
         </div>
 `;
@@ -361,6 +362,7 @@ function revealOutputCopyActions(visible) {
 
 function refreshOutputDependentPanels() {
   window.dispatchEvent(new CustomEvent('story-maker:kakuyomu-refresh'));
+  window.dispatchEvent(new CustomEvent('story-maker:alphapolis-refresh'));
   window.dispatchEvent(new CustomEvent('story-maker:output-manual-change'));
 }
 
@@ -580,6 +582,7 @@ function installOutputAssistLauncher() {
     observer.disconnect();
     installLongifyBeta();
     installKakuyomuAssist();
+    installAlphapolisAssist();
   };
   const tryInstall = () => {
     queued = false;
