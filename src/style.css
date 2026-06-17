@@ -352,6 +352,10 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .longify-beta-badge{display:inline-flex;align-items:center;justify-content:center;min-height:26px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#38bdf8,#2dd4bf);color:#062334;font-size:12px;font-weight:900;box-shadow:0 0 18px rgba(45,212,191,.22)}
 .longify-beta-title{font-weight:900;color:#dff8ff;font-size:15px;letter-spacing:0}
 .longify-beta-status{font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.03em}
+.longify-beta-provider-warning{display:grid;gap:3px;max-width:760px;margin-top:4px;padding:9px 11px;border:1px solid rgba(251,191,36,.38);border-radius:var(--radius-xs);background:rgba(251,191,36,.075);color:#fde68a;font-size:11px;line-height:1.55;font-weight:700;letter-spacing:0}
+.longify-beta-provider-warning strong{display:block;color:#facc15;font-size:12px;font-weight:900}
+.longify-beta-provider-warning span{color:#fef3c7}
+.longify-beta-provider-warning.hidden{display:none}
 .longify-beta-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .longify-beta-button{min-width:220px;white-space:normal;text-align:center;border-color:rgba(34,211,238,.42);color:#a7f3ff;background:rgba(14,165,233,.08)}
 .longify-beta-button:hover{border-color:rgba(45,212,191,.64);background:rgba(20,184,166,.12);color:#e0ffff}

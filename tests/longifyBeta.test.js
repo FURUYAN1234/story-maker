@@ -32,6 +32,7 @@ import {
   normalizeLongifyPublicText,
   normalizeLongifySeed,
   resolveLongifyPanelState,
+  resolveLongifyProviderWarningState,
   runLongifyBrushupBeta,
   runLongifyBeta,
   sanitizeLongifyBrushupCritique,
@@ -72,6 +73,16 @@ assert.deepEqual(resolveLongifyPanelState({ unavailable: false, busy: false, rea
   ready: true,
   ariaDisabled: 'false',
   ariaBusy: 'false',
+});
+assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'gemini' }), {
+  provider: 'gemini',
+  visible: true,
+  ariaHidden: 'false',
+});
+assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'openai' }), {
+  provider: 'openai',
+  visible: false,
+  ariaHidden: 'true',
 });
 assert.equal(normalizeLongifySeed(`${seedStory}\n\n${STORY_MAKER_FOOTER}`).includes(STORY_MAKER_FOOTER), false);
 assert.equal(submissionCharLength('あ い\nう\r\n　え\tお'), 5);
@@ -274,6 +285,51 @@ assert.equal(
 assert.equal(
   cleanLongifyDraft('\u7b2c2\u7ae0\n\nAkari waited.\n\n*\n\nShe opened the door.\n\n\uff0a\n\nThe tide moved.\n\n\u203b\n\nDawn came.'),
   '\u7b2c2\u7ae0\n\nAkari waited.\n\nShe opened the door.\n\nThe tide moved.\n\nDawn came.'
+);
+// cleanLongifyDraft strips **1\u30b3\u30de\u76ee** wrapper line
+assert.equal(
+  cleanLongifyDraft('\u7b2c1\u7ae0\n\n**1\u30b3\u30de\u76ee**\nShe opened the door.'),
+  '\u7b2c1\u7ae0\n\nShe opened the door.'
+);
+// hasLongifyFormatArtifacts flags **3\u30b3\u30de\u76ee** (markdown emphasis wrapper)
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n**3\u30b3\u30de\u76ee**\nShe opened the door.'),
+  true
+);
+// hasLongifyFormatArtifacts flags full-width \uff0a\uff0a1\u30b3\u30de\u76ee\uff0a\uff0a
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n\uff0a\uff0a1\u30b3\u30de\u76ee\uff0a\uff0a\nShe opened the door.'),
+  true
+);
+// inline bold prose not falsely flagged as a manga panel heading
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n**\u3042\u308b\u671d**\u3001\u5f7c\u306f\u6b69\u3044\u305f\u3002'),
+  false
+);
+// cleanLongifyDraft unwraps **\u7d75/\u72b6\u6cc1:** X and strips the script label, keeping the prose
+assert.equal(
+  cleanLongifyDraft('\u7b2c1\u7ae0\n\n**\u7d75/\u72b6\u6cc1:** \u591c\u660e\u3051\u524d\u306e\u5546\u5e97\u8857\u3002'),
+  '\u7b2c1\u7ae0\n\n\u591c\u660e\u3051\u524d\u306e\u5546\u5e97\u8857\u3002'
+);
+// cleanLongifyDraft drops a standalone **\u30bb\u30ea\u30d5:** label line
+assert.equal(
+  cleanLongifyDraft('\u7b2c1\u7ae0\n\n**\u30bb\u30ea\u30d5:**\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'),
+  '\u7b2c1\u7ae0\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'
+);
+// guard flags markdown-wrapped script label **\u7d75/\u72b6\u6cc1:**
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n**\u7d75/\u72b6\u6cc1:** \u591c\u660e\u3051\u524d\u306e\u5546\u5e97\u8857\u3002'),
+  true
+);
+// guard flags markdown-wrapped storyboard meta **\u72d9\u3044:**
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n**\u72d9\u3044:** \u4e09\u4eba\u306e\u6c7a\u610f\u3092\u793a\u3059\u3002'),
+  true
+);
+// inline bold prose with a colon that is not a script label stays clean
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n\u5f7c\u306f\u8a00\u3063\u305f\u3002**\u91cd\u8981\u3060\u3063\u305f**\u3002'),
+  false
 );
 const contaminatedChapter = [
   '\u3010Source Title\u3011',

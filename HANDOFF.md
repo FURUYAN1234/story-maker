@@ -2,6 +2,112 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-06-17 Gemini Longify Brush-Up Regression Handoff
+
+### Status
+
+- Current work is NOT passing and should be treated as a regression, not a successful improvement.
+- User-visible result after the latest Codex structural patch got worse: real in-app Browser Gemini API proof showed `AI score 45`, not 80+.
+- Do not deploy, tag, release, or backup this state.
+- Do not claim "pass" unless a fresh real in-app Browser Gemini API run returns AI review score `80+`.
+- The active browser run was stopped by reload after saving evidence, to avoid continuing to spend API calls.
+
+### Evidence From Latest Browser Run
+
+- URL used: `http://127.0.0.1:5179/?codexGeminiEventOwnership=20260617&qaOutputFile=/scratch/gemini-low-score-40-source-20260617.txt`
+- App title: `Story Maker v5.1.2`
+- Engine label: `Gemini API`
+- First pass output:
+  - AI score observed in banner: `45`
+  - submission chars: `30,838`
+  - chapter count: `6`
+  - footer count: `1`
+  - manga/storyboard artifacts: `3`
+  - offending visible pattern included Markdown-wrapped panel headings such as `**1コマ目**`, `**3コマ目**`, `**4コマ目**`.
+- Auto second pass started but was stopped before completion:
+  - ownership plan was prepared.
+  - ownership enforcement and uniqueness audit had not run yet when evidence was captured.
+  - progress showed short chapter rewrites and failed expansion attempts, e.g. chapter 1 ended around `3,828` chars and expansion retries produced only tiny non-adoptable additions.
+  - chapter 2 repeatedly hit script/dialogue-form cleanup and short expansion failures.
+- Saved evidence:
+  - `scratch/gemini-event-ownership-regression-handoff-20260617.json`
+  - `scratch/gemini-event-ownership-regression-handoff-output-20260617.txt`
+
+### What Codex Changed In The Current Uncommitted Diff
+
+- `src/longifyBeta.js`
+  - Added Gemini-only prose gates and compression behavior changes.
+  - Added deterministic event ownership ledger functions:
+    - `buildLongifyEventOwnership`
+    - `buildLongifyOwnedWindowConstraint`
+    - `detectLongifyOwnershipViolations`
+    - `enforceLongifyEventOwnership`
+    - `auditLongifyChapterUniqueness`
+  - Added ownership prompt injection and local postprocessing for Gemini brush-up.
+  - Changed compression thresholds and chapter/top-up attempt behavior.
+  - Added additional format cleanup checks for script/dialogue/meta artifacts.
+- `src/providerClients.js`
+  - Added Gemini `systemInstruction` support for normal and streaming calls.
+- `tests/longifyBeta.test.js`
+  - Added many local tests for ownership, compression, source fallback, expansion, and format cleanup.
+- `tests/providerClients.test.js`
+  - Added tests for Gemini `systemInstruction`.
+
+### Verification That Passed Locally
+
+- `node --check src\longifyBeta.js`
+- `node tests\longifyBeta.test.js`
+- `node tests\providerClients.test.js`
+- `npm run lint --if-present`
+- `npm run build` passed with the existing large chunk warning.
+
+These local checks were insufficient; the real Gemini browser run still failed and regressed.
+
+### Known Mistakes / Root Cause Notes
+
+- Codex initially gated event ownership so it did not run in compression mode. The real sample is about `37,266` submission chars targeting `30,000`, so compression mode was active. This meant the first ownership attempt was effectively bypassed. That gate was later removed, but the overall patch still failed.
+- The latest patch was too broad and changed too many moving parts at once. It made it harder to isolate the true failure.
+- A concrete format-cleanup bug remains: `LONGIFY_MANGA_PANEL_HEADING_PATTERN` catches plain `1コマ目`, but does not catch Markdown emphasis wrappers such as `**1コマ目**`. That allowed manga/storyboard artifacts into the final output.
+- Local source restoration / compression / ownership backfill paths must reject or clean artifact-bearing units after every local append or fallback. Do not assume only Gemini raw output can contain manga/script labels.
+- The ownership ledger plan is visible in progress, but that alone does not prove the final manuscript was structurally fixed.
+
+### Recommended Next Action
+
+1. Consider reverting or shelving the current oversized structural diff before continuing. At minimum, do not build further on it without first isolating the regression.
+2. Fix the narrow confirmed artifact leak first:
+   - update panel-heading cleanup/detection so Markdown-wrapped labels like `**1コマ目**`, `__1コマ目__`, and full-width variants are removed/rejected.
+   - add a unit test directly against `cleanLongifyDraft('**1コマ目**\n本文')` and final manuscript validation.
+3. Audit all local fallback append paths:
+   - `compactLongifyChapterForFinalFallback`
+   - `restoreGeminiCompressionDeficitFromSourceChapters`
+   - ownership backfill in `enforceLongifyEventOwnership`
+   - uniqueness backfill in `auditLongifyChapterUniqueness`
+   - top-up append paths
+   Every unit added from source or model output must pass artifact filtering after Markdown wrapper stripping.
+4. Only after format artifacts are back to zero should structural scoring be reattempted.
+5. If Opus/Claude takes over, give it this file plus the two saved evidence files above. Ask it to produce a smaller patch plan, not another broad rewrite.
+
+### Guardrails For The Next Agent
+
+- Do not ask the user to paste API keys. The user enters keys in the app UI only.
+- Do not deploy or backup unless the user explicitly asks.
+- Do not claim success from tests alone. Passing means real in-app Browser Gemini API AI review score `80+`.
+- Keep score regression guard, 30,000-char minimum, manga/script rejection, and API top-up suppression.
+- Prefer small patches with one browser proof after each meaningful change.
+
+### Follow-up 2026-06-17: Broad diff shelved, narrow artifact fix applied on HEAD
+
+- The oversized structural event-ownership diff (~2,028 lines in `src/longifyBeta.js` plus provider/test changes) was shelved via `git stash`, NOT deleted, to restore a clean HEAD baseline and stop confounding browser verification.
+  - Recover the shelved work with `git stash pop`, or isolate it with `git stash branch <name> stash@{0}`. (Stash refs are positional; confirm with `git stash list` before popping.)
+- Root cause re-scoped: the `45` score was dominated by a pre-existing artifact fail-open, not proof that the ownership approach is wrong. The structural hypothesis was never cleanly tested because manga labels polluted the manuscript first.
+- Narrow fix applied on HEAD (`src/longifyBeta.js`, +14/-2):
+  - Added `stripLongifyLineEmphasis()` and made manga panel-heading detection tolerant of Markdown emphasis wrappers (`**1コマ目**`, `__...__`, full-width `＊＊...＊＊`).
+  - Applied only in `cleanLongifyDraft` and `longifyFormatArtifactIssues` (the cleaner and the guard). No change to deletion behavior, score regression guard, 30,000-char floor, manga/script rejection scope, or API top-up suppression.
+- Added 4 unit tests in `tests/longifyBeta.test.js`: wrapper-line cleanup, wrapped detection, full-width detection, and inline-bold non-false-positive.
+- Local verification passed: `node --check src/longifyBeta.js`, `node tests/longifyBeta.test.js`, `node tests/providerClients.test.js`, `npm run lint`, `npm run build` (existing large-chunk warning only).
+- NOT a pass. Still requires a fresh real in-app Browser Gemini run to confirm manga/storyboard artifacts == `0`, then decide whether to reintroduce structural pieces in small, individually browser-verified increments.
+- No deploy, no backup performed.
+
 ## 2026-06-13 v5.0.4 Release State
 
 ### What Changed
