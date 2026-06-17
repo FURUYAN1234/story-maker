@@ -53,6 +53,7 @@ const API_WINDOW_NAME_PREFIX = 'story-maker.api.tab-session.v500:';
 const UNTITLED_STORY_TITLE = '名称未設定の小説';
 const LONGIFY_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)\s*[:：]\s*[^\n]{1,100}[\t \u3000]*$/u;
 const LONGIFY_EMPTY_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)\s*[:：]\s*$/u;
+const LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*【[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)[\t \u3000]*】[^\n]{0,100}$/u;
 const LONGIFY_BARE_TITLE_ARTIFACT_LINE_PATTERN = /^[\t \u3000]*[【「『]?[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9０-９][\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9０-９\t \u3000・、のとへにがをは]{1,79}[】」』]?[\t \u3000]*$/u;
 const LONGIFY_SUBSECTION_HEADING_PATTERN = /^[\t \u3000]*(?:[#＃]{1,6}[\t \u3000]*)?第[\d０-９一二三四五六七八九十百]+[\t \u3000]*節(?:[\t \u3000:：\-ー―／/・]+[^\n]{0,48})?[\t \u3000]*$/u;
 const LONGIFY_STANDALONE_FINISH_PATTERN = /^[\t \u3000]*【?\s*完\s*】?[\t \u3000]*$/u;
@@ -62,6 +63,8 @@ const LONGIFY_MANGA_LABEL_PREFIX_PATTERN = /^[\t \u3000]*(?:絵\s*\/\s*状況|�
 const LONGIFY_NON_CHAPTER_MARKDOWN_HEADING_PATTERN = /^[\t \u3000]*#{1,6}[\t \u3000]+(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[^\n]{1,120}$/u;
 const LONGIFY_TITLE_CANDIDATE_LINE_PATTERN = /^[\t \u3000]*(?:作品タイトル案|タイトル案|作品タイトル|タイトル|題名)\s*[:：]/u;
 const LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_（）()・]{1,18}\s*[:：]\s*\S/u;
+const LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
+const LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN = /(?:瞬間を描く|瞬間を演出|対比を見せる|構造を強調|雰囲気を強調|狙いを示す|テーマを示す|変化を示す)[。.!！]?$/u;
 
 // 行頭・行末のMarkdown強調ラッパ（**, __, ~~, 全角＊＊／＿＿）を剥がしてから
 // 形式判定する。Geminiは漫画コマ見出しを `**1コマ目**` のように装飾して出すため、
@@ -82,6 +85,22 @@ function unwrapLongifyLabelEmphasis(text) {
     /(^|\n)([^\S\n]*)[*_~＊＿]{1,3}[^\S\n]*((?:絵[^\S\n]*\/[^\S\n]*状況|絵|状況|セリフ|台詞|狙い|ねらい|意図|演出意図|構図|カメラ|効果音|SFX)[^\S\n]*[:：])[^\S\n]*[*_~＊＿]{1,3}/gu,
     '$1$2$3',
   );
+}
+
+function stripLongifySpeakerCue(line) {
+  return String(line || '').replace(
+    /^([\t \u3000]*)(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*([「『])/u,
+    '$1$2',
+  );
+}
+
+function normalizeLongifyChapterHeadingLine(line) {
+  const value = String(line || '').trim();
+  if (!getChapterNumberFromHeading(value)) return line;
+  return value
+    .replace(/^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?【[\t \u3000]*/u, '')
+    .replace(/[\t \u3000]*】[\t \u3000]*$/u, '')
+    .trim();
 }
 
 const STYLE_MODE_LABELS = {
@@ -845,7 +864,9 @@ export function cleanLongifyDraft(text) {
     .replace(/\n?\s*[（(]\s*つづく\s*[）)]\s*$/u, '')
     .replace(/\n?\s*次回へ続く\s*$/u, '')
     .split('\n')
-    .map(line => String(line || '').replace(LONGIFY_MANGA_LABEL_PREFIX_PATTERN, ''));
+    .map(line => stripLongifySpeakerCue(
+      normalizeLongifyChapterHeadingLine(String(line || '').replace(LONGIFY_MANGA_LABEL_PREFIX_PATTERN, '')),
+    ));
 
   const cleaned = [];
   for (let index = 0; index < lines.length; index += 1) {
@@ -871,10 +892,12 @@ export function cleanLongifyDraft(text) {
   return cleaned
     .filter(line => !/^[\t \u3000]*[*＊※]{1,5}[\t \u3000]*$/u.test(line))
     .filter(line => !LONGIFY_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_SUBSECTION_HEADING_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_STANDALONE_FINISH_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_MANGA_PANEL_HEADING_PATTERN.test(stripLongifyLineEmphasis(line)))
     .filter(line => !LONGIFY_MANGA_META_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_NON_CHAPTER_MARKDOWN_HEADING_PATTERN.test(String(line || '').trim()))
     .filter(line => {
       const trimmed = String(line || '').trim();
@@ -900,6 +923,12 @@ function longifyFormatArtifactIssues(text) {
   }
   if (lines.some(line => !LONGIFY_TITLE_CANDIDATE_LINE_PATTERN.test(line) && LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN.test(line))) {
     issues.push('脚本型の話者ラベル');
+  }
+  if (lines.some(line => LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN.test(line))) {
+    issues.push('脚本型の話者ラベル');
+  }
+  if (lines.some(line => LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(line) || LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN.test(line))) {
+    issues.push('漫画シナリオ記法');
   }
   return issues;
 }
@@ -1878,6 +1907,52 @@ export function shouldAutoBrushupClearCheckbox({
   if (score === null || score === undefined || score === '') return false;
   const numericScore = Number(score);
   return Number.isFinite(numericScore) && numericScore >= AI_REVIEW_PASS_SCORE;
+}
+
+export function resolveLongifyProgressDisplay({
+  mode = 'longify',
+  progressMode = '',
+  brushupAttempt = 0,
+  maxBrushupAttempts = AUTO_BRUSHUP_MAX_ATTEMPTS,
+  chapterNumber = 0,
+  chapterCount = 0,
+} = {}) {
+  const activeMode = progressMode || mode;
+  const normalizedMode = activeMode === 'brushup' ? 'brushup' : 'longify';
+  const numericMax = Number(maxBrushupAttempts);
+  const maxAttempts = Number.isFinite(numericMax) && numericMax > 0
+    ? Math.floor(numericMax)
+    : AUTO_BRUSHUP_MAX_ATTEMPTS;
+  const numericAttempt = Number(brushupAttempt);
+  const attempt = normalizedMode === 'brushup'
+    ? Math.min(
+      maxAttempts,
+      Math.max(1, Number.isFinite(numericAttempt) ? Math.floor(numericAttempt) : 1),
+    )
+    : 0;
+  const numericChapterCount = Number(chapterCount);
+  const totalChapters = Number.isFinite(numericChapterCount) && numericChapterCount > 0
+    ? Math.floor(numericChapterCount)
+    : 0;
+  const numericChapterNumber = Number(chapterNumber);
+  const currentChapter = totalChapters
+    ? Math.min(
+      totalChapters,
+      Math.max(0, Number.isFinite(numericChapterNumber) ? Math.floor(numericChapterNumber) : 0),
+    )
+    : 0;
+  const modeLabel = normalizedMode === 'brushup'
+    ? `ブラッシュアップ ${attempt}周目/${maxAttempts}`
+    : '長編化';
+  const chapterLabel = totalChapters ? `${currentChapter}/${totalChapters}章` : '';
+  return {
+    mode: normalizedMode,
+    modeLabel,
+    brushupAttempt: attempt,
+    maxBrushupAttempts: maxAttempts,
+    chapterLabel,
+    progressLabel: [modeLabel, chapterLabel].filter(Boolean).join('・'),
+  };
 }
 
 function reviewTextSignature(text) {
@@ -3286,14 +3361,14 @@ export async function runLongifyBrushupBeta({
   const nextScore = extractAiReviewScore(aiReviewText);
   const scoreRegressionBlocked = priorScore !== null
     && nextScore !== null
-    && nextScore + 5 < priorScore;
+    && nextScore < priorScore;
   if (scoreRegressionBlocked) {
     const retainedChapters = sourceChapters.map((chapter, index) => ensureChapterHeading(cleanLongifyDraft(chapter), index + 1));
     const retainedText = formatBrushupOutput({ title, chapters: retainedChapters, fallbackText: manuscript });
     const retainedChars = submissionCharLength(stripStoryMakerFooter(retainedText));
-    report('AI採点が前回より大きく下がったため、改稿結果を採用せず元原稿を保持します。', {
+    report('AI採点が前回より下がったため、改稿結果を採用せず元原稿を保持します。', {
       phase: 'brushupScoreRegressionGuard',
-      detail: `前回 ${priorScore}点 / 今回 ${nextScore}点。品質悪化版をOutputへ固定しないため、直前の長編本文とAI講評に戻します。`,
+      detail: `保持 ${priorScore}点 / 破棄 ${nextScore}点。品質悪化版をOutputへ固定しないため、直前の長編本文とAI講評に戻します。`,
       chapterNumber: sourceChapters.length,
       chapterCount: sourceChapters.length,
       completedChars: retainedChars,
@@ -3313,6 +3388,8 @@ export async function runLongifyBrushupBeta({
       finalChars: retainedChars,
       targetTotalNumber,
       scoreRegressionBlocked: true,
+      retainedScore: priorScore,
+      rejectedScore: nextScore,
       rejectedAiReviewText: aiReviewText,
     };
   }
@@ -4104,15 +4181,24 @@ function setAiProgressLongifyActive({ message, detail, chapterNumber = 0, chapte
   const progressLog = document.getElementById('progress-log');
   const scoreBoard = document.getElementById('thought-score-board');
   const globalAlert = document.getElementById('global-alert');
+  const progressDisplay = resolveLongifyProgressDisplay({
+    mode: options.progressMode,
+    brushupAttempt: options.brushupAttempt,
+    maxBrushupAttempts: options.maxBrushupAttempts,
+    chapterNumber,
+    chapterCount,
+  });
+  const hasExplicitProgressMode = options.progressMode === 'longify' || options.progressMode === 'brushup';
+  const displayModeLabel = hasExplicitProgressMode ? progressDisplay.modeLabel : modeLabel;
   const titlePrefix = done ? '完了' : aborted ? '中断' : 'API稼働中';
   if (progressTitle) {
-    progressTitle.textContent = `AI進捗・思考ログ: ${modeLabel} ${titlePrefix}`;
+    progressTitle.textContent = `AI進捗・思考ログ: ${displayModeLabel} ${titlePrefix}`;
   }
   if (globalAlert) {
     if (done || aborted) {
       globalAlert.style.display = 'none';
     } else {
-      globalAlert.textContent = `${modeLabel} API稼働中: ${message || '処理中...'}`;
+      globalAlert.textContent = `${displayModeLabel} API稼働中: ${message || '処理中...'}`;
       globalAlert.style.display = 'flex';
     }
   }
@@ -4122,7 +4208,9 @@ function setAiProgressLongifyActive({ message, detail, chapterNumber = 0, chapte
     scoreBoard.style.display = 'none';
   }
   if (progressLog && message) {
-    const progress = chapterCount ? ` [${Math.max(0, chapterNumber)} / ${chapterCount}章]` : '';
+    const progress = chapterCount
+      ? ` [${hasExplicitProgressMode ? progressDisplay.progressLabel : `${Math.max(0, chapterNumber)} / ${chapterCount}章`}]`
+      : '';
     const generated = completedChars ? ` / 生成済み ${formatNumber(completedChars)}字` : '';
     const minimum = options.targetTotalChars ? ` / ${options.targetTotalChars}` : '';
     const line = detail ? `${message}${progress}${generated}${minimum}\n  - ${detail}` : `${message}${progress}${generated}${minimum}`;
@@ -4274,6 +4362,16 @@ export function installLongifyBeta() {
   };
 
   const isAutoBrushupChecked = () => Boolean(autoBrushupCheckbox?.checked);
+  const createBrushupProgressOptions = (baseOptions = {}, attempt = autoBrushupAttempts || 1) => ({
+    ...(baseOptions || {}),
+    progressMode: 'brushup',
+    brushupAttempt: attempt || 1,
+    maxBrushupAttempts: AUTO_BRUSHUP_MAX_ATTEMPTS,
+  });
+  const createLongifyProgressOptions = (baseOptions = {}) => ({
+    ...(baseOptions || {}),
+    progressMode: 'longify',
+  });
   const finishAutoBrushupChain = ({ clearCheckbox = false } = {}) => {
     autoBrushupChainActive = false;
     autoBrushupAttempts = 0;
@@ -4315,6 +4413,7 @@ export function installLongifyBeta() {
       chapterNumber: 0,
       chapterCount: countLongifyChapterHeadings(outputEl.innerText || outputEl.textContent || ''),
       completedChars: submissionCharLength(outputEl.innerText || outputEl.textContent || ''),
+      options: createBrushupProgressOptions({}, nextAttempt),
       modeLabel: 'ブラッシュアップβ',
     });
     let remainingStartRetries = AUTO_BRUSHUP_START_MAX_RETRIES;
@@ -4432,6 +4531,7 @@ export function installLongifyBeta() {
     if (!brushupMode) clearLongifyReview();
     if (brushupMode) {
       beginBrushupAutoAttempt();
+      const brushupProgressOptions = createBrushupProgressOptions(brushupOptions);
       let pendingAutoBrushupReview = null;
       running = true;
       abortController = new AbortController();
@@ -4442,12 +4542,12 @@ export function installLongifyBeta() {
       setStopButtonState(stopButton, true);
       setControlsDisabled(true, { brushupMode: true });
       button.textContent = 'ブラッシュアップ中...';
-      setTextContent(statusEl, 'AI講評とブラッシュアップを開始しています');
+      setTextContent(statusEl, `ブラッシュアップ ${brushupProgressOptions.brushupAttempt}周目/${AUTO_BRUSHUP_MAX_ATTEMPTS} を開始しています`);
       const progressLog = document.getElementById('progress-log');
       if (progressLog) progressLog.textContent = '';
       startAiProgressHeartbeat({
         statusEl,
-        modeLabel: 'ブラッシュアップβ',
+        modeLabel: resolveLongifyProgressDisplay(brushupProgressOptions).modeLabel,
         initialPhase: 'AI講評を開始中',
       });
       setAiProgressLongifyActive({
@@ -4456,6 +4556,7 @@ export function installLongifyBeta() {
         chapterNumber: 0,
         chapterCount: countLongifyChapterHeadings(storyText),
         completedChars: submissionCharLength(storyText),
+        options: brushupProgressOptions,
         modeLabel: 'ブラッシュアップβ',
       });
 
@@ -4475,27 +4576,43 @@ export function installLongifyBeta() {
           onStage(stage) {
             setAiProgressLongifyActive({
               ...stage,
+              options: brushupProgressOptions,
               modeLabel: 'ブラッシュアップβ',
               completedChars: stage.completedChars || 0,
             });
           },
         });
-        setTextContent(statusEl, 'ブラッシュアップ本文をOutputへ表示中...');
-        setAiProgressLongifyActive({
-          message: 'ブラッシュアップ本文をOutputへ表示中...',
-          detail: `講評要点: ${previewText(result.critiqueText, 260)}`,
-          phase: 'render',
-          chapterNumber: result.chapterCount,
-          chapterCount: result.chapterCount,
-          completedChars: result.finalChars,
-          modeLabel: 'ブラッシュアップβ',
-        });
-        await setOutputTextTypewriter(outputEl, charCounter, result.text, {
-          signal: abortController.signal,
-          onRenderProgress(progress) {
-            updateOutputRenderProgress(statusEl, progress, 'ブラッシュアップ本文ライブ表示中');
-          },
-        });
+        if (result.scoreRegressionBlocked) {
+          setTextContent(statusEl, 'ブラッシュアップ後の点数が下がったため、前回の最高点原稿を保持しています...');
+          setAiProgressLongifyActive({
+            message: 'ブラッシュアップ後の点数が下がったため、前回の最高点原稿を保持しています...',
+            detail: `保持 ${result.retainedScore}点 / 破棄 ${result.rejectedScore}点。Outputは開始前の原稿から上書きしません。`,
+            phase: 'rollback',
+            chapterNumber: result.chapterCount,
+            chapterCount: result.chapterCount,
+            completedChars: result.finalChars,
+            options: brushupProgressOptions,
+            modeLabel: 'ブラッシュアップβ',
+          });
+        } else {
+          setTextContent(statusEl, 'ブラッシュアップ本文をOutputへ表示中...');
+          setAiProgressLongifyActive({
+            message: 'ブラッシュアップ本文をOutputへ表示中...',
+            detail: `講評要点: ${previewText(result.critiqueText, 260)}`,
+            phase: 'render',
+            chapterNumber: result.chapterCount,
+            chapterCount: result.chapterCount,
+            completedChars: result.finalChars,
+            options: brushupProgressOptions,
+            modeLabel: 'ブラッシュアップβ',
+          });
+          await setOutputTextTypewriter(outputEl, charCounter, result.text, {
+            signal: abortController.signal,
+            onRenderProgress(progress) {
+              updateOutputRenderProgress(statusEl, progress, 'ブラッシュアップ本文ライブ表示中');
+            },
+          });
+        }
         setLongifyTags(tagRow, result);
         revealOutputActions();
         const review = buildReviewDisplayFromResult({
@@ -4513,18 +4630,22 @@ export function installLongifyBeta() {
         } else if (autoBrushupChainActive) {
           finishAutoBrushupChainAfterReview(review);
         }
+        const rollbackScoreText = result.scoreRegressionBlocked
+          ? `保持 ${result.retainedScore}点 / 破棄 ${result.rejectedScore}点`
+          : formatReviewScoreForStatus(review);
         setTextContent(statusEl, result.scoreRegressionBlocked
-          ? `ブラッシュアップ停止: AI採点が悪化したため元原稿を保持 / ${reviewLabel} ${formatReviewScoreForStatus(review)}`
+          ? `ブラッシュアップ停止: 点数が下がったため最高点原稿へロールバック / ${rollbackScoreText}`
           : `ブラッシュアップ完了: ${result.chapterCount}章 / ${formatNumber(result.finalChars)}字 / ${reviewLabel} ${formatReviewScoreForStatus(review)}`);
         finishAiProgress({
           message: result.scoreRegressionBlocked
             ? 'ブラッシュアップ結果を採用せず元原稿を保持しました。'
             : 'ブラッシュアップが完了しました。',
           detail: result.scoreRegressionBlocked
-            ? `AI採点が前回より下がったため、品質悪化版をOutputへ固定しませんでした。保持中の${reviewLabel}: ${formatReviewScoreForStatus(review)}`
+            ? `AI採点が前回より下がったため、品質悪化版をOutputへ固定しませんでした。${rollbackScoreText}`
             : `${reviewLabel}を反映した改稿本文をOutputへ反映しました。${reviewLabel}: ${formatReviewScoreForStatus(review)} / 次回方針: ${previewText(result.aiReviewText, 260)}`,
           completedChars: result.finalChars,
           chapterCount: result.chapterCount,
+          options: brushupProgressOptions,
           modeLabel: 'ブラッシュアップβ',
         });
       } catch (error) {
@@ -4535,6 +4656,7 @@ export function installLongifyBeta() {
           message: aborted ? 'ブラッシュアップを中断しました。' : 'ブラッシュアップでエラーが発生しました。',
           detail: aborted ? 'Outputは表示済みの内容を保持しました。' : message,
           chapterCount: countLongifyChapterHeadings(storyText),
+          options: brushupProgressOptions,
           modeLabel: 'ブラッシュアップβ',
           aborted,
         });
@@ -4556,6 +4678,7 @@ export function installLongifyBeta() {
       return;
     }
     const options = readLongifyRunOptionsFromUi();
+    const longifyProgressOptions = createLongifyProgressOptions(options);
     beginLongifyAutoBrushupChain();
     let pendingAutoBrushupReview = null;
 
@@ -4573,7 +4696,7 @@ export function installLongifyBeta() {
     if (progressLog) progressLog.textContent = '';
     startAiProgressHeartbeat({
       statusEl,
-      modeLabel: '長編化β',
+      modeLabel: resolveLongifyProgressDisplay(longifyProgressOptions).modeLabel,
       initialPhase: '芯固定台帳を作成中',
     });
     setAiProgressLongifyActive({
@@ -4581,7 +4704,7 @@ export function installLongifyBeta() {
       detail: 'Output本文はスクロール暴走を避けるため、完了時に一括反映します。',
       chapterNumber: 0,
       chapterCount: options.chapterCount,
-      options,
+      options: longifyProgressOptions,
     });
 
     try {
@@ -4601,7 +4724,7 @@ export function installLongifyBeta() {
         onStage(stage) {
           setAiProgressLongifyActive({
             ...stage,
-            options,
+            options: longifyProgressOptions,
             completedChars: stage.completedChars || 0,
           });
         },
@@ -4615,7 +4738,7 @@ export function installLongifyBeta() {
         chapterNumber: result.chapters.length,
         chapterCount: result.chapters.length,
         completedChars: finalChars,
-        options,
+        options: longifyProgressOptions,
       });
       await setOutputTextTypewriter(outputEl, charCounter, result.text, {
         signal: abortController.signal,
@@ -4650,7 +4773,7 @@ export function installLongifyBeta() {
         detail: metMinimum
           ? `Outputへ完成稿を一括反映しました。${reviewLabel}: ${formatReviewScoreForStatus(review)} / ${reviewLabel}: ${previewText(result.aiReviewText, 260)}`
           : `追加生成を試みましたが、AI応答が短く止まりました。${reviewLabel}: ${formatReviewScoreForStatus(review)} / ${reviewLabel}: ${previewText(result.aiReviewText, 260)}`,
-        options,
+        options: longifyProgressOptions,
         completedChars: finalChars,
         chapterCount: result.chapters.length,
       });
@@ -4661,7 +4784,7 @@ export function installLongifyBeta() {
       finishAiProgress({
         message: aborted ? '長編化βを中断しました。' : '長編化βでエラーが発生しました。',
         detail: aborted ? 'Outputは表示済みの内容を保持しました。' : message,
-        options,
+        options: longifyProgressOptions,
         chapterCount: options.chapterCount,
         aborted,
       });

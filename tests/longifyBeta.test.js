@@ -32,6 +32,7 @@ import {
   normalizeLongifyPublicText,
   normalizeLongifySeed,
   resolveLongifyPanelState,
+  resolveLongifyProgressDisplay,
   resolveLongifyProviderWarningState,
   runLongifyBrushupBeta,
   runLongifyBeta,
@@ -84,6 +85,25 @@ assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'openai' }), {
   visible: false,
   ariaHidden: 'true',
 });
+assert.deepEqual(resolveLongifyProgressDisplay({
+  progressMode: 'brushup',
+  brushupAttempt: 2,
+  maxBrushupAttempts: 3,
+  chapterNumber: 1,
+  chapterCount: 3,
+}), {
+  mode: 'brushup',
+  modeLabel: 'ブラッシュアップ 2周目/3',
+  brushupAttempt: 2,
+  maxBrushupAttempts: 3,
+  chapterLabel: '1/3章',
+  progressLabel: 'ブラッシュアップ 2周目/3・1/3章',
+});
+assert.equal(resolveLongifyProgressDisplay({
+  progressMode: 'longify',
+  chapterNumber: 4,
+  chapterCount: 6,
+}).progressLabel, '長編化・4/6章');
 assert.equal(normalizeLongifySeed(`${seedStory}\n\n${STORY_MAKER_FOOTER}`).includes(STORY_MAKER_FOOTER), false);
 assert.equal(submissionCharLength('あ い\nう\r\n　え\tお'), 5);
 
@@ -331,6 +351,26 @@ assert.equal(
   hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n\u5f7c\u306f\u8a00\u3063\u305f\u3002**\u91cd\u8981\u3060\u3063\u305f**\u3002'),
   false
 );
+assert.equal(
+  cleanLongifyDraft('\u3010\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\u3011\n\n\u3010\u30bf\u30a4\u30c8\u30eb\u3011\u96e8\u4e0a\u304c\u308a\u306e\u706f\u53f0\u5546\u5e97\u8857\n\n\u6faa\uff08\u5c0f\u58f0\u3067\uff09\u300c\u2026\u2026\u5546\u5e97\u8857\u306b\u3001\u706f\u53f0\u2026\u2026\uff1f\u300d\n\n\u4e09\u4eba\u304c\u77e5\u3089\u305a\u77e5\u3089\u305a\u201c\u6614\u306e\u601d\u3044\u51fa\u201d\u306b\u5f15\u304d\u623b\u3055\u308c\u308b\u77ac\u9593\u3092\u6f14\u51fa\u3002\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'),
+  '\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\n\n\u300c\u2026\u2026\u5546\u5e97\u8857\u306b\u3001\u706f\u53f0\u2026\u2026\uff1f\u300d\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'
+);
+assert.equal(
+  hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n\u6faa\uff08\u5c0f\u58f0\u3067\uff09\u300c\u2026\u2026\u5546\u5e97\u8857\u306b\u3001\u706f\u53f0\u2026\u2026\uff1f\u300d'),
+  true
+);
+const formattedStoryboardLeak = formatLongifyOutput({
+  title: '\u96e8\u4e0a\u304c\u308a\u306e\u706f\u53f0\u5546\u5e97\u8857',
+  chapters: [
+    '\u7b2c1\u7ae0\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002',
+    '\u7b2c2\u7ae0\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002',
+    '\u7b2c3\u7ae0\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002',
+    `\u3010\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\u3011\n\n\u3010\u30bf\u30a4\u30c8\u30eb\u3011\u96e8\u4e0a\u304c\u308a\u306e\u706f\u53f0\u5546\u5e97\u8857\n\n\u6625\u4eba\u300c\u307e\u305f\u6faa\u306e\u3001\u5909\u306a\u5b9d\u63a2\u3057\uff1f\u300d\n\n\u73fe\u5728\u3068\u904e\u53bb\u306e\u8ddd\u96e2\u306e\u5bfe\u6bd4\u3092\u898b\u305b\u308b\u3002\n\n${'\u672c\u6587\u304c\u7d9a\u304f\u3002'.repeat(80)}`,
+  ],
+});
+assert.match(formattedStoryboardLeak, /\n\n\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\n\n/u);
+assert.doesNotMatch(formattedStoryboardLeak, /\u3010\u7b2c4\u7ae0|\u3010\u30bf\u30a4\u30c8\u30eb\u3011|\u6625\u4eba\u300c|\u5bfe\u6bd4\u3092\u898b\u305b\u308b/u);
+assert.match(formattedStoryboardLeak, /\u300c\u307e\u305f\u6faa\u306e\u3001\u5909\u306a\u5b9d\u63a2\u3057\uff1f\u300d/u);
 const contaminatedChapter = [
   '\u3010Source Title\u3011',
   '',
@@ -815,7 +855,7 @@ const regressionGuardResult = await runLongifyBrushupBeta({
     }
     if (context.stage === 'brushupReview') {
       return {
-        text: 'AI\u7dcf\u5408\u70b9: 62\u70b9\nAI\u8b1b\u8a55:\n\u6539\u7a3f\u5f8c\u306b\u69cb\u6210\u304c\u5d29\u308c\u305f\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c1\u7ae0\u306f\u5143\u306b\u623b\u3059\u3002',
+        text: 'AI\u7dcf\u5408\u70b9: 85\u70b9\nAI\u8b1b\u8a55:\n\u6539\u7a3f\u5f8c\u306b\u69cb\u6210\u304c\u5c11\u3057\u5f31\u304f\u306a\u3063\u305f\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c1\u7ae0\u306f\u5143\u306b\u623b\u3059\u3002',
         usedModel: 'mock-regression-review',
       };
     }
@@ -826,6 +866,8 @@ const regressionGuardResult = await runLongifyBrushupBeta({
   },
 });
 assert.equal(regressionGuardResult.scoreRegressionBlocked, true);
+assert.equal(regressionGuardResult.retainedScore, 86);
+assert.equal(regressionGuardResult.rejectedScore, 85);
 assert.equal(regressionGuardResult.reviewSource, 'ai');
 assert.match(regressionGuardResult.aiReviewText, /86\u70b9/);
 assert.equal(countLongifyChapterHeadings(regressionGuardResult.text), 2);
