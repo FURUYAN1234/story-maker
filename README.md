@@ -283,6 +283,27 @@ Brush-up rewrites the existing long-form manuscript from the latest AI review. I
 | Assembled brush-up result falls below the long-form minimum. | A final top-up pass can add more material to the manuscript. | This protects the long-form minimum but does not guarantee exact match with the selected target. |
 | 結合後のブラッシュアップ結果が長編最低ラインを下回る。 | 最後に補強生成を行い、本文量を追加できます。 | 長編最低ラインを守るための保護であり、指定文字数ぴったりを保証するものではありません。 |
 
+### Fallbacks And Rollback / フォールバックとロールバック
+
+Longify beta uses several safety paths because long manuscripts depend on many API calls. These paths are guards around the selected provider, not separate hidden story modes.
+
+長編化βは複数回のAPI通信に依存するため、いくつかの安全経路を持っています。これは選択中APIの周囲に置く保護であり、別の隠し物語モードではありません。
+
+| Situation | Local behavior | Why it exists |
+|---|---|---|
+| API call fails or the selected model is unavailable. | The request can move to the configured provider fallback for that stage. | Keeps one transient provider/model failure from wasting the whole longify run. |
+| API通信に失敗する、または選択モデルが使えない。 | その段階で設定されている代替モデルへ切り替えて続行できます。 | 一時的なAPI/モデル失敗だけで長編化全体を失わないためです。 |
+| A rewritten chapter becomes too short. | The app retries, keeps the best usable candidate, or preserves the original chapter when the rewrite would damage the manuscript. | Prevents brush-up from silently shrinking a chapter into a summary. |
+| 改稿章が短くなりすぎる。 | 再試行し、使える最良候補を保持し、改稿で原稿が壊れる場合は元章を保持します。 | ブラッシュアップが章を要約へ潰してしまうのを防ぎます。 |
+| Gemini compression leaves the manuscript under the target length. | Missing length is restored locally from the source chapters before relying on API top-up. | Reduces extra generated filler and keeps the result closer to the original manuscript. |
+| Gemini圧縮後に目標文字数を下回る。 | API補強へ頼る前に、元章からローカル復元して不足分を補います。 | 追加生成の水増しを減らし、元原稿に近い長編稿を保つためです。 |
+| Compression mode is already trying to shorten an overlong manuscript. | API top-up is suppressed unless the final manuscript truly falls below the required minimum. | Avoids a loop where one stage compresses and another immediately expands again. |
+| 過長原稿を圧縮している最中。 | 最終稿が本当に最低文字数を下回る場合を除き、API補強を抑えます。 | 圧縮した直後に再び膨らませる矛盾ループを避けるためです。 |
+| Final cleanup finds script, manga, title-label, or storyboard residue. | The residue is removed or normalized before the manuscript is displayed and reviewed. | Keeps long-form Output as prose instead of manga panels, screenplay notes, or draft labels. |
+| 最終整形で脚本、漫画、タイトルラベル、演出指示風の残骸を見つける。 | Output表示と講評前に削除または正規化します。 | 長編Outputを、漫画コマ・脚本メモ・下書きラベルではなく散文として保つためです。 |
+| Brush-up receives a lower AI score than the prior best. | The lower-scored draft is rejected and the best previous manuscript remains in Output. | Prevents a manual or automatic brush-up from erasing a better manuscript. |
+| ブラッシュアップ後のAI点数が過去最高点より下がる。 | 低得点稿を破棄し、Outputには過去最高点の原稿を残します。 | 手動/自動ブラッシュアップで良い原稿が消えるのを防ぎます。 |
+
 ## v5.1.0 Quality System / v5.1.0 品質システム
 
 v5.1.0 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and the long-form beta auto-brush-up completion gate. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
@@ -816,9 +837,11 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - Made longify beta progress labels explicit for longification versus brush-up, including round labels such as `ブラッシュアップ 2周目/3・4/6章`.
 - Tightened brush-up score regression handling so any lower AI review score keeps the best previous manuscript instead of overwriting the Output.
 - Added final-format cleanup for bracketed chapter headings, title labels, speaker-cue script lines, and storyboard-style directive residue in longify/brush-up drafts.
+- Documented longify beta fallback and rollback behavior, including source restoration, short-chapter preservation, top-up suppression during compression, and best-manuscript retention.
 - 長編化βの進捗表示で、長編化中かブラッシュアップ中か、また `ブラッシュアップ 2周目/3・4/6章` のような周回と章番号が分かるようにしました。
 - ブラッシュアップ後にAI講評点が下がった場合は、Outputを低得点稿で上書きせず、これまでの最高点稿を保持するようにしました。
 - 長編化/ブラッシュアップ草稿に残る角括弧付き章見出し、タイトルラベル、話者名つき脚本行、演出指示風の残骸を最終整形で掃除するよう補強しました。
+- 長編化βのフォールバックとロールバック挙動として、元章復元、短すぎる章の保持、圧縮中の補強抑制、最高点稿保持をREADMEに明記しました。
 
 ### v5.1.3 (2026-06-17)
 
