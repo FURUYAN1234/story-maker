@@ -6,6 +6,7 @@ import {
   auditLongifyFormat,
   buildAiLongifyReview,
   extractAiReviewScore,
+  formatLongifyReviewCopyText,
   buildLongifyAiReviewPrompt,
   buildLongifyBrushupChapterPrompt,
   buildLongifyBrushupCritiquePrompt,
@@ -32,6 +33,7 @@ import {
   longifyChapterBodyCharLength,
   normalizeLongifyPublicText,
   normalizeLongifySeed,
+  normalizeLongifyUiTargetChars,
   resolveLongifyPanelState,
   resolveLongifyProgressDisplay,
   resolveLongifyProviderWarningState,
@@ -86,6 +88,10 @@ assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'openai' }), {
   visible: false,
   ariaHidden: 'true',
 });
+assert.equal(normalizeLongifyUiTargetChars(10000), 10000);
+assert.equal(normalizeLongifyUiTargetChars(20000), 10000);
+assert.equal(normalizeLongifyUiTargetChars(30000), 10000);
+assert.equal(normalizeLongifyUiTargetChars('invalid'), 10000);
 assert.deepEqual(resolveLongifyProgressDisplay({
   progressMode: 'brushup',
   brushupAttempt: 2,
@@ -105,6 +111,18 @@ assert.equal(resolveLongifyProgressDisplay({
   chapterNumber: 4,
   chapterCount: 6,
 }).progressLabel, '長編化・4/6章');
+const exportedReviewText = formatLongifyReviewCopyText({
+  modeLabel: '長編化後',
+  source: 'ai',
+  score: 82,
+  passLabel: '合格点',
+  summary: '章ごとの因果は確認済みです。',
+  details: ['構造チェック済み'],
+  aiReviewText: 'AI総合点: 82点\n次回方針: 終盤の象徴回収を強める。',
+});
+assert.match(exportedReviewText, /長編化後 AI講評: 82点/);
+assert.match(exportedReviewText, /講評:\nAI総合点: 82点/);
+assert.match(exportedReviewText, /確認項目:\n- 構造チェック済み/);
 assert.equal(normalizeLongifySeed(`${seedStory}\n\n${STORY_MAKER_FOOTER}`).includes(STORY_MAKER_FOOTER), false);
 assert.equal(submissionCharLength('あ い\nう\r\n　え\tお'), 5);
 

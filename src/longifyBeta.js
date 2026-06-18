@@ -9,6 +9,7 @@ import {
   extractStoryTitle,
   stripStoryMakerFooter,
 } from './kakuyomuAssist.js';
+import { buildStoryExportFileName } from './fileIoHelpers.js';
 import {
   auditLongifyStructure,
   buildContinuityDigest,
@@ -24,6 +25,7 @@ const DEFAULT_CHAPTER_COUNT = 6;
 const DEFAULT_TARGET_TOTAL_CHARS = 30000;
 const LONGIFY_TARGET_MIN = 10000;
 const LONGIFY_TARGET_MAX = 150000;
+const LONGIFY_UI_TARGET_MAX = 10000;
 const MIN_SEED_CHARS = 240;
 const MIN_BRUSHUP_LONG_CHARS = 8000;
 export const AI_REVIEW_PASS_SCORE = 80;
@@ -654,10 +656,20 @@ function brushupChapterOutputTokenLimit(targetPlan, attempt = 1) {
   });
 }
 
+export function normalizeLongifyUiTargetChars(value) {
+  const total = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(total) || total < LONGIFY_TARGET_MIN) return LONGIFY_UI_TARGET_MAX;
+  return Math.min(total, LONGIFY_UI_TARGET_MAX);
+}
+
 function readLongifyRunOptionsFromUi() {
   const targetEl = document.getElementById('longify-target-chars');
+  const targetValue = normalizeLongifyUiTargetChars(targetEl?.value);
+  if (targetEl && String(targetEl.value) !== String(targetValue)) {
+    targetEl.value = String(targetValue);
+  }
   const options = createLongifyRunOptions({
-    targetTotalChars: targetEl?.value,
+    targetTotalChars: targetValue,
   });
   return {
     ...options,
@@ -4726,6 +4738,7 @@ function clearLongifyReview() {
   delete reviewEl.dataset.chapterCount;
   delete reviewEl.dataset.reviewSource;
   delete reviewEl.dataset.textSignature;
+  delete reviewEl.dataset.reviewExportText;
 }
 
 function getLongifyReviewPlainText() {
@@ -4736,6 +4749,48 @@ function getLongifyReviewPlainText() {
   const aiReviewText = String(reviewEl?.querySelector?.('.longify-beta-review-ai-text')?.textContent || '').trim();
   if (aiReviewText) return aiReviewText;
   return String(reviewEl?.innerText || reviewEl?.textContent || '').trim();
+}
+
+function buildLongifyReviewHeadline(review = {}) {
+  if (review.source === 'failed') {
+    return `${review.modeLabel} AI講評: 取得失敗（未採点）`;
+  }
+  if (review.source === 'structure') {
+    return `${review.modeLabel} 構造チェック: 不合格（未採点）`;
+  }
+  if (review.source === 'format') {
+    return `${review.modeLabel} 形式チェック: 不合格（未採点）`;
+  }
+  if (review.source === 'ai') {
+    return `${review.modeLabel} AI講評${review.score === null ? '' : `: ${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`}`;
+  }
+  return `${review.modeLabel || '長編化後'}のローカル確認: ${review.score ?? '未採点'}点`;
+}
+
+function appendLongifyReviewExportSection(lines, title, items = []) {
+  const filtered = items.filter(Boolean);
+  if (!filtered.length) return;
+  lines.push(`${title}:\n${filtered.map(item => `- ${item}`).join('\n')}`);
+}
+
+export function formatLongifyReviewCopyText(review = {}) {
+  const lines = [buildLongifyReviewHeadline(review)];
+  if (review.summary) lines.push(review.summary);
+  appendLongifyReviewExportSection(lines, '確認項目', review.details || []);
+  if (review.aiReviewText) lines.push(`講評:\n${review.aiReviewText}`);
+  appendLongifyReviewExportSection(lines, 'よい点', review.positives || []);
+  appendLongifyReviewExportSection(lines, '悪い点', review.negatives || []);
+  appendLongifyReviewExportSection(lines, '次回ブラッシュアップ内容', review.brushupPlan || []);
+  return lines.filter(Boolean).join('\n\n').trim();
+}
+
+function createLongifyReviewActionButton(action, label) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn-secondary longify-review-action';
+  button.dataset.longifyReviewAction = action;
+  button.textContent = label;
+  return button;
 }
 
 function appendLongifyReviewSection(root, title, items = []) {
@@ -4764,20 +4819,18 @@ function renderLongifyReview(review) {
   reviewEl.dataset.targetChars = String(review.targetChars || '');
   reviewEl.dataset.reviewSource = review.source || 'local';
   reviewEl.dataset.textSignature = review.signature || '';
+  reviewEl.dataset.reviewExportText = formatLongifyReviewCopyText(review);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'longify-beta-review-toolbar';
+  toolbar.append(
+    createLongifyReviewActionButton('copy', '講評コピー'),
+    createLongifyReviewActionButton('save', '講評TXT保存'),
+  );
 
   const scoreLine = document.createElement('div');
   scoreLine.className = 'longify-beta-review-score';
-  if (review.source === 'failed') {
-    scoreLine.textContent = `${review.modeLabel} AI講評: 取得失敗（未採点）`;
-  } else if (review.source === 'structure') {
-    scoreLine.textContent = `${review.modeLabel} 構造チェック: 不合格（未採点）`;
-  } else if (review.source === 'format') {
-    scoreLine.textContent = `${review.modeLabel} 形式チェック: 不合格（未採点）`;
-  } else if (review.source === 'ai') {
-    scoreLine.textContent = `${review.modeLabel} AI講評${review.score === null ? '' : `: ${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`}`;
-  } else {
-    scoreLine.textContent = `${review.modeLabel}のローカル確認: ${review.score}点`;
-  }
+  scoreLine.textContent = buildLongifyReviewHeadline(review);
 
   const summaryLine = document.createElement('div');
   summaryLine.className = 'longify-beta-review-summary';
@@ -4791,8 +4844,8 @@ function renderLongifyReview(review) {
     list.appendChild(item);
   }
 
-  reviewEl.append(scoreLine, summaryLine, list);
-  if (['ai', 'failed', 'structure'].includes(review.source)) {
+  reviewEl.append(toolbar, scoreLine, summaryLine, list);
+  if (['ai', 'failed', 'structure', 'format'].includes(review.source)) {
     const aiText = document.createElement('pre');
     aiText.className = 'longify-beta-review-ai-text';
     aiText.textContent = review.aiReviewText || '';
@@ -5171,6 +5224,56 @@ function formatReviewScoreForStatus(review) {
   return `${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`;
 }
 
+function restoreLongifyReviewButtonText(button, originalText) {
+  if (!button) return;
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.remove('is-copied');
+  }, 1200);
+}
+
+async function copyLongifyReviewText(value, button) {
+  const text = String(value || '').trim();
+  if (!text || !button) return;
+  const originalText = button.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    button.textContent = 'コピー済み';
+  } catch {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+    button.textContent = 'コピー済み';
+  }
+  button.classList.add('is-copied');
+  restoreLongifyReviewButtonText(button, originalText);
+}
+
+function saveLongifyReviewTextFile(value, button) {
+  const text = String(value || '').trim();
+  if (!text || !button) return;
+  const originalText = button.textContent;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = buildStoryExportFileName('LongifyReview', 'txt');
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  button.textContent = '保存済み';
+  button.classList.add('is-copied');
+  restoreLongifyReviewButtonText(button, originalText);
+}
+
 export function installLongifyBeta() {
   const outputEl = document.getElementById('output');
   const button = document.getElementById('btn-longify-beta');
@@ -5183,6 +5286,19 @@ export function installLongifyBeta() {
   document.getElementById('btn-generate')?.addEventListener('click', () => {
     if (outputEl.dataset) delete outputEl.dataset.longifyOutput;
   }, true);
+  document.getElementById('longify-beta-review')?.addEventListener('click', event => {
+    const actionButton = event.target?.closest?.('[data-longify-review-action]');
+    if (!actionButton || actionButton.disabled) return;
+    const reviewEl = actionButton.closest('#longify-beta-review');
+    const exportText = reviewEl?.dataset?.reviewExportText || '';
+    if (actionButton.dataset.longifyReviewAction === 'copy') {
+      copyLongifyReviewText(exportText, actionButton);
+      return;
+    }
+    if (actionButton.dataset.longifyReviewAction === 'save') {
+      saveLongifyReviewTextFile(exportText, actionButton);
+    }
+  });
 
   let running = false;
   let abortController = null;

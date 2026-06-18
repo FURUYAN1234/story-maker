@@ -109,8 +109,10 @@ const html = renderAlphapolisPreview(preview);
 assert.match(html, /Alphapolis Form Preview/);
 assert.match(html, /選択肢: 未選択 \/ 男性向け \/ 女性向け/);
 assert.match(html, /data-copy-kind="tag"/);
-assert.match(html, /data-copy-kind="chapterSetting"/);
-assert.match(html, /data-copy-kind="chapterName"/);
+assert.doesNotMatch(html, /data-copy-kind="chapterSetting"/);
+assert.doesNotMatch(html, /data-copy-kind="chapterName"/);
+assert.doesNotMatch(html, /data-copy-kind="guidelineChecks"/);
+assert.match(html, /data-copy-kind="episodeTitle"/);
 assert.match(html, /data-copy-kind="episodeBody"/);
 assert.match(html, /投稿前チェック/);
 
@@ -149,5 +151,11 @@ const unspecifiedHot = buildAlphapolisPreview({
   settings: { genre: 'ファンタジー' },
 });
 assert.equal(unspecifiedHot.hotGenre, '未選択');
+assert.ok(ALPHAPOLIS_HOT_RANKING_OPTIONS.includes(unspecifiedHot.hotGenre));
+assert.ok(ALPHAPOLIS_CATEGORY_OPTIONS.includes(unspecifiedHot.category));
+assert.notEqual(buildAlphapolisPreview({
+  storyText: 'タイトル: 朝の切符\n古い駅で主人公が小さな約束を思い出す。',
+  settings: {},
+}).category, 'カテゴリ選択');
 
 console.log('alphapolisAssist tests passed');

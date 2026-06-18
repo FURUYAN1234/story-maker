@@ -61,6 +61,7 @@ assert.equal(getKakuyomuCopyValue(preview, 'tags'), preview.tags.join('\n'));
 const previewHtml = renderKakuyomuPreview(preview);
 assert.equal((previewHtml.match(/data-copy-kind="tag"/g) || []).length, preview.tags.length);
 assert.match(previewHtml, /data-copy-index="0"/);
+assert.match(previewHtml, /35文字以内/);
 assert.equal(previewHtml.includes('タグ一覧をコピー'), false);
 assert.equal(previewHtml.includes('AI利用タグ'), false);
 

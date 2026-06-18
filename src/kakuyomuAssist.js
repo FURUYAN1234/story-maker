@@ -551,7 +551,7 @@ export function renderKakuyomuPreview(preview) {
     ${renderRow({ label: '連載状態', value: preview.workStatus, kind: 'workStatus' })}
     ${renderRow({ label: '種類', value: preview.workType, kind: 'workType' })}
     ${renderRow({ label: 'ジャンル', value: preview.genre, kind: 'genre' })}
-    ${renderRow({ label: 'キャッチコピー', value: preview.catchCopy, kind: 'catchCopy' })}
+    ${renderRow({ label: 'キャッチコピー', value: preview.catchCopy, kind: 'catchCopy', note: '35文字以内' })}
     ${renderRow({ label: '紹介文', value: preview.introduction, kind: 'introduction', multiline: true })}
     ${renderSelfRatings(preview)}
     ${renderTags(preview)}

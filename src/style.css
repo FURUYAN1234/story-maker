@@ -369,6 +369,7 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .longify-beta-field span{font-size:10px;font-weight:800;color:var(--text3);letter-spacing:.04em}
 .longify-beta-field select{width:100%;min-width:0;padding:7px 26px 7px 9px;border:1px solid rgba(34,211,238,.32);border-radius:var(--radius-xs);background:rgba(10,10,16,.72);color:var(--text);font-family:var(--font-sans);font-size:12px;outline:none}
 .longify-beta-field select:disabled{opacity:.45;cursor:not-allowed}
+.longify-beta-limit-note{color:#fbbf24;font-size:10px;font-weight:800;line-height:1.45}
 .longify-beta-check{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 8px;align-items:center;min-width:0;padding:8px 10px;border:1px solid rgba(34,211,238,.24);border-radius:var(--radius-xs);background:rgba(0,0,0,.14);color:var(--text);font-size:12px;font-weight:800;cursor:pointer}
 .longify-beta-check input{width:15px;height:15px;accent-color:#22d3ee;cursor:pointer}
 .longify-beta-check small{grid-column:2;color:var(--text3);font-size:10px;font-weight:700;line-height:1.4}
@@ -376,6 +377,8 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .longify-beta-check:has(input:disabled) input{cursor:not-allowed}
 .longify-beta-review{display:flex;flex-direction:column;gap:7px;border-top:1px solid rgba(34,211,238,.24);padding-top:10px;font-size:12px;line-height:1.55;color:var(--text2)}
 .longify-beta-review.hidden{display:none}
+.longify-beta-review-toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.longify-beta-review-toolbar .btn-secondary{font-size:11px;padding:5px 9px}
 .longify-beta-review-score{font-weight:900;color:#facc15}
 .longify-beta-review-summary{color:var(--text);font-weight:700}
 .longify-beta-review-details{display:flex;flex-wrap:wrap;gap:6px}

@@ -205,7 +205,19 @@ function addTag(tags, value) {
   if (tag && !tags.includes(tag)) tags.push(tag);
 }
 
+function findExactOption(values, options, { allowPlaceholder = true } = {}) {
+  for (const value of values) {
+    const text = compactSpaces(value);
+    if (!text) continue;
+    const match = options.find(option => option === text);
+    if (match && (allowPlaceholder || match !== 'カテゴリ選択')) return match;
+  }
+  return '';
+}
+
 function inferHotRanking(settings = {}) {
+  const direct = findExactOption([settings.hotGenre, settings.target, settings.modeLabel], ALPHAPOLIS_HOT_RANKING_OPTIONS);
+  if (direct) return direct;
   const source = [
     settings.target,
     settings.modeLabel,
@@ -216,6 +228,8 @@ function inferHotRanking(settings = {}) {
 }
 
 function inferCategory(settings = {}) {
+  const direct = findExactOption([settings.category, settings.genre], ALPHAPOLIS_CATEGORY_OPTIONS, { allowPlaceholder: false });
+  if (direct) return direct;
   const source = [
     settings.genre,
     settings.theme,
@@ -239,7 +253,7 @@ function inferCategory(settings = {}) {
   if (/絵本/.test(source)) return '絵本';
   if (/\bbl\b|ボーイズラブ|やおい/.test(source)) return 'BL';
   if (/エッセイ|随筆|ノンフィクション|実話/.test(source)) return 'エッセイ・ノンフィクション';
-  return 'カテゴリ選択';
+  return '大衆娯楽';
 }
 
 function inferLengthKind(body, episodes) {
@@ -522,9 +536,6 @@ function renderTags(preview) {
 }
 
 function renderEpisode(episode, index) {
-  const chapterNameActions = episode.chapterSetting === '新しい章を追加する'
-    ? renderCopyButton('chapterName', { label: '新章名コピー', index })
-    : '';
   const chapterNameMeta = episode.chapterSetting === '新しい章を追加する'
     ? ` / 新しい章名: ${Ce(episode.chapterName)}`
     : '';
@@ -536,8 +547,6 @@ function renderEpisode(episode, index) {
           <div class="kakuyomu-body-block-meta">${charLength(episode.body)}字 / 章の設定: ${Ce(episode.chapterSetting)}${chapterNameMeta}</div>
         </div>
         <div class="kakuyomu-body-block-actions">
-          ${renderCopyButton('chapterSetting', { label: '章設定コピー', index })}
-          ${chapterNameActions}
           ${renderCopyButton('episodeTitle', { label: '話タイトルコピー', index })}
           ${renderCopyButton('episodeBody', { label: '本文コピー', index, className: 'kakuyomu-chapter-copy' })}
         </div>
@@ -571,7 +580,7 @@ export function renderAlphapolisPreview(preview) {
     ${renderRow({ label: '表紙画像', value: preview.coverImage, kind: 'coverImage' })}
     ${renderRow({ label: '感想の受付', value: preview.impressions, kind: 'impressions' })}
     ${renderRow({ label: '投稿ガイドライン', value: preview.guideline, kind: 'guideline' })}
-    ${renderRow({ label: '投稿前チェック', value: preview.guidelineChecks.join('\n'), kind: 'guidelineChecks', multiline: true })}
+    ${renderRow({ label: '投稿前チェック', value: preview.guidelineChecks.join('\n'), kind: 'guidelineChecks', multiline: true, hideAction: true })}
     ${renderRow({ label: '話の投稿', kind: 'episodeBody', multiline: true, hideAction: true, contentHtml: renderEpisodes(preview) })}
   `;
 }
