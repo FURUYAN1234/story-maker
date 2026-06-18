@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import {
   auditLongifyStructure,
   buildContinuityDigest,
+  detectEpisodeRetake,
   detectParaphrasedOverlap,
   detectStoryboardResidue,
   detectSettingContradiction,
+  extractEpisodeArc,
   extractInvariants,
   isLikelyTruncated,
   renderRollingMemo,
@@ -41,6 +43,35 @@ assert.equal(noOverlap.ok, true, 'distinct chapter is not flagged');
 
 const sim = shingleSimilarity('あいうえおかきくけこ', 'あいうえおかきくけこ');
 assert.ok(sim.jaccard > 0.9, 'identical text has high jaccard');
+
+const sameEpisodeA = [
+  '澪は古い写真を発見し、春人と喫茶店で相談した。',
+  '二人は商店街を守る計画を実行しようと決め、店を回って証言を受け取った。',
+  '工事業者に反対されたが、祖父が写真を残した理由が分かった。',
+  '最後に町の人へ写真を公開し、止まっていた時計が動き始めた。',
+].join('');
+const sameEpisodeB = [
+  '春人の視点では、古い写真に気づく場面から始まる。',
+  '澪とカフェで話し合い、商店街のために同じ計画を進めると決意する。',
+  '証言を預かったあと工事側に止められ、祖父の行動の意味を知る。',
+  '終盤では集まった人々に写真を見せ、時計が時を刻みはじめる。',
+].join('');
+const sameEpisodeArc = extractEpisodeArc(sameEpisodeA);
+assert.ok(sameEpisodeArc.includes('discover'), 'episode arc extracts discovery');
+assert.ok(sameEpisodeArc.includes('present'), 'episode arc extracts public action');
+const retake = detectEpisodeRetake(sameEpisodeB.repeat(3), [sameEpisodeA.repeat(3)]);
+assert.equal(retake.ok, false, 'same generic episode arc retold from another viewpoint is detected');
+
+const successorEpisode = [
+  '翌朝、澪は写真公開の結果を受けて町役場へ向かった。',
+  '工事業者との交渉はこじれたが、今度は保存申請の締切を知る。',
+  '前日の発見や公開をやり直さず、町の人から署名を集める準備へ進んだ。',
+].join('');
+assert.equal(
+  detectEpisodeRetake(successorEpisode.repeat(3), [sameEpisodeA.repeat(3)]).ok,
+  true,
+  'successor chapter that advances after the episode is not treated as a retake',
+);
 
 // --- B. Invariants + contradiction ------------------------------------------
 const ledger = `00. 不変設定
@@ -93,6 +124,15 @@ const codes = new Set(audit.blocking.map(b => b.code));
 assert.ok(codes.has('setting_contradiction'), 'audit catches setting contradiction');
 assert.ok(codes.has('chapter_loop'), 'audit catches re-enactment loop');
 assert.ok(codes.has('truncated'), 'audit catches truncation');
+
+const retakeAudit = auditLongifyStructure({
+  chapters: [
+    `第1章\n${sameEpisodeA.repeat(3)}`,
+    `第2章\n${sameEpisodeB.repeat(3)}`,
+  ],
+});
+assert.equal(retakeAudit.ok, false, 'audit flags same episode retake');
+assert.ok(retakeAudit.blocking.some(issue => issue.code === 'episode_retake'), 'audit reports episode_retake');
 
 const storyboardResidueChapter = [
   '第1章',

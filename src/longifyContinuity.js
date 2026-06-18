@@ -48,6 +48,21 @@ const ACTION_CATEGORIES = [
   { id: 'nod', tokens: ['頷'] },
 ];
 
+const EPISODE_EVENT_CATEGORIES = [
+  { id: 'discover', label: '発見', tokens: [/見つけ/u, /発見/u, /気づ/u, /拾/u, /現れ/u, /浮かび/u, /残され/u] },
+  { id: 'consult', label: '相談', tokens: [/相談/u, /話し合/u, /語り合/u, /打ち合わせ/u, /問いかけ/u, /尋ね/u] },
+  { id: 'decide', label: '決意', tokens: [/決め/u, /決意/u, /覚悟/u, /約束/u, /誓/u, /やろう/u, /しよう/u] },
+  { id: 'move', label: '移動/到着', tokens: [/向か/u, /訪ね/u, /訪れ/u, /到着/u, /たどり着/u, /中へ/u, /足を運/u, /戻/u, /帰/u] },
+  { id: 'investigate', label: '調査', tokens: [/探/u, /探索/u, /調べ/u, /見回/u, /聞き込/u, /確かめ/u, /跡を追/u] },
+  { id: 'act', label: '実行', tokens: [/試/u, /実行/u, /始め/u, /動き出/u, /取りかか/u, /作業/u, /準備/u, /進め/u, /片付/u] },
+  { id: 'repair', label: '修復', tokens: [/直し/u, /直す/u, /修理/u, /修復/u, /繕/u, /補修/u] },
+  { id: 'confront', label: '障壁/対立', tokens: [/立ちはだか/u, /阻/u, /反対/u, /止め/u, /責め/u, /言い放/u, /脅/u, /争/u, /交渉/u, /拒/u] },
+  { id: 'obtain', label: '取得/証拠', tokens: [/受け取/u, /手に入/u, /預か/u, /渡され/u, /証言/u, /記録/u, /写真/u, /地図/u, /鍵/u] },
+  { id: 'reveal', label: '判明', tokens: [/わか/u, /分か/u, /判明/u, /明か/u, /知っ/u, /思い出/u, /真相/u, /意味/u, /理由/u] },
+  { id: 'present', label: '公開/実行', tokens: [/上映/u, /発表/u, /見せ/u, /披露/u, /公開/u, /集め/u, /拍手/u] },
+  { id: 'resolve', label: '解決', tokens: [/解決/u, /救/u, /守/u, /残せ/u, /動き始め/u, /刻みはじめ/u, /終わ/u] },
+];
+
 // School-level invariant classes used for contradiction detection.
 const SCHOOL_LEVELS = [
   {
@@ -145,6 +160,109 @@ export function extractBeats(text) {
   return [...beats];
 }
 
+function tokenMatches(sentence, token) {
+  if (token instanceof RegExp) return token.test(sentence);
+  return sentence.includes(token);
+}
+
+function eventLabel(id) {
+  return EPISODE_EVENT_CATEGORIES.find(event => event.id === id)?.label || id;
+}
+
+export function extractEpisodeArc(text) {
+  const body = stripChapterHeading(text);
+  const arc = [];
+  const seen = new Set();
+  for (const sentence of splitSentences(body)) {
+    for (const event of EPISODE_EVENT_CATEGORIES) {
+      if (seen.has(event.id)) continue;
+      if (!event.tokens.some(token => tokenMatches(sentence, token))) continue;
+      seen.add(event.id);
+      arc.push(event.id);
+    }
+  }
+  return arc;
+}
+
+function longestCommonSubsequenceLength(left, right) {
+  if (!left.length || !right.length) return 0;
+  const prev = Array(right.length + 1).fill(0);
+  const curr = Array(right.length + 1).fill(0);
+  for (let i = 1; i <= left.length; i += 1) {
+    curr.fill(0);
+    for (let j = 1; j <= right.length; j += 1) {
+      curr[j] = left[i - 1] === right[j - 1]
+        ? prev[j - 1] + 1
+        : Math.max(prev[j], curr[j - 1]);
+    }
+    for (let j = 0; j <= right.length; j += 1) prev[j] = curr[j];
+  }
+  return prev[right.length];
+}
+
+export function detectEpisodeRetake(currentText, previousTexts = []) {
+  const previous = (Array.isArray(previousTexts) ? previousTexts : [previousTexts]).filter(Boolean);
+  if (!previous.length) return { ok: true };
+  if (charLength(stripChapterHeading(currentText)) < 240) return { ok: true };
+
+  const currentArc = extractEpisodeArc(currentText);
+  if (currentArc.length < EPISODE_RETAKE_MIN_EVENTS) {
+    return { ok: true, currentArc };
+  }
+
+  let best = {
+    sharedCount: 0,
+    currentRatio: 0,
+    previousRatio: 0,
+    lcsRatio: 0,
+    previousArc: [],
+    sharedEvents: [],
+  };
+
+  for (const prev of previous) {
+    const previousArc = extractEpisodeArc(prev);
+    if (previousArc.length < EPISODE_RETAKE_MIN_EVENTS) continue;
+    const previousSet = new Set(previousArc);
+    const sharedEvents = currentArc.filter(event => previousSet.has(event));
+    const sharedCount = sharedEvents.length;
+    const currentRatio = sharedCount / currentArc.length;
+    const previousRatio = sharedCount / previousArc.length;
+    const lcs = longestCommonSubsequenceLength(currentArc, previousArc);
+    const lcsRatio = lcs / Math.min(currentArc.length, previousArc.length);
+    const candidate = {
+      sharedCount,
+      currentRatio,
+      previousRatio,
+      lcsRatio,
+      previousArc,
+      sharedEvents,
+    };
+    if (
+      candidate.sharedCount > best.sharedCount
+      || candidate.lcsRatio > best.lcsRatio
+      || (candidate.currentRatio + candidate.previousRatio) > (best.currentRatio + best.previousRatio)
+    ) {
+      best = candidate;
+    }
+  }
+
+  const isRetake = best.sharedCount >= EPISODE_RETAKE_MIN_EVENTS
+    && best.currentRatio >= EPISODE_RETAKE_SHARED_RATIO
+    && best.previousRatio >= EPISODE_RETAKE_SHARED_RATIO
+    && best.lcsRatio >= EPISODE_RETAKE_LCS_RATIO;
+
+  if (!isRetake) {
+    return { ok: true, currentArc, ...best };
+  }
+
+  return {
+    ok: false,
+    reason: `前章までと同じエピソード列を変奏しています（${best.sharedEvents.map(eventLabel).join(' → ')}）。`,
+    currentArc,
+    ...best,
+  };
+}
+
 function shingles(text, size = 4) {
   const normalized = normalizeForShingle(stripChapterHeading(text));
   const chars = Array.from(normalized);
@@ -187,6 +305,9 @@ export function shingleSimilarity(textA, textB, size = 4) {
 const OVERLAP_JACCARD_THRESHOLD = 0.34;
 const OVERLAP_CONTAINMENT_THRESHOLD = 0.5;
 const OVERLAP_BEAT_THRESHOLD = 4;
+const EPISODE_RETAKE_MIN_EVENTS = 4;
+const EPISODE_RETAKE_SHARED_RATIO = 0.72;
+const EPISODE_RETAKE_LCS_RATIO = 0.67;
 const STORYBOARD_SEPARATOR = /^[\t \u3000]*(?:-{3,}|…{2,}|・・・|···)[\t \u3000]*$/u;
 const STORYBOARD_LABEL = /^[\t \u3000]*【(?:追加本文|[^】]{0,80}長編化計画[^】]{0,80})】[\t \u3000]*$/u;
 const STORYBOARD_STANDALONE_TITLE = /^[\t \u3000]*【(?![\t \u3000]*第[\d０-９一二三四五六七八九十百]+[\t \u3000]*章)(?![\t \u3000]*(?:追加本文|小説タイトル|タイトル|題名|作品名))[^】\n]{2,80}】[\t \u3000]*$/u;
@@ -389,11 +510,13 @@ export function buildContinuityDigest(chapterText, chapterNumber) {
     .slice(-4)
     .map(sentence => `・${clip(sentence, 60)}`);
   const beats = extractBeats(chapterText);
+  const episodeArc = extractEpisodeArc(chapterText);
   return [
     `【第${chapterNumber}章の確定（次章はこの後から始める）】`,
     `到達状態: ${clip(endingState, 120) || '（抽出不可）'}`,
     keySentences.length ? `この章の主な出来事:\n${keySentences.join('\n')}` : '',
     beats.length ? `使用済みビート(再演禁止): ${beats.join(' / ')}` : '',
+    episodeArc.length ? `使用済みイベント列(同じ話のリテイク禁止): ${episodeArc.map(eventLabel).join(' → ')}` : '',
   ].filter(Boolean).join('\n');
 }
 
@@ -448,6 +571,10 @@ export function auditLongifyStructure({ chapters = [], invariants = {} } = {}) {
     const overlap = detectParaphrasedOverlap(chapter, bodies.slice(0, index));
     if (!overlap.ok) {
       blocking.push({ code: 'chapter_loop', chapter: num, message: `第${num}章: ${overlap.reason}` });
+    }
+    const episodeRetake = detectEpisodeRetake(chapter, bodies.slice(0, index));
+    if (!episodeRetake.ok) {
+      blocking.push({ code: 'episode_retake', chapter: num, message: `第${num}章: ${episodeRetake.reason}` });
     }
   });
 
