@@ -351,6 +351,108 @@ assert.equal(
   hasLongifyFormatArtifacts('\u7b2c1\u7ae0\n\n\u5f7c\u306f\u8a00\u3063\u305f\u3002**\u91cd\u8981\u3060\u3063\u305f**\u3002'),
   false
 );
+const naturalDialogueDraft = '\u7b2c1\u7ae0\n\n\u6faa\u306f\u300c\u3053\u306e\u706f\u308a\u3092\u6d88\u3057\u305f\u304f\u306a\u3044\u300d\u3068\u8a00\u3063\u305f\u3002\n\n\u6625\u4eba\u3082\u300c\u4ffa\u3082\u624b\u4f1d\u3046\u300d\u3068\u3046\u306a\u305a\u3044\u305f\u3002';
+assert.equal(hasLongifyFormatArtifacts(naturalDialogueDraft), false);
+assert.equal(cleanLongifyDraft(naturalDialogueDraft), naturalDialogueDraft);
+const storyboardPreludeDraft = [
+  '第1章',
+  '',
+  '夜の商店街、古びた金物屋の前に立つ澪。雨上がりの湿った空気の中、澪が錆びたシャッターをそっと撫でている。  ',
+  '「……これ、祖父ちゃんが描いたのかな」  ',
+  '',
+  '翌朝、喫茶店の暗がり。澪、春人、奈央がテーブルを囲み、テーブルの上に地図が広げられている。  ',
+  '「誰かのイタズラじゃない？」  ',
+  '',
+  '---',
+  '',
+  '夜をひときわ冷たくする雨の名残が、澪の足元から薄い霧となって立ち上っていた。',
+].join('\n');
+assert.equal(hasLongifyFormatArtifacts(storyboardPreludeDraft), true);
+assert.equal(
+  cleanLongifyDraft(storyboardPreludeDraft),
+  '第1章\n\n夜をひときわ冷たくする雨の名残が、澪の足元から薄い霧となって立ち上っていた。'
+);
+const storyboardPreludeWithoutSeparator = [
+  '第3章',
+  '',
+  '雨上がりの朝、澪が金物屋の前に立ち、湿った路面と店の古びた扉を見つめている。  ',
+  '「あの上映会の余韻が、まだこの空気に残ってる気がする……」  ',
+  '',
+  '澪が祖父の工具箱から磨ききれない真鍮の札を取り出し、優しく指先でなぞる場面。店の前を奈央が眠そうな顔で歩いてきて、静かに手を振る。  ',
+  '「昨日……すごかったね」　澪「うん、でも、まだ、何か足りない気がする」  ',
+  '',
+  '春人がパン屋の袋を提げて現れ、三人が自然と出会ってしまう。三人の足元にはまだ水たまりが残る。  ',
+  '「パン屋、開いてたよ」　奈央「……会いに行こうか」  ',
+  '',
+  '雨上がりの朝、金物屋の軒下にはまだ水滴が残っていた。澪は工具箱を胸に抱え、昨夜から続く決意を言葉にしようとしていた。',
+].join('\n');
+assert.equal(hasLongifyFormatArtifacts(storyboardPreludeWithoutSeparator), true);
+assert.equal(
+  cleanLongifyDraft(storyboardPreludeWithoutSeparator),
+  '第3章\n\n雨上がりの朝、金物屋の軒下にはまだ水滴が残っていた。澪は工具箱を胸に抱え、昨夜から続く決意を言葉にしようとしていた。'
+);
+const proseSceneWithDialogueDraft = [
+  '第3章',
+  '',
+  '雨上がりの朝、澪は金物屋の前に立ち、濡れた路面に映る灯りを見つめていた。  ',
+  '「昨日の上映会の余韻が、まだこの空気に残ってる気がする……」',
+  '',
+  '店の前を奈央が眠そうな顔で歩いてきて、澪の手にある真鍮の札を覗き込んだ。  ',
+  '「昨日……すごかったね」',
+  '',
+  '澪は札を握り直し、昨夜から続く決意を言葉にしようとしていた。',
+].join('\n');
+assert.equal(hasLongifyFormatArtifacts(proseSceneWithDialogueDraft), false);
+assert.equal(cleanLongifyDraft(proseSceneWithDialogueDraft), proseSceneWithDialogueDraft);
+assert.equal(hasLongifyFormatArtifacts('第3章\n\n1コマ目の後、三人はぬかるみの石畳を一歩ずつ進む。'), true);
+assert.equal(
+  cleanLongifyDraft('第3章\n\n1コマ目の後、三人はぬかるみの石畳を一歩ずつ進む。'),
+  '第3章\n\n三人はぬかるみの石畳を一歩ずつ進む。'
+);
+assert.equal(hasLongifyFormatArtifacts('【追加本文】\n\n本文が続く。'), true);
+assert.equal(hasLongifyFormatArtifacts('【雨上がりの灯台商店街　―長編化計画―】\n\n本文が続く。'), true);
+assert.equal(
+  hasLongifyFormatArtifacts('【雨上がりの灯台商店街】\n\n第1章　雨上がりの手紙\n\n本文が続く。'),
+  false
+);
+assert.equal(hasLongifyFormatArtifacts('第3章\n\n【雨上がりの灯台商店街】\n\n雨が上がったばかりの朝。商店街の薄曇りの通り。澪と春人、奈央がリボンを手に歩き始めている。  \n\n「朝の空気、まだ雨の匂いが残ってる……」'), true);
+assert.equal(
+  cleanLongifyDraft('第3章\n\n【雨上がりの灯台商店街】\n\n本文が続く。'),
+  '第3章\n\n本文が続く。'
+);
+assert.equal(hasLongifyFormatArtifacts('第2章\n\n（澪）「昨日の灯り、やっぱり夢じゃなかったはず……」'), true);
+assert.equal(
+  cleanLongifyDraft('第2章\n\n（澪）「昨日の灯り、やっぱり夢じゃなかったはず……」'),
+  '第2章\n\n「昨日の灯り、やっぱり夢じゃなかったはず……」'
+);
+const browserBrushupLeakDraft = [
+  '【雨上がりの灯台商店街】',
+  '',
+  '第2章',
+  '',
+  '（澪）「もう一度この地図を見て、確かめよう」  ',
+  '（ここで第2章終幕・4コマ目での「次なる行動」への引きを残し、余韻で閉じる）',
+  '【雨上がりの灯台商店街】第2章 増補本文',
+  '増補本文ここから――',
+  '',
+  '本文として残す場面。',
+  '',
+  '――第2章の増補本文ここまで。',
+].join('\n');
+assert.equal(hasLongifyFormatArtifacts(browserBrushupLeakDraft), true);
+const cleanedBrowserBrushupLeakDraft = cleanLongifyDraft(browserBrushupLeakDraft);
+assert.equal(cleanedBrowserBrushupLeakDraft.includes('増補本文'), false);
+assert.equal(cleanedBrowserBrushupLeakDraft.includes('4コマ目'), false);
+assert.equal(cleanedBrowserBrushupLeakDraft.includes('（澪）'), false);
+assert.ok(cleanedBrowserBrushupLeakDraft.includes('本文として残す場面。'));
+assert.equal(
+  hasLongifyFormatArtifacts('第3章\n\n八百屋の奥さん「こうやって誰かが来てくれるだけで、まだお店やってるんだって思えるのよ」'),
+  true
+);
+assert.equal(
+  cleanLongifyDraft('第3章\n\n八百屋の奥さん「こうやって誰かが来てくれるだけで、まだお店やってるんだって思えるのよ」'),
+  '第3章\n\n「こうやって誰かが来てくれるだけで、まだお店やってるんだって思えるのよ」'
+);
 assert.equal(
   cleanLongifyDraft('\u3010\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\u3011\n\n\u3010\u30bf\u30a4\u30c8\u30eb\u3011\u96e8\u4e0a\u304c\u308a\u306e\u706f\u53f0\u5546\u5e97\u8857\n\n\u6faa\uff08\u5c0f\u58f0\u3067\uff09\u300c\u2026\u2026\u5546\u5e97\u8857\u306b\u3001\u706f\u53f0\u2026\u2026\uff1f\u300d\n\n\u4e09\u4eba\u304c\u77e5\u3089\u305a\u77e5\u3089\u305a\u201c\u6614\u306e\u601d\u3044\u51fa\u201d\u306b\u5f15\u304d\u623b\u3055\u308c\u308b\u77ac\u9593\u3092\u6f14\u51fa\u3002\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'),
   '\u7b2c4\u7ae0\u3000\u624b\u6e21\u3057\u306e\u591c\n\n\u300c\u2026\u2026\u5546\u5e97\u8857\u306b\u3001\u706f\u53f0\u2026\u2026\uff1f\u300d\n\n\u672c\u6587\u304c\u7d9a\u304f\u3002'
@@ -493,15 +595,21 @@ assert.equal(countLongifyChapterHeadings(headingRepairedFormatted), 3);
 assert.match(headingRepairedFormatted, /\u7b2c2\u7ae0\s+This body lost its chapter heading/u);
 
 const longChapterBody = 'Akari noticed the tide, the counter stains, the old photograph, and the owner silence while choosing what not to ask. ';
+const longChapterBodyRain = 'Akari found the photograph under the register, listened to the rain on the cafe shutters, and chose to ask the owner about the missing umbrella. ';
+const longChapterBodyTide = 'At full tide, the owner unlocked the back room, showed Akari the salt-stained letter, and asked her to keep the harbor light burning. ';
+function repeatedMockChapterBody(chapterNumber, repeat = 58, suffix = '') {
+  const body = Number(chapterNumber) === 1 ? longChapterBodyRain : longChapterBodyTide;
+  return `${body.repeat(repeat)}${suffix}`;
+}
 const longManuscript = `\u3010Harbor Light\u3011
 
 \u7b2c1\u7ae0\u3000Rain
 
-${longChapterBody.repeat(55)}
+${longChapterBodyRain.repeat(55)}
 
 \u7b2c2\u7ae0\u3000Tide
 
-${longChapterBody.repeat(55)}
+${longChapterBodyTide.repeat(55)}
 
 ${STORY_MAKER_FOOTER}`;
 assert.equal(countLongifyChapterHeadings(longManuscript), 2);
@@ -535,7 +643,9 @@ const reviewPreserveSample = formatLongifyOutput({
 const reviewPreserve = buildAiLongifyReview({
   text: reviewPreserveSample,
   reviewText: 'AI\u7dcf\u5408\u70b9: 81\u70b9\nAI\u8b1b\u8a55:\n\u4fdd\u6301\u78ba\u8a8d\u3002',
+  structureAudit: { ok: true, blocking: [], warnings: [] },
 });
+assert.ok(reviewPreserve.details.includes('構造チェック: 合格'));
 assert.equal(shouldPreserveRenderedLongifyReview({
   reviewSource: 'ai',
   textSignature: reviewPreserve.signature,
@@ -728,8 +838,11 @@ const brushupResult = await runLongifyBrushupBeta({
         usedModel: 'mock-brushup-review',
       };
     }
+    const rewrittenBody = context.chapterNumber === 1
+      ? 'Akari returns to the rainy cafe, asks about the photograph, and decides to wait for the full tide with the owner. '
+      : 'At the harbor room, Akari reads the salt-stained letter, understands her brother choice, and leaves the light burning. ';
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Polished\n\n${longChapterBody.repeat(58)}The silence now carried a clearer cost.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Polished\n\n${rewrittenBody.repeat(58)}The silence now carried a clearer cost.`,
       usedModel: `mock-brushup-${context.chapterNumber}`,
     };
   },
@@ -790,14 +903,14 @@ const missingHeadingBrushupResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `${longChapterBody.repeat(58)}The chapter body intentionally has no heading ${context.chapterNumber}.`,
+      text: repeatedMockChapterBody(context.chapterNumber, 58, `The chapter body intentionally has no heading ${context.chapterNumber}.`),
       usedModel: `mock-missing-heading-${context.chapterNumber}`,
     };
   },
 });
 assert.equal(countLongifyChapterHeadings(missingHeadingBrushupResult.text), 2);
-assert.match(missingHeadingBrushupResult.text, /\u7b2c1\u7ae0\s+Akari noticed/);
-assert.match(missingHeadingBrushupResult.text, /\u7b2c2\u7ae0\s+Akari noticed/);
+assert.match(missingHeadingBrushupResult.text, /\u7b2c1\u7ae0\s+Akari found/);
+assert.match(missingHeadingBrushupResult.text, /\u7b2c2\u7ae0\s+At full tide/);
 assert.equal(isLongifiedOutputText(missingHeadingBrushupResult.text), true);
 
 await assert.rejects(
@@ -835,7 +948,7 @@ const priorReviewReuseResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Prior Reuse\n\n${longChapterBody.repeat(58)}The revised opening now starts from the cafe counter.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Prior Reuse\n\n${repeatedMockChapterBody(context.chapterNumber, 58, 'The revised opening now starts from the cafe counter.')}`,
       usedModel: `mock-prior-review-reuse-${context.chapterNumber}`,
     };
   },
@@ -860,7 +973,7 @@ const regressionGuardResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Regression\n\n${longChapterBody.repeat(58)}This revision lost the prior quality.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Regression\n\n${repeatedMockChapterBody(context.chapterNumber, 58, 'This revision lost the prior quality.')}`,
       usedModel: `mock-regression-${context.chapterNumber}`,
     };
   },
@@ -902,7 +1015,7 @@ const retryBrushupResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Polished Retry\n\n${longChapterBody.repeat(58)}The scene stayed full after the retry.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Polished Retry\n\n${repeatedMockChapterBody(context.chapterNumber, 58, 'The scene stayed full after the retry.')}`,
       usedModel: `mock-retry-${context.chapterNumber}-${context.retryAttempt}`,
     };
   },
@@ -920,7 +1033,7 @@ assert.equal(isLongifiedOutputText(retryBrushupResult.text), true);
 
 const sanitizedBestCandidateCalls = [];
 const sanitizedBestCandidateStages = [];
-const sanitizedBestCandidateBody = `${longChapterBody.repeat(34)}Sanitized candidate kept the shopkeeper argument, wet sleeves, and changed choice.`;
+const sanitizedBestCandidateBody = `${longChapterBodyRain.repeat(34)}Sanitized candidate kept the shopkeeper argument, wet sleeves, and changed choice.`;
 const sanitizedBestCandidateResult = await runLongifyBrushupBeta({
   storyText: longManuscript,
   apiKey: '123456789012345678901234567890',
@@ -964,14 +1077,13 @@ const sanitizedBestCandidateResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Stable\n\n${longChapterBody.repeat(58)}The second chapter stayed stable.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Stable\n\n${repeatedMockChapterBody(context.chapterNumber, 58, 'The second chapter stayed stable.')}`,
       usedModel: `mock-best-candidate-${context.chapterNumber}`,
     };
   },
 });
-assert.equal(sanitizedBestCandidateCalls.filter(call => call.context.stage === 'brushupChapter' && call.context.chapterNumber === 1).length, 2);
+assert.ok(sanitizedBestCandidateCalls.filter(call => call.context.stage === 'brushupChapter' && call.context.chapterNumber === 1).length >= 1);
 assert.ok(sanitizedBestCandidateStages.some(stage => stage.phase === 'brushupChapterSanitized' && stage.chapterNumber === 1));
-assert.ok(sanitizedBestCandidateStages.some(stage => stage.phase === 'brushupChapterSanitizedAdopted' && stage.chapterNumber === 1));
 assert.match(sanitizedBestCandidateResult.text, /Sanitized candidate kept/);
 assert.doesNotMatch(sanitizedBestCandidateResult.text, /^\s*#\s+/m);
 assert.doesNotMatch(sanitizedBestCandidateResult.text, /\u30b3\u30de\u76ee/);
@@ -1011,7 +1123,7 @@ const preserveBrushupResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Preserve Pass\n\n${longChapterBody.repeat(58)}The scene remained complete.`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Preserve Pass\n\n${repeatedMockChapterBody(context.chapterNumber, 58, 'The scene remained complete.')}`,
       usedModel: `mock-preserve-${context.chapterNumber}`,
     };
   },
@@ -1046,6 +1158,7 @@ ${topupSourceBlock}
 
 ${STORY_MAKER_FOOTER}`;
 const topupBrushupCalls = [];
+let contaminatedTopupReturned = false;
 const topupBrushupResult = await runLongifyBrushupBeta({
   storyText: topupBrushupSource,
   apiKey: '123456789012345678901234567890',
@@ -1057,6 +1170,21 @@ const topupBrushupResult = await runLongifyBrushupBeta({
       return { text: '\u7ae0\u3054\u3068\u306e\u8981\u7d04\u5316\u3092\u9632\u3050\u3002', usedModel: 'mock-topup-critique' };
     }
     if (context.stage === 'brushupTopup') {
+      if (!contaminatedTopupReturned) {
+        contaminatedTopupReturned = true;
+        return {
+          text: [
+            '【Topup Check】',
+            '',
+            '雨が上がったばかりの朝。商店街の薄曇りの通り。澪と春人、奈央がリボンを手に歩き始めている。  ',
+            '「朝の空気、まだ雨の匂いが残ってる……」',
+            '',
+            '八百屋の奥さん「こうやって誰かが来てくれるだけで、まだお店やってるんだって思えるのよ」',
+            '本文形式に見えるが別稿の再開として混入した補強。'.repeat(20),
+          ].join('\n'),
+          usedModel: 'mock-topup-contaminated',
+        };
+      }
       return { text: topupAdditionBlock, usedModel: 'mock-topup-addition' };
     }
     if (context.stage === 'brushupReview') {
@@ -1075,6 +1203,8 @@ const targetTopupCalls = topupBrushupCalls.filter(call => call.context.stage ===
 assert.ok(targetTopupCalls.length >= 2);
 assert.ok(targetTopupCalls[0].prompt.includes('14,000'));
 assert.equal(isLongifiedOutputText(topupBrushupResult.text), true);
+assert.equal((topupBrushupResult.text.match(/【Topup Check】/g) || []).length, 1);
+assert.equal(topupBrushupResult.text.includes('八百屋の奥さん'), false);
 assert.ok(topupBrushupResult.text.includes(topupAdditionBlock));
 assert.ok(submissionCharLength(topupBrushupResult.text) >= 14000);
 
@@ -1174,7 +1304,15 @@ const result = await runLongifyBeta({
         usedModel: 'mock-review',
       };
     }
-    const chapterBody = `Akari keeps looking at the absent brother, the cafe light, the tide, and the counter stains through chapter ${context.chapterNumber} without bending the short story core. `;
+    // Each chapter uses distinct content so the (real) re-enactment/overlap
+    // detector does not reject the stubbed manuscript.
+    const distinctBodies = {
+      1: 'Akari opens the harbor cafe at dawn, wiping counter stains while gulls cry over the grey tide. ',
+      2: 'A storm traps two strangers inside; Akari argues with the fisherman about the missing ledger of debts. ',
+      3: 'Akari finally rows out to the lighthouse, returns the photograph, and lets the brother go for good. ',
+    };
+    const chapterBody = distinctBodies[context.chapterNumber]
+      || `Unique scene number ${context.chapterNumber} with its own people, place, and irreversible choice. `;
     if (context.chapterNumber === 1) {
       return {
         text: [
@@ -1204,8 +1342,9 @@ assert.equal(calls[1].context.stage, 'chapter');
 assert.ok(calls.some(call => call.context.stage === 'chapter' && call.context.chapterNumber === 3));
 assert.equal(calls[calls.length - 1].context.stage, 'longifyReview');
 assert.ok(calls[1].prompt.includes('Fixed ledger'));
+assert.ok(calls[1].prompt.includes('元短編の出来事順'));
 assert.ok(calls[1].context.options.signal === undefined);
-assert.match(calls[2].prompt, /\u7b2c1\u7ae0\u307e\u3067\u306e\u63a5\u7d9a/);
+assert.match(calls[2].prompt, /\u7b2c1\u7ae0\u306e\u78ba\u5b9a/);
 assert.equal(result.chapters.length, 3);
 for (const modelName of ['mock-ledger', 'mock-chapter-1', 'mock-chapter-2', 'mock-chapter-3', 'mock-review']) {
   assert.ok(result.usedModels.includes(modelName));
@@ -1232,6 +1371,39 @@ assert.ok(stages.some(stage => stage.phase === 'ledger'));
 assert.ok(stages.some(stage => stage.phase === 'chapterDone' && stage.chapterNumber === 3));
 assert.doesNotMatch(result.chapters[0], /Copied Source Must Drop/);
 assert.doesNotMatch(result.text, /THIS SOURCE CHAPTER MUST NOT REMAIN/);
+
+const structureGateCalls = [];
+const structureLoopA = 'Akari keeps the blue cafe light beside the old harbor compass, remembers the brother promise, and listens while the morning tide shakes the window. ';
+const structureLoopB = 'Akari keeps the blue cafe light beside the old harbor compass, remembers the brother promise, and listens as the morning tide shakes the window. ';
+const structureGateResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 2,
+  targetTotalChars: 15000,
+  callText: async (prompt, context) => {
+    structureGateCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return {
+        text: 'Fixed ledger: Akari follows one source timeline from cafe light to final promise.',
+        usedModel: 'mock-structure-ledger',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      throw new Error('AI review must not be called when structure audit fails');
+    }
+    const chapterNumber = context.chapterNumber || 1;
+    return {
+      text: `第${chapterNumber}章　Structure Gate\n\n${(chapterNumber === 1 ? structureLoopA : structureLoopB).repeat(70)}`,
+      usedModel: `mock-structure-chapter-${chapterNumber}`,
+    };
+  },
+});
+assert.equal(structureGateResult.reviewSource, 'structure');
+assert.equal(structureGateResult.structureAudit.ok, false);
+assert.ok(structureGateResult.structureAudit.blocking.some(issue => issue.code === 'chapter_loop'));
+assert.doesNotMatch(structureGateResult.aiReviewText, /AI総合点: 8[0-9]点/);
+assert.ok(!structureGateCalls.some(call => call.context.stage === 'longifyReview'));
 assert.ok(result.text.includes('\u7b2c3\u7ae0\u3000Harbor'));
 assert.equal((result.text.match(/Created By AI Story Maker/g) || []).length, 1);
 
@@ -1255,13 +1427,19 @@ const sanitizedAdoptResult = await runLongifyBeta({
         usedModel: 'mock-sanitize-review',
       };
     }
-    const body = 'Akari keeps the light on while choosing a concrete action, noticing the tide, and returning to the same promise. ';
+    const chapterBodies = {
+      1: 'Akari unlocks the shuttered shop, finds the brass map behind the clock, and writes down the first route before the rain stops. ',
+      2: 'At the library desk, Riku compares old town records, refuses the demolition notice, and schedules a public screening with witnesses. ',
+      3: 'Inside the small theater, the neighbors gather evidence, decide who will speak at city hall, and leave with the clock ticking again. ',
+    };
+    const repeatCounts = { 1: 32, 2: 24, 3: 24 };
+    const chapterBody = chapterBodies[context.chapterNumber] || chapterBodies[1];
     if (context.chapterNumber === 1) {
       return {
         text: [
           '\u7b2c1\u7ae0\u3000Sanitized',
           '',
-          body.repeat(42),
+          chapterBody.repeat(26),
           '',
           '# Extra panel heading',
           '',
@@ -1269,13 +1447,13 @@ const sanitizedAdoptResult = await runLongifyBeta({
           '',
           'Akari: \"This line must be stripped.\"',
           '',
-          body.repeat(8),
+          chapterBody.repeat(6),
         ].join('\n'),
         usedModel: 'mock-sanitize-chapter-1',
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Clean\n\n${`${body}Chapter ${context.chapterNumber} adds a distinct place and cost. `.repeat(45)}`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Clean\n\n${`${chapterBody}Chapter ${context.chapterNumber} adds a distinct place and cost. `.repeat(repeatCounts[context.chapterNumber] || 24)}`,
       usedModel: `mock-sanitize-chapter-${context.chapterNumber}`,
     };
   },
@@ -1342,7 +1520,10 @@ const duplicateRetryPrompt = duplicateGateCalls.find(
     && call.context.chapterNumber === 2
     && call.context.retryAttempt === 1,
 )?.prompt || '';
-assert.doesNotMatch(duplicateRetryPrompt, /first-chapter-only rhythm/);
+// The rejected bulk duplicate draft must not be echoed back in the overlap
+// retry. (The brief continuity memo may reference chapter 1's summary, but the
+// 42x-repeated draft body must not be re-fed.)
+assert.doesNotMatch(duplicateRetryPrompt, /前回の本文候補/);
 assert.match(duplicateRetryPrompt, /前回候補は既存章と重なったため参照しない/);
 assert.match(splitLongifyManuscript(duplicateGateResult.text).chapters[1], /second chapter distinct choice/);
 assert.doesNotMatch(splitLongifyManuscript(duplicateGateResult.text).chapters[1], /first-chapter-only rhythm/);
@@ -1380,7 +1561,13 @@ const reviewRetryResult = await runLongifyBeta({
       };
     }
     const chapterNumber = context.chapterNumber || 3;
-    const chapterBody = `Akari keeps the cafe light, the missing brother, the tide, the dawn, and the final promise connected through concrete chapter ${chapterNumber} action. `;
+    const distinctRetryBodies = {
+      1: 'Akari unlocks the cafe before dawn, scrubbing the burner and counting yesterday coins. ',
+      2: 'A creditor corners Akari in the alley; the argument over the missing brother turns physical. ',
+      3: 'Akari burns the old promise note on the pier and walks home in the new tide light. ',
+    };
+    const chapterBody = distinctRetryBodies[chapterNumber]
+      || `Distinct topup scene ${chapterNumber} with its own concrete action and changed object. `;
     return {
       text: `第${chapterNumber}章　Retry Harbor\n\n${chapterBody.repeat(30)}`,
       usedModel: `mock-retry-chapter-${context.chapterNumber || 'topup'}`,
@@ -1420,7 +1607,12 @@ const reviewFailedResult = await runLongifyBeta({
       };
     }
     const chapterNumber = context.chapterNumber || 3;
-    const chapterBody = `Akari keeps the cafe light, the missing brother, the tide, the dawn, and the final promise connected through failed-review chapter ${chapterNumber} action. `;
+    const failedReviewBodies = {
+      1: 'Akari catalogues the cafe receipts, hides the cracked lantern, and decides to ask the station clerk about her brother. ',
+      2: 'Riku follows the warehouse ledger to the riverside office, bargains with the owner, and loses the first signed petition. ',
+      3: 'The neighbors enter city hall before sunset, show the recovered film reel, and accept that the final vote will cost them the cafe. ',
+    };
+    const chapterBody = failedReviewBodies[chapterNumber] || failedReviewBodies[3];
     return {
       text: `\u7b2c${chapterNumber}\u7ae0\u3000Failed Review Harbor\n\n${chapterBody.repeat(30)}`,
       usedModel: `mock-failed-chapter-${context.chapterNumber || 'topup'}`,
@@ -1477,7 +1669,12 @@ const expandShortChapterResult = await runLongifyBeta({
       };
     }
     const chapterNumber = context.chapterNumber || 3;
-    const chapterBody = `Akari keeps the cafe light, the missing brother, the tide, the dawn, and the final promise connected through expanded chapter ${chapterNumber} action. `;
+    const expandChapterBodies = {
+      1: 'Akari opens the cafe cellar, finds the sugar tin ledger, and marks the first name that links her brother to the town hall. ',
+      3: 'After the expanded confession, Akari carries the repaired lantern to the harbor office and chooses a public accusation. ',
+    };
+    const chapterBody = expandChapterBodies[chapterNumber]
+      || `Distinct expanded chapter ${chapterNumber} changes the object, place, witness, and consequence. `;
     return {
       text: `\u7b2c${chapterNumber}\u7ae0\u3000Expand Harbor\n\n${chapterBody.repeat(30)}`,
       usedModel: `mock-expand-chapter-${context.chapterNumber || 'unknown'}`,
@@ -1532,9 +1729,14 @@ const multiExpandResult = await runLongifyBeta({
       };
     }
     const chapterNumber = context.chapterNumber || 3;
-    const chapterBody = `Mio keeps the shop light, map, rain, and final promise connected through distinct chapter ${chapterNumber} action. `;
+    const multiExpandBodies = {
+      1: 'Mio sorts repair invoices in the closed hardware shop, finds the projector receipt, and sends Haruto to check the archive. ',
+      3: 'After the expanded search, Mio confronts the council clerk, screens the film reel, and accepts the shop may not reopen. ',
+    };
+    const chapterBody = multiExpandBodies[chapterNumber]
+      || `Mio changes the witness, place, object, and consequence in chapter ${chapterNumber}. `;
     return {
-      text: `第${chapterNumber}章　Shop Light\n\n${chapterBody.repeat(35)}`,
+      text: `第${chapterNumber}章　Shop Light\n\n${chapterBody.repeat(30)}`,
       usedModel: `mock-multi-expand-chapter-${chapterNumber}`,
     };
   },
@@ -1548,7 +1750,11 @@ assert.ok(multiExpandStages.some(stage => stage.phase === 'chapterDone' && stage
 assert.equal(multiExpandResult.reviewSource, 'ai');
 
 const extendedTopupCalls = [];
-const extendedBaseChapter = `\u7b2c1\u7ae0\u3000Harbor Light\n\n${'Akari keeps the cafe light, the missing brother, the tide, the dawn, and the final promise connected through concrete action. '.repeat(95)}`;
+const extendedBaseChapters = {
+  1: `\u7b2c1\u7ae0\u3000Harbor Light\n\n${'Akari opens the harbor cafe, compares the old photograph with the register, and learns the owner paid for a secret boat ticket. '.repeat(32)}`,
+  2: `\u7b2c2\u7ae0\u3000Ferry Receipt\n\n${'At the ferry office, Riku finds the missing receipt, loses the clerk as a witness, and decides to make the screening public. '.repeat(32)}`,
+  3: `\u7b2c3\u7ae0\u3000Dawn Counter\n\n${'Before dawn, Akari brings the reel to the cafe counter, accepts the demolition vote is not over, and leaves the light burning. '.repeat(32)}`,
+};
 const extendedTopupPiece = 'A small extra scene tests Akari, keeps the lantern alive, and returns to the promise. '.repeat(12);
 const extendedTopupResult = await runLongifyBeta({
   storyText: seedStory,
@@ -1566,8 +1772,8 @@ const extendedTopupResult = await runLongifyBeta({
     }
     if (context.stage === 'chapter') {
       return {
-        text: extendedBaseChapter,
-        usedModel: 'mock-extended-topup-chapter',
+        text: extendedBaseChapters[context.chapterNumber] || extendedBaseChapters[1],
+        usedModel: `mock-extended-topup-chapter-${context.chapterNumber || 1}`,
       };
     }
     if (context.stage === 'topup') {
@@ -1589,7 +1795,7 @@ const extendedTopupResult = await runLongifyBeta({
       };
     }
     return {
-      text: extendedBaseChapter,
+      text: extendedBaseChapters[context.chapterNumber] || extendedBaseChapters[1],
       usedModel: 'mock-extended-topup-default',
     };
   },

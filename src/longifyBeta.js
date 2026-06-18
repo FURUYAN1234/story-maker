@@ -9,6 +9,15 @@ import {
   extractStoryTitle,
   stripStoryMakerFooter,
 } from './kakuyomuAssist.js';
+import {
+  auditLongifyStructure,
+  buildContinuityDigest,
+  detectParaphrasedOverlap,
+  detectSettingContradiction,
+  extractInvariants,
+  isLikelyTruncated,
+  renderRollingMemo,
+} from './longifyContinuity.js';
 
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
@@ -23,6 +32,7 @@ const AUTO_BRUSHUP_START_RETRY_DELAY_MS = 500;
 const AUTO_BRUSHUP_START_MAX_WAIT_MS = 10000;
 const AUTO_BRUSHUP_START_MAX_RETRIES = Math.ceil(AUTO_BRUSHUP_START_MAX_WAIT_MS / AUTO_BRUSHUP_START_RETRY_DELAY_MS);
 const LONGIFY_CHAPTER_RETRY_ATTEMPTS = 3;
+const LONGIFY_CHAPTER_TRUNCATION_RETRIES = 3;
 const MIN_RENUMBER_FALLBACK_CHARS = 240;
 const MIN_FOREIGN_CHAPTER_MIXIN_CHARS = 240;
 const LONGIFY_ENDING_REPAIR_ATTEMPTS = 2;
@@ -54,17 +64,33 @@ const UNTITLED_STORY_TITLE = '名称未設定の小説';
 const LONGIFY_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)\s*[:：]\s*[^\n]{1,100}[\t \u3000]*$/u;
 const LONGIFY_EMPTY_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)\s*[:：]\s*$/u;
 const LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN = /^[\t \u3000]*【[\t \u3000]*(?:小説タイトル|タイトル|題名|作品名)[\t \u3000]*】[^\n]{0,100}$/u;
+const LONGIFY_STANDALONE_BRACKETED_TITLE_LINE_PATTERN = /^[\t \u3000]*【(?![\t \u3000]*第[\d０-９一二三四五六七八九十百]+[\t \u3000]*章)(?![\t \u3000]*(?:追加本文|小説タイトル|タイトル|題名|作品名))[^】\n]{2,80}】[\t \u3000]*$/u;
 const LONGIFY_BARE_TITLE_ARTIFACT_LINE_PATTERN = /^[\t \u3000]*[【「『]?[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9０-９][\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9０-９\t \u3000・、のとへにがをは]{1,79}[】」』]?[\t \u3000]*$/u;
 const LONGIFY_SUBSECTION_HEADING_PATTERN = /^[\t \u3000]*(?:[#＃]{1,6}[\t \u3000]*)?第[\d０-９一二三四五六七八九十百]+[\t \u3000]*節(?:[\t \u3000:：\-ー―／/・]+[^\n]{0,48})?[\t \u3000]*$/u;
 const LONGIFY_STANDALONE_FINISH_PATTERN = /^[\t \u3000]*【?\s*完\s*】?[\t \u3000]*$/u;
 const LONGIFY_MANGA_PANEL_HEADING_PATTERN = /^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?(?:第?[\d０-９一二三四五六七八九十百]+[\t \u3000]*)?(?:コマ目|コマめ|カット)[\t \u3000]*$/u;
+const LONGIFY_MANGA_PANEL_LEAD_PATTERN = /^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?(?:第?[\d０-９一二三四五六七八九十百]+[\t \u3000]*)?(?:コマ目|コマめ|カット)(?:の(?:後|あと|場面|続き)|では|から|、|に|で)?[\t \u3000、:：\-ー―]*/u;
 const LONGIFY_MANGA_META_LINE_PATTERN = /^[\t \u3000]*(?:狙い|ねらい|意図|演出意図|構図|カメラ|効果音|SFX)\s*[:：]/u;
 const LONGIFY_MANGA_LABEL_PREFIX_PATTERN = /^[\t \u3000]*(?:絵\s*\/\s*状況|絵|状況|セリフ|台詞)\s*[:：]\s*/u;
 const LONGIFY_NON_CHAPTER_MARKDOWN_HEADING_PATTERN = /^[\t \u3000]*#{1,6}[\t \u3000]+(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[^\n]{1,120}$/u;
 const LONGIFY_TITLE_CANDIDATE_LINE_PATTERN = /^[\t \u3000]*(?:作品タイトル案|タイトル案|作品タイトル|タイトル|題名)\s*[:：]/u;
+const LONGIFY_AUGMENTATION_META_LINE_PATTERN = /増補本文/u;
+const LONGIFY_STORYBOARD_PAREN_DIRECTIVE_LINE_PATTERN = /^[\t \u3000]*[（(][^）)\n]*(?:コマ目|コマめ|カット|終幕|引きを残|余韻で閉じ|ここで第)[^）)\n]*[）)][\t \u3000]*$/u;
 const LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_（）()・]{1,18}\s*[:：]\s*\S/u;
 const LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
+const LONGIFY_PAREN_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN = /^[\t \u3000]*[（(][\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}[）)][\t \u3000]*[「『]/u;
+const LONGIFY_INLINE_SCRIPT_DIALOGUE_PATTERN = /[」』][\t \u3000]*(?!と|って|と、|と。)[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
 const LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN = /(?:瞬間を描く|瞬間を演出|対比を見せる|構造を強調|雰囲気を強調|狙いを示す|テーマを示す|変化を示す)[。.!！]?$/u;
+const LONGIFY_STORYBOARD_SEPARATOR_PATTERN = /^[\t \u3000]*(?:-{3,}|…{2,}|・・・|···)[\t \u3000]*$/u;
+const LONGIFY_TOPUP_LABEL_LINE_PATTERN = /^[\t \u3000]*【(?:追加本文|[^】]{0,80}長編化計画[^】]{0,80})】[\t \u3000]*$/u;
+const LONGIFY_SCENE_CARD_LOCATION_PATTERN = /(?:商店街|金物屋|喫茶店|カフェ|映画館|路地|通り|店内|店先|店の前|カウンター|パン屋|雑貨屋|空き地|跡地|裏口|翌朝|夕暮れ|深夜|夜|朝|雨上がり|路面|水たまり|シャッター)/u;
+const LONGIFY_SCENE_CARD_STAGE_PATTERN = /(?:背景に|背後に|窓の外|視線の先|手元に|足元|指先|場面|並んで|立つ|立っている|立ち止まる|歩く|座っている|囲んでいる|広げている|広げられている|照らしている|揺れている|残っている|現れる|手渡している|眺めている|見つめている|見守る|微笑む|手を振る|差し出す|覗き込む|映っている)/u;
+const LONGIFY_PROSE_ONLY_FORMAT_RULES = [
+  '- 元短編が4コマ漫画風、漫画ネーム、シナリオ、脚本、ト書き、場面カード形式でも、完成稿ではすべて地の文と会話文の散文小説へ翻訳する。',
+  '- 「1コマ目」「絵/状況:」「セリフ:」「カメラ:」「狙い:」「登場人物名:」のようなラベル、番号付き場面行、話者名だけを前置きした台本行は禁止。',
+  '- 禁止例: 八百屋の奥さん「ありがとう」 / 子ども「公式メンバーだって！」 / 雨上がりの朝、澪が店先に立っている。  のようなネーム行。',
+  '- 許可例: 八百屋の奥さんは目を細め、「ありがとう」と言った。澪はその声の奥に、まだ店を閉じたくない迷いを聞いた。',
+].join('\n');
 
 // 行頭・行末のMarkdown強調ラッパ（**, __, ~~, 全角＊＊／＿＿）を剥がしてから
 // 形式判定する。Geminiは漫画コマ見出しを `**1コマ目**` のように装飾して出すため、
@@ -87,11 +113,145 @@ function unwrapLongifyLabelEmphasis(text) {
   );
 }
 
+const LONGIFY_PROSE_QUOTED_CUE_PARTICLE_PATTERN = /(?:は|が|も|を|に|へ|で|と|から|まで|より|、|。|[,.!?！？])$/u;
+const LONGIFY_PROSE_QUOTED_CUE_VERB_TAIL_PATTERN = /(?:言|聞|尋|答|訊|問|呟|つぶや|笑|見|思|考|叫|呼|囁|ささや|返|頷|うなず|振|向|続|促|遮|告|声)$/u;
+
+function getLongifyDialogueQuoteIndex(line) {
+  const value = String(line || '');
+  const quoteIndices = ['\u300c', '\u300e']
+    .map(quote => value.indexOf(quote))
+    .filter(index => index >= 0);
+  return quoteIndices.length ? Math.min(...quoteIndices) : -1;
+}
+
+function isLongifyScriptQuotedSpeakerLine(line) {
+  const trimmed = String(line || '').trim();
+  if (LONGIFY_PAREN_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN.test(trimmed)) return true;
+  if (!LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN.test(trimmed)) return false;
+
+  const quoteIndex = getLongifyDialogueQuoteIndex(trimmed);
+  if (quoteIndex <= 0) return false;
+
+  const cue = trimmed
+    .slice(0, quoteIndex)
+    .replace(/[\uff08(][^\uff09)\n]{1,24}[\uff09)]/gu, '')
+    .trim();
+  if (!cue) return false;
+
+  if (LONGIFY_PROSE_QUOTED_CUE_PARTICLE_PATTERN.test(cue)) return false;
+  if (LONGIFY_PROSE_QUOTED_CUE_VERB_TAIL_PATTERN.test(cue)) return false;
+  return true;
+}
+
+function isLongifyDialogueOnlyLine(line) {
+  const trimmed = String(line || '').trim();
+  return /^[「『][\s\S]{0,180}[」』]?[。！？!？」』]?[ \t\u3000]*$/u.test(trimmed);
+}
+
+function isLongifyInlineScriptDialogueLine(line) {
+  return LONGIFY_INLINE_SCRIPT_DIALOGUE_PATTERN.test(stripLongifyLineEmphasis(line));
+}
+
+function isLongifyStoryboardDialogueLine(line) {
+  return isLongifyDialogueOnlyLine(line) || isLongifyInlineScriptDialogueLine(line);
+}
+
+function isLongifyStoryboardSceneCardLine(line) {
+  const raw = String(line || '');
+  const trimmed = stripLongifyLineEmphasis(raw);
+  if (!trimmed || getChapterNumberFromHeading(trimmed)) return false;
+  if (isLongifyStoryboardDialogueLine(trimmed)) return false;
+  if (LONGIFY_MANGA_PANEL_LEAD_PATTERN.test(trimmed)) return true;
+  const len = charLength(trimmed);
+  if (len < 24 || len > 190) return false;
+  if (!LONGIFY_SCENE_CARD_LOCATION_PATTERN.test(trimmed)) return false;
+  if (!LONGIFY_SCENE_CARD_STAGE_PATTERN.test(trimmed)) return false;
+  return /[ \t\u3000]{2,}$/u.test(raw)
+    || /(?:背景|背後|窓の外|視線|手元|足元|肩越し|カウンター越し|場面|淡い朝日|色褪せた|濡れた|雨上がり)/u.test(trimmed);
+}
+
+function findLongifyStoryboardPreludeEnd(lines, startIndex) {
+  let nonEmpty = 0;
+  let sceneCards = 0;
+  let dialogueOnly = 0;
+  let hardStoryboardSignals = 0;
+  let lastStoryboardIndex = -1;
+  for (let index = startIndex; index < lines.length && nonEmpty < 18; index += 1) {
+    const trimmed = String(lines[index] || '').trim();
+    if (!trimmed) continue;
+    if (getChapterNumberFromHeading(trimmed) && nonEmpty > 0) break;
+    if (LONGIFY_TOPUP_LABEL_LINE_PATTERN.test(trimmed)) break;
+    if (LONGIFY_STORYBOARD_SEPARATOR_PATTERN.test(trimmed)) {
+      return nonEmpty >= 4 && sceneCards >= 2 && dialogueOnly >= 2 ? index : -1;
+    }
+    const isPanelLead = LONGIFY_MANGA_PANEL_LEAD_PATTERN.test(stripLongifyLineEmphasis(lines[index]));
+    const isSceneCard = isLongifyStoryboardSceneCardLine(lines[index]);
+    const isInlineScriptLine = isLongifyInlineScriptDialogueLine(lines[index]);
+    const isDialogueLine = isLongifyStoryboardDialogueLine(lines[index]);
+    if (isSceneCard || isPanelLead) sceneCards += 1;
+    if (isDialogueLine) dialogueOnly += 1;
+    if (isPanelLead || isInlineScriptLine) hardStoryboardSignals += 1;
+    if (isSceneCard || isPanelLead || isDialogueLine) {
+      lastStoryboardIndex = index;
+    } else if (lastStoryboardIndex >= 0 && nonEmpty >= 4 && sceneCards >= 2 && dialogueOnly >= 2 && hardStoryboardSignals >= 1) {
+      return lastStoryboardIndex;
+    }
+    nonEmpty += 1;
+  }
+  if (lastStoryboardIndex >= 0 && nonEmpty >= 4 && sceneCards >= 2 && dialogueOnly >= 2 && hardStoryboardSignals >= 1) {
+    return lastStoryboardIndex;
+  }
+  return -1;
+}
+
+function stripLongifyStoryboardPreludes(lines) {
+  const out = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    out.push(line);
+    if (!getChapterNumberFromHeading(String(line || '').trim())) continue;
+    const end = findLongifyStoryboardPreludeEnd(lines, index + 1);
+    if (end < 0) continue;
+    if (String(out[out.length - 1] || '').trim()) out.push('');
+    index = end;
+    while (index + 1 < lines.length && !String(lines[index + 1] || '').trim()) index += 1;
+  }
+  return out;
+}
+
+function hasLongifyStoryboardPrelude(text) {
+  const lines = normalizeText(unwrapLongifyLabelEmphasis(text)).split('\n');
+  for (let index = 0; index < lines.length; index += 1) {
+    const trimmed = String(lines[index] || '').trim();
+    if (LONGIFY_TOPUP_LABEL_LINE_PATTERN.test(trimmed)) return true;
+    if (getChapterNumberFromHeading(trimmed) && findLongifyStoryboardPreludeEnd(lines, index + 1) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasLongifyStandaloneTitleStoryboardBlock(text) {
+  const lines = normalizeText(unwrapLongifyLabelEmphasis(text)).split('\n');
+  for (let index = 0; index < lines.length; index += 1) {
+    const trimmed = String(lines[index] || '').trim();
+    if (!LONGIFY_STANDALONE_BRACKETED_TITLE_LINE_PATTERN.test(trimmed)) continue;
+    if (findLongifyStoryboardPreludeEnd(lines, index + 1) >= 0) return true;
+  }
+  return false;
+}
+
 function stripLongifySpeakerCue(line) {
-  return String(line || '').replace(
-    /^([\t \u3000]*)(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*([「『])/u,
-    '$1$2',
-  );
+  if (!isLongifyScriptQuotedSpeakerLine(line)) return String(line || '');
+  return String(line || '')
+    .replace(
+      /^([\t \u3000]*)[（(][\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}[）)][\t \u3000]*([「『])/u,
+      '$1$2',
+    )
+    .replace(
+      /^([\t \u3000]*)(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*([「『])/u,
+      '$1$2',
+    );
 }
 
 function normalizeLongifyChapterHeadingLine(line) {
@@ -524,6 +684,11 @@ export function buildLongifyLedgerPrompt(seedText, options = {}) {
 
 固定する項目:
 0. 作品タイトル案: 本文に明示タイトルがない場合でも、物語の核から短い日本語タイトルを必ず作る。「${UNTITLED_STORY_TITLE}」「無題」は禁止。
+00. 不変設定（全章固定・変更禁止。必ず次のラベルで出力する）:
+   学年: …（例: 小学6年生。学校が舞台でなければ「該当なし」）
+   年齢: …（主人公の年齢。不明なら推定し固定）
+   時代: …（現代/昭和 など）
+   季節: …（物語が進む季節）
 1. 作品の核: この物語が何についての話なのか。
 2. 主人公の欲求: 表向きの欲求と、本当に必要としているもの。
 3. 曲げてはいけない因果: 冒頭から結末までの必須因果。
@@ -542,6 +707,17 @@ function getLongifyChapterRole(chapterNumber, chapterCount) {
   return getBrushupChapterRole(chapterNumber, chapterCount);
 }
 
+function formatInvariantBlock(invariants) {
+  if (!invariants) return '';
+  const lines = [];
+  if (invariants.grade) lines.push(`学年/年齢: ${invariants.grade}`);
+  if (invariants.age && !invariants.grade) lines.push(`年齢: ${invariants.age}`);
+  if (invariants.era) lines.push(`時代/季節: ${invariants.era}`);
+  if (invariants.season && !invariants.era) lines.push(`季節: ${invariants.season}`);
+  if (!lines.length) return '';
+  return `\n\n【不変設定（全章で厳守・変更禁止）】\n${lines.join('\n')}\n上記に矛盾する語（例: 学年が小学なら「中学」「ランドセル以外の進学先」を現在の事実として書く）を出さないこと。`;
+}
+
 function buildLongifyChapterRoleMap(chapterCount = DEFAULT_CHAPTER_COUNT, targetTotalChars = 0) {
   const total = Math.max(1, Number(chapterCount || DEFAULT_CHAPTER_COUNT));
   const target = Math.max(0, Number(targetTotalChars || 0));
@@ -551,6 +727,29 @@ function buildLongifyChapterRoleMap(chapterCount = DEFAULT_CHAPTER_COUNT, target
     const targetLine = perChapterTarget ? ` / 目安${formatNumber(perChapterTarget)}字前後` : '';
     return `第${chapterNumber}章${targetLine}: ${getLongifyChapterRole(chapterNumber, total)}`;
   }).join('\n');
+}
+
+function extractLongifySourceEventLine(seedText, maxEvents = 10) {
+  const sentences = String(seedText || '')
+    .replace(/\r\n?/g, '\n')
+    .split(/[。！？!?\n]+/u)
+    .map(line => line.trim())
+    .filter(line => charLength(line) >= 18)
+    .filter(line => !/^第[\d０-９一二三四五六七八九十百]+\s*章/u.test(line));
+  const eventLike = sentences.filter(sentence => (
+    /(?:見つけ|出会|向か|入|開|聞|話|決|選|失敗|壊|拒|止|戻|知|気づ|動|灯|上映|時計|地図|鍵|手紙|写真|約束|対立|工事|祖父)/u.test(sentence)
+  ));
+  const pool = eventLike.length >= 3 ? eventLike : sentences;
+  const selected = [];
+  const seen = new Set();
+  for (const sentence of pool) {
+    const normalized = normalizeForRepeat(sentence);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    selected.push(`- ${clipText(sentence, 90)}`);
+    if (selected.length >= maxEvents) break;
+  }
+  return selected.length ? selected.join('\n') : '- 元短編の出来事順を崩さず、発見、対立、選択、結末を一本道に伸ばす。';
 }
 
 export function buildLongifyChapterPrompt({
@@ -564,6 +763,7 @@ export function buildLongifyChapterPrompt({
   chapterRangeLabel = '',
   styleMode = 'preserve',
   endingMode = 'keep',
+  invariants = null,
 } = {}) {
   const runOptions = createLongifyRunOptions({
     targetTotalChars,
@@ -573,7 +773,9 @@ export function buildLongifyChapterPrompt({
   });
   const chapterRoleMap = buildLongifyChapterRoleMap(runOptions.chapterCount, runOptions.targetTotalNumber);
   const currentChapterRole = getLongifyChapterRole(chapterNumber, runOptions.chapterCount);
-  return `あなたは人間の小説家として、短編を長編化しています。
+  const invariantBlock = formatInvariantBlock(invariants);
+  const sourceEventLine = extractLongifySourceEventLine(seedText);
+  return `あなたは人間の小説家として、短編を長編化しています。${invariantBlock}
 下の「短編原稿」と「固定台帳」を絶対に守り、第${chapterNumber}章だけを本文として執筆してください。
 
 品質条件:
@@ -582,6 +784,7 @@ export function buildLongifyChapterPrompt({
 - 章題は「第${chapterNumber}章　（章題）」の形式で始める。
 - 章題の直後に「タイトル:」「小説タイトル:」「第1節」などの下位見出しを置かない。章本文へ直接入る。
 - 章題のあとは、地の文の段落と必要な会話文だけで続ける。各行を小説本文として読める文章にし、構造ラベルや番号付きの場面行へ分解しない。
+${LONGIFY_PROSE_ONLY_FORMAT_RULES}
 - 最低量は投稿サイト準拠文字数で${targetChars || runOptions.targetChars}。この字数を下回る章は不合格。短すぎる要約にしない。
 - 字数レンジは投稿サイト準拠で${chapterRangeLabel || runOptions.chapterRangeLabel}。上限を大きく超える場合は、同じ心理説明や同じ状況確認を削り、場面の密度で勝負する。
 - この章だけで盛りすぎない。予定章数を守るため、上限目安を超えそうなら全文の逐語的な引き伸ばしではなく、章固有の変化だけを残して閉じる。
@@ -591,6 +794,7 @@ export function buildLongifyChapterPrompt({
 - 短編の芯を保持する。本筋、主人公の欲求、結末の意味、語り口を変えない。
 - 盛る場合も、短編に最初から含まれていた違和感や伏線から自然に派生させる。
 - その章の「欲求 / 誤解 / 発見 / 代償 / 関係変化 / 具体物 / 次章への引き」を場面で見せる。
+- 工事業者、家族、町外の力などの障害を出した場合は、その場で温情や偶然だけで解決させない。反論、失敗、代償、次の行動を必ず残し、ドラマの山場として機能させる。
 - 固定台帳の第${chapterNumber}章の役割だけを使う。他章の役割を先取りしない。
 - 全章役割表の第${chapterNumber}章だけを担当する。第1章と同じ導入の別バージョン、第1章の再説明、第1章で済んだ発見・相談・状況確認の再演は禁止。
 - 第${chapterNumber}章の役割: ${currentChapterRole}
@@ -598,6 +802,7 @@ export function buildLongifyChapterPrompt({
 - 章末はその章だけの不可逆な変化で閉じる。同じ慰め合い、同じ誓い直し、同じ食べ物共有、同じ「まだ終わっていない」調を章ごとに繰り返さない。
 - 台詞、身体感覚、場所の具体、沈黙、言い淀みを入れて、人間が書いたような起伏を作る。
 - 便利すぎる偶然、説明過多、AIらしい総括、テンプレの熱血説教は禁止。
+- 長編化は短編の出来事列を一本の時間軸に伸ばす作業。短編の出来事を順不同の雰囲気素材として並べ替えたり、同じ発見・相談・決意を別バージョンで重ねたりしない。
 - 最終章以外では完全解決しない。最終章では短編の結末の意味へ戻して着地する。
 - 各章末に「（つづく）」「次回へ続く」などの連載メタ表示を入れない。
 - 各章末に「【完】」などの完結マーカーを入れない。アプリ側が最終整形する。
@@ -614,6 +819,9 @@ ${previousBridge || 'まだ前章はありません。'}
 
 固定台帳:
 ${ledgerText}
+
+元短編の出来事順（一本道の背骨。本文として出力しない）:
+${sourceEventLine}
 
 短編原稿:
 ${seedText}`;
@@ -634,11 +842,18 @@ function isLongifyOverlapValidation(validation = {}) {
   return /重複|繰り返|既存章|重なる場面/u.test(String(validation?.reason || ''));
 }
 
+function isLongifyFormatValidation(validation = {}) {
+  return /小説本文ではない形式|本文形式ではない|混入|漫画|脚本|Markdown|話者ラベル|コマ|絵コンテ/u.test(String(validation?.reason || ''));
+}
+
 function buildLongifyChapterRetryPrompt(args = {}, previousDraft = '', validation = {}) {
   const overlapRetry = isLongifyOverlapValidation(validation);
+  const formatRetry = isLongifyFormatValidation(validation);
   const previousBodyCandidate = cleanLongifyDraft(previousDraft) || String(previousDraft || '');
   const previousDraftSection = overlapRetry
     ? `前回候補は既存章と重なったため参照しない。台帳の第${args.chapterNumber}章でまだ本文化されていない時間、場所、目的、対立、具体物から新しい場面を起こす。`
+    : formatRetry
+      ? `前回候補は4コマ/脚本/ネーム形式へ崩れたため参照しない。短編の出来事だけを素材にし、通常の小説本文として最初から書き直す。`
     : `前回の本文候補（構造記号は除去済み）:
 ${clipText(previousBodyCandidate, 2400)}`;
   return `${buildLongifyChapterPrompt(args)}
@@ -651,6 +866,7 @@ ${clipText(previousBodyCandidate, 2400)}`;
 - 冒頭は必ず「第${args.chapterNumber}章　（章題）」で始め、その直後から本文を厚く書く。
 - 前回出力の本文が別の章番号に入っていた場合でも、今回は第${args.chapterNumber}章として正しい章番号で出す。
 - 画面左の出力モードや前回の構造に引っ張られず、章題と本文段落だけの散文小説として書く。
+${LONGIFY_PROSE_ONLY_FORMAT_RULES}
 - 前回が短すぎた場合、同じ要約を繰り返さず、会話、行動、身体感覚、場所の変化、選択の代償を増やして最低量を確実に超える。
 - 前回が長すぎた場合、同じ心理説明や同じ章末パターンを削り、${args.chapterRangeLabel || '指定字数レンジ'}に近づける。
 - 前章までの接続メモに出た冒頭・終盤パターンは再利用しない。
@@ -684,6 +900,7 @@ function buildLongifyChapterExpansionPrompt({
     Math.ceil(Number(deficitChars || 0) + LONGIFY_CHAPTER_EXPAND_SAFETY_MARGIN),
     Math.ceil(Number(deficitChars || 0) * 1.9),
   );
+  const sourceEventLine = extractLongifySourceEventLine(seedText);
   return `第${chapterNumber}章の草稿が短すぎます。既存草稿を捨てず、同じ章の中へ自然に差し込める「増補本文」だけを書いてください。
 
 条件:
@@ -692,13 +909,18 @@ function buildLongifyChapterExpansionPrompt({
 - 第${chapterNumber}章の途中に入る場面として、会話、行動、身体感覚、場所の変化、選択の代償を増やす。
 - 既存草稿の出来事を巻き戻さず、同じ結末へ自然に接続する。
 - 短編の芯、本筋、主人公の欲求、結末の意味、語り口を変えない。
+- 元短編の出来事順から外れた新しい雰囲気シーンを足さない。増補は、その章が担当している因果の不足分だけにする。
 - 「（つづく）」「次回へ続く」「タイトル:」「Output」「【完】」などの管理語は禁止。
 - 散文の小説本文として増補する。地の文と会話文だけで続け、構造ラベルや番号付きの場面行へ分解しない。
+${LONGIFY_PROSE_ONLY_FORMAT_RULES}
 - 文体方針: ${runOptions.styleInstruction}
 - 結末方針: ${runOptions.endingInstruction}
 
 固定台帳:
 ${ledgerText}
+
+元短編の出来事順（一本道の背骨。本文として出力しない）:
+${sourceEventLine}
 
 短編原稿:
 ${clipText(seedText, 2400)}
@@ -709,6 +931,31 @@ ${clipText(chapterText, 4200)}`;
 
 function tailChars(text, count) {
   return Array.from(String(text || '')).slice(-count).join('');
+}
+
+export function buildLongifyChapterContinuationPrompt({
+  ledgerText = '',
+  chapterNumber = 1,
+  chapterText = '',
+  isLastChapter = false,
+} = {}) {
+  const tail = tailChars(chapterBodyText(chapterText), 600);
+  return `第${chapterNumber}章の本文が文字数上限で途中で切れています。下の「直前までの末尾」に自然につながる続きだけを書いてください。
+
+条件:
+- 出力は続きの本文のみ。これまでの文章の繰り返し、前置き、要約、章見出しは一切不要。
+- 末尾の文を途中から自然に続け、場面を最後まで書き切る。
+- 章題、タイトル、解説、箇条書き、作業メモ、構造ラベルは禁止。
+- 「（つづく）」「次回へ続く」などの連載メタは書かない。
+${isLastChapter
+    ? '- これは最終章。物語をきちんと着地させて締めくくる。「【完】」は書かない（アプリ側が付与する）。'
+    : '- 最終章ではないので完全解決はせず、この章の不可逆な変化で閉じる。'}
+
+固定台帳:
+${clipText(ledgerText, 1800)}
+
+直前までの末尾:
+${tail}`;
 }
 
 export function buildLongifyTopupPrompt({
@@ -728,6 +975,7 @@ export function buildLongifyTopupPrompt({
     endingMode,
   });
   const minimumAddition = Math.max(1400, Math.ceil(Number(deficitChars || 0) * 1.25));
+  const sourceEventLine = extractLongifySourceEventLine(seedText);
   return `長編化本文が最低文字数に届いていません。
 下の本文を壊さず、既存の最終章へ自然に差し込める追加本文だけを書いてください。
 
@@ -736,7 +984,10 @@ export function buildLongifyTopupPrompt({
 - 投稿サイト準拠文字数で最低${formatNumber(minimumAddition)}字以上を書く。空白・改行で水増ししない。
 - 短編の芯、本筋、結末の意味、語り口を変えない。
 - 既存の結末を上書きせず、結末直前に入る自然な場面、対話、具体物、回想、代償を増やす。
-- 「（つづく）」「次回へ続く」「タイトル:」「Output」などの管理語は禁止。
+- 元短編の出来事順を補強する。完結後の日常、別エピソード、設定資料、雰囲気だけの後日談を足さない。
+- 「追加本文」「長編化計画」「（つづく）」「次回へ続く」「タイトル:」「Output」などの管理語は禁止。
+- 場面説明カード、4コマネーム、シナリオ形式、映像のト書きは禁止。必ず地の文と会話だけの散文にする。
+- 障害や対立を扱う場合は、温情や偶然だけで丸めず、反論、失敗、代償、次の行動を含める。
 - 段落の間に単独の「*」「＊」「※」「***」などの区切り記号を入れない。場面転換は文章で処理する。
 - 文体方針: ${runOptions.styleInstruction}。
 - 結末方針: ${runOptions.endingInstruction}。
@@ -746,6 +997,9 @@ ${runOptions.targetTotalChars}
 
 固定台帳:
 ${ledgerText}
+
+元短編の出来事順（一本道の背骨。本文として出力しない）:
+${sourceEventLine}
 
 現在本文の末尾:
 ${tailChars(currentText, 2600)}
@@ -858,7 +1112,7 @@ ${tailChars(seedText, ENDING_ANCHOR_SOURCE_CHARS)}`;
 }
 
 export function cleanLongifyDraft(text) {
-  const lines = unwrapLongifyLabelEmphasis(stripStoryMakerFooter(text))
+  const lines = stripLongifyStoryboardPreludes(unwrapLongifyLabelEmphasis(stripStoryMakerFooter(text))
     .replace(/^\s*(?:以下(?:に|、)|では、).{0,40}\n+/u, '')
     .replace(/\n?\s*(?:Created By AI Story Maker V[\d.]+|Generated By AI Story Maker V[\d.]+)\s*$/iu, '')
     .replace(/\n?\s*[（(]\s*つづく\s*[）)]\s*$/u, '')
@@ -866,7 +1120,7 @@ export function cleanLongifyDraft(text) {
     .split('\n')
     .map(line => stripLongifySpeakerCue(
       normalizeLongifyChapterHeadingLine(String(line || '').replace(LONGIFY_MANGA_LABEL_PREFIX_PATTERN, '')),
-    ));
+    ).replace(LONGIFY_MANGA_PANEL_LEAD_PATTERN, '')));
 
   const cleaned = [];
   for (let index = 0; index < lines.length; index += 1) {
@@ -891,18 +1145,24 @@ export function cleanLongifyDraft(text) {
 
   return cleaned
     .filter(line => !/^[\t \u3000]*[*＊※]{1,5}[\t \u3000]*$/u.test(line))
+    .filter(line => !LONGIFY_STORYBOARD_SEPARATOR_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_TOPUP_LABEL_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_AUGMENTATION_META_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_STANDALONE_BRACKETED_TITLE_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_SUBSECTION_HEADING_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_STANDALONE_FINISH_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_MANGA_PANEL_HEADING_PATTERN.test(stripLongifyLineEmphasis(line)))
+    .filter(line => !LONGIFY_MANGA_PANEL_LEAD_PATTERN.test(stripLongifyLineEmphasis(line)))
     .filter(line => !LONGIFY_MANGA_META_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_STORYBOARD_PAREN_DIRECTIVE_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_NON_CHAPTER_MARKDOWN_HEADING_PATTERN.test(String(line || '').trim()))
     .filter(line => {
       const trimmed = String(line || '').trim();
       return LONGIFY_TITLE_CANDIDATE_LINE_PATTERN.test(trimmed)
-        || !LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN.test(trimmed);
+        || (!LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN.test(trimmed) && !isLongifyInlineScriptDialogueLine(trimmed));
     })
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -912,7 +1172,26 @@ export function cleanLongifyDraft(text) {
 function longifyFormatArtifactIssues(text) {
   const lines = normalizeText(unwrapLongifyLabelEmphasis(text)).split('\n').map(line => String(line || '').trim()).filter(Boolean);
   const issues = [];
-  if (lines.some(line => LONGIFY_MANGA_PANEL_HEADING_PATTERN.test(stripLongifyLineEmphasis(line)))) {
+  const isAllowedLeadingTitle = (index) => index === 0 && getChapterNumberFromHeading(lines[1]) === 1;
+  if (lines.some(line => LONGIFY_TOPUP_LABEL_LINE_PATTERN.test(line))) {
+    issues.push('追加本文ラベル・長編化計画');
+  }
+  if (lines.some(line => LONGIFY_AUGMENTATION_META_LINE_PATTERN.test(line))) {
+    issues.push('増補本文メタ');
+  }
+  if (hasLongifyStoryboardPrelude(text)) {
+    issues.push('絵コンテ型の章頭メモ');
+  }
+  if (hasLongifyStandaloneTitleStoryboardBlock(text)) {
+    issues.push('絵コンテ型の本文内メモ');
+  }
+  if (lines.some((line, index) => LONGIFY_STANDALONE_BRACKETED_TITLE_LINE_PATTERN.test(line) && !isAllowedLeadingTitle(index))) {
+    issues.push('タイトル再掲');
+  }
+  if (lines.some(line => (
+    LONGIFY_MANGA_PANEL_HEADING_PATTERN.test(stripLongifyLineEmphasis(line))
+    || LONGIFY_MANGA_PANEL_LEAD_PATTERN.test(stripLongifyLineEmphasis(line))
+  ))) {
     issues.push('漫画コマ見出し');
   }
   if (lines.some(line => LONGIFY_MANGA_META_LINE_PATTERN.test(line) || LONGIFY_MANGA_LABEL_PREFIX_PATTERN.test(line))) {
@@ -924,10 +1203,14 @@ function longifyFormatArtifactIssues(text) {
   if (lines.some(line => !LONGIFY_TITLE_CANDIDATE_LINE_PATTERN.test(line) && LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN.test(line))) {
     issues.push('脚本型の話者ラベル');
   }
-  if (lines.some(line => LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN.test(line))) {
+  if (lines.some(line => isLongifyScriptQuotedSpeakerLine(line) || isLongifyInlineScriptDialogueLine(line))) {
     issues.push('脚本型の話者ラベル');
   }
-  if (lines.some(line => LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(line) || LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN.test(line))) {
+  if (lines.some(line => (
+    LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(line)
+    || LONGIFY_STORYBOARD_DIRECTIVE_LINE_PATTERN.test(line)
+    || LONGIFY_STORYBOARD_PAREN_DIRECTIVE_LINE_PATTERN.test(line)
+  ))) {
     issues.push('漫画シナリオ記法');
   }
   return issues;
@@ -935,6 +1218,10 @@ function longifyFormatArtifactIssues(text) {
 
 export function hasLongifyFormatArtifacts(text) {
   return longifyFormatArtifactIssues(text).length > 0;
+}
+
+function isHardLongifyTopupArtifactIssue(issue) {
+  return /追加本文|長編化計画/u.test(String(issue || ''));
 }
 
 function normalizeChapterNumberToken(value) {
@@ -1962,7 +2249,7 @@ function reviewTextSignature(text) {
 }
 
 export function shouldPreserveRenderedLongifyReview({ reviewSource = '', textSignature = '', outputText = '' } = {}) {
-  if (reviewSource !== 'ai' && reviewSource !== 'failed') return false;
+  if (!['ai', 'failed', 'structure'].includes(reviewSource)) return false;
   return Boolean(textSignature && textSignature === reviewTextSignature(outputText));
 }
 
@@ -1972,6 +2259,7 @@ export function buildAiLongifyReview({
   reviewText = '',
   targetChars = 0,
   chapterCount = 0,
+  structureAudit = null,
 } = {}) {
   const normalizedReview = cleanLongifyAiReviewText(reviewText);
   const chars = submissionCharLength(stripStoryMakerFooter(text));
@@ -1990,6 +2278,7 @@ export function buildAiLongifyReview({
     summary,
     aiReviewText: normalizedReview,
     details: [
+      structureAudit ? `構造チェック: ${structureAudit.ok ? '合格' : '要修正'}` : '',
       'AI講評: 実行済み',
       score === null ? 'AI総合点: 未取得' : `AI総合点: ${score}点（${passLabel}）`,
       `投稿サイト換算文字数: ${formatNumber(chars)}字`,
@@ -2036,6 +2325,56 @@ function buildFailedLongifyReview({
     positives: [],
     negatives: ['AI講評が取得できていないため、品質判定は確定していません。'],
     brushupPlan: ['AI講評を取り直してからブラッシュアップしてください。'],
+    chars,
+    chapters,
+    targetChars: normalizedTargetChars,
+    targetMet: !normalizedTargetChars || chars >= normalizedTargetChars,
+    signature: reviewTextSignature(text),
+  };
+}
+
+function buildStructureLongifyReview({
+  text = '',
+  mode = 'longify',
+  structureAudit = null,
+  targetChars = 0,
+  chapterCount = 0,
+} = {}) {
+  const chars = submissionCharLength(stripStoryMakerFooter(text));
+  const chapters = chapterCount || countLongifyChapterHeadings(text);
+  const normalizedTargetChars = Math.max(0, Number(targetChars || 0));
+  const blocking = Array.isArray(structureAudit?.blocking) ? structureAudit.blocking : [];
+  const messages = blocking.map(issue => issue.message || issue.code).filter(Boolean);
+  const aiReviewText = [
+    '構造チェック: 不合格',
+    'AI総合点: 未採点（構造NG）',
+    '理由: 元短編の出来事列から一本の時間軸へ伸びておらず、講評前のローカル構造監査で重大欠陥を検出しました。',
+    messages.length ? `検出内容: ${messages.join(' / ')}` : '',
+    '次回操作: まず章ごとの時間・目的・対立・不可逆な変化を一本化してから、AI講評またはブラッシュアップへ進んでください。',
+  ].filter(Boolean).join('\n');
+  return {
+    source: 'structure',
+    mode,
+    modeLabel: mode === 'brushup' ? 'ブラッシュアップ後' : '長編化後',
+    score: null,
+    passLabel: '構造NG',
+    summary: '構造チェックで不合格です。AI講評の点数より、ストーリー軸の一本化を優先してください。',
+    aiReviewText,
+    details: [
+      '構造チェック: 不合格',
+      'AI総合点: 未採点（構造NG）',
+      `構造問題: ${formatNumber(blocking.length)}件`,
+      `投稿サイト換算文字数: ${formatNumber(chars)}字`,
+      chapters ? `章数: ${chapters}章` : '',
+      targetChars ? `最低文字数: ${chars >= targetChars ? '達成' : '未達'}（${formatNumber(targetChars)}字）` : '',
+    ].filter(Boolean),
+    positives: [],
+    negatives: messages.length ? messages : ['元短編の因果列と長編本文の時間軸が一本化されていません。'],
+    brushupPlan: [
+      '元短編の出来事を発生順に並べ、各章へ一度だけ割り当てる。',
+      '各章の開始時点、目的、障害、失敗または選択、章末で変わった状態を固定する。',
+      '不足文字数は新しい雰囲気シーンではなく、既存因果の対立・代償・意味づけとして増やす。',
+    ],
     chars,
     chapters,
     targetChars: normalizedTargetChars,
@@ -2163,14 +2502,14 @@ export function ensureChapterHeading(text, chapterNumber) {
 }
 
 export function summarizeForContinuity(chapterText, chapterNumber) {
-  const normalized = cleanLongifyDraft(chapterText).replace(/\s+/g, ' ');
-  const heading = normalized.split(/\s+/u).find(line => getChapterNumberFromHeading(line) === Number(chapterNumber))
-    || `第${chapterNumber}章`;
+  // Emit a REAL digest of what actually happened in this chapter (ending state,
+  // key events, consumed beats) instead of a content-free boilerplate. This is
+  // what gets carried forward so the next chapter does not re-enact prior beats.
+  const digest = buildContinuityDigest(chapterText, chapterNumber);
   return [
-    `第${chapterNumber}章までの接続: ${heading} は完了済み。`,
-    `既出章の扱い: 第${chapterNumber}章の本文、冒頭、章末、同じ小物説明、同じ会話、同じ決意表明を引用・再演しない。`,
-    `次章は第${chapterNumber}章の結末より後の時間・場所・目的・心理状態から始める。前章の出来事は一文で受け止めるだけにする。`,
-  ].join('\n');
+    digest,
+    '次章は上記の到達状態の「後」から始める。使用済みビートと同じ場面・会話・決意表明を再演しない。',
+  ].filter(Boolean).join('\n');
 }
 
 export function formatLongifyProgressOutput({ title = '', chapters = [], activeMessage = '' } = {}) {
@@ -2389,7 +2728,9 @@ export async function runLongifyBeta({
   if (ledgerResponse?.usedModel) usedModels.push(ledgerResponse.usedModel);
   title = resolveLongifyTitle({ seedText, ledgerText, initialTitle: title });
 
+  const invariants = extractInvariants(ledgerText);
   const chapters = [];
+  const continuityDigests = [];
   let previousBridge = '';
   for (let index = 1; index <= runOptions.chapterCount; index += 1) {
     throwIfAborted(signal);
@@ -2423,6 +2764,7 @@ export async function runLongifyBeta({
       chapterRangeLabel: chapterGenerationPlan.label || runOptions.chapterRangeLabel,
       styleMode: runOptions.styleMode,
       endingMode: runOptions.endingMode,
+      invariants,
     };
     let chapterResponse = null;
     let chapterText = '';
@@ -2487,12 +2829,14 @@ export async function runLongifyBeta({
         !chapterValidation.ok
         && /小説本文ではない形式/u.test(chapterValidation?.reason || '')
       ) {
-        const sanitizedValidation = validateLongifyChapterDraft(chapterText, {
+        const sanitizedChapterText = cleanLongifyDraft(chapterText);
+        const sanitizedValidation = validateLongifyChapterDraft(sanitizedChapterText, {
           chapterNumber: index,
           targetChars: chapterGenerationPlan.min || Number(targetChars || 0) || runOptions.minChapterChars,
           maxChars: chapterGenerationPlan.max || runOptions.maxChapterChars,
         });
         if (sanitizedValidation.ok) {
+          chapterText = sanitizedChapterText;
           chapterValidation = sanitizedValidation;
           report(`第${index}章の形式崩れを除去して採用しました。`, {
             phase: 'chapterSanitized',
@@ -2514,18 +2858,31 @@ export async function runLongifyBeta({
           previousInvalidDraft = chapterText;
         }
       }
+      if (chapterValidation.ok) {
+        const contradiction = detectSettingContradiction(chapterText, invariants);
+        if (!contradiction.ok) {
+          chapterValidation = {
+            ...chapterValidation,
+            ok: false,
+            reason: contradiction.reason,
+          };
+          previousInvalidDraft = chapterText;
+        }
+      }
       if (chapterValidation.ok) break;
     }
     if (
       !chapterValidation?.ok
       && /小説本文ではない形式/u.test(chapterValidation?.reason || '')
     ) {
-      const sanitizedValidation = validateLongifyChapterDraft(chapterText, {
+      const sanitizedChapterText = cleanLongifyDraft(chapterText);
+      const sanitizedValidation = validateLongifyChapterDraft(sanitizedChapterText, {
         chapterNumber: index,
         targetChars: chapterGenerationPlan.min || Number(targetChars || 0) || runOptions.minChapterChars,
         maxChars: chapterGenerationPlan.max || runOptions.maxChapterChars,
       });
       if (sanitizedValidation.ok) {
+        chapterText = sanitizedChapterText;
         chapterValidation = sanitizedValidation;
         report(`第${index}章の形式崩れを除去して採用しました。`, {
           phase: 'chapterSanitized',
@@ -2654,9 +3011,60 @@ export async function runLongifyBeta({
     if (!chapterValidation?.ok) {
       throw new Error(`第${index}章の本文抽出に失敗しました: ${chapterValidation?.reason || '章本文が不正です'}`);
     }
+    // Token-limit truncation guard: a chapter that hit maxOutputTokens ends
+    // mid-sentence (no terminal punctuation). Resume from the tail instead of
+    // accepting a cut-off chapter (the observed "「うーん」と考" failure).
+    const isLastChapter = index === runOptions.chapterCount;
+    let truncationAttempts = 0;
+    while (
+      isLikelyTruncated(chapterText, chapterResponse?.finishReason)
+      && truncationAttempts < LONGIFY_CHAPTER_TRUNCATION_RETRIES
+    ) {
+      truncationAttempts += 1;
+      report(`第${index}章が途中で切れたため続きを生成中... (${truncationAttempts}/${LONGIFY_CHAPTER_TRUNCATION_RETRIES})`, {
+        phase: 'chapterContinue',
+        detail: '文字数上限による切断を検知しました。末尾から続きだけを生成します。',
+        chapterNumber: index,
+        chapterCount: runOptions.chapterCount,
+        completedChars: submissionCharLength(chapters.join('\n\n')),
+      });
+      const continuationResponse = await callModel(buildLongifyChapterContinuationPrompt({
+        ledgerText,
+        chapterNumber: index,
+        chapterText,
+        isLastChapter,
+      }), {
+        stage: 'chapterContinue',
+        chapterNumber: index,
+        onFallback: fallbackModel => report(`モデルを切り替えています: ${fallbackModel}`, {
+          phase: 'fallback',
+          detail: `第${index}章の続きを ${fallbackModel} で継続します。`,
+          chapterNumber: index,
+          chapterCount: runOptions.chapterCount,
+        }),
+        options: {
+          temperature: runOptions.styleMode === 'intensify' ? 0.88 : 0.78,
+          disableGoogleSearch: true,
+          maxTokens: 6000,
+          maxOutputTokens: 6000,
+          timeoutMs: 180000,
+          signal,
+        },
+      });
+      throwIfAborted(signal);
+      chapterResponse = continuationResponse;
+      const continuationText = chapterBodyText(continuationResponse?.text || continuationResponse || '');
+      if (submissionCharLength(continuationText) < 60) break;
+      chapterText = `${chapterText.trimEnd()}${continuationText}`.trim();
+      if (continuationResponse?.usedModel) usedModels.push(continuationResponse.usedModel);
+    }
+    if (isLastChapter && isLikelyTruncated(chapterText, chapterResponse?.finishReason)) {
+      throw new Error(`最終章（第${index}章）が完結せずに途切れました。文字数上限の可能性があります。もう一度お試しください。`);
+    }
     chapters.push(chapterText);
     if (chapterResponse?.usedModel) usedModels.push(chapterResponse.usedModel);
-    previousBridge = summarizeForContinuity(chapterText, index);
+    continuityDigests.push(summarizeForContinuity(chapterText, index));
+    previousBridge = renderRollingMemo(continuityDigests);
     report(`第${index}章が完了しました。`, {
       phase: 'chapterDone',
       detail: '次章へ渡す接続メモを作成し、芯のズレを抑えます。',
@@ -2733,7 +3141,8 @@ export async function runLongifyBeta({
     const topupArtifactIssues = longifyFormatArtifactIssues(rawTopupText);
     const topupText = cleanLongifyDraft(rawTopupText);
     if (topupArtifactIssues.length) {
-      if (submissionCharLength(topupText) >= 200 && !hasLongifyFormatArtifacts(topupText)) {
+      const hardTopupArtifacts = topupArtifactIssues.some(isHardLongifyTopupArtifactIssue);
+      if (!hardTopupArtifacts && submissionCharLength(topupText) >= 200 && !hasLongifyFormatArtifacts(topupText)) {
         report('最低文字数補強の形式崩れを除去して採用しました。', {
           phase: 'topupSanitized',
           detail: `混入形式: ${topupArtifactIssues.join('、')}。掃除後の追加本文を採用します。`,
@@ -2849,6 +3258,39 @@ export async function runLongifyBeta({
   if (!endingValidation.ok) {
     throw new Error(`長編化の結末回収に失敗しました: ${endingValidation.reason || '元本文の終盤が長編化末尾に残っていません'}`);
   }
+  const structureAudit = auditLongifyStructure({ chapters, invariants });
+  if (!structureAudit.ok) {
+    report(`構造チェック: 要修正（${structureAudit.blocking.length}件）`, {
+      phase: 'structureAudit',
+      detail: structureAudit.blocking.map(issue => issue.message).join(' / '),
+      chapterNumber: runOptions.chapterCount,
+      chapterCount: runOptions.chapterCount,
+    });
+    return {
+      title,
+      seedText,
+      ledgerText,
+      chapters,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: buildStructureLongifyReview({
+        text,
+        mode: 'longify',
+        structureAudit,
+        targetChars: runOptions.targetTotalNumber,
+        chapterCount: chapters.length,
+      }).aiReviewText,
+      reviewSource: 'structure',
+      structureAudit,
+      options: runOptions,
+    };
+  } else {
+    report('構造チェック: 合格（再演ループ・設定矛盾・尻切れなし）', {
+      phase: 'structureAudit',
+      chapterNumber: runOptions.chapterCount,
+      chapterCount: runOptions.chapterCount,
+    });
+  }
   report('完成稿をAI講評で評価中...', {
     phase: 'aiReview',
     detail: '次回ブラッシュアップでそのまま使える章別の改稿指示をAIに作成させています。',
@@ -2886,6 +3328,7 @@ export async function runLongifyBeta({
     text,
     aiReviewText,
     reviewSource: reviewResult.source,
+    structureAudit,
     options: runOptions,
   };
 }
@@ -3290,7 +3733,8 @@ export async function runLongifyBrushupBeta({
     const topupArtifactIssues = longifyFormatArtifactIssues(rawTopupText);
     const topupText = cleanLongifyDraft(rawTopupText);
     if (topupArtifactIssues.length) {
-      if (submissionCharLength(topupText) >= 200 && !hasLongifyFormatArtifacts(topupText)) {
+      const hardTopupArtifacts = topupArtifactIssues.some(isHardLongifyTopupArtifactIssue);
+      if (!hardTopupArtifacts && submissionCharLength(topupText) >= 200 && !hasLongifyFormatArtifacts(topupText)) {
         report('ブラッシュアップ後の最低文字数補強の形式崩れを除去して採用しました。', {
           phase: 'brushupTopupSanitized',
           detail: `混入形式: ${topupArtifactIssues.join('、')}。掃除後の追加本文を採用します。`,
@@ -3328,6 +3772,45 @@ export async function runLongifyBrushupBeta({
   }
 
   const text = formatBrushupOutput({ title, chapters, fallbackText: manuscript });
+  const structureAudit = auditLongifyStructure({ chapters });
+  if (!structureAudit.ok) {
+    report(`構造チェック: 要修正（${structureAudit.blocking.length}件）`, {
+      phase: 'brushupStructureAudit',
+      detail: structureAudit.blocking.map(issue => issue.message).join(' / '),
+      chapterNumber: sourceChapters.length,
+      chapterCount: sourceChapters.length,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+    const structureReview = buildStructureLongifyReview({
+      text,
+      mode: 'brushup',
+      structureAudit,
+      targetChars: targetTotalNumber,
+      chapterCount: chapters.length,
+    });
+    return {
+      mode: 'brushup',
+      title,
+      critiqueText,
+      structureGuide,
+      chapters,
+      chapterCount: chapters.length,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: structureReview.aiReviewText,
+      reviewSource: 'structure',
+      structureAudit,
+      originalChars: submissionCharLength(manuscript),
+      finalChars: submissionCharLength(stripStoryMakerFooter(text)),
+      targetTotalNumber,
+    };
+  }
+  report('構造チェック: 合格（再演ループ・設定矛盾・尻切れなし）', {
+    phase: 'brushupStructureAudit',
+    chapterNumber: sourceChapters.length,
+    chapterCount: sourceChapters.length,
+    completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+  });
   report('改稿後の完成稿をAI講評で再評価中...', {
     phase: 'brushupReview',
     detail: '再ブラッシュアップでそのまま使える章別の改稿指示をAIに作成させています。',
@@ -3391,6 +3874,7 @@ export async function runLongifyBrushupBeta({
       retainedScore: priorScore,
       rejectedScore: nextScore,
       rejectedAiReviewText: aiReviewText,
+      structureAudit,
     };
   }
   return {
@@ -3404,6 +3888,7 @@ export async function runLongifyBrushupBeta({
     text,
     aiReviewText,
     reviewSource: reviewResult.source,
+    structureAudit,
     originalChars: submissionCharLength(manuscript),
     finalChars: submissionCharLength(stripStoryMakerFooter(text)),
     targetTotalNumber,
@@ -3717,7 +4202,25 @@ function detectLongifyChapterOverlap(chapterText, previousChapters = []) {
   const sentenceRatio = currentSentences.length ? repeatedSentences / currentSentences.length : 0;
   const overlapsTooMuch = (repeatedParagraphs >= 2 && paragraphRatio >= 0.24)
     || (repeatedSentences >= 5 && sentenceRatio >= 0.28);
-  if (!overlapsTooMuch) return { ok: true };
+  if (!overlapsTooMuch) {
+    // Exact-match passed; check for paraphrased re-enactment (the loop bug the
+    // exact-match detector misses, e.g. ch5/ch6 retelling the same beats).
+    // Live gate uses the language-aware beat signal (place x action) only;
+    // fuzzy text similarity is reserved for the non-blocking structural audit.
+    const paraphrase = detectParaphrasedOverlap(chapterText, previousChapters, { useShingle: false });
+    if (!paraphrase.ok) {
+      return {
+        ok: false,
+        reason: `既存章と重複しています（${paraphrase.reason}）。`,
+        repeatedParagraphs,
+        repeatedSentences,
+        paragraphRatio,
+        sentenceRatio,
+        ...paraphrase,
+      };
+    }
+    return { ok: true };
+  }
   return {
     ok: false,
     reason: `既存章と重複する段落または文が多すぎます（段落${formatNumber(repeatedParagraphs)} / 文${formatNumber(repeatedSentences)}）。`,
@@ -3936,7 +4439,7 @@ function clearLongifyReview() {
 
 function getLongifyReviewPlainText() {
   const reviewEl = document.getElementById('longify-beta-review');
-  if (reviewEl?.dataset?.reviewSource === 'failed') return '';
+  if (reviewEl?.dataset?.reviewSource === 'failed' || reviewEl?.dataset?.reviewSource === 'structure') return '';
   const aiReviewText = String(reviewEl?.querySelector?.('.longify-beta-review-ai-text')?.textContent || '').trim();
   if (aiReviewText) return aiReviewText;
   return String(reviewEl?.innerText || reviewEl?.textContent || '').trim();
@@ -3973,6 +4476,8 @@ function renderLongifyReview(review) {
   scoreLine.className = 'longify-beta-review-score';
   if (review.source === 'failed') {
     scoreLine.textContent = `${review.modeLabel} AI講評: 取得失敗（未採点）`;
+  } else if (review.source === 'structure') {
+    scoreLine.textContent = `${review.modeLabel} 構造チェック: 不合格（未採点）`;
   } else if (review.source === 'ai') {
     scoreLine.textContent = `${review.modeLabel} AI講評${review.score === null ? '' : `: ${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`}`;
   } else {
@@ -3992,7 +4497,7 @@ function renderLongifyReview(review) {
   }
 
   reviewEl.append(scoreLine, summaryLine, list);
-  if (review.source === 'ai' || review.source === 'failed') {
+  if (['ai', 'failed', 'structure'].includes(review.source)) {
     const aiText = document.createElement('pre');
     aiText.className = 'longify-beta-review-ai-text';
     aiText.textContent = review.aiReviewText || '';
@@ -4316,6 +4821,7 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
       reviewText: result.aiReviewText,
       targetChars,
       chapterCount,
+      structureAudit: result.structureAudit,
     });
   }
   if (result?.reviewSource === 'failed') {
@@ -4323,6 +4829,15 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
       text: result.text,
       mode,
       reviewText: result.aiReviewText,
+      targetChars,
+      chapterCount,
+    });
+  }
+  if (result?.reviewSource === 'structure') {
+    return buildStructureLongifyReview({
+      text: result.text,
+      mode,
+      structureAudit: result.structureAudit,
       targetChars,
       chapterCount,
     });
@@ -4338,11 +4853,13 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
 
 function reviewKindLabel(source) {
   if (source === 'failed') return 'AI講評';
+  if (source === 'structure') return '構造チェック';
   return source === 'ai' ? 'AI講評' : '予備採点';
 }
 
 function formatReviewScoreForStatus(review) {
   if (review?.source === 'failed') return '取得失敗（未採点）';
+  if (review?.source === 'structure') return '構造NG（未採点）';
   if (!review || review.score === null || review.score === undefined) return '未採点';
   return `${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`;
 }

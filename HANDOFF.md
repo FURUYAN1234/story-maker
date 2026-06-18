@@ -2,6 +2,33 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-06-18 Long-novel structural-bug fixes (v5.1.7)
+
+### Status
+
+- Fixed structural bugs in longify beta (`runLongifyBeta` in `src/longifyBeta.js`) that prose/critique passes could not see. Version bumped 5.1.6 -> 5.1.7 before this verification session.
+- All 55 unit tests pass (`node --test "tests/**/*.test.js"`); `npm run build` and generic-rules guard pass after the final follow-up patch.
+- Real in-app Browser OpenAI verification on 2026-06-18 used the user-entered key only through the UI. A 10,000-char run with auto brush-up off completed at 10,225 displayed chars / 10,198 generated chars in the progress log, 3 chapters, visible `構造チェック: 合格`, local final re-audit `auditLongifyStructure.ok === true`, and AI review 82点. The review explicitly judged the story axis (`芯`, `一貫`, `因果`, `伏線`, `場面転換`) and still identified literary improvement points, not structural gate failures.
+- Manual next brush-up was also run in-app. It expanded to 30,573 chars / 6 chapters and structure check passed, but the score stayed 82点 (no score gain). The captured output exposed remaining format leaks: parenthesized script speaker labels such as `（澪）「...」`, storyboard/4-koma parenthetical notes, and `増補本文` meta lines. These exact leaks are now detected/cleaned and pinned in `tests/longifyBeta.test.js`; the captured brush-up output is artifact-positive before `cleanLongifyDraft` and artifact-free after cleanup. Do not deploy/tag until the user approves.
+
+### What changed
+
+- New pure module `src/longifyContinuity.js` (+ `tests/longifyContinuity.test.js`).
+- **A. Re-enactment loop (main cause):** `summarizeForContinuity` no longer returns a content-free boilerplate; it builds a real per-chapter digest (ending state / key events / consumed place×action beats). Digests are accumulated and rendered into every chapter prompt via `renderRollingMemo` (was: last-chapter boilerplate, overwritten each chapter).
+- **C. Loop detection:** `detectLongifyChapterOverlap` now also runs `detectParaphrasedOverlap`. Live regeneration gate uses the language-aware beat signal only (`useShingle:false`) to avoid false positives on non-Japanese/uniform text; fuzzy shingle similarity is used in the non-blocking audit.
+- **B. Setting drift (学年/ランドセル↔中学):** ledger prompt now emits a frozen `不変設定` block; `extractInvariants` parses it, it is injected into every chapter prompt, and `detectSettingContradiction` gates chapters.
+- **D. Truncation (尻切れ "「うーん」と考"):** `isLikelyTruncated` (terminal-punctuation heuristic; finishReason is dropped by the streaming provider layer so it is not relied on) drives an auto-continuation loop (`buildLongifyChapterContinuationPrompt`, ≤3 attempts). Final chapter must close or the run errors instead of silently accepting a cut-off.
+- **E. Blind critique:** `auditLongifyStructure` runs on the assembled manuscript before the AI review, reported via `onStage` and returned as `result.structureAudit` (non-blocking; does not alter the literary score path).
+- **F. Storyboard/script/augmentation residue after OpenAI proof:** Real OpenAI runs still produced `1コマ目の後...` / no-separator 4-koma storyboard residue, then a later 30k brush-up produced `（澪）「...」` parenthesized speaker labels and `増補本文` meta despite structure pass. Follow-up patches now detect and clean panel-lead residue, inline speaker-dialogue residue, parenthesized speaker labels, no-separator storyboard preludes, parenthesized 4-koma/end-card directives, duplicate in-body titles, and augmentation-meta lines before critique; regression tests pin the exact leaked shapes.
+
+### Notes / follow-ups
+
+- finishReason is NOT wired through `streamTextCall`/`zs` (minified provider). Truncation relies on the punctuation heuristic, which covers the observed failure. Wiring finishReason would be a stronger signal but touches minified `providerClients.js`.
+- Plan/diagnosis: `docs/codex_longnovel_bugfix_plan.md`.
+- Existing integration fixtures that reused one filler sentence across chapters were made distinct, and one bridge-format assertion updated (`第1章までの接続` → `第1章の確定`).
+- Latest OpenAI AI review still found literary improvement points, not structural gate failures: explanation-heavy scenes, weak/abstract scene turns, weak late emotional deepening, and insufficient symbolic payoff. Treat this as next brush-up quality work, not as proof that the structural bug gate failed.
+- The next brush-up did not raise the score in the observed run (82 -> 82), so do not claim that the brush-up quality loop is proven to improve score yet. The evidence does prove that structure audit is visible and that the latest captured format leaks are now guarded in code/tests.
+
 ## 2026-06-17 Gemini Longify Brush-Up Regression Handoff
 
 ### Status
