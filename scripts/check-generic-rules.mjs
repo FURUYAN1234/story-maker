@@ -20,6 +20,12 @@ const ruleFiles = process.env.SMK_GENERIC_RULE_FILES
     .filter(Boolean)
   : defaultRuleFiles;
 
+const longifyRuntimeRuleFiles = [
+  'src/longifyBeta.js',
+  'src/longifyContinuity.js',
+  'src/providerClients.js',
+];
+
 function u(escaped) {
   return JSON.parse(`"${escaped}"`);
 }
@@ -73,6 +79,45 @@ const mojibakeTerms = [
   '\\u8811',
 ].map(u);
 
+const longifyRuntimeTermLimits = {
+  'src/longifyBeta.js': {},
+  'src/longifyContinuity.js': {},
+  'src/providerClients.js': {},
+};
+
+const longifyRuntimeBlockedTerms = [
+  'SOURCE_FIT',
+  'sourceFit',
+  '短い原作',
+  '原作量',
+  '商店街',
+  'コンビニ',
+  '灯台商店街',
+  '金物屋',
+  '喫茶店',
+  'カフェ',
+  '映画館',
+  'パン屋',
+  '雑貨屋',
+  '八百屋',
+  '澪',
+  '春人',
+  '奈央',
+  '佐藤澪',
+];
+
+const longifyRuntimeTrackedTerms = [
+  ...new Set([
+    ...longifyRuntimeBlockedTerms,
+    ...Object.values(longifyRuntimeTermLimits).flatMap(limits => Object.keys(limits)),
+  ]),
+];
+
+const longifyRuntimeBlockedPatterns = [
+  { pattern: /自動.{0,16}(?:1万|10000|10,000).{0,16}(?:3章|3\s*章)/u, label: 'hidden 10000/3 chapter auto override' },
+  { pattern: /(?:1万|10000|10,000).{0,16}(?:3章|3\s*章).{0,16}自動/u, label: 'hidden 10000/3 chapter auto override' },
+];
+
 const failures = [];
 const fixed = [];
 
@@ -95,6 +140,10 @@ function findHits(file, text, term, kind) {
 
 function replaceAllLiteral(text, search, replacement) {
   return text.split(search).join(replacement);
+}
+
+function countLiteral(text, term) {
+  return text.split(term).length - 1;
 }
 
 for (const file of ruleFiles) {
@@ -128,6 +177,43 @@ for (const file of ruleFiles) {
   }
 }
 
+for (const file of longifyRuntimeRuleFiles) {
+  const absolute = path.join(rootDir, file);
+  if (!fs.existsSync(absolute)) {
+    failures.push({ file, line: 1, term: '(missing file)', kind: 'longify runtime rule file missing' });
+    continue;
+  }
+
+  const text = fs.readFileSync(absolute, 'utf8');
+  const limits = longifyRuntimeTermLimits[file] || {};
+
+  for (const term of longifyRuntimeTrackedTerms) {
+    const count = countLiteral(text, term);
+    const limit = limits[term] || 0;
+    if (count > limit) {
+      const firstIndex = text.indexOf(term);
+      failures.push({
+        file,
+        line: firstIndex >= 0 ? lineNumber(text, firstIndex) : 1,
+        term: `${term} (${count}/${limit})`,
+        kind: 'longify runtime concrete-term increase',
+      });
+    }
+  }
+
+  for (const { pattern, label } of longifyRuntimeBlockedPatterns) {
+    const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+    for (const match of text.matchAll(new RegExp(pattern.source, flags))) {
+      failures.push({
+        file,
+        line: lineNumber(text, match.index || 0),
+        term: match[0],
+        kind: label,
+      });
+    }
+  }
+}
+
 if (shouldFix) {
   if (fixed.length) {
     console.log('Generic rule fixer rewrote non-generic public rules:');
@@ -149,4 +235,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Generic rule guard passed: ${ruleFiles.length} files scanned.`);
+console.log(`Generic rule guard passed: ${ruleFiles.length} public rule files and ${longifyRuntimeRuleFiles.length} longify runtime files scanned.`);

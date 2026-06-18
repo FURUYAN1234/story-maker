@@ -23,7 +23,7 @@ const PLACE_CATEGORIES = [
   { id: 'station', tokens: ['駅'] },
   { id: 'window', tokens: ['窓', 'ベランダ'] },
   { id: 'desk', tokens: ['机'] },
-  { id: 'street', tokens: ['坂', '道', '橋', '川', '店', 'コンビニ', '商店街'] },
+  { id: 'street', tokens: ['坂', '道', '橋', '川', '店', '通り', '路地'] },
 ];
 
 // Actions are canonicalized so different conjugations (座り / 腰を / 座っ) map to
@@ -315,7 +315,7 @@ const STORYBOARD_PANEL_LEAD = /^[\t \u3000]*(?:#{1,6}[\t \u3000]*)?(?:第?[\d０
 const STORYBOARD_INLINE_SCRIPT_DIALOGUE = /[」』][\t \u3000]*(?!と|って|と、|と。)[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
 const STORYBOARD_SCRIPT_QUOTED_SPEAKER = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
 const STORYBOARD_PROSE_CUE_PARTICLE_TAIL = /(?:は|が|も|を|に|へ|で|と|から|まで|より|、|。|[,.!?！？])$/u;
-const STORYBOARD_SCENE_LOCATION = /(?:商店街|金物屋|喫茶店|カフェ|映画館|路地|通り|店内|店先|店の前|カウンター|パン屋|雑貨屋|空き地|跡地|裏口|翌朝|夕暮れ|深夜|夜|朝|雨上がり|路面|水たまり|シャッター)/u;
+const STORYBOARD_SCENE_LOCATION = /(?:場所|背景|時刻|場面|朝|昼|夕方|夜|翌日|雨|雪|風|光|影|街|町|村|通り|路地|道路|橋|川|広場|公園|空き地|跡地|店|店先|店内|部屋|家|学校|駅|港|森|山|海|入口|出口|裏口|屋上|地下|階段|廊下|扉|窓|机|棚|床|壁|椅子|テーブル|カウンター|看板|鍵|地図|写真|札|紙|本|手紙|記録|箱|袋|工具|足元|路面|水たまり|軒下)/u;
 const STORYBOARD_SCENE_STAGE = /(?:背景に|背後に|窓の外|視線の先|手元に|足元|指先|場面|並んで|立つ|立っている|立ち止まる|歩く|座っている|囲んでいる|広げている|広げられている|照らしている|揺れている|残っている|現れる|手渡している|眺めている|見つめている|見守る|微笑む|手を振る|差し出す|覗き込む|映っている)/u;
 
 function isDialogueOnlyLine(line) {
