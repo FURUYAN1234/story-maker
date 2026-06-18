@@ -4,6 +4,18 @@ This file is public-repository safe. Do not include API keys, private credential
 
 ## 2026-06-18 Long-novel structural-bug fixes (v5.1.7)
 
+### Follow-up: format gate + causality-aware review scoring (2026-06-18)
+
+- Added a pre-review `formatAudit` gate in `src/longifyBeta.js` for both `runLongifyBeta` and `runLongifyBrushupBeta`.
+- Final assembled text is now audited before `auditLongifyStructure` and before AI critique. If residue is cleanable, chapters are rewritten through `cleanLongifyDraft` and re-audited; if residue remains, the run returns `reviewSource: "format"` instead of sending a polluted manuscript to AI critique.
+- AI review prompts now receive a required structural/format deduction block. It explicitly asks the reviewer to penalize broken timeline, scene re-enactment, weak causal deltas, uncollected setup/payoff, weak climax obstacle, and remaining 4-koma/script/augmentation/title residue.
+- AI review display now carries `formatAudit` details and caps visible AI score at 69 when format or structure audit fails. The review panel/status now treats `format` like `structure`/`failed` so local NG cards are not reused as prior AI critique.
+- Regression tests were added for `auditLongifyFormat`, the score cap, review preservation for `format`, returned `formatAudit` on longify/brush-up results, and the real browser leak shape `「4コマ漫画風長編化・本編差し込み追加本文」`.
+- Local verification passed after the final patch: `node --test "tests/**/*.test.js"` (55/55), `npm run check:generic-rules`, `npm run build` (existing >500 kB chunk warning only), and `git diff --check` on touched files (LF/CRLF warning only).
+- Real in-app Browser OpenAI run on port 5179 with user-entered key, 10,000-char target, auto brush-up off: completed 3 chapters, 10,780 submission chars, visible `形式チェック: 合格`, visible `構造チェック: 合格`, AI review 76点. Progress showed chapter/top-up format cleanup firing in the live run. AI review explicitly flagged the desired structural weakness: weak `因果差分`, blurred story propulsion, weak setup/payoff/climax concentration, and chapter-specific fixes.
+- The same browser run exposed one new final-output residue after the displayed pass: `「4コマ漫画風長編化・本編差し込み追加本文」`. This was patched immediately. Re-audit of the captured browser output with the patched cleaner reports `hasFormatArtifactsBeforeClean === true`, `cleanedHasFormatArtifacts === false`, and the quoted meta heading absent after cleaning. A fresh full API rerun after this tiny detector patch has not been run yet to avoid extra API spend.
+- Do not deploy/tag until the user approves.
+
 ### Status
 
 - Fixed structural bugs in longify beta (`runLongifyBeta` in `src/longifyBeta.js`) that prose/critique passes could not see. Version bumped 5.1.6 -> 5.1.7 before this verification session.

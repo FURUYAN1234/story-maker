@@ -75,6 +75,7 @@ const LONGIFY_MANGA_LABEL_PREFIX_PATTERN = /^[\t \u3000]*(?:絵\s*\/\s*状況|�
 const LONGIFY_NON_CHAPTER_MARKDOWN_HEADING_PATTERN = /^[\t \u3000]*#{1,6}[\t \u3000]+(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[^\n]{1,120}$/u;
 const LONGIFY_TITLE_CANDIDATE_LINE_PATTERN = /^[\t \u3000]*(?:作品タイトル案|タイトル案|作品タイトル|タイトル|題名)\s*[:：]/u;
 const LONGIFY_AUGMENTATION_META_LINE_PATTERN = /増補本文/u;
+const LONGIFY_QUOTED_META_HEADING_LINE_PATTERN = /^[\t \u3000]*[「『"“”']?[^「」\n]{0,80}(?:4コマ|漫画|長編化)[^「」\n]{0,80}(?:追加本文|増補本文|本編差し込み)[^「」\n]{0,80}[」』"“”']?[\t \u3000]*$/u;
 const LONGIFY_STORYBOARD_PAREN_DIRECTIVE_LINE_PATTERN = /^[\t \u3000]*[（(][^）)\n]*(?:コマ目|コマめ|カット|終幕|引きを残|余韻で閉じ|ここで第)[^）)\n]*[）)][\t \u3000]*$/u;
 const LONGIFY_SCRIPT_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_（）()・]{1,18}\s*[:：]\s*\S/u;
 const LONGIFY_SCRIPT_QUOTED_SPEAKER_LINE_PATTERN = /^[\t \u3000]*(?!第[\t \u3000]*[0-9０-９一二三四五六七八九十百]+[\t \u3000]*章(?:[\t \u3000:：\-ー―／/・]|$))[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}A-Za-z0-9_・]{1,14}(?:[（(][^）)\n]{1,18}[）)])?[\t \u3000]*[「『]/u;
@@ -1148,6 +1149,7 @@ export function cleanLongifyDraft(text) {
     .filter(line => !LONGIFY_STORYBOARD_SEPARATOR_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_TOPUP_LABEL_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_AUGMENTATION_META_LINE_PATTERN.test(String(line || '').trim()))
+    .filter(line => !LONGIFY_QUOTED_META_HEADING_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_BRACKETED_TITLE_LABEL_LINE_PATTERN.test(String(line || '').trim()))
     .filter(line => !LONGIFY_STANDALONE_BRACKETED_TITLE_LINE_PATTERN.test(String(line || '').trim()))
@@ -1178,6 +1180,9 @@ function longifyFormatArtifactIssues(text) {
   }
   if (lines.some(line => LONGIFY_AUGMENTATION_META_LINE_PATTERN.test(line))) {
     issues.push('増補本文メタ');
+  }
+  if (lines.some(line => LONGIFY_QUOTED_META_HEADING_LINE_PATTERN.test(line))) {
+    issues.push('引用符付き本文外メタ');
   }
   if (hasLongifyStoryboardPrelude(text)) {
     issues.push('絵コンテ型の章頭メモ');
@@ -1218,6 +1223,67 @@ function longifyFormatArtifactIssues(text) {
 
 export function hasLongifyFormatArtifacts(text) {
   return longifyFormatArtifactIssues(text).length > 0;
+}
+
+export function auditLongifyFormat(text) {
+  const issues = longifyFormatArtifactIssues(text);
+  const cleanedText = issues.length ? cleanLongifyDraft(text) : String(text || '');
+  const remainingIssues = longifyFormatArtifactIssues(cleanedText);
+  return {
+    ok: remainingIssues.length === 0,
+    dirty: issues.length > 0,
+    changed: cleanedText !== String(text || ''),
+    issues,
+    remainingIssues,
+  };
+}
+
+function publicLongifyFormatAudit(audit) {
+  return {
+    ok: Boolean(audit?.ok),
+    dirty: Boolean(audit?.dirty),
+    changed: Boolean(audit?.changed),
+    issues: Array.isArray(audit?.issues) ? audit.issues : [],
+    remainingIssues: Array.isArray(audit?.remainingIssues) ? audit.remainingIssues : [],
+  };
+}
+
+function buildLongifyFormatText({ mode = 'longify', title = '', chapters = [], fallbackText = '' } = {}) {
+  if (mode === 'brushup') return formatBrushupOutput({ title, chapters, fallbackText });
+  return formatLongifyOutput({ title, chapters });
+}
+
+function applyLongifyFormatGate({ mode = 'longify', title = '', chapters = [], fallbackText = '' } = {}) {
+  const rawText = buildLongifyFormatText({ mode, title, chapters, fallbackText });
+  const rawAudit = auditLongifyFormat(rawText);
+  if (!rawAudit.dirty) {
+    return {
+      text: rawText,
+      chapters,
+      audit: rawAudit,
+    };
+  }
+
+  const cleanedChapters = chapters.map((chapter, index) => (
+    ensureChapterHeading(cleanLongifyDraft(chapter), index + 1)
+  ));
+  const cleanedText = buildLongifyFormatText({
+    mode,
+    title,
+    chapters: cleanedChapters,
+    fallbackText,
+  });
+  const cleanedAudit = {
+    ...auditLongifyFormat(cleanedText),
+    dirty: true,
+    changed: true,
+    issues: rawAudit.issues,
+  };
+  return {
+    text: cleanedText,
+    chapters: cleanedChapters,
+    audit: cleanedAudit,
+  };
 }
 
 function isHardLongifyTopupArtifactIssue(issue) {
@@ -1741,11 +1807,40 @@ ${targetBlock}
 ${buildBrushupReviewSource(manuscript)}`;
 }
 
+function buildLongifyEvaluationAuditBlock({ formatAudit = null, structureAudit = null } = {}) {
+  const lines = [
+    '',
+    '構造・形式の必須減点軸:',
+    '- 一本の時間軸として読めない時系列混線、同一場面の再演、同じ場所×行為の反復は必ず問題点に入れる。',
+    '- 章ごとの因果差分（誰が何を知り、何が可能/不可能になり、何の負債が増えたか）が弱い章は減点する。',
+    '- 伏線の未回収、先行セットアップのない回収、クライマックス障壁の弱さは次回方針へ必ず反映する。',
+    '- 4コマ/脚本/増補本文/タイトル再掲など本文外形式が残っている場合、80点以上にしない。',
+  ];
+  if (formatAudit) {
+    const issues = Array.isArray(formatAudit.remainingIssues) && formatAudit.remainingIssues.length
+      ? formatAudit.remainingIssues
+      : (Array.isArray(formatAudit.issues) ? formatAudit.issues : []);
+    lines.push(`- formatAudit.ok: ${formatAudit.ok ? 'true' : 'false'}`);
+    if (formatAudit.dirty) lines.push('- formatAudit.cleaned: true');
+    if (issues.length) lines.push(`- formatAudit.issues: ${issues.join(' / ')}`);
+  }
+  if (structureAudit) {
+    const blocking = Array.isArray(structureAudit.blocking) ? structureAudit.blocking : [];
+    lines.push(`- structureAudit.ok: ${structureAudit.ok ? 'true' : 'false'}`);
+    if (blocking.length) {
+      lines.push(`- structureAudit.blocking: ${blocking.map(issue => issue.message || issue.code).filter(Boolean).join(' / ')}`);
+    }
+  }
+  return lines.join('\n');
+}
+
 export function buildLongifyAiReviewPrompt(manuscript, {
   mode = 'longify',
   priorReviewText = '',
   targetChars = 0,
   chapterCount = 0,
+  formatAudit = null,
+  structureAudit = null,
 } = {}) {
   const priorBlock = String(priorReviewText || '').trim()
     ? `\n前回までのAI講評・改稿方針:\n${String(priorReviewText).trim().slice(0, 4000)}\n`
@@ -1753,6 +1848,7 @@ export function buildLongifyAiReviewPrompt(manuscript, {
   const modeLabel = mode === 'brushup' ? 'ブラッシュアップ後の完成稿' : '長編化後の完成稿';
   const targetLine = targetChars ? `- 投稿サイト換算の目標文字数: ${formatNumber(targetChars)}字` : '';
   const chapterLine = chapterCount ? `- 章数: ${chapterCount}章` : '';
+  const auditBlock = buildLongifyEvaluationAuditBlock({ formatAudit, structureAudit });
   return `あなたは商業小説の編集者です。次の${modeLabel}を、次回ブラッシュアップでそのまま使える実用的なAI講評として評価してください。
 ローカル計算ではなく、本文を読んだ編集判断として返してください。
 
@@ -1779,6 +1875,7 @@ JSON出力形式:
 補助情報:
 ${targetLine}
 ${chapterLine}
+${auditBlock}
 ${priorBlock}
 評価対象情報（ここから。本文として書き写し禁止）:
 <<<EVALUATION_TARGET_PACKET
@@ -2008,11 +2105,14 @@ function buildLongifyAiReviewRetryPrompt(manuscript, reviewOptions = {}, invalid
     priorReviewText = '',
     targetChars = 0,
     chapterCount = 0,
+    formatAudit = null,
+    structureAudit = null,
   } = reviewOptions || {};
   const priorBlock = String(priorReviewText || '').trim()
     ? `\n前回までのAI講評・改稿方針:\n${String(priorReviewText).trim().slice(0, 2400)}\n`
     : '';
   const modeLabel = mode === 'brushup' ? 'ブラッシュアップ後の完成稿' : '長編化後の完成稿';
+  const auditBlock = buildLongifyEvaluationAuditBlock({ formatAudit, structureAudit });
   return `あなたは商業小説の編集者です。${modeLabel}の講評だけを作成してください。
 
 前回の応答は講評形式ではありませんでした。本文の続き、本文の冒頭、タイトル、章本文を出力してはいけません。
@@ -2027,6 +2127,7 @@ INVALID_RESPONSE
 - score、commentary、positives、problems、chapterDirections、nextBrushupPlanを必ず書く。
 - 投稿サイト換算の目標文字数: ${targetChars ? `${formatNumber(targetChars)}字` : '指定なし'}
 - 章数: ${chapterCount || '不明'}章
+${auditBlock}
 ${priorBlock}
 評価対象情報（ここから。本文として書き写し禁止）:
 <<<EVALUATION_TARGET_PACKET
@@ -2064,13 +2165,15 @@ async function requestLongifyAiReview({
   priorReviewText = '',
   targetChars = 0,
   chapterCount = 0,
+  formatAudit = null,
+  structureAudit = null,
   stage = 'longifyReview',
   report,
   reportContext = {},
   fallbackDetail = '完成稿AI講評',
   signal,
 } = {}) {
-  const reviewOptions = { mode, priorReviewText, targetChars, chapterCount };
+  const reviewOptions = { mode, priorReviewText, targetChars, chapterCount, formatAudit, structureAudit };
   const baseOptions = {
     temperature: 0.12,
     disableGoogleSearch: true,
@@ -2249,8 +2352,35 @@ function reviewTextSignature(text) {
 }
 
 export function shouldPreserveRenderedLongifyReview({ reviewSource = '', textSignature = '', outputText = '' } = {}) {
-  if (!['ai', 'failed', 'structure'].includes(reviewSource)) return false;
+  if (!['ai', 'failed', 'structure', 'format'].includes(reviewSource)) return false;
   return Boolean(textSignature && textSignature === reviewTextSignature(outputText));
+}
+
+function capAiReviewScore(score, { formatAudit = null, structureAudit = null } = {}) {
+  if (score === null || score === undefined) return null;
+  let cap = 100;
+  if (formatAudit && !formatAudit.ok) cap = Math.min(cap, 69);
+  if (structureAudit && !structureAudit.ok) cap = Math.min(cap, 69);
+  return Math.min(score, cap);
+}
+
+function formatAuditDetails(formatAudit) {
+  if (!formatAudit) return [];
+  const issues = Array.isArray(formatAudit.issues) ? formatAudit.issues : [];
+  const remaining = Array.isArray(formatAudit.remainingIssues) ? formatAudit.remainingIssues : [];
+  if (!formatAudit.ok) {
+    return [
+      `形式チェック: 要修正（${remaining.length || issues.length}件）`,
+      remaining.length ? `形式残り: ${remaining.join(' / ')}` : '',
+    ].filter(Boolean);
+  }
+  if (formatAudit.dirty) {
+    return [
+      '形式チェック: 修正済み',
+      issues.length ? `除去した形式: ${issues.join(' / ')}` : '',
+    ].filter(Boolean);
+  }
+  return ['形式チェック: 合格'];
 }
 
 export function buildAiLongifyReview({
@@ -2260,13 +2390,15 @@ export function buildAiLongifyReview({
   targetChars = 0,
   chapterCount = 0,
   structureAudit = null,
+  formatAudit = null,
 } = {}) {
   const normalizedReview = cleanLongifyAiReviewText(reviewText);
   const chars = submissionCharLength(stripStoryMakerFooter(text));
   const chapters = chapterCount || countLongifyChapterHeadings(text);
   const normalizedTargetChars = Math.max(0, Number(targetChars || 0));
   const targetMet = !normalizedTargetChars || chars >= normalizedTargetChars;
-  const score = extractAiReviewScore(normalizedReview);
+  const rawScore = extractAiReviewScore(normalizedReview);
+  const score = capAiReviewScore(rawScore, { formatAudit, structureAudit });
   const passLabel = targetMet ? aiReviewPassLabel(score) : aiReviewPassLabel(AI_REVIEW_PASS_SCORE - 1);
   const summary = firstReviewLine(normalizedReview) || 'AI講評本文を取得しました。';
   return {
@@ -2278,9 +2410,11 @@ export function buildAiLongifyReview({
     summary,
     aiReviewText: normalizedReview,
     details: [
+      ...formatAuditDetails(formatAudit),
       structureAudit ? `構造チェック: ${structureAudit.ok ? '合格' : '要修正'}` : '',
       'AI講評: 実行済み',
       score === null ? 'AI総合点: 未取得' : `AI総合点: ${score}点（${passLabel}）`,
+      rawScore !== null && score !== rawScore ? `AI総合点上限補正: ${rawScore}点 -> ${score}点` : '',
       `投稿サイト換算文字数: ${formatNumber(chars)}字`,
       chapters ? `章数: ${chapters}章` : '',
       targetChars ? `最低文字数: ${chars >= targetChars ? '達成' : '未達'}（${formatNumber(targetChars)}字）` : '',
@@ -2374,6 +2508,55 @@ function buildStructureLongifyReview({
       '元短編の出来事を発生順に並べ、各章へ一度だけ割り当てる。',
       '各章の開始時点、目的、障害、失敗または選択、章末で変わった状態を固定する。',
       '不足文字数は新しい雰囲気シーンではなく、既存因果の対立・代償・意味づけとして増やす。',
+    ],
+    chars,
+    chapters,
+    targetChars: normalizedTargetChars,
+    targetMet: !normalizedTargetChars || chars >= normalizedTargetChars,
+    signature: reviewTextSignature(text),
+  };
+}
+
+function buildFormatLongifyReview({
+  text = '',
+  mode = 'longify',
+  formatAudit = null,
+  targetChars = 0,
+  chapterCount = 0,
+} = {}) {
+  const chars = submissionCharLength(stripStoryMakerFooter(text));
+  const chapters = chapterCount || countLongifyChapterHeadings(text);
+  const normalizedTargetChars = Math.max(0, Number(targetChars || 0));
+  const remaining = Array.isArray(formatAudit?.remainingIssues) ? formatAudit.remainingIssues : [];
+  const issues = remaining.length ? remaining : (Array.isArray(formatAudit?.issues) ? formatAudit.issues : []);
+  const messages = issues.filter(Boolean);
+  const aiReviewText = [
+    '形式チェック: 不合格',
+    'AI総合点: 未採点（形式NG）',
+    '理由: 本文外の脚本・4コマ・増補本文・タイトル再掲などが残っているため、AI講評前に停止しました。',
+    messages.length ? `検出内容: ${messages.join(' / ')}` : '',
+    '次回方針: まず本文を小説本文だけに清掃し、章ごとの時間軸・因果差分が読める状態に戻してから講評してください。',
+  ].filter(Boolean).join('\n');
+  return {
+    source: 'format',
+    mode,
+    modeLabel: mode === 'brushup' ? 'ブラッシュアップ後' : '長編化後',
+    score: null,
+    passLabel: '形式NG',
+    summary: '形式チェックで不合格です。AI講評の前に本文外形式の除去を優先してください。',
+    aiReviewText,
+    details: [
+      ...formatAuditDetails(formatAudit),
+      'AI総合点: 未採点（形式NG）',
+      `投稿サイト換算文字数: ${formatNumber(chars)}字`,
+      chapters ? `章数: ${chapters}章` : '',
+      targetChars ? `最低文字数: ${chars >= targetChars ? '達成' : '未達'}（${formatNumber(targetChars)}字）` : '',
+    ].filter(Boolean),
+    positives: [],
+    negatives: messages.length ? messages : ['本文外形式が残っています。'],
+    brushupPlan: [
+      '脚本・4コマ・増補本文ラベル・タイトル再掲を本文から除去する。',
+      '清掃後に章ごとの出来事順、障壁、転機、回収を一本の時間軸へ並べ直す。',
     ],
     chars,
     chapters,
@@ -3258,6 +3441,53 @@ export async function runLongifyBeta({
   if (!endingValidation.ok) {
     throw new Error(`長編化の結末回収に失敗しました: ${endingValidation.reason || '元本文の終盤が長編化末尾に残っていません'}`);
   }
+  const finalFormatGate = applyLongifyFormatGate({ mode: 'longify', title, chapters });
+  const formatAudit = publicLongifyFormatAudit(finalFormatGate.audit);
+  if (finalFormatGate.audit.changed) {
+    chapters.splice(0, chapters.length, ...finalFormatGate.chapters);
+    text = finalFormatGate.text;
+    report('形式チェック: 本文外形式を清掃しました。', {
+      phase: 'formatAudit',
+      detail: formatAudit.issues.join(' / '),
+      chapterNumber: runOptions.chapterCount,
+      chapterCount: runOptions.chapterCount,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+  }
+  if (!formatAudit.ok) {
+    report(`形式チェック: 要修正（${formatAudit.remainingIssues.length || formatAudit.issues.length}件）`, {
+      phase: 'formatAudit',
+      detail: (formatAudit.remainingIssues.length ? formatAudit.remainingIssues : formatAudit.issues).join(' / '),
+      chapterNumber: runOptions.chapterCount,
+      chapterCount: runOptions.chapterCount,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+    const formatReview = buildFormatLongifyReview({
+      text,
+      mode: 'longify',
+      formatAudit,
+      targetChars: runOptions.targetTotalNumber,
+      chapterCount: chapters.length,
+    });
+    return {
+      title,
+      seedText,
+      ledgerText,
+      chapters,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: formatReview.aiReviewText,
+      reviewSource: 'format',
+      formatAudit,
+      options: runOptions,
+    };
+  }
+  report('形式チェック: 合格', {
+    phase: 'formatAudit',
+    chapterNumber: runOptions.chapterCount,
+    chapterCount: runOptions.chapterCount,
+    completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+  });
   const structureAudit = auditLongifyStructure({ chapters, invariants });
   if (!structureAudit.ok) {
     report(`構造チェック: 要修正（${structureAudit.blocking.length}件）`, {
@@ -3281,6 +3511,7 @@ export async function runLongifyBeta({
         chapterCount: chapters.length,
       }).aiReviewText,
       reviewSource: 'structure',
+      formatAudit,
       structureAudit,
       options: runOptions,
     };
@@ -3304,6 +3535,8 @@ export async function runLongifyBeta({
     mode: 'longify',
     targetChars: runOptions.targetTotalNumber,
     chapterCount: chapters.length,
+    formatAudit,
+    structureAudit,
     stage: 'longifyReview',
     report,
     reportContext: {
@@ -3328,6 +3561,7 @@ export async function runLongifyBeta({
     text,
     aiReviewText,
     reviewSource: reviewResult.source,
+    formatAudit,
     structureAudit,
     options: runOptions,
   };
@@ -3771,7 +4005,58 @@ export async function runLongifyBrushupBeta({
     throw new Error('ブラッシュアップ結果が長編最低文字数を下回りました。');
   }
 
-  const text = formatBrushupOutput({ title, chapters, fallbackText: manuscript });
+  let text = formatBrushupOutput({ title, chapters, fallbackText: manuscript });
+  const finalFormatGate = applyLongifyFormatGate({ mode: 'brushup', title, chapters, fallbackText: manuscript });
+  const formatAudit = publicLongifyFormatAudit(finalFormatGate.audit);
+  if (finalFormatGate.audit.changed) {
+    chapters.splice(0, chapters.length, ...finalFormatGate.chapters);
+    text = finalFormatGate.text;
+    report('形式チェック: 本文外形式を清掃しました。', {
+      phase: 'brushupFormatAudit',
+      detail: formatAudit.issues.join(' / '),
+      chapterNumber: sourceChapters.length,
+      chapterCount: sourceChapters.length,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+  }
+  if (!formatAudit.ok) {
+    report(`形式チェック: 要修正（${formatAudit.remainingIssues.length || formatAudit.issues.length}件）`, {
+      phase: 'brushupFormatAudit',
+      detail: (formatAudit.remainingIssues.length ? formatAudit.remainingIssues : formatAudit.issues).join(' / '),
+      chapterNumber: sourceChapters.length,
+      chapterCount: sourceChapters.length,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+    const formatReview = buildFormatLongifyReview({
+      text,
+      mode: 'brushup',
+      formatAudit,
+      targetChars: targetTotalNumber,
+      chapterCount: chapters.length,
+    });
+    return {
+      mode: 'brushup',
+      title,
+      critiqueText,
+      structureGuide,
+      chapters,
+      chapterCount: chapters.length,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: formatReview.aiReviewText,
+      reviewSource: 'format',
+      formatAudit,
+      originalChars: submissionCharLength(manuscript),
+      finalChars: submissionCharLength(stripStoryMakerFooter(text)),
+      targetTotalNumber,
+    };
+  }
+  report('形式チェック: 合格', {
+    phase: 'brushupFormatAudit',
+    chapterNumber: sourceChapters.length,
+    chapterCount: sourceChapters.length,
+    completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+  });
   const structureAudit = auditLongifyStructure({ chapters });
   if (!structureAudit.ok) {
     report(`構造チェック: 要修正（${structureAudit.blocking.length}件）`, {
@@ -3799,6 +4084,7 @@ export async function runLongifyBrushupBeta({
       text,
       aiReviewText: structureReview.aiReviewText,
       reviewSource: 'structure',
+      formatAudit,
       structureAudit,
       originalChars: submissionCharLength(manuscript),
       finalChars: submissionCharLength(stripStoryMakerFooter(text)),
@@ -3825,6 +4111,8 @@ export async function runLongifyBrushupBeta({
     priorReviewText: critiqueText,
     targetChars: targetTotalNumber,
     chapterCount: chapters.length,
+    formatAudit,
+    structureAudit,
     stage: 'brushupReview',
     report,
     reportContext: {
@@ -3848,6 +4136,7 @@ export async function runLongifyBrushupBeta({
   if (scoreRegressionBlocked) {
     const retainedChapters = sourceChapters.map((chapter, index) => ensureChapterHeading(cleanLongifyDraft(chapter), index + 1));
     const retainedText = formatBrushupOutput({ title, chapters: retainedChapters, fallbackText: manuscript });
+    const retainedFormatAudit = publicLongifyFormatAudit(auditLongifyFormat(retainedText));
     const retainedChars = submissionCharLength(stripStoryMakerFooter(retainedText));
     report('AI採点が前回より下がったため、改稿結果を採用せず元原稿を保持します。', {
       phase: 'brushupScoreRegressionGuard',
@@ -3874,6 +4163,7 @@ export async function runLongifyBrushupBeta({
       retainedScore: priorScore,
       rejectedScore: nextScore,
       rejectedAiReviewText: aiReviewText,
+      formatAudit: retainedFormatAudit,
       structureAudit,
     };
   }
@@ -3888,6 +4178,7 @@ export async function runLongifyBrushupBeta({
     text,
     aiReviewText,
     reviewSource: reviewResult.source,
+    formatAudit,
     structureAudit,
     originalChars: submissionCharLength(manuscript),
     finalChars: submissionCharLength(stripStoryMakerFooter(text)),
@@ -4439,7 +4730,9 @@ function clearLongifyReview() {
 
 function getLongifyReviewPlainText() {
   const reviewEl = document.getElementById('longify-beta-review');
-  if (reviewEl?.dataset?.reviewSource === 'failed' || reviewEl?.dataset?.reviewSource === 'structure') return '';
+  if (reviewEl?.dataset?.reviewSource === 'failed'
+    || reviewEl?.dataset?.reviewSource === 'structure'
+    || reviewEl?.dataset?.reviewSource === 'format') return '';
   const aiReviewText = String(reviewEl?.querySelector?.('.longify-beta-review-ai-text')?.textContent || '').trim();
   if (aiReviewText) return aiReviewText;
   return String(reviewEl?.innerText || reviewEl?.textContent || '').trim();
@@ -4478,6 +4771,8 @@ function renderLongifyReview(review) {
     scoreLine.textContent = `${review.modeLabel} AI講評: 取得失敗（未採点）`;
   } else if (review.source === 'structure') {
     scoreLine.textContent = `${review.modeLabel} 構造チェック: 不合格（未採点）`;
+  } else if (review.source === 'format') {
+    scoreLine.textContent = `${review.modeLabel} 形式チェック: 不合格（未採点）`;
   } else if (review.source === 'ai') {
     scoreLine.textContent = `${review.modeLabel} AI講評${review.score === null ? '' : `: ${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`}`;
   } else {
@@ -4822,6 +5117,7 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
       targetChars,
       chapterCount,
       structureAudit: result.structureAudit,
+      formatAudit: result.formatAudit,
     });
   }
   if (result?.reviewSource === 'failed') {
@@ -4842,6 +5138,15 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
       chapterCount,
     });
   }
+  if (result?.reviewSource === 'format') {
+    return buildFormatLongifyReview({
+      text: result.text,
+      mode,
+      formatAudit: result.formatAudit,
+      targetChars,
+      chapterCount,
+    });
+  }
   return buildLongifyReview({
     text: result?.text || '',
     mode,
@@ -4854,12 +5159,14 @@ function buildReviewDisplayFromResult({ result, mode, targetChars = 0, chapterCo
 function reviewKindLabel(source) {
   if (source === 'failed') return 'AI講評';
   if (source === 'structure') return '構造チェック';
+  if (source === 'format') return '形式チェック';
   return source === 'ai' ? 'AI講評' : '予備採点';
 }
 
 function formatReviewScoreForStatus(review) {
   if (review?.source === 'failed') return '取得失敗（未採点）';
   if (review?.source === 'structure') return '構造NG（未採点）';
+  if (review?.source === 'format') return '形式NG（未採点）';
   if (!review || review.score === null || review.score === undefined) return '未採点';
   return `${review.score}点（${review.passLabel || aiReviewPassLabel(review.score)}）`;
 }

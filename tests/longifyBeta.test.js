@@ -3,6 +3,7 @@ import { STORY_MAKER_FOOTER } from '../src/version.js';
 import {
   AUTO_BRUSHUP_MAX_ATTEMPTS,
   AI_REVIEW_PASS_SCORE,
+  auditLongifyFormat,
   buildAiLongifyReview,
   extractAiReviewScore,
   buildLongifyAiReviewPrompt,
@@ -445,6 +446,17 @@ assert.equal(cleanedBrowserBrushupLeakDraft.includes('増補本文'), false);
 assert.equal(cleanedBrowserBrushupLeakDraft.includes('4コマ目'), false);
 assert.equal(cleanedBrowserBrushupLeakDraft.includes('（澪）'), false);
 assert.ok(cleanedBrowserBrushupLeakDraft.includes('本文として残す場面。'));
+const browserBrushupLeakAudit = auditLongifyFormat(browserBrushupLeakDraft);
+assert.equal(browserBrushupLeakAudit.dirty, true);
+assert.equal(browserBrushupLeakAudit.ok, true);
+assert.ok(browserBrushupLeakAudit.issues.length >= 2);
+assert.equal(browserBrushupLeakAudit.remainingIssues.length, 0);
+const quotedMetaHeadingLeak = '第3章\n\n「4コマ漫画風長編化・本編差し込み追加本文」\n\n映写会が始まる直前の薄暗い映写室。';
+assert.equal(hasLongifyFormatArtifacts(quotedMetaHeadingLeak), true);
+assert.equal(
+  cleanLongifyDraft(quotedMetaHeadingLeak),
+  '第3章\n\n映写会が始まる直前の薄暗い映写室。'
+);
 assert.equal(
   hasLongifyFormatArtifacts('第3章\n\n八百屋の奥さん「こうやって誰かが来てくれるだけで、まだお店やってるんだって思えるのよ」'),
   true
@@ -624,6 +636,7 @@ assert.match(buildLongifyAiReviewPrompt(longManuscript), /AI\u8b1b\u8a55/);
 assert.match(buildLongifyAiReviewPrompt(longManuscript), /\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a/);
 assert.match(buildLongifyAiReviewPrompt(longManuscript), /AI\u7dcf\u5408\u70b9/);
 assert.match(buildLongifyAiReviewPrompt(longManuscript), /\u30ec\u30d3\u30e5\u30fc\u7528\u629c\u7c8b\u30d1\u30b1\u30c3\u30c8/);
+assert.match(buildLongifyAiReviewPrompt(longManuscript), /\u69cb\u9020\u30fb\u5f62\u5f0f\u306e\u5fc5\u9808\u6e1b\u70b9\u8ef8/);
 assert.doesNotMatch(buildLongifyAiReviewPrompt(longManuscript), /EVALUATION_TARGET_MANUSCRIPT/);
 assert.equal(extractAiReviewScore('AI\u7dcf\u5408\u70b9: 86\u70b9\nAI\u8b1b\u8a55:'), 86);
 assert.equal(extractAiReviewScore('\u30b9\u30b3\u30a2: 74'), 74);
@@ -646,6 +659,21 @@ const reviewPreserve = buildAiLongifyReview({
   structureAudit: { ok: true, blocking: [], warnings: [] },
 });
 assert.ok(reviewPreserve.details.includes('構造チェック: 合格'));
+const reviewFormatCapped = buildAiLongifyReview({
+  text: reviewPreserveSample,
+  reviewText: 'AI\u7dcf\u5408\u70b9: 92\u70b9\nAI\u8b1b\u8a55:\n\u8868\u5c64\u306f\u8aad\u307f\u3084\u3059\u3044\u3002',
+  formatAudit: {
+    ok: false,
+    dirty: true,
+    changed: true,
+    issues: ['\u5897\u88dc\u672c\u6587\u30e1\u30bf'],
+    remainingIssues: ['\u8a71\u8005\u30e9\u30d9\u30eb'],
+  },
+  structureAudit: { ok: true, blocking: [], warnings: [] },
+});
+assert.equal(reviewFormatCapped.score, 69);
+assert.ok(reviewFormatCapped.details.some(detail => detail.includes('\u5f62\u5f0f\u30c1\u30a7\u30c3\u30af')));
+assert.ok(reviewFormatCapped.details.some(detail => detail.includes('92\u70b9 -> 69\u70b9')));
 assert.equal(shouldPreserveRenderedLongifyReview({
   reviewSource: 'ai',
   textSignature: reviewPreserve.signature,
@@ -666,6 +694,11 @@ assert.equal(shouldPreserveRenderedLongifyReview({
   textSignature: reviewPreserve.signature,
   outputText: `${reviewPreserveSample}\nextra`,
 }), false);
+assert.equal(shouldPreserveRenderedLongifyReview({
+  reviewSource: 'format',
+  textSignature: reviewPreserve.signature,
+  outputText: reviewPreserveSample,
+}), true);
 assert.equal(AI_REVIEW_PASS_SCORE, 80);
 assert.equal(AUTO_BRUSHUP_MAX_ATTEMPTS, 3);
 assert.equal(shouldAutoBrushupContinue({ score: 79, autoEnabled: true, attempts: 0 }), true);
@@ -1203,6 +1236,7 @@ const targetTopupCalls = topupBrushupCalls.filter(call => call.context.stage ===
 assert.ok(targetTopupCalls.length >= 2);
 assert.ok(targetTopupCalls[0].prompt.includes('14,000'));
 assert.equal(isLongifiedOutputText(topupBrushupResult.text), true);
+assert.equal(topupBrushupResult.formatAudit.ok, true);
 assert.equal((topupBrushupResult.text.match(/【Topup Check】/g) || []).length, 1);
 assert.equal(topupBrushupResult.text.includes('八百屋の奥さん'), false);
 assert.ok(topupBrushupResult.text.includes(topupAdditionBlock));
@@ -1350,6 +1384,7 @@ for (const modelName of ['mock-ledger', 'mock-chapter-1', 'mock-chapter-2', 'moc
   assert.ok(result.usedModels.includes(modelName));
 }
 assert.equal(result.reviewSource, 'ai');
+assert.equal(result.formatAudit.ok, true);
 assert.ok(result.aiReviewText.includes('\u6b21\u56de\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7\u65b9\u91dd'));
 const aiReview = buildAiLongifyReview({ text: result.text, reviewText: result.aiReviewText, chapterCount: result.chapters.length });
 assert.equal(aiReview.source, 'ai');
