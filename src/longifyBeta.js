@@ -20,7 +20,7 @@ import {
   renderRollingMemo,
 } from './longifyContinuity.js';
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_MODEL = 'gemini-3.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
 const DEFAULT_TARGET_TOTAL_CHARS = 30000;
 const LONGIFY_TARGET_MIN = 10000;

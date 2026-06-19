@@ -743,6 +743,7 @@ function scenarioChunkIsComplete(text) {
     && /\[4コマ目/m.test(source)
     && (source.match(/\[EMOTION:/g) || []).length >= 4
     && (source.match(/\[Camera:/g) || []).length >= 4
+    && (source.match(/^状況:/gm) || []).length >= 4
     && (source.match(/^絵:/gm) || []).length >= 4
     && (source.match(/^セリフ:/gm) || []).length >= 4
     && (source.match(/^演出:/gm) || []).length >= 4
@@ -824,6 +825,13 @@ function normalizeScenarioPanelLabels(text) {
   );
 }
 
+function removeScenarioPrefaceBeforeFirstPanel(text) {
+  return normalizeBreaks(text).replace(
+    /^(Scenario:\s*)\n+[\s\S]*?(?=^\[1コマ目\])/m,
+    (_, label) => `${label}\n`,
+  );
+}
+
 function clean4komaScenario(text) {
   let next = stripPublicArtifacts(text);
   const firstTopic = next.search(/^Topic:/m);
@@ -838,6 +846,7 @@ function clean4komaScenario(text) {
     .replace(/^【Topic:\s*([^】]+)】/u, 'Topic: $1')
     .replace(/\n+(?:このプロットでシナリオを作成します|全て基準値を超えています)[\s\S]*$/u, '');
   next = normalizeScenarioPanelLabels(next);
+  next = removeScenarioPrefaceBeforeFirstPanel(next);
   next = balanceScenarioTopicLine(trimAfterFinalScenarioAim(keepFirstComplete4komaScenario(next)));
   if (MODE_MAX_CHARS['4koma_scenario']) {
     next = trimToSentencePreserveBreaks(next, MODE_MAX_CHARS['4koma_scenario']);

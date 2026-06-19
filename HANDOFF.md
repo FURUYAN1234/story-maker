@@ -2,6 +2,17 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-06-19 Fallback Chain alignment (v5.2.1)
+
+- Updated the shared Gemini fallback order in `src/data.js` to `gemini-3.5-flash` -> `gemini-2.5-flash` -> `gemini-2.5-pro` -> `gemini-flash-latest` -> `gemini-pro-latest`.
+- Updated the default Gemini model returned by `src/apiKeyHelpers.js` and the longify beta default model in `src/longifyBeta.js` to `gemini-3.5-flash`.
+- OpenAI chains remain unchanged: text `gpt-4.1` -> `gpt-4.1-mini` -> `gpt-4.1-nano` -> `gpt-4o`; vision `gpt-4.1` -> `gpt-4o` -> `gpt-4.1-mini`.
+- Updated `4koma_scenario` to follow the current Nano Banana Pro STEP2 contract: every panel now carries `状況:` and requires at least one `キャラ名「短いセリフ。」` speech-bubble dialogue line.
+- Added `scripts/check-nano-4koma-contract.mjs` and wired it into `npm run build`, so deploys stop if the adjacent Nano Banana Pro STEP2 contract changes before Story Maker is reviewed.
+- Version identity was bumped from `v5.2.0` to `v5.2.1` in `package.json`, `package-lock.json`, `src/version.js`, `index.html`, and `README.md`.
+- Nano Banana Pro scenario parser and prompt contract were checked before deploy work; this change intentionally aligns Story Maker's 4koma scenario format with the current Nano Banana Pro input contract.
+- Verification status: `node --test "tests/**/*.test.js"` passed 55/55, `npm run build` passed, and the in-app browser Gemini 4koma scenario proof produced 4 panels with `状況:` plus quoted dialogue in every panel and no prose between `Scenario:` and `[1コマ目]`. Deploy/tag/release are next.
+
 ## 2026-06-18 Long-novel structural-bug fixes (v5.1.7)
 
 ### Follow-up: format gate + causality-aware review scoring (2026-06-18)

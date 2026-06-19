@@ -28,9 +28,11 @@ CodexおよびAntigravityがデプロイ作業を行う際の完全な手順書�
 - **個人情報/ローカルパス**: OSユーザーディレクトリなどのローカル絶対パス、個人名、メールアドレスが含まれていないか。
 - **公開禁止の固有名詞**: 他プロジェクト名（`Nano Banana Pro`, `remotion_video_2` 等）が混入していないか。
 - **機密情報**: APIキーが直書きされていないか。
+- **Nano Banana Pro 4koma契約**: `npm run check:nano-4koma-contract` を通し、隣接する `../nano-banana-pro/src/lib/prompts.js` のSTEP2契約がStory Makerの `4koma_scenario` へ反映済みであることを確認する。Nano側の契約ブロックが変わった場合は、Story Maker側の4コマシナリオ契約を見直してからデプロイする。
 
 ## 4. Build & Deploy Commands
 ```bash
+npm run check:nano-4koma-contract
 npm run build
 npm run deploy
 ```

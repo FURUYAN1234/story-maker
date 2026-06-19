@@ -46,4 +46,22 @@ const letter = Jo({
 assert.match(letter.prompt, /【文体指定：手紙・書簡体】/);
 assert.doesNotMatch(letter.prompt, /【時代考証ルール（厳守）】/);
 
+const fourKomaScenario = Jo({
+  mode: '4koma_scenario',
+  genre: 'コメディ',
+  theme: '朝の忘れ物',
+  era: '現代',
+  characters: [{ name: 'ミナ', role: '主人公', personality: 'せっかち' }],
+});
+
+assert.match(fourKomaScenario.prompt, /Topic:/);
+assert.match(fourKomaScenario.prompt, /\[1コマ目\]/);
+assert.match(fourKomaScenario.prompt, /状況: \[視覚的な状況/);
+assert.match(fourKomaScenario.prompt, /セリフ: キャラ名「セリフ」/);
+assert.match(fourKomaScenario.prompt, /キャラ名「短いセリフ。」/);
+assert.match(fourKomaScenario.prompt, /セリフなし/);
+assert.match(fourKomaScenario.prompt, /台詞なし/);
+assert.match(fourKomaScenario.prompt, /Scenario: の直後は必ず \[1コマ目\]/);
+assert.ok(fourKomaScenario.tags.includes('AI 4koma シナリオ'));
+
 console.log('promptBuilder tests passed');

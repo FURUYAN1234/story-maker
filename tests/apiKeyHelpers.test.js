@@ -32,7 +32,7 @@ assert.equal(Lt('abc$defghijklmnopqrst', 'gemini').message, 'APIキーに使用�
 assert.equal(Lt(fakeGeminiKey, 'gemini').ok, true);
 
 assert.equal(gn(fakeOpenAiKey), 'gpt-4.1');
-assert.equal(gn(fakeGeminiKey), 'gemini-2.5-flash');
+assert.equal(gn(fakeGeminiKey), 'gemini-3.5-flash');
 assert.equal(Qf(fakeOpenAiKey), 'ChatGPT');
 assert.equal(Qf(fakeGeminiKey), 'Gemini');
 

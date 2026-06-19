@@ -1,4 +1,4 @@
-# Story Maker v5.2.0 / AI物語メーカー
+# Story Maker v5.2.1 / AI物語メーカー
 
 Story Maker is a static web application for generating creative text with Google Gemini API or OpenAI API, including standard short-form outputs and a beta workflow that expands completed Output into a long-form manuscript. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -831,6 +831,20 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.2.1 (2026-06-19)
+
+- Updated the shared Gemini fallback chain to start with `gemini-3.5-flash`, followed by `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-flash-latest`, and `gemini-pro-latest`.
+- Aligned the default Gemini model used for standard generation and longify beta provider calls with the shared fallback chain.
+- Updated `4koma_scenario` for the current Nano Banana Pro STEP2 contract by adding per-panel `状況:` fields and mandatory quoted speech-bubble dialogue.
+- Added a pre-deploy Nano 4koma contract check so Story Maker stops before deploy when Nano Banana Pro's STEP2 contract changes.
+- Kept the OpenAI text and vision chains unchanged because they already match the current `gpt-4.1` first fallback order.
+
+- Geminiの共通フォールバックチェーンを `gemini-3.5-flash` 先頭に更新し、`gemini-2.5-flash`、`gemini-2.5-pro`、`gemini-flash-latest`、`gemini-pro-latest` の順に揃えました。
+- 通常生成と長編化βのGemini初期モデルを、共通フォールバックチェーンに合わせました。
+- `4koma_scenario` を現行Nano Banana Pro STEP2契約に合わせ、各コマの `状況:` と吹き出し用の引用台詞を必須化しました。
+- Nano Banana ProのSTEP2契約が変わった場合に、Story Maker側の追従漏れをデプロイ前に止めるチェックを追加しました。
+- OpenAIのテキスト/画像認識チェーンは、現行の `gpt-4.1` 先頭構成と一致しているため変更していません。
 
 ### v5.2.0 (2026-06-18)
 

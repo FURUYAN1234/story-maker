@@ -1,7 +1,7 @@
 import { normalizeApiKey } from './apiSession.js';
 
 const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
-const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash';
 
 export function normalizeKey(value) {
   return normalizeApiKey(value);

@@ -1,6 +1,6 @@
 {
   "name": "story-maker",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",
@@ -8,7 +8,8 @@
     "dev": "vite",
     "fix:generic-rules": "node scripts/check-generic-rules.mjs --fix",
     "check:generic-rules": "node scripts/check-generic-rules.mjs",
-    "build": "npm run fix:generic-rules && npm run check:generic-rules && vite build",
+    "check:nano-4koma-contract": "node scripts/check-nano-4koma-contract.mjs",
+    "build": "npm run fix:generic-rules && npm run check:generic-rules && npm run check:nano-4koma-contract && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"
   },
