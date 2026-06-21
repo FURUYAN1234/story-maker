@@ -61,6 +61,31 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
 }
 
 {
+  for (const [provider, expectedTemperature] of [['gemini', 0.85], ['openai', undefined]]) {
+    const calls = [];
+    const result = await runLongNovelDryRun({
+      provider,
+      stage: 'm1',
+      chapters: 1,
+      scenesPerChapter: 1,
+      targetChars: [500, 900],
+      apiKey: `test-${provider}-key-with-enough-length`,
+      attemptLimit: 1,
+      providerCall: async ({ prompt, temperature }) => {
+        calls.push({ prompt, temperature });
+        return {
+          text: makeProviderText(prompt, provider === 'gemini' ? '荳' : '莠後'),
+          usedModel: 'fake-model',
+        };
+      },
+    });
+    assert.equal(result.evaluation.ok, true);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].temperature, expectedTemperature);
+  }
+}
+
+{
   const result = validateSceneDraft(longValidText, { minChars: 500, allowedNames });
   assert.equal(result.ok, true);
   assert.equal(result.fatal, false);
@@ -97,11 +122,11 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
 }
 
 {
-  const { outline } = createLongNovelPlan({ stage: 'm4' });
-  assert.equal(outline.chapters.length, 10);
-  assert.equal(outline.chapters.flatMap(chapter => chapter.scenes).length, 50);
+  const { outline } = createLongNovelPlan({ stage: 'm3' });
+  assert.equal(outline.chapters.length, 3);
+  assert.equal(outline.chapters.flatMap(chapter => chapter.scenes).length, 12);
   assert.equal(outline.chapters[0].scenes[0].id, 'C01S01');
-  assert.equal(outline.chapters[9].scenes[4].id, 'C10S05');
+  assert.equal(outline.chapters[2].scenes[3].id, 'C03S04');
   assert.equal(typeof outline.chapters[0].role.desire, 'string');
   assert.equal(typeof outline.chapters[0].role.misconception, 'string');
   assert.equal(typeof outline.chapters[0].role.discovery, 'string');
@@ -124,7 +149,19 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
 }
 
 {
-  const { bible, outline } = createLongNovelPlan({ stage: 'm4' });
+  await assert.rejects(
+    runLongNovelDryRun({
+      provider: 'gemini',
+      stage: 'm4',
+      apiKey: 'test-gemini-key-with-enough-length',
+      providerCall: async () => ({ text: makeProviderText(''), usedModel: 'fake-model' }),
+    }),
+    /M4 ten-chapter dev runner is retired/,
+  );
+}
+
+{
+  const { bible, outline } = createLongNovelPlan({ stage: 'm3' });
   const chapter = outline.chapters[0];
   const prompt = buildFinalChapterPolishRepairPrompt({
     draft: makeSceneText('repair-target'),
@@ -135,7 +172,7 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
     editorialPlan: 'Repetition Compression: keep only useful echoes. Chapter Showcase Upgrades: keep the strongest visible choice.',
     priorPrompt: 'previous prompt',
   });
-  assert.match(prompt, /Strict final-polish minimum: 4060 Japanese characters/);
+  assert.match(prompt, /Strict final-polish minimum: \d+ Japanese characters/);
   assert.match(prompt, /Current failed draft length:/);
   assert.match(prompt, /Accepted chapter body to preserve and repair from:/);
 }
@@ -179,7 +216,7 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
 {
   const result = await runLongNovelDryRun({
     provider: 'openai',
-    stage: 'm4',
+    stage: 'm3',
     apiKey: 'test-openai-key-with-enough-length',
     providerCall: async ({ prompt }) => {
       if (prompt.includes('WHOLE_MANUSCRIPT_EDITOR') && prompt.includes('PLAN REQUEST')) {
@@ -213,13 +250,13 @@ function makeProviderText(prompt, marker = String(Math.random()).slice(2, 6)) {
     },
   });
   assert.equal(result.evaluation.ok, true);
-  assert.equal(result.evaluation.sceneCount, 50);
-  assert.equal(result.evaluation.chapterCount, 10);
-  assert.equal(result.evaluation.chapterEditCount, 10);
-  assert.equal(result.evaluation.manuscriptEditCount, 10);
+  assert.equal(result.evaluation.sceneCount, 12);
+  assert.equal(result.evaluation.chapterCount, 3);
+  assert.equal(result.evaluation.chapterEditCount, 3);
+  assert.equal(result.evaluation.manuscriptEditCount, 3);
   assert.equal(result.evaluation.manuscriptEditorialCompleted, true);
   assert.equal(result.manuscript.includes('第1章'), true);
-  assert.equal(result.manuscript.includes('第10章'), true);
+  assert.equal(result.manuscript.includes('第3章'), true);
   assert.equal(result.manuscript.endsWith(manuscriptFooter()), true);
 }
 
@@ -239,7 +276,7 @@ console.log('long novel validator tests passed');
 
 // F: evaluateLongNovelDraft の warnings 配列存在検証
 {
-  const { bible, outline } = createLongNovelPlan({ stage: 'm4' });
+  const { bible, outline } = createLongNovelPlan({ stage: 'm3' });
   const fakeChapterBody = Array.from({ length: 5 }, (_, i) => makeSceneText(`ch-s${i + 1}`)).join('\n\n');
   const fakeChapterDrafts = outline.chapters.map(ch => ({
     chapter: ch.num,
@@ -259,7 +296,7 @@ console.log('long novel validator tests passed');
     ),
     manuscriptEditorial: { completed: true, plan: 'test plan', validation: { ok: true }, chapterPolishes: fakeChapterDrafts },
   };
-  const evaluation = evaluateLongNovelDraft(fakeState, { sceneCount: 50, chapterCount: 10 });
+  const evaluation = evaluateLongNovelDraft(fakeState, { sceneCount: 12, chapterCount: 3 });
   assert.ok(Array.isArray(evaluation.warnings), 'warnings should be an array');
   // fakeデータでは全章が同じ構造なので、chapter_tail_similarity warning が出る可能性がある
   // warnings が存在すること自体を検証（fatalではないので ok は true のまま）
@@ -277,7 +314,7 @@ console.log('long novel validator tests passed');
 import { buildSceneContract } from '../../src/longNovel/sceneContract.js';
 import { createSeedBible } from '../../src/longNovel/storyBible.js';
 {
-  const { outline, bible } = createLongNovelPlan({ stage: 'm4' });
+  const { outline, bible } = createLongNovelPlan({ stage: 'm3' });
   const scene = outline.chapters[0].scenes[0];
   const contract = buildSceneContract({ scene, bible, previousScenes: [], attempt: 1, provider: 'gemini' });
   assert.ok(contract.includes('新情報:'), 'sceneContract should include newInformation line');

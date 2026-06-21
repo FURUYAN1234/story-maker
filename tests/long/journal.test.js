@@ -51,7 +51,7 @@ const fakeNestedOpenAiSecret = 'sk-' + 'abcdefabcdefabcdefabcdefabcdef';
   const storage = createMemoryStorage();
   const journal = createRunJournal({
     provider: 'gemini',
-    stage: 'm4',
+    stage: 'm3',
     premiseText: 'manuscript replay version test',
     storage,
   });

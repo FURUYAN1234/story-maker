@@ -79,4 +79,58 @@ try {
   globalThis.fetch = originalFetch;
 }
 
+function streamFromText(parts) {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    start(controller) {
+      for (const part of parts) {
+        controller.enqueue(encoder.encode(part));
+      }
+      controller.close();
+    },
+  });
+}
+
+globalThis.fetch = async () => ({
+  ok: true,
+  body: streamFromText([
+    'data: {"choices":[{"delta":{"content":"hel"}}]}\n',
+    'data: {"choices":[{"delta":{"content":"lo"}}]}\n',
+    'data: [DONE]\n',
+  ]),
+});
+
+try {
+  const chunks = [];
+  const result = await cf('sk-unit-test-key', 'prompt', chunk => chunks.push(chunk), null, { maxTokens: 64 });
+  assert.equal(result.usedModel, 'gpt-4.1');
+  assert.deepEqual(chunks, [
+    { text: 'hel', isThought: false },
+    { text: 'lo', isThought: false },
+  ]);
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
+globalThis.fetch = async () => ({
+  ok: true,
+  body: streamFromText([
+    'data: {"candidates":[{"content":{"parts":[{"text":"body"},{"thought":"idea"}]}}]}\n',
+  ]),
+});
+
+try {
+  const chunks = [];
+  await zs('gemini-unit-test-key', 'gemini-2.5-flash', 'prompt', chunk => chunks.push(chunk), {
+    timeoutMs: 1000,
+    disableGoogleSearch: true,
+  });
+  assert.deepEqual(chunks, [
+    { text: 'body', isThought: false },
+    { text: 'idea', isThought: true },
+  ]);
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
 console.log('providerClients tests passed');

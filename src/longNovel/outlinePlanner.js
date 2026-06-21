@@ -34,17 +34,10 @@ export const LONG_NOVEL_STAGES = {
     editorialPass: true,
     manuscriptEditorialPass: true,
   },
-  m4: {
-    id: 'm4',
-    label: 'M4 ten-chapter completion run',
-    chapters: 10,
-    scenesPerChapter: 5,
-    targetChars: [1800, 2500],
-    maxTokens: 8192,
-    timeoutMs: 360000,
-    editorialPass: true,
-    manuscriptEditorialPass: true,
-  },
+};
+
+export const RETIRED_LONG_NOVEL_STAGES = {
+  m4: 'M4 ten-chapter dev runner is retired. Use the visible Longify beta route and its target policy instead.',
 };
 
 const PLACE_ROTATION = ['P1', 'P2', 'P3'];
@@ -257,10 +250,23 @@ const CHAPTER_ROLE_TEMPLATES = [
   },
 ];
 
+export function isRetiredLongNovelStage(stageId) {
+  return Boolean(RETIRED_LONG_NOVEL_STAGES[String(stageId || '').trim()]);
+}
+
+export function retiredLongNovelStageMessage(stageId) {
+  return RETIRED_LONG_NOVEL_STAGES[String(stageId || '').trim()] || '';
+}
+
+export function activeLongNovelStageIds() {
+  return Object.keys(LONG_NOVEL_STAGES);
+}
+
 export function stageConfig(stageOrOptions = 'm1') {
   const stageId = typeof stageOrOptions === 'string'
     ? stageOrOptions
     : stageOrOptions.stage || stageOrOptions.stageId || 'm1';
+  if (isRetiredLongNovelStage(stageId)) throw new Error(retiredLongNovelStageMessage(stageId));
   return LONG_NOVEL_STAGES[stageId] || LONG_NOVEL_STAGES.m1;
 }
 

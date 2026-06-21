@@ -69,8 +69,8 @@ const storyChecks = [
     markers: ['「[EMOTION:]」「[Camera:]」「状況:」「絵:」「セリフ:」「演出:」「狙い:」', 'キャラ名「短いセリフ。'],
   },
   {
-    file: 'src/legacyMain.js',
-    markers: ['"状況:"', 'キャラ名「短いセリフ。', 'セリフなし', '台詞なし'],
+    file: 'src/outputModeContracts.js',
+    markers: ['状況:', 'キャラ名「短いセリフ。', 'セリフなし', '台詞なし'],
   },
 ];
 

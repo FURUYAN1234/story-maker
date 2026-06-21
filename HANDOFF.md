@@ -2,6 +2,176 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-06-21 visible Longify beta real API resume proof
+
+- Resumed the interrupted standard visible Longify beta API proof on `http://127.0.0.1:5179/?codexRealLongifyResume=1`.
+- User entered the API key in the app UI only; no key was pasted to chat or written to files. The app detected `Gemini API`.
+- Standard seed generation completed through the visible `#btn-generate` route: Output became a 1,971-char seed story, `#btn-longify-beta` became enabled, no Vite overlay, and browser error log 0.
+- Clicked the visible `#btn-longify-beta` exactly once with `#longify-target-chars` set to `10000` and auto brush-up checked.
+- Longify first pass completed without a browser/app crash: 3 chapters, 10,551 displayed chars / 10,212 submission chars, one `Created By AI Story Maker V5.2.1` footer, format check pass, structure check pass, minimum 10,000 chars reached, AI score 62.
+- Auto brush-up started after the 62-point review, retried invalid chapter rewrite shapes, performed minimum-char top-up, then stopped back at manual brush-up state. Final review stayed 62 points and still `要ブラッシュアップ`.
+- Final browser state: `#btn-longify-beta` text is `この長編小説をブラッシュアップする`, stop button hidden/disabled, status is `AI講評を反映して長編小説をブラッシュアップできます`, no Vite overlay, browser error log 0.
+- Result: the standard visible API route is executable and did not crash, but this Gemini run is not a quality pass. The review still reports repeated time-axis/penalty scenes and exposed planning/meta text. Do not claim Longify quality validation passed from this run.
+- No deploy, tag, release, backup, commit, or staging was run.
+
+## 2026-06-21 M4 dev-runner retirement and proof-route correction
+
+- The prior `?longdev=1&pin=gemini:m4` proof route was the wrong target for the visible Longify beta UI. Treat all older handoff notes that say to run Gemini M4 as obsolete.
+- `src/longNovel/outlinePlanner.js` no longer exposes active `m4`; `m4` is now a retired stage and `stageConfig({ stage: 'm4' })` throws.
+- `src/longNovel/devPanel.js` renders only active longdev stages and disables retired URL pins instead of allowing a hidden M4 run.
+- The visible Longify beta target choices now come from `LONGIFY_TARGET_POLICY` / `buildLongifyTargetOptions(...)` in `src/longifyBeta.js`; the policy owns the target unit, active/default target, choice list, and chapter-count breakpoints.
+- `index.html` no longer carries the fixed Longify target option table. It keeps only a temporary placeholder, and the select is rebuilt from runtime policy during page initialization.
+- Current-state check found a real standard-page bug: on an empty-output page, `#longify-target-chars` could remain stuck on the temporary placeholder because target-select initialization only happened through the output-assist/Longify lazy install path.
+- Fix applied: `src/longifyBeta.js` now exports `syncLongifyTargetSelect(...)`, `src/publicRuntime.js` calls it during public runtime startup, and `tests/longifyBeta.test.js` pins that only `10000` is active while all higher policy targets stay disabled with `当面停止` labels.
+- Current proof target is the visible Longify beta route only: use the standard page controls, `#longify-target-chars`, `#btn-longify-beta`, and `runLongifyBeta(...)`. Do not use M4 as proof for this work.
+- Thread audit correction: the previous real API check was interrupted after the user entered an API key, standard seed generation completed, and the standard `#btn-longify-beta` 10000-char run started. That API proof was not completed and must not be treated as closed.
+- Current browser state after the interruption is no longer the API-run state: only one 5179 tab is open, it is on the M4 retired recheck URL, the API input is empty, storage has no API-key/session entry, and Output is back to the initial help text. To resume the real API proof, open the standard visible page again and have the user enter the API key in the app UI; never ask for the key in chat.
+- Verification passed after the route correction: focused longify/long tests, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser proof passed:
+  - Existing `?longdev=1&pin=gemini:m4` URL now shows no M4 button, only M1-M3 run buttons, all run buttons disabled by the retired pin, retired status text, no Vite overlay, and browser error log 0.
+  - Standard page `?codexLongifyPolicy=1` shows no longdev panel; after page initialization, `#longify-target-chars` is rebuilt with 8 policy-derived options, only `10000` is enabled/selected, the temporary placeholder is gone, there is no Vite overlay, and browser error log 0.
+- Do not use a Gemini Longify full run as refactor proof. A standard-page Gemini attempt was started after a seed generation, but the user clarified that Gemini long-form behavior is not meaningful for refactor verification; the run was stopped from the UI, the partial Longify result was not adopted, and the output remained the short seed story.
+- No deploy, tag, release, backup, commit, staging, or new real API Longify proof has been completed after this correction yet.
+
+## 2026-06-21 DOM character action binding extraction
+
+- Continued the DOM event binding split after Output Copy/Download extraction.
+- Added `bindCharacterActionButtons(...)` in `src/legacyDomEventBindings.js`.
+- `src/legacyMain.js` now delegates the four character action click bindings through that helper:
+  - add character
+  - remove character
+  - randomize character contents
+  - randomize all character data
+- Handler bodies remain local in `src/legacyMain.js`; this change only moves the event-registration responsibility.
+- `tests/legacyDomEventBindings.test.js` now covers all four delegated click paths.
+- Verification passed: `node --check src\legacyDomEventBindings.js`, `node --check src\legacyMain.js`, `node --check tests\legacyDomEventBindings.test.js`, `node tests\legacyDomEventBindings.test.js`, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smoke on `http://127.0.0.1:5179/?codexCharacterActionsDom=1&fresh=...` passed: `Story Maker v5.2.1`, API field present/editable, all four character action buttons present, character count `0`, no Vite overlay, and browser error log 0.
+- No real API call, deploy, tag, release, backup, commit, or staging was run.
+
+## 2026-06-21 DOM output copy/download binding extraction
+
+- Continued the DOM event binding split after the section-clear helper.
+- Added `normalizeFourKomaScenarioExportText(...)` in `src/legacyDomEventBindings.js` for the existing 4koma scenario export label cleanup.
+- Added `bindOutputCopyDownloadButtons(...)` in `src/legacyDomEventBindings.js`.
+- `src/legacyMain.js` now delegates Output Copy/Download event registration through the helper while preserving:
+  - 4koma scenario export label normalization for `Topic`, `Logline`, `Location`, `Outfit`, `Punchline`, and `Scenario`.
+  - clipboard success/reset labels.
+  - timestamped TXT download names using `state.lastTitle || "story"`.
+  - Blob/object URL/link-click download behavior.
+- `tests/legacyDomEventBindings.test.js` now covers export normalization, non-4koma pass-through, clipboard writes, label reset timing, Blob creation, object URL generation, download filename, and link click.
+- Verification passed: `node --check src\legacyDomEventBindings.js`, `node --check src\legacyMain.js`, `node --check tests\legacyDomEventBindings.test.js`, `node tests\legacyDomEventBindings.test.js`, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser DOM smoke on `http://127.0.0.1:5179/?codexOutputActionsDom=2&fresh=...` passed: `Story Maker v5.2.1`, API field present/editable, Copy/Download buttons present but `display:none` on initial empty output, no Vite overlay, and browser error log 0.
+- A direct click smoke was not kept because the initial empty-output state hides `#btn-copy`; unit coverage pins the copied/downloaded behavior without needing a generated story.
+- No real API call, deploy, tag, release, backup, commit, or staging was run.
+
+## 2026-06-21 DOM section-clear binding extraction
+
+- Continued the uncommitted `src/legacyMain.js` refactor after the user clarified that the refactor work was not finished.
+- Added `bindSectionClearButtons(...)` in `src/legacyDomEventBindings.js`.
+- `src/legacyMain.js` now delegates `.btn-section-clear` registration through that helper, while preserving the existing behavior through injected callbacks:
+  - `chars` still calls the character clear path.
+  - `mode` still resets to `4koma`, clears `modeSource`, updates active chips/custom input, and reapplies forced defaults.
+  - axis sections still clear custom input, category/sub chips, state keys, and axis source.
+  - `supplement` still clears the supplemental text and clear button.
+- `tests/legacyDomEventBindings.test.js` now covers locked no-op, default-filled deletion, chars/mode/axis/supplement clear behavior, mode chip activation, and axis-source reset.
+- Verification passed: `node --check src\legacyDomEventBindings.js`, `node --check src\legacyMain.js`, `node --check tests\legacyDomEventBindings.test.js`, `node tests\legacyDomEventBindings.test.js`, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smoke on `http://127.0.0.1:5179/?codexSectionClearDom=1&fresh=...` passed: `Story Maker v5.2.1`, `document.readyState=complete`, API field present/editable, 11 `.btn-section-clear` buttons, no Vite overlay, and browser error log 0.
+- No real API call, deploy, tag, release, backup, commit, or staging was run.
+- Remaining refactor is still real work: additional DOM wiring separation, deeper standard-generation orchestration cleanup, provider/API streaming boundary cleanup, longify retry/audit wrapper cleanup, and the manual-key long-novel proof/redesign closure.
+
+## 2026-06-21 continuation completion audit
+
+- Re-audited the current worktree after the goal continuation request instead of relying on the prior handoff text.
+- No additional code change was needed in this audit pass.
+- Current local checks passed again: full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- Port 5179 is the Story Maker Vite dev server (`vite --host 127.0.0.1 --port 5179`) and returned HTTP 200.
+- In-app browser audit on `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4&codexCompletionAudit=1&fresh=...` showed:
+  - title/header v5.2.1, `document.readyState=complete`, no Vite overlay, empty browser error log;
+  - `#engine-label` was `API未設定`, `#apikey` was present, empty, password type, and editable;
+  - longdev panel was visible, URL pin was active, only the Gemini M4 run button was enabled, and OpenAI/Both/other stages were disabled by the pin;
+  - visible journal status was `journal: gemini m4 paused / scenes 50 / chapters 10 / final 10`, which is not a completed proof because `src/longNovel/devPanel.js` only hydrates non-`done` journals into that status.
+- Remaining blocker is unchanged: final Gemini M4 proof requires the user to type the Gemini API key into the app UI. Do not ask for the key in chat; after entry, run exactly one pinned Gemini M4 pass and use Resume if it pauses.
+- No deploy, tag, release, backup, commit, or real API call was run in this audit pass.
+
+## 2026-06-21 longify pre-top-up structure guard
+
+- Continued the longify retry/audit cleanup after preserved-review reuse.
+- Added `getLongifyPreTopupStructureBlock(...)` in `src/longifyRetryAudit.js`.
+- `src/longifyBeta.js` now audits structure before minimum-character top-up in both fresh longify and brush-up flows.
+- If `chapter_loop`, `episode_retake`, setting contradiction, or storyboard residue is already present, the flow returns a `structure` review instead of appending more text to the final chapter.
+- Truncation-only cases are not blocked by this helper, so ending repair/top-up can still do useful completion work.
+- `tests/longifyBeta.test.js` now separates normal top-up fixtures into distinct chapter bodies and pins that `brushupTopup` is not called when a chapter loop is detected before top-up.
+- Verification passed: `node --check src\longifyRetryAudit.js`, `node --check src\longifyBeta.js`, `node --check tests\longifyBeta.test.js`, `node tests\longifyRetryAudit.test.js`, `node tests\longifyBeta.test.js`, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smokes passed:
+  - `http://127.0.0.1:5179/?codexTopupGuard=1&fresh=...`: v5.2.1, API field present, longify button/review container present, no Vite overlay, empty browser error log.
+  - `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4&codexTopupGuardLongdev=1&fresh=...`: v5.2.1, longdev panel visible, URL pin active with only Gemini/M4 enabled, active run-lock storage empty, no Vite overlay, empty browser error log.
+- No real API call, deploy, tag, release, or backup was run.
+- Remaining proof in `PLAN.md` is still the manual-key Gemini M4 run.
+
+## 2026-06-21 longify preserved-review reuse fix
+
+- Continued the uncommitted longify retry/audit extraction after the run-lock/provider-guard batch.
+- Added reusable-review source helpers in `src/longifyRetryAudit.js`: `isReusableLongifyReviewSource(...)` and `selectReusableLongifyReviewText(...)`.
+- `src/longifyBeta.js` now uses the helper in `getLongifyReviewPlainText()` so preserved `ai`, `failed`, `structure`, and `format` review cards feed their critique text into the next brush-up prompt.
+- `local` auto-review text is intentionally not treated as prior AI critique.
+- This closes the loop path where `structure`/`format` NG review cards were preserved in the UI but dropped before the next brush-up, leaving the retry without the audit reason it needed.
+- Verification passed: `node --check src\longifyRetryAudit.js`, `node --check src\longifyBeta.js`, `node tests\longifyRetryAudit.test.js`, `node tests\longifyBeta.test.js`, full `node --test "tests/**/*.test.js"` (72/72), `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smokes passed:
+  - `http://127.0.0.1:5179/?codexReviewReuse=1&fresh=...`: v5.2.1, API field present, longify button/review container present, no Vite overlay, empty browser error log.
+  - `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4&codexReviewReuseLongdev=1&fresh=...`: v5.2.1, longdev panel visible, URL pin active with only Gemini/M4 enabled, active run-lock storage empty, no Vite overlay, empty browser error log.
+- No real API call, deploy, tag, release, or backup was run.
+- Remaining proof in `PLAN.md` is unchanged: manually enter a Gemini API key in the app UI and run exactly one `?longdev=1&pin=gemini:m4` Gemini M4 pass; if it pauses, use Resume rather than restarting. Do not ask the user to paste an API key into chat.
+
+## 2026-06-21 long-novel run-lock and longify retry/audit extraction
+
+- Continued the uncommitted refactor after standard-generation, provider-streaming, and DOM-binding extraction.
+- Added `src/longNovel/runLock.js` and `tests/long/runLock.test.js`.
+- `src/longNovel/devPanel.js` now delegates longdev active-run acquire/touch/release/read/stale handling to the shared run-lock helper, including localStorage/sessionStorage mirroring and the active-token window flag.
+- Added a provider-correction guard in `tests/long/validator.test.js`: Gemini first scene generation stays at temperature `0.85`, while OpenAI leaves first-scene temperature unset/default.
+- Added `src/longifyRetryAudit.js` and `tests/longifyRetryAudit.test.js`.
+- `src/longifyBeta.js` now delegates chapter post-validation overlap/contradiction guards and brush-up candidate retry/best-candidate/reject/preserve decisions to pure helpers while keeping API calls, UI progress reporting, prompts, and output assembly local.
+- Verification passed: `node --check` for touched modules, `node tests\longifyRetryAudit.test.js`, `node tests\longifyBeta.test.js`, `node tests\longifyContinuity.test.js`, `node --test "tests/long/*.test.js"`, full `node --test "tests/**/*.test.js"` (72/72), `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smokes passed:
+  - `http://127.0.0.1:5179/?codexLongifyRetryAudit=1&fresh=...`: v5.2.1, API field present, no Vite overlay, empty browser error log.
+  - `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4&codexFinalLongdev=1&fresh=...`: v5.2.1, longdev panel visible, URL pin active with only Gemini/M4 enabled, active run-lock storage empty, no Vite overlay, empty browser error log.
+- UI displayed `API未設定`; no real API call, deploy, tag, release, or backup was run.
+- Remaining proof in `PLAN.md`: manually enter a Gemini API key in the app UI and run exactly one `?longdev=1&pin=gemini:m4` Gemini M4 pass; if it pauses, use Resume rather than restarting. Do not touch OpenAI for that round.
+
+## 2026-06-21 legacyMain API-tab session binding extraction
+
+- Continued the uncommitted `src/legacyMain.js` refactor after the contract/state extraction checkpoint.
+- Added `src/apiTabSessionPersistence.js` and `tests/apiTabSessionPersistence.test.js`.
+- `src/legacyMain.js` now delegates API-tab sessionStorage write/restore, save/switch/edit handler wrapping, and click-handler rebinds to `createApiTabSessionPersistence(...)`.
+- The existing `src/apiTabSession.js` snapshot/parse helpers remain the pure data boundary; the new persistence module owns browser storage and DOM listener wiring.
+- Verification passed: `node --check src\apiTabSessionPersistence.js`, `node --check src\legacyMain.js`, `node tests\apiTabSession.test.js`, `node tests\apiTabSessionPersistence.test.js`, full `node --test "tests/**/*.test.js"` (65/65), `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smoke on `http://127.0.0.1:5179/?codexApiTabSession=1` passed: `Story Maker v5.2.1`, header visible, API field present, `⚠ API未設定`, `longNovelSealed=true`, no Vite overlay, and empty browser error log.
+- No real API call, deploy, tag, release, or backup was run.
+- Remaining refactor: standard-generation orchestration, provider/streaming boundary cleanup, broader DOM event binding separation, longify retry/audit wrapper cleanup, and final handling of the long-novel redesign TODO in `PLAN.md`.
+
+## 2026-06-21 provider streaming parser extraction
+
+- Continued the provider/API refactor after the API-tab session binding extraction.
+- Added `src/providerStreamParsing.js` and `tests/providerStreamParsing.test.js`.
+- `src/providerClients.js` now delegates OpenAI and Gemini SSE line parsing to `parseOpenAiStreamLine(...)`, `parseGeminiStreamLine(...)`, and `consumeSseLines(...)`.
+- Added fake-stream coverage in `tests/providerClients.test.js` for `cf(...)` OpenAI streaming and `zs(...)` Gemini streaming, confirming chunk delivery and Gemini thought/body flags without any network call.
+- Verification passed: `node --check src\providerClients.js`, `node --check src\providerStreamParsing.js`, `node tests\providerStreamParsing.test.js`, `node tests\providerClients.test.js`, full `node --test "tests/**/*.test.js"` (66/66), `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smoke on `http://127.0.0.1:5179/?codexProviderStream=1` passed: `Story Maker v5.2.1`, API field present, `⚠ API未設定`, `longNovelSealed=true`, no Vite overlay, and empty browser error log.
+- No real API call, deploy, tag, release, or backup was run.
+- Remaining refactor: standard-generation orchestration, broader DOM event binding separation, longify retry/audit wrapper cleanup, and final handling of the long-novel redesign TODO in `PLAN.md`.
+
+## 2026-06-21 standard generation orchestration and DOM binding extraction
+
+- Continued the uncommitted refactor after provider streaming parser extraction.
+- Added `src/standardLiveProgress.js`, `src/standardThoughtScores.js`, `src/standardGenerationProgressLog.js`, and focused tests.
+- `src/legacyMain.js` now delegates standard live-preview cleanup/phase/signal summaries, standard thought-score parsing/scoreboard rendering, and standard progress-log formatting out of `mh()` while keeping API orchestration and DOM assignment local.
+- Added `src/legacyDomEventBindings.js` and `tests/legacyDomEventBindings.test.js`.
+- `Eh()` now delegates fixed click-handler registration and lock-button toggle binding while keeping the existing handler bodies local.
+- Verification passed: `node --check src\legacyMain.js`, focused helper tests, full `node --test "tests/**/*.test.js"` (70/70 after DOM batch), `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build`.
+- In-app browser smoke on `http://127.0.0.1:5179/?codexDomRefactor=1` passed: `Story Maker v5.2.1`, API field present, `笞 API譛ｪ險ｭ螳啻, `longNovelSealed=true`, empty browser error log, and API switch button verified Gemini -> OpenAI -> Gemini without a real API call.
+- Theme lock buttons are intentionally not pointer-clickable while API is unset because the settings panel has `pointer-events: none`; unit coverage pins the lock binding helper itself.
+- No real API call, deploy, tag, release, or backup was run.
+- Remaining refactor: longify retry/audit wrapper cleanup and final handling of the long-novel redesign TODO in `PLAN.md`.
+
 ## 2026-06-19 Fallback Chain alignment (v5.2.1)
 
 - Updated the shared Gemini fallback order in `src/data.js` to `gemini-3.5-flash` -> `gemini-2.5-flash` -> `gemini-2.5-pro` -> `gemini-flash-latest` -> `gemini-pro-latest`.
@@ -1663,3 +1833,65 @@ These local checks were insufficient; the real Gemini browser run still failed a
 - Deploy `v5.0.2` only after the current diff is reviewed and committed.
 - Create a bilingual annotated tag and GitHub Release for `v5.0.2`.
 - Run the Antigravity full backup only when explicitly requested by the user.
+
+## 2026-06-21 Codex Refactor Batch: Legacy Main Contract and State Split
+
+### What Changed
+
+- Added `src/longNovelAnalogContracts.js`.
+- Added `tests/longNovelAnalogContracts.test.js`.
+- Added `src/outputModeContracts.js`.
+- Added `tests/outputModeContracts.test.js`.
+- Added `src/letterOutputRepair.js`.
+- Added `tests/letterOutputRepair.test.js`.
+- Added `src/apiTabSession.js`.
+- Added `tests/apiTabSession.test.js`.
+- Added `src/publicModeState.js`.
+- Added `tests/publicModeState.test.js`.
+- Added `src/publicLongModeSeal.js`.
+- Added `tests/publicLongModeSeal.test.js`.
+- Added `src/longNovelCompletionScore.js`.
+- Added `tests/longNovelCompletionScore.test.js`.
+- Added `src/longNovelTextDedupe.js`.
+- Added `tests/longNovelTextDedupe.test.js`.
+- Added `src/longNovelLocalComedyFilters.js`.
+- Added `tests/longNovelLocalComedyFilters.test.js`.
+- `src/legacyMain.js` now delegates selected v4.2.4/v4.2.7/v4.2.8/v4.3.0/v4.3.1/v4.3.5/v4.3.6/v4.3.7/v4.4.0, v4.4.2/v4.4.5, v4.5.0-v4.5.7/v4.5.9, v4.6.0/v4.6.1/v4.6.3/v4.6.5/v4.6.7/v4.6.8/v4.6.9, v4.7.2/v4.7.3/v4.7.7/v4.7.8/v4.7.9, v4.8.0/v4.8.1/v4.8.2/v4.8.5/v4.8.6/v4.8.8/v4.8.9, and v4.9.0/v4.9.3 long-novel/local-comedy contract text to the helper module.
+- `src/legacyMain.js` now delegates public output-mode contract text v4.9.5-v4.9.7, default public mode options, final format checks, and line-break density checks to `src/outputModeContracts.js`.
+- `src/legacyMain.js` now delegates letter-mode invalid-output detection, cleanup, candidate-line extraction, and fallback letter assembly to `src/letterOutputRepair.js`, while keeping current mode/settings reads local.
+- `src/legacyMain.js` now delegates API-tab session snapshot construction and restore parsing to `src/apiTabSession.js`, while keeping sessionStorage access and API-key UI locking local.
+- `src/legacyMain.js` now delegates public mode signal collection, public long-mode sealing/random exclusion, long-novel completion score calculation, repeated-text dedupe/continuation trimming, and local-comedy route filters/carrier lists to focused helper modules.
+- Removed the dead `ot === false` legacy long-mode implementation block. Current hidden longdev remains served by `src/longNovel/devEntry.js`.
+- `scripts/check-nano-4koma-contract.mjs` now scans `src/outputModeContracts.js` for the extracted Nano 4koma markers instead of requiring them to remain in `src/legacyMain.js`.
+- Kept the remaining standard generation orchestration, provider calls, DOM event binding, and deeper long-novel retry/audit wrappers local to avoid broad behavior movement.
+
+### Verification
+
+- `node tests\longNovelAnalogContracts.test.js` passed.
+- `node tests\outputModeContracts.test.js` passed.
+- `node tests\letterOutputRepair.test.js` passed.
+- `node tests\apiTabSession.test.js` passed.
+- `node tests\publicModeState.test.js` passed.
+- `node tests\publicLongModeSeal.test.js` passed.
+- `node tests\longNovelCompletionScore.test.js` passed.
+- `node tests\longNovelTextDedupe.test.js` passed.
+- `node tests\longNovelLocalComedyFilters.test.js` passed.
+- `node --check src\legacyMain.js` passed.
+- `node --check src\apiTabSession.js` passed.
+- `node --check src\longNovelAnalogContracts.js` passed.
+- `node --check src\outputModeContracts.js` passed.
+- `node --check src\letterOutputRepair.js` passed.
+- `node --check src\publicLongModeSeal.js` passed.
+- `node --check src\longNovelCompletionScore.js` passed.
+- `node --check src\longNovelTextDedupe.js` passed.
+- `node --check src\longNovelLocalComedyFilters.js` passed.
+- `node --check scripts\check-nano-4koma-contract.mjs` passed.
+- `node scripts\check-nano-4koma-contract.mjs` passed.
+- `node --test "tests/**/*.test.js"` passed: 64/64.
+- `git diff --check -- . ':!dist'` passed.
+- `npm run build` passed.
+
+### Remaining Refactor Direction
+
+- `src/legacyMain.js` still owns standard generation orchestration, provider streaming, DOM event binding, and some deep long-novel retry/audit wrapper wiring. Treat further decomposition there as a new behavior-risk-managed pass, not as part of this contract/state extraction batch.
+- Final in-app browser smoke proof passed on `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4`: `Story Maker v5.2.1` loaded with `document.readyState=complete`, no Vite overlay, browser error log empty, `document.documentElement.dataset.longNovelSealed === "true"`, the public long-mode chip was hidden and disabled, `#btn-rand-mode` carried the random-exclusion hook, and the hidden `longdev` panel was present under the dev URL. The current UI displayed `⚠ API未設定`; no API generation was run in this proof.

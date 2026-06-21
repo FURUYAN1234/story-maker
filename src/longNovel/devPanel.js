@@ -1,5 +1,10 @@
 import { runLongNovelDryRun } from './engine.js';
-import { LONG_NOVEL_STAGES } from './outlinePlanner.js';
+import {
+  LONG_NOVEL_STAGES,
+  activeLongNovelStageIds,
+  isRetiredLongNovelStage,
+  retiredLongNovelStageMessage,
+} from './outlinePlanner.js';
 import {
   apiKeyProvider,
   isRealApiKey,
@@ -8,11 +13,15 @@ import {
 } from '../apiSession.js';
 import { readLongDevApiSession } from './devApiSession.js';
 import { createRunJournal, loadRunJournal, clearRunJournal } from './runJournal.js';
+import {
+  acquireLongNovelRunLock as acquireRunLock,
+  readLongNovelActiveRun as readActiveRun,
+  releaseLongNovelRunLock as releaseRunLock,
+  touchLongNovelRunLock as touchRunLock,
+} from './runLock.js';
 import { buildStoryExportFileName } from '../fileIoHelpers.js';
 
-const ACTIVE_RUN_KEY = 'story-maker.longdev.activeRun.v501';
 const SNAPSHOT_KEY = 'story-maker.longdev.lastSnapshot.v501';
-const RUN_LOCK_TTL_MS = 4 * 60 * 60 * 1000;
 
 export function installLongNovelDevPanel() {
   injectStyle();
@@ -36,10 +45,7 @@ export function installLongNovelDevPanel() {
         </div>
       </div>
       <div class="longdev-stage-grid">
-        ${renderStageButtons('m1')}
-        ${renderStageButtons('m2')}
-        ${renderStageButtons('m3')}
-        ${renderStageButtons('m4')}
+        ${activeLongNovelStageIds().map(renderStageButtons).join('')}
       </div>
       <textarea id="longdev-premise" spellcheck="false">A long-form verification story about a protagonist finding a small trace of an old promise and trying, over one night, to repair a nearly broken relationship.</textarea>
       <div id="longdev-status" class="longdev-status">ready</div>
@@ -104,6 +110,13 @@ async function runFromPanel(provider, stage = 'm1') {
   const log = document.getElementById('longdev-log');
   const summary = document.getElementById('longdev-summary');
   const buttons = [...document.querySelectorAll('#longdev-panel button')];
+  if (isRetiredLongNovelStage(stage)) {
+    const message = retiredLongNovelStageMessage(stage);
+    if (status) status.textContent = message;
+    appendLog(log, message);
+    applyUrlPinToButtons();
+    return [];
+  }
   const providers = provider === 'both' ? ['gemini', 'openai'] : [provider === 'openai' ? 'openai' : 'gemini'];
   const stageConfig = LONG_NOVEL_STAGES[stage] || LONG_NOVEL_STAGES.m1;
   const pin = readUrlPin();
@@ -256,6 +269,7 @@ async function runFromPanel(provider, stage = 'm1') {
 
 function renderStageButtons(stage) {
   const config = LONG_NOVEL_STAGES[stage];
+  if (!config) return '';
   return `
     <div class="longdev-stage">
       <div class="longdev-stage-title">${config.label}</div>
@@ -364,46 +378,6 @@ function getApiKey(provider) {
   return normalizeApiKey(normalizedProvider === 'openai' ? session.openaiKey : session.geminiKey);
 }
 
-function acquireRunLock(run) {
-  const active = readActiveRun();
-  if (active && !isStaleActiveRun(active) && active.token !== run.token) return { ok: false, active };
-  const locked = {
-    ...run,
-    startedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  window.__storyMakerLongDevActiveToken = run.token;
-  safeSetStorage(ACTIVE_RUN_KEY, locked);
-  return { ok: true, active: locked };
-}
-
-function touchRunLock(token) {
-  const active = readActiveRun();
-  if (!active || active.token !== token) return;
-  safeSetStorage(ACTIVE_RUN_KEY, { ...active, updatedAt: new Date().toISOString() });
-}
-
-function releaseRunLock(token) {
-  const active = readActiveRun();
-  if (active && active.token === token) safeRemoveStorage(ACTIVE_RUN_KEY);
-  if (window.__storyMakerLongDevActiveToken === token) window.__storyMakerLongDevActiveToken = null;
-}
-
-function readActiveRun() {
-  const active = safeGetStorage(ACTIVE_RUN_KEY);
-  if (!active) return null;
-  if (isStaleActiveRun(active)) {
-    safeRemoveStorage(ACTIVE_RUN_KEY);
-    return null;
-  }
-  return active;
-}
-
-function isStaleActiveRun(active) {
-  const stamp = Date.parse(active?.updatedAt || active?.startedAt || '');
-  return !stamp || Date.now() - stamp > RUN_LOCK_TTL_MS;
-}
-
 function persistSnapshot(snapshot) {
   const clean = {
     savedAt: new Date().toISOString(),
@@ -453,6 +427,10 @@ function hydrateJournalStatus() {
   const status = document.getElementById('longdev-status');
   if (!status) return;
   const pin = readUrlPin();
+  if (pin?.retired) {
+    status.textContent = retiredLongNovelStageMessage(pin.stage);
+    return;
+  }
   const provider = pin?.provider || 'gemini';
   const journal = loadRunJournal(provider)?.toJSON();
   if (!journal || journal.status === 'done') return;
@@ -468,6 +446,7 @@ function readUrlPin() {
     const raw = params.get('pin') || '';
     const [providerRaw, stageRaw] = raw.split(':');
     const provider = providerRaw === 'openai' ? 'openai' : providerRaw === 'gemini' ? 'gemini' : '';
+    if (provider && isRetiredLongNovelStage(stageRaw)) return { provider, stage: stageRaw, retired: true };
     const stage = LONG_NOVEL_STAGES[stageRaw] ? stageRaw : '';
     return provider && stage ? { provider, stage } : null;
   } catch {
@@ -481,6 +460,11 @@ function applyUrlPinToButtons() {
   for (const button of buttons) {
     if (!pin) {
       button.title = '';
+      continue;
+    }
+    if (pin.retired) {
+      button.disabled = true;
+      button.title = retiredLongNovelStageMessage(pin.stage);
       continue;
     }
     const allowed = button.dataset.longdevRun === pin.provider && button.dataset.longdevStage === pin.stage;

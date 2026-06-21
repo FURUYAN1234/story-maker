@@ -19,19 +19,54 @@ import {
   isLikelyTruncated,
   renderRollingMemo,
 } from './longifyContinuity.js';
+import {
+  applyLongifyChapterPostValidationGuards,
+  evaluateLongifyBrushupCandidate,
+  getLongifyPreTopupStructureBlock,
+  getLongifyBrushupCompressionRejection,
+  selectReusableLongifyReviewText,
+  shouldAdoptLongifyBrushupBestCandidate,
+  shouldPreserveOriginalLongifyChapter,
+} from './longifyRetryAudit.js';
 
 const DEFAULT_MODEL = 'gemini-3.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
-const DEFAULT_TARGET_TOTAL_CHARS = 30000;
-const LONGIFY_TARGET_MIN = 10000;
-const LONGIFY_TARGET_MAX = 150000;
-const LONGIFY_UI_TARGET_MAX = 10000;
+const LONGIFY_TARGET_UNIT_CHARS = 10000;
+const toLongifyTargetChars = units => units * LONGIFY_TARGET_UNIT_CHARS;
+export const LONGIFY_TARGET_POLICY = Object.freeze({
+  unitChars: LONGIFY_TARGET_UNIT_CHARS,
+  min: toLongifyTargetChars(1),
+  max: toLongifyTargetChars(15),
+  activeMax: toLongifyTargetChars(1),
+  default: toLongifyTargetChars(1),
+  choices: Object.freeze([1, 2, 3, 5, 8, 10, 12, 15].map(toLongifyTargetChars)),
+  chapterBreakpoints: Object.freeze([
+    { max: toLongifyTargetChars(1), chapterCount: 3 },
+    { max: toLongifyTargetChars(2), chapterCount: 4 },
+    { max: toLongifyTargetChars(5), chapterCount: 6 },
+    { max: toLongifyTargetChars(10), chapterCount: 8 },
+  ]),
+  maxChapterCount: 10,
+});
+const DEFAULT_TARGET_TOTAL_CHARS = LONGIFY_TARGET_POLICY.default;
+const LONGIFY_TARGET_MIN = LONGIFY_TARGET_POLICY.min;
+const LONGIFY_TARGET_MAX = LONGIFY_TARGET_POLICY.max;
 const MIN_SEED_CHARS = 240;
 const MIN_BRUSHUP_LONG_CHARS = 8000;
+const LONGIFY_TYPEWRITER_BATCH_POLICY = Object.freeze({
+  compactMaxChars: MIN_BRUSHUP_LONG_CHARS,
+  midMaxChars: toLongifyTargetChars(3),
+});
+const LONGIFY_REVIEW_LENGTH_SCORE_BANDS = Object.freeze([
+  { minChars: toLongifyTargetChars(3), bonus: 12 },
+  { minChars: Math.round(toLongifyTargetChars(1.5)), bonus: 9 },
+  { minChars: MIN_BRUSHUP_LONG_CHARS, bonus: 6 },
+  { minChars: 3000, bonus: 2 },
+]);
 export const AI_REVIEW_PASS_SCORE = 80;
 export const AUTO_BRUSHUP_MAX_ATTEMPTS = 3;
 const AUTO_BRUSHUP_START_RETRY_DELAY_MS = 500;
-const AUTO_BRUSHUP_START_MAX_WAIT_MS = 10000;
+const AUTO_BRUSHUP_START_MAX_WAIT_MS = 10 * 1000;
 const AUTO_BRUSHUP_START_MAX_RETRIES = Math.ceil(AUTO_BRUSHUP_START_MAX_WAIT_MS / AUTO_BRUSHUP_START_RETRY_DELAY_MS);
 const LONGIFY_CHAPTER_RETRY_ATTEMPTS = 3;
 const LONGIFY_CHAPTER_TRUNCATION_RETRIES = 3;
@@ -441,11 +476,11 @@ function clampInt(value, fallback, min, max) {
 }
 
 function deriveChapterCountForTarget(totalChars) {
-  if (totalChars <= 10000) return 3;
-  if (totalChars <= 20000) return 4;
-  if (totalChars <= 50000) return 6;
-  if (totalChars <= 100000) return 8;
-  return 10;
+  const total = Number(totalChars || 0);
+  for (const breakpoint of LONGIFY_TARGET_POLICY.chapterBreakpoints) {
+    if (total <= breakpoint.max) return breakpoint.chapterCount;
+  }
+  return LONGIFY_TARGET_POLICY.maxChapterCount;
 }
 
 function getSelectedOptionLabel(selectEl, fallback = '') {
@@ -657,13 +692,50 @@ function brushupChapterOutputTokenLimit(targetPlan, attempt = 1) {
 }
 
 export function normalizeLongifyUiTargetChars(value) {
+  const activeMax = Math.max(LONGIFY_TARGET_POLICY.min, LONGIFY_TARGET_POLICY.activeMax);
   const total = Number.parseInt(String(value || ''), 10);
-  if (!Number.isFinite(total) || total < LONGIFY_TARGET_MIN) return LONGIFY_UI_TARGET_MAX;
-  return Math.min(total, LONGIFY_UI_TARGET_MAX);
+  if (!Number.isFinite(total) || total < LONGIFY_TARGET_POLICY.min) return activeMax;
+  return Math.min(total, activeMax);
+}
+
+export function buildLongifyTargetOptions(policy = LONGIFY_TARGET_POLICY) {
+  const activeMax = Math.max(policy.min, policy.activeMax);
+  const values = Array.from(new Set([
+    ...policy.choices,
+    policy.min,
+    activeMax,
+  ]))
+    .filter(value => Number.isFinite(value) && value >= policy.min && value <= policy.max)
+    .sort((a, b) => a - b);
+  return values.map(value => ({
+    value,
+    label: `最低${formatNumber(value)}字`,
+    disabled: value > activeMax,
+  }));
+}
+
+export function syncLongifyTargetSelect(targetEl = document.getElementById('longify-target-chars')) {
+  if (!targetEl) return null;
+  const previous = targetEl.value;
+  const options = buildLongifyTargetOptions();
+  targetEl.innerHTML = '';
+  for (const optionData of options) {
+    const option = document.createElement('option');
+    option.value = String(optionData.value);
+    option.textContent = optionData.disabled
+      ? `${optionData.label}（当面停止）`
+      : optionData.label;
+    option.disabled = optionData.disabled;
+    targetEl.appendChild(option);
+  }
+  const nextValue = normalizeLongifyUiTargetChars(previous);
+  targetEl.value = String(nextValue);
+  return nextValue;
 }
 
 function readLongifyRunOptionsFromUi() {
   const targetEl = document.getElementById('longify-target-chars');
+  syncLongifyTargetSelect(targetEl);
   const targetValue = normalizeLongifyUiTargetChars(targetEl?.value);
   if (targetEl && String(targetEl.value) !== String(targetValue)) {
     targetEl.value = String(targetValue);
@@ -3042,28 +3114,16 @@ export async function runLongifyBeta({
           });
         }
       }
-      if (chapterValidation.ok) {
-        const overlapIssue = detectLongifyChapterOverlap(chapterText, chapters);
-        if (!overlapIssue.ok) {
-          chapterValidation = {
-            ...chapterValidation,
-            ok: false,
-            reason: overlapIssue.reason,
-          };
-          previousInvalidDraft = chapterText;
-        }
-      }
-      if (chapterValidation.ok) {
-        const contradiction = detectSettingContradiction(chapterText, invariants);
-        if (!contradiction.ok) {
-          chapterValidation = {
-            ...chapterValidation,
-            ok: false,
-            reason: contradiction.reason,
-          };
-          previousInvalidDraft = chapterText;
-        }
-      }
+      const guardedChapter = applyLongifyChapterPostValidationGuards({
+        validation: chapterValidation,
+        chapterText,
+        previousChapters: chapters,
+        invariants,
+        detectOverlap: detectLongifyChapterOverlap,
+        detectContradiction: detectSettingContradiction,
+      });
+      chapterValidation = guardedChapter.validation;
+      if (guardedChapter.previousInvalidDraft) previousInvalidDraft = guardedChapter.previousInvalidDraft;
       if (chapterValidation.ok) break;
     }
     if (
@@ -3270,6 +3330,37 @@ export async function runLongifyBeta({
     if (typeof onPartial === 'function') {
       onPartial({ title, chapters, activeMessage: `[長編化β] 第${index}章まで生成しました。` });
     }
+  }
+
+  const preTopupStructureAudit = auditLongifyStructure({ chapters, invariants });
+  const preTopupStructureBlock = getLongifyPreTopupStructureBlock(preTopupStructureAudit);
+  if (preTopupStructureBlock.skipTopup) {
+    const text = formatLongifyOutput({ title, chapters });
+    report('讒矩繝√ぉ繝・け: 霑ｽ蜉逕滓・蜑阪↓荳榊粋譬ｼ', {
+      phase: 'structurePreTopup',
+      detail: preTopupStructureBlock.blocking.map(issue => issue.message).join(' / '),
+      chapterNumber: preTopupStructureBlock.chapters[0] || runOptions.chapterCount,
+      chapterCount: runOptions.chapterCount,
+      completedChars: submissionCharLength(stripStoryMakerFooter(text)),
+    });
+    return {
+      title,
+      seedText,
+      ledgerText,
+      chapters,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: buildStructureLongifyReview({
+        text,
+        mode: 'longify',
+        structureAudit: preTopupStructureAudit,
+        targetChars: runOptions.targetTotalNumber,
+        chapterCount: chapters.length,
+      }).aiReviewText,
+      reviewSource: 'structure',
+      structureAudit: preTopupStructureAudit,
+      options: runOptions,
+    };
   }
 
   let topupAttempts = 0;
@@ -3795,22 +3886,27 @@ export async function runLongifyBrushupBeta({
       }
       throwIfAborted(signal);
       if (rewriteResponse?.usedModel) usedModels.push(rewriteResponse.usedModel);
-      const rawPolishedChapter = rewriteResponse?.text || rewriteResponse || '';
-      const rawPolishedArtifactIssues = longifyFormatArtifactIssues(rawPolishedChapter);
-      polishedChapter = cleanLongifyDraft(rawPolishedChapter);
-      polishedArtifactIssues = longifyFormatArtifactIssues(polishedChapter);
-      const polishedChars = submissionCharLength(polishedChapter);
-      const sanitizedUsable = rawPolishedArtifactIssues.length > 0
-        && polishedArtifactIssues.length === 0
-        && polishedChars >= hardMinimumPolishedChars;
-      const candidateTooLong = targetPlan.compressionMode
-        && polishedChars > Math.ceil(targetPlan.max * 1.35);
-      if (
-        polishedArtifactIssues.length === 0
-        && polishedChars >= hardMinimumPolishedChars
-        && !candidateTooLong
-        && polishedChars > bestPolishedChars
-      ) {
+      const brushupCandidate = evaluateLongifyBrushupCandidate({
+        rawChapter: rewriteResponse?.text || rewriteResponse || '',
+        targetPlan,
+        hardMinimumPolishedChars,
+        targetPolishedChars,
+        cleanDraft: cleanLongifyDraft,
+        collectArtifactIssues: longifyFormatArtifactIssues,
+        charLength: submissionCharLength,
+      });
+      const {
+        rawArtifactIssues: rawPolishedArtifactIssues,
+        polishedChapter: evaluatedPolishedChapter,
+        polishedArtifactIssues: evaluatedPolishedArtifactIssues,
+        polishedChars,
+        sanitizedUsable,
+        needsRetry,
+        retryArtifactIssues,
+      } = brushupCandidate;
+      polishedChapter = evaluatedPolishedChapter;
+      polishedArtifactIssues = evaluatedPolishedArtifactIssues;
+      if (brushupCandidate.canStoreBest && polishedChars > bestPolishedChars) {
         bestPolishedChapter = polishedChapter;
         bestPolishedChars = polishedChars;
         bestPolishedWasSanitized = rawPolishedArtifactIssues.length > 0;
@@ -3824,14 +3920,8 @@ export async function runLongifyBrushupBeta({
           completedChars: submissionCharLength(chapters.join('\n\n')) + polishedChars,
         });
       }
-      const needsRetry = polishedArtifactIssues.length > 0
-        || polishedChars < targetPolishedChars
-        || (targetPlan.compressionMode && polishedChars > Math.ceil(targetPlan.max * 1.35));
       if (!needsRetry) break;
       if (attempt < maxRewriteAttempts) {
-        const retryArtifactIssues = rawPolishedArtifactIssues.length
-          ? rawPolishedArtifactIssues
-          : polishedArtifactIssues;
         report(retryArtifactIssues.length
           ? `第${chapterNumber}章の改稿が本文形式ではないため再試行します...`
           : targetPlan.compressionMode && polishedChars > targetPlan.max
@@ -3849,14 +3939,14 @@ export async function runLongifyBrushupBeta({
         });
       }
     }
-    if (
-      bestPolishedChapter
-      && (
-        polishedArtifactIssues.length > 0
-        || submissionCharLength(polishedChapter) < hardMinimumPolishedChars
-        || (targetPlan.compressionMode && submissionCharLength(polishedChapter) > Math.ceil(targetPlan.max * 1.35))
-      )
-    ) {
+    if (shouldAdoptLongifyBrushupBestCandidate({
+      bestPolishedChapter,
+      currentChapter: polishedChapter,
+      currentArtifactIssues: polishedArtifactIssues,
+      hardMinimumPolishedChars,
+      targetPlan,
+      charLength: submissionCharLength,
+    })) {
       polishedChapter = bestPolishedChapter;
       polishedArtifactIssues = [];
       report(`第${chapterNumber}章は再試行中の最良改稿候補を採用します。`, {
@@ -3867,16 +3957,20 @@ export async function runLongifyBrushupBeta({
         completedChars: submissionCharLength(chapters.join('\n\n')) + bestPolishedChars,
       });
     }
-    const polishedChapterChars = submissionCharLength(polishedChapter);
-    const compressionOverMax = targetPlan.compressionMode && polishedChapterChars > Math.ceil(targetPlan.max * 1.35);
-    const compressionTooShort = targetPlan.compressionMode && polishedChapterChars < hardMinimumPolishedChars;
-    const compressionBadFormat = targetPlan.compressionMode && polishedArtifactIssues.length > 0;
-    if (compressionOverMax || compressionTooShort || compressionBadFormat) {
+    const compressionRejection = getLongifyBrushupCompressionRejection({
+      polishedChapter,
+      polishedArtifactIssues,
+      targetPlan,
+      hardMinimumPolishedChars,
+      charLength: submissionCharLength,
+    });
+    const polishedChapterChars = compressionRejection.polishedChars;
+    if (compressionRejection.rejected) {
       report(`第${chapterNumber}章の圧縮改稿が字数レンジを外れたため停止します。`, {
         phase: 'brushupChapterRejected',
-        detail: compressionBadFormat
+        detail: compressionRejection.badFormat
           ? `混入形式: ${polishedArtifactIssues.join('、')}。本文形式ではない改稿を採用しません。`
-          : compressionOverMax
+          : compressionRejection.overMax
             ? `圧縮後 ${formatNumber(polishedChapterChars)}字 / 許容上限 ${formatNumber(Math.ceil(targetPlan.max * 1.35))}字。過長結果を採用しません。`
             : `圧縮後 ${formatNumber(polishedChapterChars)}字 / 下限 ${formatNumber(hardMinimumPolishedChars)}字。要約化した結果を採用しません。`,
         chapterNumber,
@@ -3885,10 +3979,12 @@ export async function runLongifyBrushupBeta({
       });
       throw new Error(`第${chapterNumber}章の圧縮改稿に失敗しました（${formatNumber(polishedChapterChars)}字 / 指定レンジ ${targetPlan.label}）。過長または要約化した章を採用せず停止しました。`);
     }
-    const preserveOriginalChapter = !targetPlan.compressionMode && (
-      polishedChapterChars < hardMinimumPolishedChars
-      || polishedArtifactIssues.length > 0
-    );
+    const preserveOriginalChapter = shouldPreserveOriginalLongifyChapter({
+      targetPlan,
+      polishedChars: polishedChapterChars,
+      polishedArtifactIssues,
+      hardMinimumPolishedChars,
+    });
     if (preserveOriginalChapter) {
       report(`第${chapterNumber}章の改稿結果が短すぎるため、元章を保持します...`, {
         phase: 'brushupChapterPreserve',
@@ -3911,6 +4007,43 @@ export async function runLongifyBrushupBeta({
       chapterCount: sourceChapters.length,
       completedChars: submissionCharLength(chapters.join('\n\n')),
     });
+  }
+
+  const preBrushupTopupStructureAudit = auditLongifyStructure({ chapters });
+  const preBrushupTopupStructureBlock = getLongifyPreTopupStructureBlock(preBrushupTopupStructureAudit);
+  if (preBrushupTopupStructureBlock.skipTopup) {
+    const text = formatBrushupOutput({ title, chapters, fallbackText: manuscript });
+    const finalChars = submissionCharLength(stripStoryMakerFooter(text));
+    report('讒矩繝√ぉ繝・け: 譛菴取枚蟄玲焚陬懷ｼｷ蜑阪↓荳榊粋譬ｼ', {
+      phase: 'brushupStructurePreTopup',
+      detail: preBrushupTopupStructureBlock.blocking.map(issue => issue.message).join(' / '),
+      chapterNumber: preBrushupTopupStructureBlock.chapters[0] || sourceChapters.length,
+      chapterCount: sourceChapters.length,
+      completedChars: finalChars,
+    });
+    const structureReview = buildStructureLongifyReview({
+      text,
+      mode: 'brushup',
+      structureAudit: preBrushupTopupStructureAudit,
+      targetChars: targetTotalNumber,
+      chapterCount: chapters.length,
+    });
+    return {
+      mode: 'brushup',
+      title,
+      critiqueText,
+      structureGuide,
+      chapters,
+      chapterCount: chapters.length,
+      usedModels: [...new Set(usedModels)],
+      text,
+      aiReviewText: structureReview.aiReviewText,
+      reviewSource: 'structure',
+      structureAudit: preBrushupTopupStructureAudit,
+      originalChars: sourceTotalChars,
+      finalChars,
+      targetTotalNumber,
+    };
   }
 
   let brushupTopupAttempts = 0;
@@ -4267,8 +4400,12 @@ function waitForPaint() {
 }
 
 function getTypewriterBatchSize(totalChars) {
-  if (totalChars <= 8000) return Math.max(2, Math.ceil(totalChars / 1800));
-  if (totalChars <= 30000) return Math.max(24, Math.ceil(totalChars / 240));
+  if (totalChars <= LONGIFY_TYPEWRITER_BATCH_POLICY.compactMaxChars) {
+    return Math.max(2, Math.ceil(totalChars / 1800));
+  }
+  if (totalChars <= LONGIFY_TYPEWRITER_BATCH_POLICY.midMaxChars) {
+    return Math.max(24, Math.ceil(totalChars / 240));
+  }
   return Math.max(80, Math.ceil(totalChars / 320));
 }
 
@@ -4591,16 +4728,10 @@ export function buildLongifyReview({
       const missingRatio = (target - chars) / Math.max(target, 1);
       score -= Math.min(18, Math.ceil(missingRatio * 34));
     }
-  } else if (chars >= 30000) {
-    score += 12;
-  } else if (chars >= 15000) {
-    score += 9;
-  } else if (chars >= 8000) {
-    score += 6;
-  } else if (chars >= 3000) {
-    score += 2;
   } else {
-    score -= 8;
+    const fallbackBand = LONGIFY_REVIEW_LENGTH_SCORE_BANDS.find(({ minChars }) => chars >= minChars);
+    if (fallbackBand) score += fallbackBand.bonus;
+    else score -= 8;
   }
   if (chapters >= 5) score += 9;
   else if (chapters >= 3) score += 7;
@@ -4743,12 +4874,12 @@ function clearLongifyReview() {
 
 function getLongifyReviewPlainText() {
   const reviewEl = document.getElementById('longify-beta-review');
-  if (reviewEl?.dataset?.reviewSource === 'failed'
-    || reviewEl?.dataset?.reviewSource === 'structure'
-    || reviewEl?.dataset?.reviewSource === 'format') return '';
-  const aiReviewText = String(reviewEl?.querySelector?.('.longify-beta-review-ai-text')?.textContent || '').trim();
-  if (aiReviewText) return aiReviewText;
-  return String(reviewEl?.innerText || reviewEl?.textContent || '').trim();
+  return selectReusableLongifyReviewText({
+    reviewSource: reviewEl?.dataset?.reviewSource || '',
+    aiReviewText: reviewEl?.querySelector?.('.longify-beta-review-ai-text')?.textContent || '',
+    exportText: reviewEl?.dataset?.reviewExportText || '',
+    visibleText: reviewEl?.innerText || reviewEl?.textContent || '',
+  });
 }
 
 function buildLongifyReviewHeadline(review = {}) {
@@ -5283,6 +5414,7 @@ export function installLongifyBeta() {
   const charCounter = document.getElementById('char-counter');
   const tagRow = document.getElementById('tag-row');
   if (!outputEl || !button || !statusEl) return;
+  syncLongifyTargetSelect();
   document.getElementById('btn-generate')?.addEventListener('click', () => {
     if (outputEl.dataset) delete outputEl.dataset.longifyOutput;
   }, true);

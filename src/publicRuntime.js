@@ -8,7 +8,7 @@ import {
 } from './modeContracts.js';
 import { installAlphapolisAssist } from './alphapolisAssist.js';
 import { installKakuyomuAssist } from './kakuyomuAssist.js';
-import { installLongifyBeta } from './longifyBeta.js';
+import { installLongifyBeta, syncLongifyTargetSelect } from './longifyBeta.js';
 import { installPublicOutputCleanup } from './outputCleanup.js';
 import { installStandardTypewriterCursor } from './standardTypewriterRenderer.js';
 
@@ -633,6 +633,7 @@ function installPublicRuntime() {
     generateButton: document.getElementById('btn-generate'),
     longNovelPanel: document.getElementById('long-novel-panel'),
   });
+  syncLongifyTargetSelect();
   installPublicOutputCleanup();
   installOutputAssistLauncher();
 }

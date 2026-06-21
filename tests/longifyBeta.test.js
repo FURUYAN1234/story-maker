@@ -3,8 +3,10 @@ import { STORY_MAKER_FOOTER } from '../src/version.js';
 import {
   AUTO_BRUSHUP_MAX_ATTEMPTS,
   AI_REVIEW_PASS_SCORE,
+  LONGIFY_TARGET_POLICY,
   auditLongifyFormat,
   buildAiLongifyReview,
+  buildLongifyTargetOptions,
   extractAiReviewScore,
   formatLongifyReviewCopyText,
   buildLongifyAiReviewPrompt,
@@ -46,6 +48,7 @@ import {
   shouldPreserveRenderedLongifyReview,
   splitLongifyManuscript,
   submissionCharLength,
+  syncLongifyTargetSelect,
   validateLongifyChapterDraft,
   validateLongifyEndingCompletion,
 } from '../src/longifyBeta.js';
@@ -88,10 +91,45 @@ assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'openai' }), {
   visible: false,
   ariaHidden: 'true',
 });
-assert.equal(normalizeLongifyUiTargetChars(10000), 10000);
-assert.equal(normalizeLongifyUiTargetChars(20000), 10000);
-assert.equal(normalizeLongifyUiTargetChars(30000), 10000);
-assert.equal(normalizeLongifyUiTargetChars('invalid'), 10000);
+const activeLongifyTargetMax = LONGIFY_TARGET_POLICY.activeMax;
+assert.equal(normalizeLongifyUiTargetChars(LONGIFY_TARGET_POLICY.min), LONGIFY_TARGET_POLICY.min);
+assert.equal(normalizeLongifyUiTargetChars(activeLongifyTargetMax + LONGIFY_TARGET_POLICY.min), activeLongifyTargetMax);
+assert.equal(normalizeLongifyUiTargetChars('invalid'), activeLongifyTargetMax);
+assert.deepEqual(
+  buildLongifyTargetOptions().filter(option => !option.disabled).map(option => option.value),
+  LONGIFY_TARGET_POLICY.choices.filter(value => value <= activeLongifyTargetMax),
+);
+assert.equal(buildLongifyTargetOptions().some(option => option.disabled), true);
+const originalDocument = globalThis.document;
+const fakeTargetSelect = {
+  value: String(activeLongifyTargetMax + LONGIFY_TARGET_POLICY.unitChars),
+  options: [],
+  set innerHTML(value) {
+    assert.equal(value, '');
+    this.options = [];
+  },
+  appendChild(option) {
+    this.options.push(option);
+  },
+};
+globalThis.document = {
+  createElement(tagName) {
+    assert.equal(tagName, 'option');
+    return {
+      value: '',
+      textContent: '',
+      disabled: false,
+    };
+  },
+};
+assert.equal(syncLongifyTargetSelect(fakeTargetSelect), activeLongifyTargetMax);
+assert.equal(fakeTargetSelect.value, String(activeLongifyTargetMax));
+assert.equal(fakeTargetSelect.options.length, buildLongifyTargetOptions().length);
+assert.equal(fakeTargetSelect.options[0].value, String(LONGIFY_TARGET_POLICY.min));
+assert.equal(fakeTargetSelect.options[0].textContent, `最低${LONGIFY_TARGET_POLICY.min.toLocaleString()}字`);
+assert.equal(fakeTargetSelect.options[0].disabled, false);
+assert.ok(fakeTargetSelect.options.slice(1).every(option => option.disabled && option.textContent.includes('当面停止')));
+globalThis.document = originalDocument;
 assert.deepEqual(resolveLongifyProgressDisplay({
   progressMode: 'brushup',
   brushupAttempt: 2,
@@ -218,11 +256,13 @@ assert.deepEqual(
     endingInstruction: '結末の意味を残して再構成する',
   }
 );
-assert.equal(createLongifyRunOptions({ targetTotalChars: 10000 }).chapterCount, 3);
-assert.equal(createLongifyRunOptions({ targetTotalChars: 18000 }).chapterCount, 4);
-assert.equal(createLongifyRunOptions({ targetTotalChars: 30000 }).chapterCount, 6);
-assert.equal(createLongifyRunOptions({ targetTotalChars: 80000 }).chapterCount, 8);
-assert.equal(createLongifyRunOptions({ targetTotalChars: 150000 }).chapterCount, 10);
+for (const { max, chapterCount } of LONGIFY_TARGET_POLICY.chapterBreakpoints) {
+  assert.equal(createLongifyRunOptions({ targetTotalChars: max }).chapterCount, chapterCount);
+}
+assert.equal(
+  createLongifyRunOptions({ targetTotalChars: LONGIFY_TARGET_POLICY.max }).chapterCount,
+  LONGIFY_TARGET_POLICY.maxChapterCount,
+);
 const chapterRange = createLongifyChapterTargetRange({ targetTotalChars: 30000, chapterCount: 6 });
 assert.deepEqual(chapterRange, {
   min: 4400,
@@ -1193,6 +1233,11 @@ assert.equal(isLongifiedOutputText(preserveBrushupResult.text), true);
 const topupSourceBlock = '\u3042'.repeat(3000);
 const topupCompactBlock = '\u3044'.repeat(2300);
 const topupAdditionBlock = '\u3046'.repeat(2600);
+const topupCompactBlocks = {
+  1: 'Akari checks the rain ledger in the cafe kitchen, finds a missing receipt, and decides to ask the harbor clerk before dawn. '.repeat(22),
+  2: 'Riku crosses the wet shopping street, loses the clerk as a witness, and chooses to confront the town-hall vote at noon. '.repeat(22),
+  3: 'Mio carries the repaired lantern to the ferry office, trades the receipt for a promise, and leaves the counter light burning. '.repeat(22),
+};
 const topupBrushupSource = `\u3010Topup Check\u3011
 
 \u7b2c1\u7ae0\u3000A
@@ -1245,7 +1290,7 @@ const topupBrushupResult = await runLongifyBrushupBeta({
       };
     }
     return {
-      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Compact\n\n${topupCompactBlock}`,
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Compact\n\n${topupCompactBlocks[context.chapterNumber] || topupCompactBlock}`,
       usedModel: `mock-topup-chapter-${context.chapterNumber}-${context.retryAttempt}`,
     };
   },
@@ -1259,6 +1304,37 @@ assert.equal((topupBrushupResult.text.match(/【Topup Check】/g) || []).length,
 assert.equal(topupBrushupResult.text.includes('八百屋の奥さん'), false);
 assert.ok(topupBrushupResult.text.includes(topupAdditionBlock));
 assert.ok(submissionCharLength(topupBrushupResult.text) >= 14000);
+
+const preTopupLoopCalls = [];
+const preTopupLoopStages = [];
+const preTopupLoopBody = 'Akari opens the cafe ledger, crosses the wet alley, argues at the harbor office, and burns the same receipt before dawn. '.repeat(28);
+const preTopupLoopResult = await runLongifyBrushupBeta({
+  storyText: topupBrushupSource,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  targetTotalChars: 14000,
+  onStage: stage => preTopupLoopStages.push(stage),
+  callText: async (prompt, context) => {
+    preTopupLoopCalls.push({ prompt, context });
+    if (context.stage === 'brushupCritique') {
+      return { text: 'Repeat structure should be repaired before adding more text.', usedModel: 'mock-pretopup-critique' };
+    }
+    if (context.stage === 'brushupTopup') {
+      throw new Error('brushup top-up should not run while a chapter loop is already detected');
+    }
+    if (context.stage === 'brushupReview') {
+      throw new Error('AI review should not run before the structure issue is repaired');
+    }
+    return {
+      text: `\u7b2c${context.chapterNumber}\u7ae0\u3000Loop Guard\n\n${preTopupLoopBody}`,
+      usedModel: `mock-pretopup-loop-${context.chapterNumber}`,
+    };
+  },
+});
+assert.equal(preTopupLoopResult.reviewSource, 'structure');
+assert.ok(preTopupLoopResult.structureAudit.blocking.some(issue => issue.code === 'chapter_loop'));
+assert.equal(preTopupLoopCalls.some(call => call.context.stage === 'brushupTopup'), false);
+assert.ok(preTopupLoopStages.some(stage => stage.phase === 'brushupStructurePreTopup'));
 
 const compressionSourceChapter = '\u3042'.repeat(7000);
 const compressionRewrittenChapter = '\u3044'.repeat(5000);
@@ -2045,7 +2121,12 @@ const endingRepairResult = await runLongifyBeta({
         usedModel: 'mock-ending-review',
       };
     }
-    const body = '商店街の光と限定どら焼きの行方を、会話と行動で場面として厚く描く。'.repeat(110);
+    const endingBodies = {
+      1: 'Akari opens the shop shutters, checks the empty flour tin, and decides to follow the customer receipt to the back lane. '.repeat(34),
+      2: 'Rin questions the clerk beside the rain barrel, loses the easy alibi, and chooses to split the dorayaki bag in public. '.repeat(34),
+      3: 'Miku returns with the packet, notices the mark on the wrapper, and understands why the missing share mattered. '.repeat(34),
+    };
+    const body = endingBodies[context.chapterNumber] || endingBodies[1];
     if (context.chapterNumber === 3) {
       return {
         text: `第3章　発見\n\n${body}\n\nリンが写真を見返すと、ミクの袖に包みが映っていた。\n「見つけた！」`,
@@ -2090,7 +2171,12 @@ const endingFallbackResult = await runLongifyBeta({
         usedModel: 'mock-fallback-review',
       };
     }
-    const body = '商店街の光と限定どら焼きの行方を、会話と行動で場面として厚く描く。'.repeat(110);
+    const fallbackBodies = {
+      1: 'Akari opens the shop shutters, checks the empty flour tin, and decides to follow the customer receipt to the back lane. '.repeat(34),
+      2: 'Rin questions the clerk beside the rain barrel, loses the easy alibi, and chooses to split the dorayaki bag in public. '.repeat(34),
+      3: 'Miku returns with the packet, notices the mark on the wrapper, and understands why the missing share mattered. '.repeat(34),
+    };
+    const body = fallbackBodies[context.chapterNumber] || fallbackBodies[1];
     if (context.chapterNumber === 3) {
       return {
         text: `第3章　発見\n\n${body}\n\nリンが写真を見返すと、ミクの袖に包みが映っていた。\n「見つけた！」`,
