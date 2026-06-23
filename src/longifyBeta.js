@@ -37,7 +37,7 @@ export const LONGIFY_TARGET_POLICY = Object.freeze({
   unitChars: LONGIFY_TARGET_UNIT_CHARS,
   min: toLongifyTargetChars(1),
   max: toLongifyTargetChars(15),
-  activeMax: toLongifyTargetChars(1),
+  activeMax: toLongifyTargetChars(2),
   default: toLongifyTargetChars(1),
   choices: Object.freeze([1, 2, 3, 5, 8, 10, 12, 15].map(toLongifyTargetChars)),
   chapterBreakpoints: Object.freeze([

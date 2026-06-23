@@ -1,4 +1,4 @@
-# Story Maker v5.2.2 / AI物語メーカー
+# Story Maker v5.2.3 / AI物語メーカー
 
 Story Maker is a static web application for generating creative text with Google Gemini API or OpenAI API, including standard short-form outputs and a beta workflow that expands completed Output into a long-form manuscript. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract.
 
@@ -73,7 +73,7 @@ The intent is not to force every work into the same template. The contract tells
 | API<br>API | Provider links<br>キー取得リンク | Header links help the user reach Gemini API and OpenAI API key pages.<br>ヘッダーから Gemini API と OpenAI API のキー取得ページへ移動できます。 |
 | Generation<br>生成 | 14 public output modes<br>14公開出力モード | Each public mode has its own expected structure and cleanup behavior.<br>各公開モードには、期待される構造と整形処理があります。 |
 | Generation<br>生成 | Selected-mode priority<br>選択モード優先 | The selected output chip wins over incidental words inside prompts or source material.<br>プロンプトや素材文中の偶然の語より、選択中の出力チップを優先します。 |
-| Generation<br>生成 | Long-form expansion beta<br>長編化β | Expands an existing Output manuscript into a chaptered long-form draft, then can brush it up from AI review feedback.<br>既存の Output 原稿を章立てされた長編下書きへ拡張し、AI講評をもとにブラッシュアップできます。 |
+| Generation<br>生成 | Long-form expansion beta<br>長編化β | Expands an existing Output manuscript into a chaptered long-form draft, then can brush it up from AI review feedback. The current public selectable target ceiling is 20,000 characters; 30,000+ targets remain visible but stopped until quality verification passes.<br>既存の Output 原稿を章立てされた長編下書きへ拡張し、AI講評をもとにブラッシュアップできます。現時点の公開版で選択できる上限は20,000字です。30,000字以上は選択肢として表示されますが、品質検証が通るまで当面停止です。 |
 | Randomization<br>ランダム | All-random<br>全項目ランダム | Randomizes the visible creative axes and starts generation immediately.<br>見えている創作軸をまとめてランダム化し、そのまま生成します。 |
 | Randomization<br>ランダム | Per-section random<br>セクション別ランダム | Individual sections can be randomized without changing the whole request.<br>全体を変えず、特定セクションだけを個別にランダム化できます。 |
 | Locking<br>固定 | Section locks<br>セクションロック | Locked sections are protected from randomization and reset where applicable.<br>ロックした欄は、対応するランダム化やリセットから保護されます。 |
@@ -204,6 +204,8 @@ Long-form expansion is not a fifteenth output chip. It is a downstream workflow 
 | 主な成果物 | 章立てされた長編原稿、単一のStory Makerフッター、更新されたOutputタグ、最新原稿を元にしたKakuyomuフォーム風プレビューです。 |
 | Quality loop | Each longification or brush-up result receives an AI review. The review score controls pass/fail display and optional auto brush-up. |
 | 品質ループ | 長編化またはブラッシュアップ後にAI講評を行います。点数は合否表示と任意の自動ブラッシュアップ判定に使われます。 |
+| Current target ceiling | The public UI currently allows 10,000-character and 20,000-character targets only. Larger targets are kept as disabled stopped options. |
+| 現在の上限 | 公開UIで選択できる最低文字数は、現時点では10,000字と20,000字のみです。30,000字以上は停止中の無効選択肢として残しています。 |
 
 ### Source And Output / 入力元と出力先
 
@@ -282,6 +284,16 @@ Brush-up rewrites the existing long-form manuscript from the latest AI review. I
 | APIが整った短い要約のような改稿を返す。 | 短くなりすぎた章は、最終結合前に再試行できます。 | 意図しない圧縮を減らすための保護であり、各章を厳密な文字数へ固定するものではありません。 |
 | Assembled brush-up result falls below the long-form minimum. | A final top-up pass can add more material to the manuscript. | This protects the long-form minimum but does not guarantee exact match with the selected target. |
 | 結合後のブラッシュアップ結果が長編最低ラインを下回る。 | 最後に補強生成を行い、本文量を追加できます。 | 長編最低ラインを守るための保護であり、指定文字数ぴったりを保証するものではありません。 |
+
+### Current Public Character Limit / 現時点の公開文字数上限
+
+The current public Longify beta target ceiling is 20,000 characters. The selector exposes 10,000 and 20,000 characters as usable choices. Higher targets such as 30,000 characters stay visible as stopped options so the UI can communicate that they exist in the design, but they are not selectable in the public release line yet.
+
+現時点の公開版Longify betaで選べる上限は20,000字です。セレクターでは10,000字と20,000字のみを有効な選択肢にしています。30,000字以上は設計上の候補として表示だけ残していますが、公開リリースではまだ選択できません。
+
+The 30,000-character OpenAI proof reached the length after brush-up, but it failed the structure gate because the final chapter repeated existing content. For that reason, 30,000+ targets remain paused until both character count and structure/AI-review quality pass together.
+
+OpenAIでの30,000字検証では、ブラッシュアップ後に文字数自体は到達しましたが、最終章が既存内容の反復と判定され、構造チェック不合格になりました。そのため、30,000字以上は文字数達成と構造・AI講評品質が同時に通るまで当面停止します。
 
 ### Fallbacks And Rollback / フォールバックとロールバック
 
@@ -826,11 +838,22 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 | Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
 | Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
 | Long-form beta<br>長編β | Long-form expansion uses multiple provider calls for chapter generation, AI review, and optional brush-up.<br>長編化は、章生成、AI講評、任意のブラッシュアップで複数回API通信を行います。 | It can take longer and consume more API quota than standard generation.<br>通常生成より時間とAPI使用量が増えます。 |
+| Longify target ceiling<br>長編化の文字数上限 | The current public selectable ceiling is 20,000 characters. 30,000+ targets are intentionally disabled after the latest OpenAI proof reached length but failed the structure gate.<br>現時点の公開版で選べる上限は20,000字です。直近のOpenAI検証では30,000字以上の文字数到達後に構造チェックが不合格になったため、30,000字以上は意図的に無効化しています。 | Use 10,000 or 20,000 characters for public Longify beta runs until longer targets pass both length and structure/AI-review quality gates.<br>より長い目標が文字数と構造・AI講評品質の両方を通過するまでは、公開版の長編化βでは10,000字または20,000字を使います。 |
 | AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
 | Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.2.3 (2026-06-23)
+
+- Raised the public Longify beta selectable ceiling from 10,000 to 20,000 characters after a real in-app OpenAI proof passed 24,464 submission characters, format check, structure check, and an 84-point AI review.
+- Kept 30,000+ targets disabled after a temporary OpenAI proof reached 34,549 characters after brush-up but failed the structure gate due to repeated final-chapter content.
+- Documented the current 20,000-character public ceiling and the 30,000+ pause in the README feature details, Longify beta details, known limitations, and release history.
+
+- 内蔵ブラウザのOpenAI実証で、24,464字、形式チェック合格、構造チェック合格、AI講評84点を確認したため、公開版Longify betaの選択可能上限を10,000字から20,000字へ引き上げました。
+- 一時的な30,000字OpenAI検証では、ブラッシュアップ後に34,549字へ到達したものの、最終章の反復により構造チェック不合格となったため、30,000字以上は引き続き無効化しています。
+- READMEの機能詳細、長編化β詳細、既知の制限、変更履歴に、現時点の公開上限が20,000字であることと30,000字以上の停止理由を明記しました。
 
 ### v5.2.2 (2026-06-21)
 

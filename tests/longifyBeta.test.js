@@ -128,7 +128,10 @@ assert.equal(fakeTargetSelect.options.length, buildLongifyTargetOptions().length
 assert.equal(fakeTargetSelect.options[0].value, String(LONGIFY_TARGET_POLICY.min));
 assert.equal(fakeTargetSelect.options[0].textContent, `最低${LONGIFY_TARGET_POLICY.min.toLocaleString()}字`);
 assert.equal(fakeTargetSelect.options[0].disabled, false);
-assert.ok(fakeTargetSelect.options.slice(1).every(option => option.disabled && option.textContent.includes('当面停止')));
+assert.ok(fakeTargetSelect.options.some(option => option.value === String(activeLongifyTargetMax) && !option.disabled));
+assert.ok(fakeTargetSelect.options
+  .filter(option => Number(option.value) > activeLongifyTargetMax)
+  .every(option => option.disabled && option.textContent.includes('当面停止')));
 globalThis.document = originalDocument;
 assert.deepEqual(resolveLongifyProgressDisplay({
   progressMode: 'brushup',
