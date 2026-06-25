@@ -831,6 +831,12 @@ A tool to convert static 4-koma manga into fully voiced animated videos. / 静�
 - [Explanation / 解説](https://note.com/happy_duck780/n/ndc6533c1512f)
 - [Code / コード](https://github.com/FURUYAN1234/ai-voice-comic-maker)
 
+#### 7. Monogatari Buzz Maker / 物語バズメーカー
+A trend-to-story planning tool that converts public Web/RSS signals into practical manga, short video, explainer video, and novel briefs. / 公開Web/RSSの話題シグナルを、漫画・ショート動画・解説動画・小説の実用企画へ変換する創作支援ツールです。
+- [Explanation / 解説](https://note.com/happy_duck780/n/ncc593101d77f)
+- [Demo / デモ](https://furuyan1234.github.io/viral-radar/)
+- [Code / コード](https://github.com/FURUYAN1234/viral-radar)
+
 ## Known Limitations / 既知の制限
 
 | Area / 領域 | Limitation / 制限 | Practical meaning / 実用上の意味 |
