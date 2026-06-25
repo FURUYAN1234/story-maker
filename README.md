@@ -816,7 +816,7 @@ An assistant for designing detailed character sheets and settings. / 詳細な�
 
 #### 4. AI Comic Translation Tool
 A tool for translating manga into multiple languages using AI. / AIを使って漫画を多言語へ翻訳するツールです。
-- [Explanation / 解説](https://note.com/happy_duck780/n/nbdf826604ce7)
+- [Explanation / 解説](https://note.com/happy_duck780/n/ne462dfc55ec8)
 - [Demo / デモ](https://furuyan1234.github.io/comic-translation/)
 - [Code / コード](https://github.com/FURUYAN1234/comic-translation)
 
