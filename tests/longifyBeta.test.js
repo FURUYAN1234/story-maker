@@ -31,6 +31,7 @@ import {
   formatLongifyOutput,
   hasLongifyFormatArtifacts,
   hasLongifySeed,
+  installLongifyBeta,
   isLongifiedOutputText,
   longifyChapterBodyCharLength,
   normalizeLongifyPublicText,
@@ -81,6 +82,74 @@ assert.deepEqual(resolveLongifyPanelState({ unavailable: false, busy: false, rea
   ariaDisabled: 'false',
   ariaBusy: 'false',
 });
+function createMockClassList() {
+  const classes = new Set();
+  return {
+    add: (...names) => names.forEach(name => classes.add(name)),
+    remove: (...names) => names.forEach(name => classes.delete(name)),
+    toggle: (name, force) => {
+      const shouldAdd = force === undefined ? !classes.has(name) : Boolean(force);
+      if (shouldAdd) classes.add(name);
+      else classes.delete(name);
+      return shouldAdd;
+    },
+    contains: name => classes.has(name),
+  };
+}
+function createMockElement() {
+  const attributes = new Map();
+  return {
+    checked: false,
+    classList: createMockClassList(),
+    dataset: {},
+    disabled: false,
+    innerText: '',
+    textContent: '',
+    title: '',
+    getAttribute: name => attributes.get(name),
+    setAttribute: (name, value) => attributes.set(name, String(value)),
+  };
+}
+{
+  const previousDocument = globalThis.document;
+  const elements = new Map([
+    ['output', createMockElement()],
+    ['btn-longify-beta', createMockElement()],
+    ['btn-longify-stop', createMockElement()],
+    ['longify-auto-brushup-until-pass', { ...createMockElement(), checked: true }],
+    ['longify-beta-status', createMockElement()],
+    ['longify-target-chars', createMockElement()],
+    ['longify-beta', createMockElement()],
+  ]);
+  globalThis.document = {
+    getElementById: id => elements.get(id) || null,
+  };
+  try {
+    installLongifyBeta();
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+  const button = elements.get('btn-longify-beta');
+  const statusEl = elements.get('longify-beta-status');
+  const stopButton = elements.get('btn-longify-stop');
+  const autoBrushupCheckbox = elements.get('longify-auto-brushup-until-pass');
+  const targetSelect = elements.get('longify-target-chars');
+  const rootEl = elements.get('longify-beta');
+  assert.equal(button.disabled, true);
+  assert.equal(button.getAttribute('aria-disabled'), 'true');
+  assert.equal(button.classList.contains('is-disabled'), true);
+  assert.equal(button.dataset.longifyInstallerAttached, 'true');
+  assert.equal(button.dataset.longifyAction, 'sealed');
+  assert.equal(button.textContent, '長編化βは停止中');
+  assert.equal(statusEl.textContent, '長編化βは検証不合格のため停止中です');
+  assert.equal(stopButton.disabled, true);
+  assert.equal(autoBrushupCheckbox.checked, false);
+  assert.equal(autoBrushupCheckbox.disabled, true);
+  assert.equal(targetSelect.disabled, true);
+  assert.equal(rootEl.classList.contains('is-unavailable'), true);
+  assert.equal(rootEl.getAttribute('aria-disabled'), 'true');
+}
 assert.deepEqual(resolveLongifyProviderWarningState({ provider: 'gemini' }), {
   provider: 'gemini',
   visible: true,
@@ -1660,6 +1729,92 @@ assert.match(duplicateRetryPrompt, /前回候補は既存章と重なったた�
 assert.match(splitLongifyManuscript(duplicateGateResult.text).chapters[1], /second chapter distinct choice/);
 assert.doesNotMatch(splitLongifyManuscript(duplicateGateResult.text).chapters[1], /first-chapter-only rhythm/);
 assert.equal(duplicateGateResult.reviewSource, 'ai');
+
+const episodeRetakeGateCalls = [];
+const episodeRetakeGateStages = [];
+const episodeA = [
+  '澪は古い写真を発見し、春人に相談した。',
+  '二人は保存計画を実行しようと決め、関係者から証言を受け取った。',
+  '反対する担当者に止められたが、祖父が写真を残した理由が分かった。',
+  '最後に記録を公開し、止まっていた時計が動き始めた。',
+].join('');
+const episodeBRetake = [
+  '終盤では記録が公開され、時計が時を刻みはじめる。',
+  '春人の視点では、古い写真を発見する場面から始まる。',
+  '証言を受け取ったあと担当者に止められ、祖父の理由を知る。',
+  '澪に相談し、保存計画を実行しようと決める。',
+].join('');
+const episodeBDistinct = [
+  '翌朝、澪は保存申請の締切表を読み、必要書類の束を前に息を整えた。',
+  '春人は濡れた申請書を直し、名前の抜けを補修した。',
+  '二人は新しい手続きのため署名欄を整え、提出の準備をした。',
+  '期限が迫る中でどちらが責任を負うか言い争い、澪は謝りきれないまま朝を迎えた。',
+].join('');
+const expandJapaneseChapter = (body, count, label) => {
+  const variants = {
+    公開後の余波: '店先の古い照明が揺れ、澪は濡れた封筒の角を押さえながら返事を待った。',
+    別視点の余波: '帳簿の余白に残った鉛筆跡を春人がなぞり、言えなかった疑問だけが残った。',
+    申請準備の余波: '役場の蛍光灯の下で申請書の端が乾き、澪は空欄の責任者名を見つめた。',
+  };
+  const tail = variants[label] || 'それぞれの場面に固有の沈黙が残り、次の行動だけが手元に残った。';
+  return `${body}${Array.from({ length: count }, (_, index) => (
+    `${label}${index + 1}。${tail}`
+  )).join('')}`;
+};
+const episodeRetakeGateResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 3,
+  targetTotalChars: 10000,
+  onStage: stage => episodeRetakeGateStages.push(stage),
+  callText: async (prompt, context) => {
+    episodeRetakeGateCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return { text: 'Fixed ledger: each chapter must advance the town-photo story instead of retelling it.', usedModel: 'mock-retake-ledger' };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI総合点: 84点\nAI講評:\n章ごとの前進を確認。\n章別の改稿指示:\n第2章は保存申請の摩擦を強める。',
+        usedModel: 'mock-retake-review',
+      };
+    }
+    if (context.chapterNumber === 1) {
+      return {
+        text: `第1章　写真の公開\n\n${expandJapaneseChapter(episodeA, 65, '公開後の余波')}`,
+        usedModel: 'mock-retake-chapter-1',
+      };
+    }
+    if (context.chapterNumber === 2 && context.retryAttempt === 0) {
+      return {
+        text: `第2章　別視点の写真\n\n${expandJapaneseChapter(episodeBRetake, 65, '別視点の余波')}`,
+        usedModel: 'mock-retake-chapter-2-bad',
+      };
+    }
+    if (context.chapterNumber === 2) {
+      return {
+        text: `第2章　保存申請\n\n${expandJapaneseChapter(episodeBDistinct, 65, '申請準備の余波')}`,
+        usedModel: 'mock-retake-chapter-2-fixed',
+      };
+    }
+    return {
+      text: `第${context.chapterNumber}章　次の選択\n\n${longChapterBody.repeat(45)}`,
+      usedModel: `mock-retake-chapter-${context.chapterNumber}`,
+    };
+  },
+});
+assert.ok(episodeRetakeGateCalls.filter(call => call.context.stage === 'chapter' && call.context.chapterNumber === 2).length >= 2);
+assert.ok(episodeRetakeGateStages.some(stage => stage.phase === 'chapterRetry' && stage.chapterNumber === 2));
+const episodeRetakeRetryPrompt = episodeRetakeGateCalls.find(
+  call => call.context.stage === 'chapter'
+    && call.context.chapterNumber === 2
+    && call.context.retryAttempt === 1,
+)?.prompt || '';
+assert.match(episodeRetakeRetryPrompt, /前回候補は既存章と重なったため参照しない/);
+assert.match(episodeRetakeRetryPrompt, /発見→相談→決意→実行→対立→判明→公開\/解決/);
+assert.match(splitLongifyManuscript(episodeRetakeGateResult.text).chapters[1], /保存申請/);
+assert.doesNotMatch(splitLongifyManuscript(episodeRetakeGateResult.text).chapters[1], /別視点の写真/);
+assert.equal(episodeRetakeGateResult.reviewSource, 'ai');
 
 const reviewRetryCalls = [];
 const reviewRetryStages = [];

@@ -1,4 +1,4 @@
-# Story Maker v5.2.4 / AI物語メーカー
+# Story Maker v5.2.5 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -845,13 +845,23 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 |---|---|---|
 | Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
 | Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Long-form beta<br>長編β | Long-form expansion uses multiple provider calls for chapter generation, AI review, and optional brush-up.<br>長編化は、章生成、AI講評、任意のブラッシュアップで複数回API通信を行います。 | It can take longer and consume more API quota than standard generation.<br>通常生成より時間とAPI使用量が増えます。 |
-| Longify target ceiling<br>長編化の文字数上限 | The current public selectable ceiling is 20,000 characters. 30,000+ targets are intentionally disabled after the latest OpenAI proof reached length but failed the structure gate.<br>現時点の公開版で選べる上限は20,000字です。直近のOpenAI検証では30,000字以上の文字数到達後に構造チェックが不合格になったため、30,000字以上は意図的に無効化しています。 | Use 10,000 or 20,000 characters for public Longify beta runs until longer targets pass both length and structure/AI-review quality gates.<br>より長い目標が文字数と構造・AI講評品質の両方を通過するまでは、公開版の長編化βでは10,000字または20,000字を使います。 |
+| Long-form beta<br>長編β | Longify beta is currently paused in the public UI after a real 20,000-character expansion plus three automatic brush-up attempts still failed the structure gate and fell below the target length.<br>長編化βは、実ブラウザで20,000字長編化と最大3回の自動ブラッシュアップを行っても構造チェック不合格・文字数未達に戻ったため、公開UIでは現在停止しています。 | The button is disabled instead of presenting an unreliable pass/fail result. Standard non-long generation remains available.<br>不確かな合格判定を出さないため、ボタンは無効化されています。通常の非長編生成は引き続き利用できます。 |
+| Longify target ceiling<br>長編化の文字数上限 | Longify target selection is disabled while Longify beta is paused.<br>長編化βの停止中は、長編化の文字数選択も無効化されています。 | Re-enabling requires a new design and fresh proof that length, structure, and review quality all pass without repeated story arcs.<br>再開には、同じ話の反復なしに文字数・構造・講評品質を通過する新設計と再検証が必要です。 |
 | AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
 | Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.2.5 (2026-06-28)
+
+- Paused the public Longify beta after a real in-app 20,000-character expansion plus three automatic brush-up attempts failed to reach a structure-safe passing result.
+- Added broader structural guards for repeated episode arcs across chapters and repeated event loops inside a chapter, while keeping the Longify beta entry point disabled until a stronger redesign is available.
+- Updated the public UI so the Longify beta button, auto brush-up checkbox, and target selector are disabled with an explicit paused status instead of allowing another unreliable run.
+
+- 内蔵ブラウザで20,000字長編化と最大3回の自動ブラッシュアップを実行しても、構造的に安全な合格結果へ到達しなかったため、公開版の長編化βを停止しました。
+- 章をまたいだ同一エピソードの再演と、章内のイベント列ループを検出する構造ガードを追加しました。ただし、より強い再設計ができるまでは長編化βの入口は無効化しています。
+- 公開UIでは、長編化βボタン、自動ブラッシュアップ、目標文字数選択を無効化し、不確かな再実行ではなく停止状態を明示するようにしました。
 
 ### v5.2.4 (2026-06-28)
 

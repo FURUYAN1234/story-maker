@@ -3,6 +3,7 @@ import {
   auditLongifyStructure,
   buildContinuityDigest,
   detectEpisodeRetake,
+  detectIntraChapterEventLoop,
   detectParaphrasedOverlap,
   detectStoryboardResidue,
   detectSettingContradiction,
@@ -61,6 +62,26 @@ assert.ok(sameEpisodeArc.includes('discover'), 'episode arc extracts discovery')
 assert.ok(sameEpisodeArc.includes('present'), 'episode arc extracts public action');
 const retake = detectEpisodeRetake(sameEpisodeB.repeat(3), [sameEpisodeA.repeat(3)]);
 assert.equal(retake.ok, false, 'same generic episode arc retold from another viewpoint is detected');
+
+const shuffledSameEpisode = [
+  '終盤では集まった人々に写真を見せ、時計が時を刻みはじめる。',
+  '春人の視点では、古い写真に気づく場面から始まる。',
+  '証言を預かったあと工事側に止められ、祖父の行動の意味を知る。',
+  '澪とカフェで話し合い、商店街のために同じ計画を進めると決意する。',
+].join('');
+const shuffledRetake = detectEpisodeRetake(shuffledSameEpisode.repeat(3), [sameEpisodeA.repeat(3)]);
+assert.equal(
+  shuffledRetake.ok,
+  false,
+  'same generic episode arc is detected even when the retelling shuffles event order',
+);
+
+const internalLoop = detectIntraChapterEventLoop([
+  sameEpisodeA,
+  'その後、澪は別の封筒から古い写真を発見し、春人に相談した。二人はまた保存計画を実行しようと決め、関係者から証言を受け取った。反対する担当者に止められたが、祖父が写真を残した理由が分かった。最後に記録を公開し、止まっていた時計が動き始めた。',
+  'さらに翌週、澪は新しい紙片から古い写真を発見し、春人に相談した。二人は三度目の保存計画を実行しようと決め、証言を受け取った。担当者に止められたが、祖父の理由を知り、記録を公開して時計が時を刻みはじめた。',
+].join(''));
+assert.equal(internalLoop.ok, false, 'same episode arc repeated inside one chapter is detected');
 
 const successorEpisode = [
   '翌朝、澪は写真公開の結果を受けて町役場へ向かった。',

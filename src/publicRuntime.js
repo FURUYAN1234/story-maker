@@ -17,6 +17,7 @@ const FALLBACK_MODE = 'novel';
 const API_SESSION_KEY = 'story-maker.api.session.v500';
 const API_MEMORY_KEY = '__storyMakerApiRuntimeMemoryV500';
 const API_WINDOW_NAME_PREFIX = 'story-maker.api.tab-session.v500:';
+let longifyBetaInstalled = false;
 const SA_STANDARD_LOCKED_ATTR = 'data-sa-standard-generating-locked';
 
 const OUTPUT_GUIDE_HTML = `
@@ -569,6 +570,13 @@ function generationIsActive() {
   );
 }
 
+function installLongifyBetaOnce() {
+  if (longifyBetaInstalled) return;
+  installLongifyBeta();
+  if (document.getElementById('btn-longify-beta')?.dataset.longifyInstallerAttached !== 'true') return;
+  longifyBetaInstalled = true;
+}
+
 function installOutputAssistLauncher() {
   const output = document.getElementById('output');
   const generateButton = document.getElementById('btn-generate');
@@ -580,7 +588,7 @@ function installOutputAssistLauncher() {
     if (installed) return;
     installed = true;
     observer.disconnect();
-    installLongifyBeta();
+    installLongifyBetaOnce();
     installKakuyomuAssist();
     installAlphapolisAssist();
   };
@@ -634,6 +642,9 @@ function installPublicRuntime() {
     longNovelPanel: document.getElementById('long-novel-panel'),
   });
   syncLongifyTargetSelect();
+  installLongifyBetaOnce();
+  setTimeout(installLongifyBetaOnce, 0);
+  setTimeout(installLongifyBetaOnce, 250);
   installPublicOutputCleanup();
   installOutputAssistLauncher();
 }

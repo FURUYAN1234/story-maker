@@ -13,6 +13,8 @@ import { buildStoryExportFileName } from './fileIoHelpers.js';
 import {
   auditLongifyStructure,
   buildContinuityDigest,
+  detectEpisodeRetake,
+  detectIntraChapterEventLoop,
   detectParaphrasedOverlap,
   detectSettingContradiction,
   extractInvariants,
@@ -31,6 +33,7 @@ import {
 
 const DEFAULT_MODEL = 'gemini-3.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
+const LONGIFY_BETA_ENABLED = false;
 const LONGIFY_TARGET_UNIT_CHARS = 10000;
 const toLongifyTargetChars = units => units * LONGIFY_TARGET_UNIT_CHARS;
 export const LONGIFY_TARGET_POLICY = Object.freeze({
@@ -914,7 +917,7 @@ ${seedText}`;
 
 function promptSafeLongifyValidationReason(validation = {}) {
   const reason = String(validation?.reason || '');
-  if (/重複|繰り返|既存章/u.test(reason)) return '既存章と重なる場面が多いため';
+  if (/重複|繰り返|既存章|同じエピソード|リテイク|再演|変奏/u.test(reason)) return '既存章と重なる場面が多いため';
   if (/小説本文ではない形式|本文形式ではない|混入|漫画|脚本|Markdown|話者ラベル|コマ/u.test(reason)) {
     return '章本文ではない構造記号やラベルが混じったため';
   }
@@ -924,7 +927,7 @@ function promptSafeLongifyValidationReason(validation = {}) {
 }
 
 function isLongifyOverlapValidation(validation = {}) {
-  return /重複|繰り返|既存章|重なる場面/u.test(String(validation?.reason || ''));
+  return /重複|繰り返|既存章|重なる場面|同じエピソード|リテイク|再演|変奏/u.test(String(validation?.reason || ''));
 }
 
 function isLongifyFormatValidation(validation = {}) {
@@ -959,6 +962,7 @@ ${LONGIFY_PROSE_ONLY_FORMAT_RULES}
 - 重複が原因の場合、章冒頭は前章の結末より後の時刻・場所・目的から始め、前章の出来事は一文で受け止めるだけにする。
 - 重複が原因の場合、第1章の別バージョンを書かない。第${args.chapterNumber}章の役割表にある「次の段階」だけを書く。
 - 重複が原因の場合、同じ店・同じ部屋・同じ地図/写真/魔法陣/小物の発見から始めず、それを受けた行動、移動、対立、失敗、発見から始める。
+- 重複が原因の場合、発見→相談→決意→実行→対立→判明→公開/解決の一連を章内で繰り返さない。すでに描いた核は一文で受け止め、その後始末、期限、交渉、損失、謝罪不能、提出、離脱など次の因果だけを書く。
 
 ${previousDraftSection}`;
 }
@@ -4612,7 +4616,23 @@ function countRepeatedSentences(text) {
 }
 
 function detectLongifyChapterOverlap(chapterText, previousChapters = []) {
+  const intraChapterLoop = detectIntraChapterEventLoop(chapterText);
+  if (!intraChapterLoop.ok) {
+    return {
+      ok: false,
+      reason: `同じエピソードを章内で繰り返しています（${intraChapterLoop.reason}）。`,
+      ...intraChapterLoop,
+    };
+  }
   if (!previousChapters.length) return { ok: true };
+  const episodeRetake = detectEpisodeRetake(chapterText, previousChapters);
+  if (!episodeRetake.ok) {
+    return {
+      ok: false,
+      reason: `既存章と同じエピソードを再演しています（${episodeRetake.reason}）。`,
+      ...episodeRetake,
+    };
+  }
   const currentParagraphs = splitReviewParagraphs(chapterBodyText(chapterText))
     .map(normalizeForRepeat)
     .filter(unit => charLength(unit) >= 56);
@@ -5082,6 +5102,24 @@ function setStopButtonState(stopButton, running) {
   stopButton.disabled = !running;
 }
 
+function sealLongifyBetaPanel({ button, statusEl, stopButton, autoBrushupCheckbox } = {}) {
+  setLongifyPanelState({ unavailable: true, busy: false, ready: false });
+  setLongifyButtonDisabled(button, true);
+  setStopButtonState(stopButton, false);
+  setControlsDisabled(true);
+  if (button) {
+    button.dataset.longifyAction = 'sealed';
+    button.textContent = '長編化βは停止中';
+    button.title = '検証不合格のため停止中です';
+  }
+  if (autoBrushupCheckbox) {
+    autoBrushupCheckbox.checked = false;
+    autoBrushupCheckbox.disabled = true;
+    autoBrushupCheckbox.title = '長編化βの停止中は使用できません';
+  }
+  setTextContent(statusEl, '長編化βは検証不合格のため停止中です');
+}
+
 function setKakuyomuAssistBusy(busy) {
   if (typeof document === 'undefined') return;
   const root = document.getElementById('kakuyomu-assist');
@@ -5414,6 +5452,11 @@ export function installLongifyBeta() {
   const charCounter = document.getElementById('char-counter');
   const tagRow = document.getElementById('tag-row');
   if (!outputEl || !button || !statusEl) return;
+  button.dataset.longifyInstallerAttached = 'true';
+  if (!LONGIFY_BETA_ENABLED) {
+    sealLongifyBetaPanel({ button, statusEl, stopButton, autoBrushupCheckbox });
+    return;
+  }
   syncLongifyTargetSelect();
   document.getElementById('btn-generate')?.addEventListener('click', () => {
     if (outputEl.dataset) delete outputEl.dataset.longifyOutput;

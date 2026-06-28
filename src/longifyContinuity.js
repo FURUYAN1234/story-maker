@@ -184,6 +184,100 @@ export function extractEpisodeArc(text) {
   return arc;
 }
 
+function extractEpisodeEventSequence(text) {
+  const body = stripChapterHeading(text);
+  const sequence = [];
+  for (const sentence of splitSentences(body)) {
+    for (const event of EPISODE_EVENT_CATEGORIES) {
+      if (!event.tokens.some(token => tokenMatches(sentence, token))) continue;
+      if (sequence[sequence.length - 1] === event.id) continue;
+      sequence.push(event.id);
+    }
+  }
+  return sequence;
+}
+
+function sameSequenceWindow(sequence, leftStart, rightStart, size) {
+  for (let offset = 0; offset < size; offset += 1) {
+    if (sequence[leftStart + offset] !== sequence[rightStart + offset]) return false;
+  }
+  return true;
+}
+
+function windowKey(events) {
+  return [...new Set(events)].sort().join('|');
+}
+
+export function detectIntraChapterEventLoop(text) {
+  const sequence = extractEpisodeEventSequence(text);
+  if (charLength(stripChapterHeading(text)) < 240 || sequence.length < 12) {
+    return { ok: true, sequence };
+  }
+
+  let best = null;
+  const maxPatternSize = Math.min(10, Math.floor(sequence.length / 2));
+  for (let size = maxPatternSize; size >= 4; size -= 1) {
+    for (let start = 0; start + size * 2 <= sequence.length; start += 1) {
+      const pattern = sequence.slice(start, start + size);
+      if (new Set(pattern).size < Math.min(4, size)) continue;
+      let count = 1;
+      let cursor = start + size;
+      while (cursor + size <= sequence.length && sameSequenceWindow(sequence, start, cursor, size)) {
+        count += 1;
+        cursor += size;
+      }
+      const strongLoop = count >= 3 || (count >= 2 && size >= 7);
+      if (!strongLoop) continue;
+      const weight = count * size;
+      if (!best || weight > best.weight) {
+        best = { start, size, count, pattern, weight };
+      }
+    }
+  }
+
+  const canonicalWindows = new Map();
+  for (let size = Math.min(10, sequence.length); size >= 6; size -= 1) {
+    for (let start = 0; start + size <= sequence.length; start += 1) {
+      const pattern = sequence.slice(start, start + size);
+      const unique = [...new Set(pattern)];
+      if (unique.length < 6) continue;
+      const key = windowKey(pattern);
+      const entry = canonicalWindows.get(key) || { starts: [], pattern: unique, size };
+      entry.starts.push(start);
+      canonicalWindows.set(key, entry);
+    }
+  }
+  for (const entry of canonicalWindows.values()) {
+    const nonOverlappingStarts = [];
+    for (const start of entry.starts) {
+      const previous = nonOverlappingStarts[nonOverlappingStarts.length - 1];
+      if (previous !== undefined && start < previous + entry.size) continue;
+      nonOverlappingStarts.push(start);
+    }
+    const count = nonOverlappingStarts.length;
+    if (count < 3) continue;
+    if (!best || count * entry.size > best.weight) {
+      best = {
+        start: -1,
+        size: entry.size,
+        count,
+        pattern: entry.pattern,
+        weight: count * entry.size,
+      };
+    }
+  }
+
+  if (!best) return { ok: true, sequence };
+
+  return {
+    ok: false,
+    reason: `章内で同じエピソード列を${best.count}回繰り返しています（${best.pattern.map(eventLabel).join(' → ')}）。`,
+    sequence,
+    repeatedPattern: best.pattern,
+    repeatCount: best.count,
+  };
+}
+
 function longestCommonSubsequenceLength(left, right) {
   if (!left.length || !right.length) return 0;
   const prev = Array(right.length + 1).fill(0);
@@ -246,10 +340,14 @@ export function detectEpisodeRetake(currentText, previousTexts = []) {
     }
   }
 
-  const isRetake = best.sharedCount >= EPISODE_RETAKE_MIN_EVENTS
+  const orderedRetake = best.sharedCount >= EPISODE_RETAKE_MIN_EVENTS
     && best.currentRatio >= EPISODE_RETAKE_SHARED_RATIO
     && best.previousRatio >= EPISODE_RETAKE_SHARED_RATIO
     && best.lcsRatio >= EPISODE_RETAKE_LCS_RATIO;
+  const broadRetake = best.sharedCount >= EPISODE_RETAKE_BROAD_MIN_EVENTS
+    && best.currentRatio >= EPISODE_RETAKE_BROAD_SHARED_RATIO
+    && best.previousRatio >= EPISODE_RETAKE_BROAD_SHARED_RATIO;
+  const isRetake = orderedRetake || broadRetake;
 
   if (!isRetake) {
     return { ok: true, currentArc, ...best };
@@ -259,6 +357,8 @@ export function detectEpisodeRetake(currentText, previousTexts = []) {
     ok: false,
     reason: `前章までと同じエピソード列を変奏しています（${best.sharedEvents.map(eventLabel).join(' → ')}）。`,
     currentArc,
+    orderedRetake,
+    broadRetake,
     ...best,
   };
 }
@@ -308,6 +408,8 @@ const OVERLAP_BEAT_THRESHOLD = 4;
 const EPISODE_RETAKE_MIN_EVENTS = 4;
 const EPISODE_RETAKE_SHARED_RATIO = 0.72;
 const EPISODE_RETAKE_LCS_RATIO = 0.67;
+const EPISODE_RETAKE_BROAD_MIN_EVENTS = 8;
+const EPISODE_RETAKE_BROAD_SHARED_RATIO = 0.8;
 const STORYBOARD_SEPARATOR = /^[\t \u3000]*(?:-{3,}|…{2,}|・・・|···)[\t \u3000]*$/u;
 const STORYBOARD_LABEL = /^[\t \u3000]*【(?:追加本文|[^】]{0,80}長編化計画[^】]{0,80})】[\t \u3000]*$/u;
 const STORYBOARD_STANDALONE_TITLE = /^[\t \u3000]*【(?![\t \u3000]*第[\d０-９一二三四五六七八九十百]+[\t \u3000]*章)(?![\t \u3000]*(?:追加本文|小説タイトル|タイトル|題名|作品名))[^】\n]{2,80}】[\t \u3000]*$/u;
