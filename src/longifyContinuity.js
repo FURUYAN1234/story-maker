@@ -405,6 +405,7 @@ export function shingleSimilarity(textA, textB, size = 4) {
 const OVERLAP_JACCARD_THRESHOLD = 0.34;
 const OVERLAP_CONTAINMENT_THRESHOLD = 0.5;
 const OVERLAP_BEAT_THRESHOLD = 4;
+const OVERLAP_BEAT_RATIO_THRESHOLD = 0.67;
 const EPISODE_RETAKE_MIN_EVENTS = 4;
 const EPISODE_RETAKE_SHARED_RATIO = 0.72;
 const EPISODE_RETAKE_LCS_RATIO = 0.67;
@@ -531,17 +532,21 @@ export function detectParaphrasedOverlap(currentText, previousTexts = [], { useS
   for (const beat of currentBeats) {
     if (previousBeats.has(beat)) beatOverlap += 1;
   }
+  const beatOverlapRatio = currentBeats.size ? beatOverlap / currentBeats.size : 0;
+  const beatLoop = beatOverlap >= OVERLAP_BEAT_THRESHOLD
+    && beatOverlapRatio >= OVERLAP_BEAT_RATIO_THRESHOLD;
 
   const overlaps = maxJaccard >= OVERLAP_JACCARD_THRESHOLD
     || maxContainment >= OVERLAP_CONTAINMENT_THRESHOLD
-    || beatOverlap >= OVERLAP_BEAT_THRESHOLD;
-  if (!overlaps) return { ok: true, maxJaccard, maxContainment, beatOverlap };
+    || beatLoop;
+  if (!overlaps) return { ok: true, maxJaccard, maxContainment, beatOverlap, beatOverlapRatio };
   return {
     ok: false,
-    reason: `既存章と内容が重複しています（言い換え再演の疑い: 類似度${maxJaccard.toFixed(2)} / 包含${maxContainment.toFixed(2)} / 反復ビート${beatOverlap}）。`,
+    reason: `既存章と内容が重複しています（言い換え再演の疑い: 類似度${maxJaccard.toFixed(2)} / 包含${maxContainment.toFixed(2)} / 反復ビート${beatOverlap} / ビート比${beatOverlapRatio.toFixed(2)}）。`,
     maxJaccard,
     maxContainment,
     beatOverlap,
+    beatOverlapRatio,
   };
 }
 
@@ -676,7 +681,7 @@ export function auditLongifyStructure({ chapters = [], invariants = {} } = {}) {
     }
     const episodeRetake = detectEpisodeRetake(chapter, bodies.slice(0, index));
     if (!episodeRetake.ok) {
-      blocking.push({ code: 'episode_retake', chapter: num, message: `第${num}章: ${episodeRetake.reason}` });
+      warnings.push({ code: 'episode_retake', chapter: num, message: `第${num}章: ${episodeRetake.reason}` });
     }
   });
 

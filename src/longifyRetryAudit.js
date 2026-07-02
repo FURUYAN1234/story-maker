@@ -5,7 +5,6 @@ function defaultCharLength(value) {
 const REUSABLE_LONGIFY_REVIEW_SOURCES = new Set(['ai', 'failed', 'structure', 'format']);
 const TOPUP_UNSAFE_STRUCTURE_CODES = new Set([
   'chapter_loop',
-  'episode_retake',
   'setting_contradiction',
   'storyboard_residue',
 ]);

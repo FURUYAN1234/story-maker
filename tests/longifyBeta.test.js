@@ -12,12 +12,14 @@ import {
   buildLongifyAiReviewPrompt,
   buildLongifyBrushupChapterPrompt,
   buildLongifyBrushupCritiquePrompt,
+  buildLongifyBrushupProgressionGuide,
   buildLongifyBrushupStructureGuide,
   buildLongifyChapterPrompt,
   buildLongifyEndingRepairPrompt,
   buildLongifyLedgerPrompt,
   buildLongifyReview,
   buildLongifyTopupPrompt,
+  buildBrushupProgressionLedgers,
   canLongifyOutput,
   cleanLongifyDraft,
   compactLongifyChapterToMax,
@@ -32,6 +34,7 @@ import {
   hasLongifyFormatArtifacts,
   hasLongifySeed,
   installLongifyBeta,
+  isLongifyBetaRuntimeEnabled,
   isLongifiedOutputText,
   longifyChapterBodyCharLength,
   normalizeLongifyPublicText,
@@ -43,6 +46,7 @@ import {
   runLongifyBrushupBeta,
   runLongifyBeta,
   sanitizeLongifyBrushupCritique,
+  detectBrushupEventRepetition,
   shouldAutoBrushupClearCheckbox,
   setSettingsPanelBusy,
   shouldAutoBrushupContinue,
@@ -53,6 +57,19 @@ import {
   validateLongifyChapterDraft,
   validateLongifyEndingCompletion,
 } from '../src/longifyBeta.js';
+
+assert.equal(isLongifyBetaRuntimeEnabled({
+  locationLike: { protocol: 'http:', hostname: '127.0.0.1', search: '?longifyBetaDev=1' },
+}), true);
+assert.equal(isLongifyBetaRuntimeEnabled({
+  locationLike: { protocol: 'http:', hostname: 'localhost', search: '?longifyBetaDev=1&codex=1' },
+}), true);
+assert.equal(isLongifyBetaRuntimeEnabled({
+  locationLike: { protocol: 'https:', hostname: 'furuyan1234.github.io', search: '?longifyBetaDev=1' },
+}), false);
+assert.equal(isLongifyBetaRuntimeEnabled({
+  locationLike: { protocol: 'http:', hostname: '127.0.0.1', search: '' },
+}), false);
 
 const seedStory = `Harbor Light
 
@@ -848,6 +865,61 @@ assert.equal(shouldAutoBrushupClearCheckbox({ score: 79, targetMet: true, attemp
 assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: false, attempts: 2 }), false);
 assert.equal(shouldAutoBrushupClearCheckbox({ score: 88, targetMet: false, attempts: 3 }), true);
 assert.equal(shouldAutoBrushupClearCheckbox({ score: null, targetMet: true, attempts: 3 }), true);
+const repeatedEventWarning = detectBrushupEventRepetition({
+  chapterNumber: 1,
+  eventKeywords: ['search', 'confront', 'photo'],
+  participantKeywords: ['hero', 'owner'],
+  outcomeKeywords: ['promise', 'light'],
+}, {
+  chapterNumber: 2,
+  eventKeywords: ['search', 'confront', 'photo'],
+  participantKeywords: ['hero', 'owner'],
+  outcomeKeywords: ['promise', 'light'],
+});
+assert.equal(repeatedEventWarning.repeated, true);
+assert.match(repeatedEventWarning.reason, /same event/i);
+const escalatedEventWarning = detectBrushupEventRepetition({
+  chapterNumber: 1,
+  eventKeywords: ['search', 'confront', 'photo'],
+  participantKeywords: ['hero', 'owner'],
+  outcomeKeywords: ['promise', 'light'],
+}, {
+  chapterNumber: 2,
+  eventKeywords: ['escape', 'confess', 'letter'],
+  participantKeywords: ['hero', 'owner'],
+  outcomeKeywords: ['loss', 'truth'],
+});
+assert.equal(escalatedEventWarning.repeated, false);
+const progressionLedgers = buildBrushupProgressionLedgers([
+  'Chapter 1\nAkari finds a hidden photo, confronts the cafe owner, and promises to keep the light on.',
+  'Chapter 2\nAkari leaves the cafe, loses the old key, and learns that her brother protected a child.',
+]);
+assert.equal(progressionLedgers.length, 2);
+assert.equal(progressionLedgers[0].chapterNumber, 1);
+assert.ok(progressionLedgers[0].openingExcerpt.includes('Akari'));
+assert.ok(progressionLedgers[0].closingExcerpt.includes('light'));
+const progressionGuide = buildLongifyBrushupProgressionGuide({
+  chapterNumber: 2,
+  chapterCount: 3,
+  sourceLedger: progressionLedgers[1],
+  priorLedgers: [progressionLedgers[0]],
+  repeatWarnings: [repeatedEventWarning],
+});
+assert.match(progressionGuide, /Progression ledger/i);
+assert.match(progressionGuide, /irreversible progression/i);
+assert.match(progressionGuide, /Chapter 1/i);
+assert.match(progressionGuide, /same event/i);
+assert.doesNotMatch(progressionGuide, /undefined/);
+const progressionPrompt = buildLongifyBrushupChapterPrompt({
+  title: splitLong.title,
+  critiqueText: '\u7b2c2\u7ae0\u306e\u9032\u5c55\u3092\u5f37\u3081\u308b',
+  chapterText: splitLong.chapters[1],
+  chapterNumber: 2,
+  chapterCount: 3,
+  progressionGuide,
+});
+assert.match(progressionPrompt, /Progression ledger/i);
+assert.match(progressionPrompt, /irreversible progression/i);
 assert.match(buildLongifyBrushupChapterPrompt({
   title: splitLong.title,
   critiqueText: '\u7b2c1\u7ae0\u306e\u611f\u60c5\u5909\u5316\u3092\u5f37\u3081\u308b',

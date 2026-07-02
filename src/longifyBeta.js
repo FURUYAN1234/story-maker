@@ -33,7 +33,7 @@ import {
 
 const DEFAULT_MODEL = 'gemini-3.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
-const LONGIFY_BETA_ENABLED = false;
+const LONGIFY_BETA_PUBLIC_ENABLED = false;
 const LONGIFY_TARGET_UNIT_CHARS = 10000;
 const toLongifyTargetChars = units => units * LONGIFY_TARGET_UNIT_CHARS;
 export const LONGIFY_TARGET_POLICY = Object.freeze({
@@ -78,6 +78,24 @@ const MIN_FOREIGN_CHAPTER_MIXIN_CHARS = 240;
 const LONGIFY_ENDING_REPAIR_ATTEMPTS = 2;
 const ENDING_ANCHOR_SOURCE_CHARS = 1600;
 const ENDING_ANCHOR_OUTPUT_CHARS = 2600;
+
+export function isLongifyBetaRuntimeEnabled({ locationLike = null } = {}) {
+  if (LONGIFY_BETA_PUBLIC_ENABLED) return true;
+  const locationRef = locationLike
+    || (typeof window !== 'undefined' ? window.location : null)
+    || (typeof globalThis !== 'undefined' ? globalThis.location : null);
+  if (!locationRef) return false;
+  try {
+    const protocol = String(locationRef.protocol || '');
+    const hostname = String(locationRef.hostname || '').toLowerCase();
+    const search = String(locationRef.search || '');
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+    if (!isLocal || !['http:', 'https:'].includes(protocol)) return false;
+    return new URLSearchParams(search).get('longifyBetaDev') === '1';
+  } catch {
+    return false;
+  }
+}
 const BRUSHUP_CHAPTER_REWRITE_MAX_ATTEMPTS = 2;
 const BRUSHUP_CHAPTER_MIN_RATIO = 0.68;
 const LONGIFY_CHAPTER_MIN_RATIO = 0.88;
@@ -1789,6 +1807,186 @@ function buildBrushupMaterialMap(sourceChapters = [], maxChars = 7200) {
   }).join('\n\n');
 }
 
+const BRUSHUP_LEDGER_STOPWORDS = new Set([
+  'the', 'and', 'but', 'for', 'with', 'that', 'this', 'from', 'into', 'onto',
+  'after', 'before', 'while', 'when', 'where', 'there', 'their', 'they',
+  'them', 'then', 'than', 'chapter', 'scene', 'said', 'says', 'was', 'were',
+  'had', 'has', 'have', 'not', 'one', 'two', 'three', 'old', 'new',
+]);
+
+function normalizeBrushupLedgerKeyword(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^0-9a-z\u3040-\u30ff\u3400-\u9fff]+/g, ' ')
+    .trim();
+}
+
+function tokenizeBrushupLedgerText(text) {
+  const normalized = normalizeBrushupLedgerKeyword(text);
+  if (!normalized) return [];
+  const englishTokens = normalized.match(/[a-z][a-z0-9'-]{2,}/g) || [];
+  const japaneseTokens = normalized.match(/[\u3040-\u30ff\u3400-\u9fff]{2,}/g) || [];
+  return [...englishTokens, ...japaneseTokens]
+    .map(token => token.trim())
+    .filter(token => token && !BRUSHUP_LEDGER_STOPWORDS.has(token));
+}
+
+function uniqueBrushupKeywords(values = [], max = 10) {
+  const seen = new Set();
+  const out = [];
+  for (const value of Array.isArray(values) ? values : [values]) {
+    for (const token of tokenizeBrushupLedgerText(value)) {
+      if (seen.has(token)) continue;
+      seen.add(token);
+      out.push(token);
+      if (out.length >= max) return out;
+    }
+  }
+  return out;
+}
+
+function mostFrequentBrushupKeywords(text, max = 12) {
+  const counts = new Map();
+  for (const token of tokenizeBrushupLedgerText(text)) {
+    counts.set(token, (counts.get(token) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0]))
+    .slice(0, max)
+    .map(([token]) => token);
+}
+
+function keywordOverlap(left = [], right = []) {
+  const a = new Set((Array.isArray(left) ? left : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
+  const b = new Set((Array.isArray(right) ? right : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
+  if (!a.size || !b.size) return { count: 0, ratio: 0, shared: [] };
+  const shared = [...a].filter(token => b.has(token));
+  return {
+    count: shared.length,
+    ratio: shared.length / Math.max(1, Math.min(a.size, b.size)),
+    shared,
+  };
+}
+
+function buildBrushupProgressionLedger(chapterText, chapterNumber = 1) {
+  const cleaned = cleanLongifyDraft(chapterText || '');
+  const paragraphs = cleaned
+    .split(/\n{2,}/)
+    .map(part => part.trim())
+    .filter(Boolean);
+  const lines = cleaned
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+  const heading = lines[0] || `Chapter ${chapterNumber}`;
+  const firstParagraph = paragraphs[0] || cleaned;
+  const lastParagraph = paragraphs[paragraphs.length - 1] || firstParagraph;
+  const middleText = paragraphs.slice(1, -1).join('\n\n') || cleaned;
+  return {
+    chapterNumber: Math.max(1, Number(chapterNumber || 1)),
+    heading: clipText(heading, 120),
+    openingExcerpt: clipText(firstParagraph, 280),
+    closingExcerpt: clipText(lastParagraph, 280),
+    eventKeywords: mostFrequentBrushupKeywords(middleText || cleaned, 12),
+    participantKeywords: uniqueBrushupKeywords(cleaned.match(/\b[A-Z][A-Za-z0-9'-]{2,}\b/g) || [], 8),
+    outcomeKeywords: uniqueBrushupKeywords(lastParagraph, 10),
+    chars: submissionCharLength(cleaned),
+  };
+}
+
+export function buildBrushupProgressionLedgers(chapters = []) {
+  const list = Array.isArray(chapters) ? chapters : [];
+  return list
+    .map((chapter, index) => buildBrushupProgressionLedger(chapter, index + 1))
+    .filter(ledger => ledger.chars > 0);
+}
+
+export function detectBrushupEventRepetition(previousLedger = {}, currentLedger = {}) {
+  const event = keywordOverlap(previousLedger.eventKeywords, currentLedger.eventKeywords);
+  const participants = keywordOverlap(previousLedger.participantKeywords, currentLedger.participantKeywords);
+  const outcome = keywordOverlap(previousLedger.outcomeKeywords, currentLedger.outcomeKeywords);
+  const repeated = event.count >= 2
+    && outcome.count >= 1
+    && (participants.count >= 1 || event.ratio >= 0.68)
+    && (event.ratio >= 0.5 || outcome.ratio >= 0.5);
+  return {
+    repeated,
+    reason: repeated
+      ? `same event pattern between Chapter ${previousLedger.chapterNumber || '?'} and Chapter ${currentLedger.chapterNumber || '?'}`
+      : '',
+    previousChapter: previousLedger.chapterNumber || null,
+    currentChapter: currentLedger.chapterNumber || null,
+    overlap: {
+      event,
+      participants,
+      outcome,
+    },
+  };
+}
+
+function detectBrushupProgressionWarnings(priorLedgers = [], currentLedger = {}) {
+  if (!Array.isArray(priorLedgers) || !priorLedgers.length || !currentLedger) return [];
+  return priorLedgers
+    .map(prior => detectBrushupEventRepetition(prior, currentLedger))
+    .filter(warning => warning.repeated)
+    .slice(0, 3);
+}
+
+function formatBrushupLedgerLine(ledger = {}) {
+  const chapter = ledger.chapterNumber || '?';
+  const event = (ledger.eventKeywords || []).slice(0, 6).join(', ') || 'not extracted';
+  const outcome = (ledger.outcomeKeywords || []).slice(0, 5).join(', ') || 'not extracted';
+  return [
+    `Chapter ${chapter}: ${ledger.heading || ''}`.trim(),
+    `- opening: ${ledger.openingExcerpt || ''}`,
+    `- closing: ${ledger.closingExcerpt || ''}`,
+    `- event keywords: ${event}`,
+    `- outcome keywords: ${outcome}`,
+  ].filter(Boolean).join('\n');
+}
+
+function formatBrushupProgressionWarnings(warnings = []) {
+  return (Array.isArray(warnings) ? warnings : [])
+    .map(warning => {
+      const sharedEvent = warning.overlap?.event?.shared?.slice(0, 5).join(', ') || 'n/a';
+      const sharedOutcome = warning.overlap?.outcome?.shared?.slice(0, 5).join(', ') || 'n/a';
+      return `- ${warning.reason}; shared events: ${sharedEvent}; shared outcomes: ${sharedOutcome}`;
+    })
+    .join('\n');
+}
+
+export function buildLongifyBrushupProgressionGuide({
+  chapterNumber = 1,
+  chapterCount = 1,
+  sourceLedger = null,
+  priorLedgers = [],
+  repeatWarnings = [],
+} = {}) {
+  const prior = Array.isArray(priorLedgers) ? priorLedgers.filter(Boolean) : [];
+  const warnings = Array.isArray(repeatWarnings) ? repeatWarnings.filter(Boolean) : [];
+  const lines = [
+    'Progression ledger (do not output this section).',
+    `Current target: Chapter ${Math.max(1, Number(chapterNumber || 1))} / ${Math.max(1, Number(chapterCount || 1))}`,
+    'Positive contract: add or sharpen at least one irreversible progression in this chapter.',
+    'Irreversible progression examples: loss, relationship change, secret revealed, point-of-no-return decision, changed destination, changed obligation.',
+    'Do not solve progression by deleting scenes or summarizing. Keep the chapter as prose and make the event meaning change.',
+  ];
+  if (prior.length) {
+    lines.push('Prior accepted chapter ledger:');
+    lines.push(prior.map(formatBrushupLedgerLine).join('\n\n'));
+  }
+  if (sourceLedger) {
+    lines.push('Current source chapter ledger:');
+    lines.push(formatBrushupLedgerLine(sourceLedger));
+  }
+  if (warnings.length) {
+    lines.push('Event repetition warnings to actively avoid:');
+    lines.push(formatBrushupProgressionWarnings(warnings));
+  }
+  return compactBlankLines(lines.filter(Boolean).join('\n'));
+}
+
 export function buildLongifyBrushupStructureGuide({
   critiqueText = '',
   sourceChapters = [],
@@ -2705,6 +2903,7 @@ export function buildLongifyBrushupChapterPrompt({
   title = '',
   critiqueText = '',
   structureGuide = '',
+  progressionGuide = '',
   chapterText = '',
   chapterNumber = 1,
   chapterCount = 1,
@@ -2717,6 +2916,12 @@ export function buildLongifyBrushupChapterPrompt({
   const strategyLine = plan.compressionMode
     ? '改稿戦略: 過長原稿の圧縮改稿。元章より短くしてよい。全文を逐語的に再現しない。反復する冒頭、状況確認、心理説明、似た章末を削り、章固有の進展だけを残す。'
     : '改稿戦略: 補強改稿。元章の情報量を保ち、足りない感情変化・伏線・具体物・会話だけを自然に増やす。';
+  structureGuide = [
+    structureGuide,
+    String(progressionGuide || '').trim()
+      ? `Progression ledger / irreversible-change contract (do not output as text):\n${clipText(progressionGuide, 7000)}`
+      : '',
+  ].filter(Boolean).join('\n\n');
   const structureBlock = String(structureGuide || '').trim()
     ? `\n全体再構成台帳（本文として出力しない。全章の役割固定に使う）:\n${clipText(structureGuide, 9000)}\n`
     : '';
@@ -3794,6 +3999,8 @@ export async function runLongifyBrushupBeta({
     });
   }
 
+  const sourceProgressionLedgers = buildBrushupProgressionLedgers(sourceChapters);
+  const acceptedProgressionLedgers = [];
   const chapters = [];
   for (let index = 0; index < sourceChapters.length; index += 1) {
     throwIfAborted(signal);
@@ -3813,6 +4020,20 @@ export async function runLongifyBrushupBeta({
       targetTotalChars: targetTotalNumber,
       sourceTotalChars,
     });
+    const sourceProgressionLedger = sourceProgressionLedgers[index]
+      || buildBrushupProgressionLedger(chapterText, chapterNumber);
+    const sourceProgressionWarnings = detectBrushupProgressionWarnings(
+      acceptedProgressionLedgers,
+      sourceProgressionLedger,
+    );
+    let chapterProgressionGuide = buildLongifyBrushupProgressionGuide({
+      chapterNumber,
+      chapterCount: sourceChapters.length,
+      sourceLedger: sourceProgressionLedger,
+      priorLedgers: acceptedProgressionLedgers,
+      repeatWarnings: sourceProgressionWarnings,
+    });
+    let lastProgressionWarningText = '';
     const hardMinimumPolishedChars = targetPlan.hardMinimum;
     const targetPolishedChars = targetPlan.min;
     const maxRewriteAttempts = targetPlan.compressionMode ? 3 : BRUSHUP_CHAPTER_REWRITE_MAX_ATTEMPTS;
@@ -3836,6 +4057,7 @@ export async function runLongifyBrushupBeta({
           title,
           critiqueText: retryCritiqueText,
           structureGuide,
+          progressionGuide: chapterProgressionGuide,
           chapterText,
           chapterNumber,
           chapterCount: sourceChapters.length,
@@ -3910,6 +4132,28 @@ export async function runLongifyBrushupBeta({
       } = brushupCandidate;
       polishedChapter = evaluatedPolishedChapter;
       polishedArtifactIssues = evaluatedPolishedArtifactIssues;
+      let candidateNeedsRetry = needsRetry;
+      let retryProgressionWarnings = [];
+      if (polishedChapter && acceptedProgressionLedgers.length) {
+        const candidateProgressionLedger = buildBrushupProgressionLedger(polishedChapter, chapterNumber);
+        retryProgressionWarnings = detectBrushupProgressionWarnings(
+          acceptedProgressionLedgers,
+          candidateProgressionLedger,
+        );
+        if (retryProgressionWarnings.length) {
+          lastProgressionWarningText = formatBrushupProgressionWarnings(retryProgressionWarnings);
+          chapterProgressionGuide = buildLongifyBrushupProgressionGuide({
+            chapterNumber,
+            chapterCount: sourceChapters.length,
+            sourceLedger: candidateProgressionLedger,
+            priorLedgers: acceptedProgressionLedgers,
+            repeatWarnings: [...sourceProgressionWarnings, ...retryProgressionWarnings],
+          });
+          candidateNeedsRetry = true;
+        } else {
+          lastProgressionWarningText = '';
+        }
+      }
       if (brushupCandidate.canStoreBest && polishedChars > bestPolishedChars) {
         bestPolishedChapter = polishedChapter;
         bestPolishedChars = polishedChars;
@@ -3924,7 +4168,17 @@ export async function runLongifyBrushupBeta({
           completedChars: submissionCharLength(chapters.join('\n\n')) + polishedChars,
         });
       }
-      if (!needsRetry) break;
+      if (!candidateNeedsRetry) break;
+      if (attempt < maxRewriteAttempts && retryProgressionWarnings.length) {
+        report('章間の事件反復候補を検出したため、進展差分を指定して再改稿します...', {
+          phase: 'brushupProgressionRetry',
+          detail: lastProgressionWarningText,
+          chapterNumber,
+          chapterCount: sourceChapters.length,
+          completedChars: submissionCharLength(chapters.join('\n\n')),
+        });
+        continue;
+      }
       if (attempt < maxRewriteAttempts) {
         report(retryArtifactIssues.length
           ? `第${chapterNumber}章の改稿が本文形式ではないため再試行します...`
@@ -4001,6 +4255,7 @@ export async function runLongifyBrushupBeta({
       });
     }
     const selectedChapter = preserveOriginalChapter ? cleanLongifyDraft(chapterText) : polishedChapter;
+    acceptedProgressionLedgers.push(buildBrushupProgressionLedger(selectedChapter, chapterNumber));
     chapters.push(ensureChapterHeading(selectedChapter, chapterNumber));
     report(`第${chapterNumber}章のブラッシュアップ完了`, {
       phase: 'brushupChapterDone',
@@ -5453,7 +5708,7 @@ export function installLongifyBeta() {
   const tagRow = document.getElementById('tag-row');
   if (!outputEl || !button || !statusEl) return;
   button.dataset.longifyInstallerAttached = 'true';
-  if (!LONGIFY_BETA_ENABLED) {
+  if (!isLongifyBetaRuntimeEnabled()) {
     sealLongifyBetaPanel({ button, statusEl, stopButton, autoBrushupCheckbox });
     return;
   }

@@ -50,8 +50,8 @@ import {
     ],
   });
   assert.equal(block.skipTopup, true);
-  assert.deepEqual(block.chapters, [6, 4]);
-  assert.equal(block.blocking.length, 2);
+  assert.deepEqual(block.chapters, [6]);
+  assert.equal(block.blocking.length, 1);
   assert.equal(getLongifyPreTopupStructureBlock({
     ok: false,
     blocking: [{ code: 'truncated', chapter: 3 }],

@@ -37,10 +37,26 @@ const chapterA = '陽葵は公園のベンチに座り、リボンを握った�
 const chapterB = 'ベンチに腰を下ろした陽葵は、手の中のリボンを握りしめた。沙也加もベンチに座る。ごみ袋を集積所まで運び、夕日に染まる団地を眺めた。陽葵はリボンを公園へ投げた。';
 const overlap = detectParaphrasedOverlap(chapterB.repeat(5), [chapterA.repeat(5)]);
 assert.equal(overlap.ok, false, 'paraphrased re-enactment is detected');
+const beatOnlyOverlap = detectParaphrasedOverlap(chapterB.repeat(5), [chapterA.repeat(5)], { useShingle: false });
+assert.equal(beatOnlyOverlap.ok, false, 'compact beat-level re-enactment is detected');
 
 const distinct = '克也は朝の教室で答案を配った。先生が出席を取り、窓の外では雨が降っていた。誰も団地の話はしなかった。新しい転校生が自己紹介をした。';
 const noOverlap = detectParaphrasedOverlap(distinct.repeat(5), [chapterA.repeat(5)]);
 assert.equal(noOverlap.ok, true, 'distinct chapter is not flagged');
+
+const priorSharedBeats = [
+  '陽葵は公園のベンチに座り、通りを歩いた。',
+  '古い店の棚に札を置き、橋の冷たい石に触れた。',
+].join('');
+const broaderSuccessorBeats = [
+  '陽葵は商店街のベンチに腰を下ろし、昨日の出来事を短く確かめた。',
+  'それから濡れた通りを歩き、古い店先に記録を置いた。',
+  '橋の欄干に触れたあと、駅まで走って新しい地図を受け取った。',
+  '教室の机に証拠を置き、玄関で鍵を渡し、窓を見上げて合図した。',
+  '廊下で資料を運び、川沿いで仲間へ手を振った。',
+].join('');
+const broadBeatOverlap = detectParaphrasedOverlap(broaderSuccessorBeats.repeat(3), [priorSharedBeats.repeat(3)], { useShingle: false });
+assert.equal(broadBeatOverlap.ok, true, 'broad successor chapter may reuse some beats without becoming a hard loop');
 
 const sim = shingleSimilarity('あいうえおかきくけこ', 'あいうえおかきくけこ');
 assert.ok(sim.jaccard > 0.9, 'identical text has high jaccard');
@@ -152,8 +168,9 @@ const retakeAudit = auditLongifyStructure({
     `第2章\n${sameEpisodeB.repeat(3)}`,
   ],
 });
-assert.equal(retakeAudit.ok, false, 'audit flags same episode retake');
-assert.ok(retakeAudit.blocking.some(issue => issue.code === 'episode_retake'), 'audit reports episode_retake');
+assert.equal(retakeAudit.ok, true, 'same episode retake is advisory after final assembly');
+assert.equal(retakeAudit.blocking.some(issue => issue.code === 'episode_retake'), false, 'episode_retake is not a hard final-audit blocker');
+assert.ok(retakeAudit.warnings.some(issue => issue.code === 'episode_retake'), 'audit reports episode_retake as a warning');
 
 const storyboardResidueChapter = [
   '第1章',

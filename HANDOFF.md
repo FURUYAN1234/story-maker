@@ -2,6 +2,30 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-02 Fable-triaged Longify beta local dev proof
+
+- User entered the API key in the in-app browser UI only; Codex did not read, print, paste, or persist the key.
+- Public/default page still keeps Longify beta sealed. `src/longifyBeta.js` now only enables the Longify beta installer on local `localhost` / `127.0.0.1` when `?longifyBetaDev=1` is present; GitHub Pages/public URLs remain disabled even if that query is present.
+- In-app browser proof ran on `http://127.0.0.1:5179/?longifyBetaDev=1`.
+- Standard seed generation through `#btn-generate` completed with OpenAI `gpt-4.1`: 1,535 posting-site chars, footer once, browser warn/error logs 0, and `#btn-longify-beta` became enabled.
+- To reduce API spend, Codex unchecked auto brush-up and changed `#longify-target-chars` from `20000` to `10000` before clicking `#btn-longify-beta`.
+- Longify beta completed: 3 chapters, 11,431 posting-site chars, one `Created By AI Story Maker V5.2.5` footer, format check pass, structure check pass, minimum 10,000 chars reached, AI review source active, AI score 80 / pass.
+- Final browser state: `#btn-longify-beta` text `この長編小説をブラッシュアップする`, stop button hidden/disabled, status `AI講評を反映して長編小説をブラッシュアップできます`, review panel visible, browser warn/error logs 0.
+- Verification passed after code changes: full JS test sweep, `node --check src\longifyBeta.js`, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, targeted `git diff --check`, and `npm run build` (Vite chunk-size warning only).
+- No deploy, tag, release, backup, commit, staging, or auto brush-up run was performed.
+- Follow-up manual brush-up was run once from the same in-app browser state. The first brush-up pass completed with 3 chapters, 10,164 review chars / 10,191 audited posting-site chars, one footer, format check pass, structure check pass, AI score 82 / pass, and browser warn/error logs 0.
+- Post-brush-up mechanical audit found no blocking/warning issues, no duplicate paragraphs, no duplicate sentences, no repeated 24-grams at least 3 times, and no paraphrase-loop pairs. Chapter-pair Jaccard stayed low: 1-2 `0.035`, 1-3 `0.033`, 2-3 `0.033`.
+- Residual quality risk: the AI review still says chapters 2-3 have a subjective "same incident repetition" feel and need clearer scene progression, even though the deterministic loop audit passes.
+- Follow-up Fable-advice implementation: `src/longifyBeta.js` now builds a per-chapter progression ledger for brush-up, feeds accepted prior-chapter ledgers forward into the next chapter prompt, and performs warning-level event-repetition detection for retry guidance instead of hard rejection. `tests/longifyBeta.test.js` pins ledger extraction, event-repetition detection, and prompt inclusion.
+- Verification after the Fable-advice implementation: RED `node tests\longifyBeta.test.js` first failed on missing `buildBrushupProgressionLedgers` export; GREEN focused longify tests passed (`longifyBeta`, `longifyContinuity`, `longifyRetryAudit`), full `tests/**/*.test.js` sweep passed, `node --check src\longifyBeta.js`, `node --check tests\longifyBeta.test.js`, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `npm run build`, and targeted `git diff --check -- src\longifyBeta.js tests\longifyBeta.test.js` passed (CRLF warnings only).
+- In-app browser smoke after reload on `http://127.0.0.1:5179/?longifyBetaDev=1`: `readyState=complete`, title `Story Maker v5.2.5`, Longify installer attached, local dev action `longify`, target options rebuilt with 8 options and enabled `10000`/`20000`, API field present/password type, no Vite overlay, warn/error logs 0. The browser had no API value and Output was empty after reload, so no fresh real-API brush-up quality score was run in this follow-up.
+- User corrected that the API key was already present in the in-app browser UI; Codex verified only masked/present state and did not read, print, paste, or persist the key.
+- Fresh real OpenAI `gpt-4.1` browser run on `http://127.0.0.1:5179/?longifyBetaDev=1`: standard 4koma seed generation completed first with 856 visible Output chars and self-scores 85 / 92 / 99, then Longify beta was run with target `10000` and auto brush-up off.
+- Longify first pass completed after retry/cleanup gates: 3 chapters, 11,500 visible Output chars / 11,088 posting-site chars, format check pass, structure check pass, minimum 10,000 chars reached, AI score 79 / needs brush-up, browser warn/error logs 0. Runtime evidence: chapter 2 initially failed for manga/script notation and short body, then passed via augmentation; chapter 3 initially failed for manga/script notation, then passed; final top-up cleaned mixed format artifacts before adoption.
+- Manual brush-up was then run from the same browser state. Result: 3 chapters, 11,769 visible Output chars / 11,222 posting-site chars, AI score 82 / pass, format check pass, structure check pass, minimum 10,000 chars reached, browser warn/error logs 0. Mechanical audit found no format or structure issues, duplicate paragraphs 0, duplicate sentences 0, repeated 24-char grams 0, and chapter-pair 4-gram Jaccard 1-2 `0.006`, 1-3 `0.011`, 2-3 `0.017`.
+- Residual quality risk remains: the AI review still flags subjective repetition in chapter events, especially recurring sign repair / dance / town bustle roles, weak chapter-by-chapter causal differences, and muted character change. During this run chapter 2's rewrite was rejected as too short and the original chapter was preserved, while chapters 1 and 3 used cleaned/best candidates plus final top-up cleanup. Treat this as a real improvement but not full literary repetition closure.
+- At the time of the fresh real-API browser proof above, no deploy, tag, release, backup, commit, or staging had been run yet.
+
 ## 2026-06-21 visible Longify beta real API resume proof
 
 - Resumed the interrupted standard visible Longify beta API proof on `http://127.0.0.1:5179/?codexRealLongifyResume=1`.
