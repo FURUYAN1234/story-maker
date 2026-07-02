@@ -66,10 +66,10 @@ assert.equal(isLongifyBetaRuntimeEnabled({
 }), true);
 assert.equal(isLongifyBetaRuntimeEnabled({
   locationLike: { protocol: 'https:', hostname: 'furuyan1234.github.io', search: '?longifyBetaDev=1' },
-}), false);
+}), true);
 assert.equal(isLongifyBetaRuntimeEnabled({
   locationLike: { protocol: 'http:', hostname: '127.0.0.1', search: '' },
-}), false);
+}), true);
 
 const seedStory = `Harbor Light
 
@@ -125,10 +125,25 @@ function createMockElement() {
     title: '',
     getAttribute: name => attributes.get(name),
     setAttribute: (name, value) => attributes.set(name, String(value)),
+    addEventListener() {},
+    appendChild(child) {
+      this.options ??= [];
+      this.options.push(child);
+    },
+    querySelector() {
+      return null;
+    },
+    set innerHTML(value) {
+      assert.equal(value, '');
+      this.options = [];
+    },
   };
 }
 {
   const previousDocument = globalThis.document;
+  const previousLocation = globalThis.location;
+  const previousMutationObserver = globalThis.MutationObserver;
+  const previousWindow = globalThis.window;
   const elements = new Map([
     ['output', createMockElement()],
     ['btn-longify-beta', createMockElement()],
@@ -138,14 +153,35 @@ function createMockElement() {
     ['longify-target-chars', createMockElement()],
     ['longify-beta', createMockElement()],
   ]);
+  elements.get('btn-longify-stop').disabled = true;
+  elements.get('longify-target-chars').value = '';
+  globalThis.location = { protocol: 'https:', hostname: 'furuyan1234.github.io', search: '' };
+  globalThis.window = {
+    name: '',
+    sessionStorage: { getItem: () => null },
+    addEventListener() {},
+  };
+  globalThis.MutationObserver = class {
+    observe() {}
+  };
   globalThis.document = {
     getElementById: id => elements.get(id) || null,
+    createElement: tagName => {
+      assert.equal(tagName, 'option');
+      return createMockElement();
+    },
   };
   try {
     installLongifyBeta();
   } finally {
     if (previousDocument === undefined) delete globalThis.document;
     else globalThis.document = previousDocument;
+    if (previousLocation === undefined) delete globalThis.location;
+    else globalThis.location = previousLocation;
+    if (previousMutationObserver === undefined) delete globalThis.MutationObserver;
+    else globalThis.MutationObserver = previousMutationObserver;
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
   }
   const button = elements.get('btn-longify-beta');
   const statusEl = elements.get('longify-beta-status');
@@ -157,13 +193,16 @@ function createMockElement() {
   assert.equal(button.getAttribute('aria-disabled'), 'true');
   assert.equal(button.classList.contains('is-disabled'), true);
   assert.equal(button.dataset.longifyInstallerAttached, 'true');
-  assert.equal(button.dataset.longifyAction, 'sealed');
-  assert.equal(button.textContent, '長編化βは停止中');
-  assert.equal(statusEl.textContent, '長編化βは検証不合格のため停止中です');
+  assert.equal(button.dataset.longifyAction, 'longify');
+  assert.equal(button.textContent, 'この小説を長編化');
+  assert.equal(statusEl.textContent, 'Output生成・貼り付け・TXTインポート後に使用できます');
   assert.equal(stopButton.disabled, true);
-  assert.equal(autoBrushupCheckbox.checked, false);
-  assert.equal(autoBrushupCheckbox.disabled, true);
+  assert.equal(autoBrushupCheckbox.checked, true);
+  assert.equal(autoBrushupCheckbox.disabled, false);
   assert.equal(targetSelect.disabled, true);
+  assert.ok(targetSelect.options.some(option => option.value === '10000' && !option.disabled));
+  assert.ok(targetSelect.options.some(option => option.value === '20000' && !option.disabled));
+  assert.ok(targetSelect.options.some(option => option.value === '30000' && option.disabled));
   assert.equal(rootEl.classList.contains('is-unavailable'), true);
   assert.equal(rootEl.getAttribute('aria-disabled'), 'true');
 }
@@ -898,6 +937,9 @@ assert.equal(progressionLedgers.length, 2);
 assert.equal(progressionLedgers[0].chapterNumber, 1);
 assert.ok(progressionLedgers[0].openingExcerpt.includes('Akari'));
 assert.ok(progressionLedgers[0].closingExcerpt.includes('light'));
+assert.ok(progressionLedgers[0].newFacts.includes('hidden'));
+assert.ok(progressionLedgers[0].openThreads.includes('photo'));
+assert.ok(progressionLedgers[0].forbiddenRepeats.some(token => token.startsWith('confront')));
 const progressionGuide = buildLongifyBrushupProgressionGuide({
   chapterNumber: 2,
   chapterCount: 3,
@@ -907,6 +949,10 @@ const progressionGuide = buildLongifyBrushupProgressionGuide({
 });
 assert.match(progressionGuide, /Progression ledger/i);
 assert.match(progressionGuide, /irreversible progression/i);
+assert.match(progressionGuide, /structured_state/i);
+assert.match(progressionGuide, /new_facts/i);
+assert.match(progressionGuide, /open_threads/i);
+assert.match(progressionGuide, /forbidden_repeats/i);
 assert.match(progressionGuide, /Chapter 1/i);
 assert.match(progressionGuide, /same event/i);
 assert.doesNotMatch(progressionGuide, /undefined/);

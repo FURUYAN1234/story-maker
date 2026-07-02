@@ -2,6 +2,42 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-02 v5.2.7 public Longify beta limited unseal
+
+- User approved the limited unseal: public/default Longify beta is reopened for OpenAI-recommended 10,000/20,000-character targets, while 30,000+ targets and the old legacy long-novel output mode remain sealed.
+- Version bumped to `5.2.7` in package files, `src/version.js`, `index.html`, and README.
+- Runtime change: `src/longifyBeta.js` now enables the Longify beta installer publicly instead of requiring local `?longifyBetaDev=1`. The fallback sealed text no longer says `検証不合格`.
+- Regression coverage in `tests/longifyBeta.test.js` now asserts public GitHub/local runtimes enable Longify beta, the installer attaches, the visible action is `この小説を長編化`, auto brush-up remains available, 10,000/20,000 are enabled, and 30,000+ remain disabled.
+- Reusable browser-output samples are stored in `docs/verification_samples/`: score 83 and score 86 text plus metadata. The 86 text SHA256 is `F5DAF8CCBB6BAE3B725728E842A8DB46BC0ED0A20CFE18ECB85E1054B23FCE43`.
+- Verification passed: RED `node tests\longifyBeta.test.js` first failed on the public runtime still returning false; GREEN focused longify test passed; `node tests\publicLongModeSeal.test.js`, `node --check` on changed JS/test files, full `node --test "tests/**/*.test.js"` 72/72, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `git diff --check -- . ':!dist'`, and `npm run build` passed (Vite chunk-size warning only).
+- In-app browser local proof: `http://127.0.0.1:5179/?codexPublicLongifyUnseal=1` showed `Story Maker v5.2.7`, installer attached, action `longify`, button text `この小説を長編化`, status `Output生成・貼り付け・TXTインポート後に使用できます`, enabled targets `10000`/`20000`, disabled targets `30000` and above, no `長編化βは停止中` / `検証不合格` text, and warn/error logs 0.
+- Deploy proof: `npm run deploy` published `origin/gh-pages` commit `85d5e75`; live GitHub Pages `https://furuyan1234.github.io/story-maker/?v=527-codex-unseal-...` showed `Story Maker v5.2.7`, asset `assets/index-DYR8594k.js`, installer attached, enabled targets `10000`/`20000`, disabled targets `30000` and above, no old stop/failure text, and browser warn/error logs 0.
+- At this point, commit/tag/GitHub Release, PS1 full backup, and the user-requested follow-up 30,000-character local test are still pending.
+
+## 2026-07-02 Fable additional brush-up score improvement pass
+
+- User asked Codex to consult Fable again and try additional score improvement for Longify beta brush-up. Fable route selected `claude-fable-5[1m]`; the first long prompt timed out, then a shorter consultation returned prioritized advice.
+- Fable's highest-leverage advice was to keep the progression ledger as compact structured state, not prose: per chapter `new_facts`, `open_threads`, and `forbidden_repeats`, capped to recent chapters so the prompt does not crowd out story context.
+- Codex implemented this in `src/longifyBeta.js`: brush-up progression ledgers now include `newFacts`, `openThreads`, and `forbiddenRepeats`; `buildLongifyBrushupProgressionGuide()` outputs a compact `structured_state` block and caps prior accepted ledgers to the latest 5 chapters.
+- Regression coverage in `tests/longifyBeta.test.js` now pins structured ledger extraction and prompt inclusion for `structured_state`, `new_facts`, `open_threads`, and `forbidden_repeats`.
+- Verification passed: RED `node tests\longifyBeta.test.js` first failed because `newFacts` was missing; GREEN `node tests\longifyBeta.test.js` passed; `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, and `npm run build` passed (Vite chunk-size warning only).
+- In-app browser at `http://127.0.0.1:5179/?longifyBetaDev=1` reloaded successfully, showed Story Maker v5.2.6 with `longifyBetaDev=1`, browser warn/error logs 0, and the dev server source at `/src/longifyBeta.js` contains `structured_state` and `forbiddenRepeats`.
+- Fresh real-API brush-up score proof is still unverified in this pass because the visible in-app browser currently shows `API未設定` and the API key input value length is 0. Do not paste keys into chat or files; have the user enter the key in the app UI before continuing the live run.
+- No deploy, tag, release, backup, commit, push, or staging was run in this pass.
+
+- Follow-up real API proof after the user entered the key in the in-app browser UI: Codex verified only key presence, not the key value. ChatGPT API was selected on `http://127.0.0.1:5179/?longifyBetaDev=1`.
+- Standard generation completed first: Output 1,256 visible chars, `#btn-longify-beta` enabled, browser warn/error logs 0.
+- Longify beta was run with target `10000`. The actual UI auto brush-up checkbox was `#longify-auto-brushup-until-pass` and remained checked, so this proof is an automatic brush-up run rather than manual-only. Initial Longify result: 3 chapters, 11,806 posting-site chars, format pass, structure pass, AI score 75 / needs brush-up.
+- Automatic brush-up completed: 3 chapters, 11,139 visible chars / 10,785 posting-site chars, format pass, structure pass, minimum 10,000 chars reached, AI score 83 / pass, browser warn/error logs 0. Final button text returned to `この長編小説をブラッシュアップする` and stop button hidden.
+- Post-run mechanical audit: duplicate paragraphs 0, duplicate sentences 0, repeated 24-char grams 0, chapter-pair 4-gram Jaccard 1-2 `0.021`, 1-3 `0.035`, 2-3 `0.027`.
+
+- User asked to preserve the current 83-point text for future verification before trying one more brush-up. Codex saved the immediate backup to `scratch/longify-backups/longify-current-before-brushup-2026-07-02T03-45-07-440Z.txt` (SHA256 `AF6439602BE5FA45DFF3A7E093707D6326CDEA7261970328C9FBD11E70D9935D`) and a durable reusable verification sample to `docs/verification_samples/longify-structured-ledger-score83-v5.2.6-2026-07-02.txt` (SHA256 `CCCAE1D35110A6BCC817A2A48B90C0FD560ED3878E0E997DF0A9190068A9CE40`) plus metadata `docs/verification_samples/longify-structured-ledger-score83-v5.2.6-2026-07-02.meta.json` (SHA256 `D3CB73F2C3A8C25633A2F35DECE8E610C4E0340FC6E86B254F30EA58AC907048`). These files do not include API keys.
+- One manual-only brush-up was then run with `#longify-auto-brushup-until-pass` confirmed unchecked. It completed with 3 chapters, 12,371 visible chars / 11,901 posting-site chars, format pass, structure pass, minimum 10,000 chars reached, AI score 86 / pass, browser warn/error logs 0. Final button text returned to `この長編小説をブラッシュアップする`, stop button hidden, and auto brush-up remained off.
+- Post-run mechanical audit after the 86-point brush-up: duplicate paragraphs 0, duplicate sentences 0, repeated 24-char grams 0, chapter-pair 4-gram Jaccard 1-2 `0.029`, 1-3 `0.033`, 2-3 `0.035`.
+
+- User then asked to preserve the 86-point output itself for future verification. Codex saved it to `scratch/longify-backups/longify-score86-before-unseal-decision-2026-07-02T03-58-21-914Z.txt` and to the durable sample `docs/verification_samples/longify-structured-ledger-score86-v5.2.6-2026-07-02.txt` (SHA256 `F5DAF8CCBB6BAE3B725728E842A8DB46BC0ED0A20CFE18ECB85E1054B23FCE43`) plus metadata `docs/verification_samples/longify-structured-ledger-score86-v5.2.6-2026-07-02.meta.json` (SHA256 `247438EF693737B8CA12E3976E14414B2AD3208AF88142C8F5AFCB06195C8AE8`). These files do not include API keys.
+- Limited unseal assessment: it is reasonable to remove the public Longify beta `verification failed / paused` seal and explanation for OpenAI-recommended 10k/20k beta use, because the recent browser proofs reached 80/82/83/86 with format/structure pass and low mechanical repetition. Keep score rollback, structure gates, and the beta warning. Do not unseal 30k+ targets, Gemini long-form claims, or the old legacy long-novel public mode (`src/data.js`, `src/prompt.js`, `src/publicLongModeSeal.js`) without separate fresh proof.
+
 ## 2026-07-02 Fable-triaged Longify beta local dev proof
 
 - User entered the API key in the in-app browser UI only; Codex did not read, print, paste, or persist the key.

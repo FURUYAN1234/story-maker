@@ -33,7 +33,7 @@ import {
 
 const DEFAULT_MODEL = 'gemini-3.5-flash';
 const DEFAULT_CHAPTER_COUNT = 6;
-const LONGIFY_BETA_PUBLIC_ENABLED = false;
+const LONGIFY_BETA_PUBLIC_ENABLED = true;
 const LONGIFY_TARGET_UNIT_CHARS = 10000;
 const toLongifyTargetChars = units => units * LONGIFY_TARGET_UNIT_CHARS;
 export const LONGIFY_TARGET_POLICY = Object.freeze({
@@ -1857,6 +1857,11 @@ function mostFrequentBrushupKeywords(text, max = 12) {
     .map(([token]) => token);
 }
 
+function buildBrushupStateKeywords(values = [], max = 8) {
+  const source = Array.isArray(values) ? values : [values];
+  return uniqueBrushupKeywords(source.filter(Boolean), max);
+}
+
 function keywordOverlap(left = [], right = []) {
   const a = new Set((Array.isArray(left) ? left : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
   const b = new Set((Array.isArray(right) ? right : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
@@ -1883,14 +1888,19 @@ function buildBrushupProgressionLedger(chapterText, chapterNumber = 1) {
   const firstParagraph = paragraphs[0] || cleaned;
   const lastParagraph = paragraphs[paragraphs.length - 1] || firstParagraph;
   const middleText = paragraphs.slice(1, -1).join('\n\n') || cleaned;
+  const eventKeywords = mostFrequentBrushupKeywords(middleText || cleaned, 12);
+  const outcomeKeywords = uniqueBrushupKeywords(lastParagraph, 10);
   return {
     chapterNumber: Math.max(1, Number(chapterNumber || 1)),
     heading: clipText(heading, 120),
     openingExcerpt: clipText(firstParagraph, 280),
     closingExcerpt: clipText(lastParagraph, 280),
-    eventKeywords: mostFrequentBrushupKeywords(middleText || cleaned, 12),
+    eventKeywords,
     participantKeywords: uniqueBrushupKeywords(cleaned.match(/\b[A-Z][A-Za-z0-9'-]{2,}\b/g) || [], 8),
-    outcomeKeywords: uniqueBrushupKeywords(lastParagraph, 10),
+    outcomeKeywords,
+    newFacts: buildBrushupStateKeywords([middleText, lastParagraph, firstParagraph], 8),
+    openThreads: buildBrushupStateKeywords([firstParagraph, middleText, outcomeKeywords.join(' ')], 8),
+    forbiddenRepeats: buildBrushupStateKeywords([eventKeywords.join(' '), outcomeKeywords.join(' ')], 10),
     chars: submissionCharLength(cleaned),
   };
 }
@@ -1937,12 +1947,19 @@ function formatBrushupLedgerLine(ledger = {}) {
   const chapter = ledger.chapterNumber || '?';
   const event = (ledger.eventKeywords || []).slice(0, 6).join(', ') || 'not extracted';
   const outcome = (ledger.outcomeKeywords || []).slice(0, 5).join(', ') || 'not extracted';
+  const structuredState = JSON.stringify({
+    chapter: ledger.chapterNumber || null,
+    new_facts: (ledger.newFacts || []).slice(0, 6),
+    open_threads: (ledger.openThreads || []).slice(0, 6),
+    forbidden_repeats: (ledger.forbiddenRepeats || []).slice(0, 8),
+  });
   return [
     `Chapter ${chapter}: ${ledger.heading || ''}`.trim(),
     `- opening: ${ledger.openingExcerpt || ''}`,
     `- closing: ${ledger.closingExcerpt || ''}`,
     `- event keywords: ${event}`,
     `- outcome keywords: ${outcome}`,
+    `- structured_state: ${structuredState}`,
   ].filter(Boolean).join('\n');
 }
 
@@ -1963,7 +1980,7 @@ export function buildLongifyBrushupProgressionGuide({
   priorLedgers = [],
   repeatWarnings = [],
 } = {}) {
-  const prior = Array.isArray(priorLedgers) ? priorLedgers.filter(Boolean) : [];
+  const prior = Array.isArray(priorLedgers) ? priorLedgers.filter(Boolean).slice(-5) : [];
   const warnings = Array.isArray(repeatWarnings) ? repeatWarnings.filter(Boolean) : [];
   const lines = [
     'Progression ledger (do not output this section).',
@@ -5364,15 +5381,15 @@ function sealLongifyBetaPanel({ button, statusEl, stopButton, autoBrushupCheckbo
   setControlsDisabled(true);
   if (button) {
     button.dataset.longifyAction = 'sealed';
-    button.textContent = '長編化βは停止中';
-    button.title = '検証不合格のため停止中です';
+    button.textContent = '長編化βは利用できません';
+    button.title = 'この環境では長編化βを使用できません';
   }
   if (autoBrushupCheckbox) {
     autoBrushupCheckbox.checked = false;
     autoBrushupCheckbox.disabled = true;
     autoBrushupCheckbox.title = '長編化βの停止中は使用できません';
   }
-  setTextContent(statusEl, '長編化βは検証不合格のため停止中です');
+  setTextContent(statusEl, 'この環境では長編化βを使用できません');
 }
 
 function setKakuyomuAssistBusy(busy) {

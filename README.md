@@ -1,4 +1,4 @@
-# Story Maker v5.2.6 / AI物語メーカー
+# Story Maker v5.2.7 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -845,13 +845,23 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 |---|---|---|
 | Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
 | Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Long-form beta<br>長編β | Longify beta is currently paused in the public UI after a real 20,000-character expansion plus three automatic brush-up attempts still failed the structure gate and fell below the target length.<br>長編化βは、実ブラウザで20,000字長編化と最大3回の自動ブラッシュアップを行っても構造チェック不合格・文字数未達に戻ったため、公開UIでは現在停止しています。 | The button is disabled instead of presenting an unreliable pass/fail result. Standard non-long generation remains available.<br>不確かな合格判定を出さないため、ボタンは無効化されています。通常の非長編生成は引き続き利用できます。 |
-| Longify target ceiling<br>長編化の文字数上限 | Longify target selection is disabled while Longify beta is paused.<br>長編化βの停止中は、長編化の文字数選択も無効化されています。 | Re-enabling requires a new design and fresh proof that length, structure, and review quality all pass without repeated story arcs.<br>再開には、同じ話の反復なしに文字数・構造・講評品質を通過する新設計と再検証が必要です。 |
+| Long-form beta<br>長編β | Longify beta is available in the public UI as a limited beta after fresh OpenAI browser proofs reached passing structure, length, and review scores.<br>長編化βは、OpenAI実ブラウザ検証で構造・文字数・講評点の合格を確認したため、限定βとして公開UIで利用できます。 | It remains a draft-expansion and revision aid, not a publication-quality guarantee. Human editing is still expected before public use.<br>公開品質の保証ではなく、長編下書き化と改稿補助です。公開利用前には人間の編集を前提にしてください。 |
+| Longify target ceiling<br>長編化の文字数上限 | The public UI currently allows 10,000-character and 20,000-character targets only.<br>公開UIで現在選択できる最低文字数は10,000字と20,000字のみです。 | 30,000+ targets remain disabled until separate quality proof passes.<br>30,000字以上は、別途品質検証が通るまで無効選択肢として残しています。 |
 | AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
 | Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.2.7 (2026-07-02)
+
+- Reopened Longify beta in the public/default UI as a limited beta for OpenAI-recommended 10,000/20,000-character expansion while keeping 30,000+ targets disabled.
+- Kept the old legacy long-novel output mode sealed; this release only reopens the downstream Longify beta panel.
+- Recorded the 86-point OpenAI browser proof as a reusable verification sample for future regression checks.
+
+- 公開/通常UIで長編化βを限定βとして再開しました。OpenAI推奨の10,000字/20,000字長編化は使える一方、30,000字以上は引き続き無効化しています。
+- 旧来の長編小説出力モードは封印を維持しています。今回の再開対象は、Output後段の長編化βパネルだけです。
+- 86点のOpenAI実ブラウザ検証結果を、今後の回帰確認に使える検証サンプルとして記録しました。
 
 ### v5.2.6 (2026-07-02)
 

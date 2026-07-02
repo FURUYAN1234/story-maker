@@ -1,0 +1,18 @@
+{
+  "sample_id": "longify-structured-ledger-score86-v5.2.6-2026-07-02",
+  "created_at": "2026-07-02T03:58:21.914Z",
+  "app": "story-maker",
+  "version": "v5.2.6",
+  "source_url": "http://127.0.0.1:5179/?longifyBetaDev=1",
+  "provider_label": "ChatGPT API",
+  "score_line": "ブラッシュアップ後 AI講評: 86点（合格点）",
+  "details": "形式チェック: 合格構造チェック: 合格AI講評: 実行済みAI総合点: 86点（合格点）投稿サイト換算文字数: 11,901字章数: 3章最低文字数: 達成（10,000字）",
+  "visible_chars": 12371,
+  "posting_chars_without_footer_space": 11901,
+  "chapter_count": 3,
+  "text_file": "C:/Users/sx717/Antigravity/story-maker/docs/verification_samples/longify-structured-ledger-score86-v5.2.6-2026-07-02.txt",
+  "scratch_backup_file": "C:/Users/sx717/Antigravity/story-maker/scratch/longify-backups/longify-score86-before-unseal-decision-2026-07-02T03-58-21-914Z.txt",
+  "sha256": "F5DAF8CCBB6BAE3B725728E842A8DB46BC0ED0A20CFE18ECB85E1054B23FCE43",
+  "api_key_included": false,
+  "reuse_note": "Use this as the higher-score longify sample for future regression and unseal-readiness checks. Do not treat it as a fresh live API result unless re-run in browser."
+}
