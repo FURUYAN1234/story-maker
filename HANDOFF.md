@@ -2,6 +2,18 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-06 v5.2.8 long-form guard release
+
+- User asked Codex to deploy Story Maker and run the standard full Antigravity backup.
+- Source commit `2faf038` is pushed to `origin/main`; annotated tag `v5.2.8` is pushed; GitHub Release is `https://github.com/FURUYAN1234/story-maker/releases/tag/v5.2.8`.
+- Runtime changes: `src/promptBuilder.js` now fails closed for legacy long-novel prompt requests while public Longify beta remains the supported long-form path; `src/longifyBeta.js` now passes structure warnings into top-up prompts so `episode_retake` warnings steer additions toward irreversible progress instead of replaying old scenes.
+- Version bumped to `5.2.8` in package files, `src/version.js`, `index.html`, and README. Regression coverage was added in `tests/promptBuilder.test.js` and `tests/longifyBeta.test.js`.
+- Fresh local real-API proof before deploy used the user-entered browser key without reading, printing, pasting, or persisting it: ChatGPT standard generation completed with 1,402 chars and self scores 92/89/99; Longify beta target `10000` with auto brush-up off completed 12,073 chars, 3 chapters, one footer, format pass, structure pass, duplicate paragraphs 0, and browser warn/error logs 0. AI review was 76 / needs brush-up, so this is a functionality and structure proof, not a literary-quality pass.
+- Verification passed: `node tests\promptBuilder.test.js`, `node tests\longifyBeta.test.js`, `npm run check:nano-4koma-contract`, `npm run lint --if-present`, `node --test "tests/**/*.test.js"` 72/72, `node --check` on changed JS/test files, `git diff --check -- . ':!dist'`, and `npm run build` (Vite chunk-size warning only).
+- Deploy proof: `npm run deploy` published `origin/gh-pages` commit `1731af2`; live GitHub Pages `https://furuyan1234.github.io/story-maker/index.html?deploy=v528-...` returned `Story Maker v5.2.8` with JS asset `assets/index-Dqs2XEfd.js`, and the live JS asset contains `5.2.8`, `長編モード停止中`, `構造警告`, and `episode_retake`.
+- Local distribution sync: GitHub Release ZIP was extracted to `C:\story-maker-main`; `package.json` reports `5.2.8`, file count is 287, and no nested duplicate folder was created.
+- The requested full Antigravity backup is the next operation; do not treat this handoff as backup completion until the ZIP artifact is verified.
+
 ## 2026-07-02 v5.2.7 public Longify beta limited unseal
 
 - User approved the limited unseal: public/default Longify beta is reopened for OpenAI-recommended 10,000/20,000-character targets, while 30,000+ targets and the old legacy long-novel output mode remain sealed.
