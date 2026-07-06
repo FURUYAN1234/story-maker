@@ -1,4 +1,4 @@
-# Story Maker v5.2.7 / AI物語メーカー
+# Story Maker v5.2.8 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -852,6 +852,12 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.2.8 (2026-07-06)
+
+- Kept the legacy long-novel output mode fail-closed while the public Longify beta remains the supported long-form path.
+- Fed structure warnings into Longify top-up prompts so episode-retake warnings steer additions toward irreversible progress instead of replaying old scenes.
+- Added regression coverage for both the sealed legacy long-mode prompt path and the top-up warning injection.
 
 ### v5.2.7 (2026-07-02)
 

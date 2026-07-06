@@ -467,6 +467,20 @@ const topupPrompt = buildLongifyTopupPrompt({
 assert.match(topupPrompt, /\u6700\u4f4e\u6587\u5b57\u6570\u306b\u5c4a\u3044\u3066\u3044\u307e\u305b\u3093/);
 assert.match(topupPrompt, /\u6700\u4f4e3,000\u5b57\u4ee5\u4e0a/);
 assert.ok(topupPrompt.includes('Current long draft tail'));
+const warningTopupPrompt = buildLongifyTopupPrompt({
+  seedText: seedStory,
+  ledgerText: 'Fixed ledger',
+  currentText: 'Current long draft tail',
+  deficitChars: 2400,
+  targetTotalChars: 18000,
+  chapterCount: 4,
+  structureWarnings: [
+    { code: 'episode_retake', chapter: 2, message: '\u7b2c2\u7ae0: same episode arc is being retold.' },
+  ],
+});
+assert.match(warningTopupPrompt, /\u540c\u3058\u30a8\u30d4\u30bd\u30fc\u30c9/);
+assert.match(warningTopupPrompt, /\u4e0d\u53ef\u9006/);
+assert.match(warningTopupPrompt, /same episode arc/);
 
 assert.equal(
   cleanLongifyDraft(`\u4ee5\u4e0b\u306b\u672c\u6587\u3092\u66f8\u304d\u307e\u3059\u3002\n\n\u7b2c1\u7ae0\u3000Rain\n\nAkari waited.\n\n${STORY_MAKER_FOOTER}`),

@@ -64,4 +64,15 @@ assert.match(fourKomaScenario.prompt, /台詞なし/);
 assert.match(fourKomaScenario.prompt, /Scenario: の直後は必ず \[1コマ目\]/);
 assert.ok(fourKomaScenario.tags.includes('AI 4koma シナリオ'));
 
+const sealedLong = Jo({
+  mode: 'long',
+  modeCustom: '長編小説',
+  genre: 'ミステリー',
+  theme: '雨の日',
+});
+
+assert.match(sealedLong.prompt, /長編モードは現在機能停止中/);
+assert.doesNotMatch(sealedLong.prompt, /あなたはプロの書き手です/);
+assert.ok(sealedLong.tags.includes('長編モード停止中'));
+
 console.log('promptBuilder tests passed');

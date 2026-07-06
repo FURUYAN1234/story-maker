@@ -1065,6 +1065,28 @@ ${clipText(ledgerText, 1800)}
 ${tail}`;
 }
 
+function formatLongifyTopupStructureWarningBlock(warnings = []) {
+  const episodeRetakes = (Array.isArray(warnings) ? warnings : [])
+    .filter(issue => String(issue?.code || '') === 'episode_retake')
+    .slice(0, 4);
+  if (!episodeRetakes.length) return '';
+  const details = episodeRetakes
+    .map(issue => {
+      const chapterNumber = Number(issue?.chapter || 0);
+      const chapter = Number.isFinite(chapterNumber) && chapterNumber > 0
+        ? `\u7b2c${chapterNumber}\u7ae0`
+        : '\u7ae0\u672a\u7279\u5b9a';
+      const message = String(issue?.message || '').trim();
+      return `- ${message || `${chapter}: \u540c\u3058\u30a8\u30d4\u30bd\u30fc\u30c9\u306e\u713c\u304d\u76f4\u3057\u5019\u88dc`}`;
+    })
+    .join('\n');
+  return [
+    '\u69cb\u9020\u8b66\u544a\uff08\u672c\u6587\u306b\u51fa\u529b\u3057\u306a\u3044\uff09:',
+    '\u540c\u3058\u30a8\u30d4\u30bd\u30fc\u30c9\u306e\u713c\u304d\u76f4\u3057\u5019\u88dc\u304c\u3042\u308a\u307e\u3059\u3002\u8ffd\u52a0\u672c\u6587\u3067\u306f\u65e2\u5b58\u5834\u9762\u3092\u518d\u6f14\u305b\u305a\u3001\u6700\u7d42\u7ae0\u3078\u5411\u3051\u305f\u4e0d\u53ef\u9006\u306a\u5909\u5316\u3001\u4ee3\u511f\u3001\u95a2\u4fc2\u5909\u5316\u3001\u672a\u56de\u53ce\u8981\u7d20\u306e\u524d\u9032\u3060\u3051\u3092\u8db3\u3057\u3066\u304f\u3060\u3055\u3044\u3002',
+    details,
+  ].join('\n');
+}
+
 export function buildLongifyTopupPrompt({
   seedText,
   ledgerText,
@@ -1074,6 +1096,7 @@ export function buildLongifyTopupPrompt({
   chapterCount = DEFAULT_CHAPTER_COUNT,
   styleMode = 'preserve',
   endingMode = 'keep',
+  structureWarnings = [],
 } = {}) {
   const runOptions = createLongifyRunOptions({
     targetTotalChars,
@@ -1083,6 +1106,7 @@ export function buildLongifyTopupPrompt({
   });
   const minimumAddition = Math.max(1400, Math.ceil(Number(deficitChars || 0) * 1.25));
   const sourceEventLine = extractLongifySourceEventLine(seedText);
+  const structureWarningBlock = formatLongifyTopupStructureWarningBlock(structureWarnings);
   return `長編化本文が最低文字数に届いていません。
 下の本文を壊さず、既存の最終章へ自然に差し込める追加本文だけを書いてください。
 
@@ -1107,6 +1131,8 @@ ${ledgerText}
 
 元短編の出来事順（一本道の背骨。本文として出力しない）:
 ${sourceEventLine}
+
+${structureWarningBlock}
 
 現在本文の末尾:
 ${tailChars(currentText, 2600)}
@@ -3615,6 +3641,7 @@ export async function runLongifyBeta({
       chapterCount: runOptions.chapterCount,
       styleMode: runOptions.styleMode,
       endingMode: runOptions.endingMode,
+      structureWarnings: preTopupStructureAudit.warnings,
     });
     let lastTopupProgress = 0;
     const topupResponse = await callModel(topupPrompt, {
@@ -4351,6 +4378,7 @@ export async function runLongifyBrushupBeta({
       chapterCount: sourceChapters.length,
       styleMode: 'preserve',
       endingMode: 'keep',
+      structureWarnings: preBrushupTopupStructureAudit.warnings,
     }), {
       stage: 'brushupTopup',
       attempt: brushupTopupAttempts,

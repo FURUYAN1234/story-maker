@@ -1,7 +1,13 @@
 import { Hd, Jd, Kd, Ud, pt, qd } from './axisPromptDetails.js';
 import { df } from './eraLoreHelpers.js';
 
-function Jo(e){const t=e.mode||"4koma",n=e.genreCustom||e.genre||"コメディ",o=e.themeCustom||e.theme||"ランダム",r=e.worldviewCustom||e.worldview||"現代日本",a=e.eraCustom||e.era||"現代",i=e.targetCustom||e.target||"全年齢",c=e.endingCustom||e.ending||"意外な結末",p=e.narrCustom||e.narration||"三人称・客観";let g;!e.characters||e.characters.length===0?g="・未設定（AIが自由に2〜3人の個性的なキャラを設定すること）":g=e.characters.map((B,Z)=>{const R=B.name||`(AI命名:キャラ${Z+1})`,H=B.role||"未定",fe=B.sex?`性別:${B.sex}, `:"",U=B.personality||"未定",ue=B.note?` [${B.note}]`:"";return`${Z+1}. ${R} (${H}) — ${fe}性格:${U}${ue}`}).join(`
+function isLegacyLongPromptRequest(e = {}) {
+  const mode = String(e?.mode || '').trim().toLowerCase();
+  const modeCustom = String(e?.modeCustom || '').trim().toLowerCase();
+  return mode === 'long' || /\blong\b|long[-_\s]*novel|\u9577\u7de8/u.test(modeCustom);
+}
+
+function Jo(e){if(isLegacyLongPromptRequest(e))return{prompt:"\u9577\u7de8\u30e2\u30fc\u30c9\u306f\u73fe\u5728\u6a5f\u80fd\u505c\u6b62\u4e2d\u3067\u3059\u3002\u516c\u958b\u7248\u3067\u306f\u77ed\u7de8\u30fb\u4e2d\u7de8\u306a\u3069\u306e\u516c\u958b\u30e2\u30fc\u30c9\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002",tags:["\u9577\u7de8\u30e2\u30fc\u30c9\u505c\u6b62\u4e2d"]};const t=e.mode||"4koma",n=e.genreCustom||e.genre||"コメディ",o=e.themeCustom||e.theme||"ランダム",r=e.worldviewCustom||e.worldview||"現代日本",a=e.eraCustom||e.era||"現代",i=e.targetCustom||e.target||"全年齢",c=e.endingCustom||e.ending||"意外な結末",p=e.narrCustom||e.narration||"三人称・客観";let g;!e.characters||e.characters.length===0?g="・未設定（AIが自由に2〜3人の個性的なキャラを設定すること）":g=e.characters.map((B,Z)=>{const R=B.name||`(AI命名:キャラ${Z+1})`,H=B.role||"未定",fe=B.sex?`性別:${B.sex}, `:"",U=B.personality||"未定",ue=B.note?` [${B.note}]`:"";return`${Z+1}. ${R} (${H}) — ${fe}性格:${U}${ue}`}).join(`
 `);const h=e.charCount?`
 ※ 指定文字数：約${e.charCount}文字程度`:"",v=e.supplement?`
 【追加指示】
