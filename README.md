@@ -204,10 +204,14 @@ Long-form expansion is not a fifteenth output chip. It is a downstream workflow 
 | UI上の位置づけ | メインOutputの後ろにある後段機能です。生成済み、貼り付け済み、またはインポート済みのOutput本文を素材にします。 |
 | Not a normal output mode | It is not a fifteenth output chip. The 14 public output modes create the first manuscript; long-form beta expands or improves that manuscript afterward. |
 | 通常モードとの違い | 15個目の出力チップではありません。14公開モードで初稿を作り、その後に長編化βで拡張または改善します。 |
+| Supported long-form path | The supported public long-form route is the downstream Longify beta panel. The older long-novel output-mode path remains fail-closed. |
+| 対応する長編経路 | 公開版で使う長編経路は、Output後段のLongify betaパネルです。旧来の長編小説出力モードは停止状態のままです。 |
 | Main result | A chaptered long-form manuscript with one Story Maker footer, updated Output tags, and a Kakuyomu-style preview based on the latest manuscript. |
 | 主な成果物 | 章立てされた長編原稿、単一のStory Makerフッター、更新されたOutputタグ、最新原稿を元にしたKakuyomuフォーム風プレビューです。 |
 | Quality loop | Each longification or brush-up result receives an AI review. The review score controls pass/fail display and optional auto brush-up. |
 | 品質ループ | 長編化またはブラッシュアップ後にAI講評を行います。点数は合否表示と任意の自動ブラッシュアップ判定に使われます。 |
+| Recommended provider | OpenAI is the recommended provider when aiming for the Longify beta 80+ AI-review target. Gemini remains useful elsewhere, but it is not the preferred route for reaching the long-form beta pass score. |
+| 推奨API | 長編化βでAI講評80点以上を狙う場合はOpenAIを推奨します。Geminiは他の用途では使えますが、長編化βの合格点狙いの主経路ではありません。 |
 | Current target ceiling | The public UI currently allows 10,000-character and 20,000-character targets only. Larger targets are kept as disabled stopped options. |
 | 現在の上限 | 公開UIで選択できる最低文字数は、現時点では10,000字と20,000字のみです。30,000字以上は停止中の無効選択肢として残しています。 |
 
@@ -230,8 +234,8 @@ Long-form expansion is not a fifteenth output chip. It is a downstream workflow 
 | 使用できるOutputなし | 無効 | 無効 | 原稿として使える本文が入るまでパネルは使えません。 |
 | Short or medium Output exists | `この小説を長編化` | Enabled | Starts the first long-form expansion from the current Output. |
 | 短中編Outputあり | `この小説を長編化` | 有効 | 現在のOutputを元に初回の長編化を開始します。 |
-| Long-form Output exists | `この長編小説をブラッシュアップする` | Disabled | Rewrites the current long manuscript from the latest AI review instead of starting over. |
-| 長編Outputあり | `この長編小説をブラッシュアップする` | 無効 | 短い元ネタからやり直さず、既存の長編原稿を講評に基づいて改善します。 |
+| Long-form Output exists | `この長編小説をブラッシュアップする` | Disabled | Rewrites the current long manuscript from the latest AI review instead of starting over. The selector is locked because brush-up does not choose a new target length. |
+| 長編Outputあり | `この長編小説をブラッシュアップする` | 無効 | 短い元ネタからやり直さず、既存の長編原稿を講評に基づいて改善します。ブラッシュアップでは新しい目標文字数を選ばないため、文字数セレクターは固定します。 |
 | Brush-up running | Brush-up running label | Disabled | The action remains visibly brush-up while Output is temporarily updating. |
 | ブラッシュアップ中 | ブラッシュアップ中表示 | 無効 | Output更新中に `この小説を長編化` 表示へ戻らないようにしています。 |
 
@@ -247,10 +251,12 @@ Long-form expansion is not a fifteenth output chip. It is a downstream workflow 
 | 3. 章ごとの拡張 | 選択中のAPIで章ごとに本文を拡張します。 | 巨大な一括応答だけに依存しない構成です。 |
 | 4. Assembly | Joins chapters, keeps a single Story Maker footer, and removes duplicated or draft-only artifacts. | Produces a readable final Output instead of a pile of partial drafts. |
 | 4. 結合 | 各章を結合し、Story Makerフッターを一つだけ残し、重複や下書き断片を取り除きます。 | 部分原稿の寄せ集めではなく、読める最終Outputにします。 |
-| 5. AI review | Sends the completed long-form manuscript to the selected provider for critique. | The review is AI-generated, not a local placeholder. |
-| 5. AI講評 | 完成した長編原稿を選択中のAPIへ送り、講評を作らせます。 | ローカルの仮文章ではなく、AIが読んだ評価として扱います。 |
-| 6. Posting assist | Updates the Kakuyomu-style preview from the latest long-form Output. | Preserves the manuscript title instead of falling back to `名称未設定の小説`. |
-| 6. 投稿補助 | 最新の長編Outputを元にKakuyomuフォーム風プレビューを更新します。 | タイトルが `名称未設定の小説` に落ちないようにします。 |
+| 5. Pre-review guards and top-up | Runs format and structure checks, blocks unsafe chapter loops, setting contradictions, and storyboard residue, then adds missing length only when safe. `episode_retake` warnings are carried into top-up prompts so additions move the story forward instead of replaying old scenes. | Keeps a formally long manuscript from passing only by repeating material. |
+| 5. 講評前の監査と補強 | 形式・構造を確認し、危険な章ループ、設定矛盾、絵コンテ残骸を止め、安全な場合だけ不足文字数を補強します。`episode_retake` 警告は補強プロンプトへ渡し、既存場面の再演ではなく物語の前進を足すようにします。 | 文字数だけ長く、同じ材料を繰り返す原稿を通しにくくします。 |
+| 6. AI review | Sends the completed long-form manuscript to the selected provider for critique. | The review is AI-generated, not a local placeholder. |
+| 6. AI講評 | 完成した長編原稿を選択中のAPIへ送り、講評を作らせます。 | ローカルの仮文章ではなく、AIが読んだ評価として扱います。 |
+| 7. Posting assist | Updates the Kakuyomu-style preview from the latest long-form Output. | Preserves the manuscript title instead of falling back to `名称未設定の小説`. |
+| 7. 投稿補助 | 最新の長編Outputを元にKakuyomuフォーム風プレビューを更新します。 | タイトルが `名称未設定の小説` に落ちないようにします。 |
 
 ### AI Review Fields / AI講評の中身
 
@@ -295,9 +301,9 @@ The current public Longify beta target ceiling is 20,000 characters. The selecto
 
 現時点の公開版Longify betaで選べる上限は20,000字です。セレクターでは10,000字と20,000字のみを有効な選択肢にしています。30,000字以上は設計上の候補として表示だけ残していますが、公開リリースではまだ選択できません。
 
-The 30,000-character OpenAI proof reached the length after brush-up, but it failed the structure gate because the final chapter repeated existing content. For that reason, 30,000+ targets remain paused until both character count and structure/AI-review quality pass together.
+The 30,000-character OpenAI proof reached the length after brush-up, but it failed the structure gate because the final chapter repeated existing content. v5.2.8 improves the smaller public path by feeding `episode_retake` structure warnings into top-up prompts, but that improvement is not treated as 30,000+ proof by itself. For that reason, 30,000+ targets remain paused until both character count and structure/AI-review quality pass together.
 
-OpenAIでの30,000字検証では、ブラッシュアップ後に文字数自体は到達しましたが、最終章が既存内容の反復と判定され、構造チェック不合格になりました。そのため、30,000字以上は文字数達成と構造・AI講評品質が同時に通るまで当面停止します。
+OpenAIでの30,000字検証では、ブラッシュアップ後に文字数自体は到達しましたが、最終章が既存内容の反復と判定され、構造チェック不合格になりました。v5.2.8では小さい公開経路について `episode_retake` の構造警告を補強プロンプトへ渡すよう改善しましたが、それだけで30,000字以上の検証通過とは扱いません。そのため、30,000字以上は文字数達成と構造・AI講評品質が同時に通るまで当面停止します。
 
 ### Fallbacks And Rollback / フォールバックとロールバック
 
@@ -320,11 +326,11 @@ Longify beta uses several safety paths because long manuscripts depend on many A
 | Brush-up receives a lower AI score than the prior best. | The lower-scored draft is rejected and the best previous manuscript remains in Output. | Prevents a manual or automatic brush-up from erasing a better manuscript. |
 | ブラッシュアップ後のAI点数が過去最高点より下がる。 | 低得点稿を破棄し、Outputには過去最高点の原稿を残します。 | 手動/自動ブラッシュアップで良い原稿が消えるのを防ぎます。 |
 
-## v5.1.0 Quality System / v5.1.0 品質システム
+## Current Quality System / 現行品質システム
 
-v5.1.0 keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and the long-form beta auto-brush-up completion gate. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
+The current v5.2.8 release line keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and Longify beta AI-review / auto-brush-up completion gates. It also keeps the legacy long-novel output-mode path fail-closed while the public Longify beta remains the supported long-form workflow. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
 
-v5.1.0では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、長編βの自動ブラッシュアップ完了判定の安定した置き場所として扱います。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
+現在のv5.2.8系では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、Longify betaのAI講評・自動ブラッシュアップ完了判定の安定した置き場所として扱います。あわせて、公開版の長編経路をLongify betaに絞り、旧来の長編小説出力モードはfail-closedのまま維持しています。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -383,6 +389,10 @@ Gemini は、通常生成、キャラクターシート画像の読み取り、�
 OpenAI can be used for text generation and style-sensitive prose drafting. The app keeps visible settings intact while switching providers, so users can compare output tendencies without rebuilding the entire prompt by hand. Public writing modes receive stricter mode and cleanup instructions to prevent analysis text from leaking into the final output.
 
 OpenAI は、文章生成と文体重視の散文生成に使えます。API提供元を切り替えても画面上の設定は維持されるため、プロンプトを手作業で組み直さずに出力傾向を比較できます。公開文章モードでは、分析文が最終出力へ混ざらないよう、モード契約と整形指示を強めています。
+
+For Longify beta, OpenAI is the recommended provider when the user is trying to reach the 80+ AI-review target. Gemini remains available for many standard workflows, but repeated browser checks showed that Gemini longification can meet formal shape requirements while still stalling below the review target, so the UI warns against treating it as the preferred route for reaching the pass score.
+
+長編化βでは、AI講評80点以上を狙う場合はOpenAIを推奨します。Geminiは通常生成など多くのワークフローで使えますが、実ブラウザ検証では形式条件を満たしても講評点が伸びにくいケースがあったため、長編化βの合格点狙いの主経路として扱わないようUIで警告します。
 
 ### Provider Switching / 提供元切り替え
 
@@ -847,7 +857,7 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 |---|---|---|
 | Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
 | Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Long-form beta<br>長編β | Longify beta is available in the public UI as a limited beta after fresh OpenAI browser proofs reached passing structure, length, and review scores.<br>長編化βは、OpenAI実ブラウザ検証で構造・文字数・講評点の合格を確認したため、限定βとして公開UIで利用できます。 | It remains a draft-expansion and revision aid, not a publication-quality guarantee. Human editing is still expected before public use.<br>公開品質の保証ではなく、長編下書き化と改稿補助です。公開利用前には人間の編集を前提にしてください。 |
+| Long-form beta<br>長編β | Longify beta is available in the public UI as a limited beta after OpenAI browser proofs reached passing structure, length, and review scores, while v5.2.8 keeps the legacy long-novel output mode sealed.<br>長編化βは、OpenAI実ブラウザ検証で構造・文字数・講評点の合格を確認したため、限定βとして公開UIで利用できます。一方、v5.2.8でも旧来の長編小説出力モードは封印したままです。 | It remains a draft-expansion and revision aid, not a publication-quality guarantee. A later v5.2.8 10,000-character check could pass functional/structure gates while still scoring below 80, so low scores should be treated as revision signals rather than as proof that Longify beta is unavailable.<br>公開品質の保証ではなく、長編下書き化と改稿補助です。後続のv5.2.8検証では10,000字経路が機能・構造上は通っても80点未満になることがありました。低い点数は、長編化βが使えない証拠ではなく改稿シグナルとして扱います。 |
 | Longify target ceiling<br>長編化の文字数上限 | The public UI currently allows 10,000-character and 20,000-character targets only.<br>公開UIで現在選択できる最低文字数は10,000字と20,000字のみです。 | 30,000+ targets remain disabled until separate quality proof passes.<br>30,000字以上は、別途品質検証が通るまで無効選択肢として残しています。 |
 | AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
 | Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
