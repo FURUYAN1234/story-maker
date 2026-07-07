@@ -26,6 +26,8 @@ The app builds a generation request from multiple visible axes instead of relyin
 
 このアプリは、自由入力だけに頼らず、複数の見える創作軸から生成リクエストを組み立てます。狙いは、AI特有の似たり寄ったりで整いすぎたストーリーから離れ、短時間の生成でも、具体的な葛藤、間、手触り、モードごとの締めによって、そこそこ面白いところを追求することです。
 
+![Story Maker 物語生成アルゴリズム 全体図](docs/images/story-maker-algorithm-overview.png)
+
 Main axes:
 
 - output mode
