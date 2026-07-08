@@ -1888,6 +1888,115 @@ function buildBrushupStateKeywords(values = [], max = 8) {
   return uniqueBrushupKeywords(source.filter(Boolean), max);
 }
 
+const BRUSHUP_QUALITY_CONTRACT_FIELDS = [
+  ['openingState', 'opening_state'],
+  ['turningAction', 'turning_action'],
+  ['endingState', 'ending_state'],
+  ['requiredDelta', 'required_delta'],
+  ['concreteAnchors', 'concrete_anchors'],
+];
+
+function readBrushupQualityField(contract = {}, camelKey, snakeKey) {
+  if (Object.prototype.hasOwnProperty.call(contract, camelKey)) return contract[camelKey];
+  if (Object.prototype.hasOwnProperty.call(contract, snakeKey)) return contract[snakeKey];
+  return undefined;
+}
+
+function hasBrushupQualityTokens(value) {
+  return Array.isArray(value) && value.some(token => normalizeBrushupLedgerKeyword(token));
+}
+
+export function validateBrushupQualityContract(contract = {}) {
+  const source = contract && typeof contract === 'object' ? contract : {};
+  const missingFields = [];
+  const emptyFields = [];
+  for (const [camelKey, snakeKey] of BRUSHUP_QUALITY_CONTRACT_FIELDS) {
+    const hasField = Object.prototype.hasOwnProperty.call(source, camelKey)
+      || Object.prototype.hasOwnProperty.call(source, snakeKey);
+    if (!hasField) {
+      missingFields.push(snakeKey);
+      continue;
+    }
+    if (!hasBrushupQualityTokens(readBrushupQualityField(source, camelKey, snakeKey))) {
+      emptyFields.push(snakeKey);
+    }
+  }
+  const issues = [
+    ...missingFields.map(field => `missing ${field}`),
+    ...emptyFields.map(field => `empty ${field}`),
+  ];
+  return {
+    valid: issues.length === 0,
+    missingFields,
+    emptyFields,
+    issues,
+  };
+}
+
+function buildBrushupEventTargetKeys({
+  eventKeywords = [],
+  participantKeywords = [],
+  outcomeKeywords = [],
+  fallbackKeywords = [],
+} = {}) {
+  const normalizeList = values => (Array.isArray(values) ? values : [values])
+    .map(normalizeBrushupLedgerKeyword)
+    .filter(Boolean);
+  const participants = normalizeList(participantKeywords);
+  const participantSet = new Set(participants);
+  const events = normalizeList(eventKeywords)
+    .filter(token => !participantSet.has(token))
+    .slice(0, 4);
+  const targets = [
+    ...participants,
+    ...normalizeList(outcomeKeywords),
+    ...normalizeList(fallbackKeywords),
+  ].slice(0, 4);
+  if (!events.length || !targets.length) return [];
+  const keys = [];
+  const seen = new Set();
+  for (const event of events) {
+    for (const target of targets) {
+      const key = `${event}:${target}`;
+      if (event === target || seen.has(key)) continue;
+      seen.add(key);
+      keys.push(key);
+      if (keys.length >= 12) return keys;
+    }
+  }
+  return keys;
+}
+
+function buildBrushupQualityDeltas({
+  firstParagraph = '',
+  middleText = '',
+  lastParagraph = '',
+  eventKeywords = [],
+  outcomeKeywords = [],
+  participantKeywords = [],
+} = {}) {
+  const eventText = Array.isArray(eventKeywords) ? eventKeywords.join(' ') : String(eventKeywords || '');
+  const outcomeText = Array.isArray(outcomeKeywords) ? outcomeKeywords.join(' ') : String(outcomeKeywords || '');
+  const openingState = buildBrushupStateKeywords(firstParagraph, 8);
+  const turningAction = buildBrushupStateKeywords([middleText, eventText], 8);
+  const endingState = buildBrushupStateKeywords([lastParagraph, outcomeText], 10);
+  const requiredDelta = buildBrushupStateKeywords([lastParagraph, middleText, outcomeText, eventText], 10);
+  const concreteAnchors = buildBrushupStateKeywords([eventText, outcomeText, firstParagraph, lastParagraph], 12);
+  return {
+    openingState,
+    turningAction,
+    endingState,
+    requiredDelta,
+    concreteAnchors,
+    eventTypeTargets: buildBrushupEventTargetKeys({
+      eventKeywords,
+      participantKeywords,
+      outcomeKeywords,
+      fallbackKeywords: [...openingState, ...endingState],
+    }),
+  };
+}
+
 function keywordOverlap(left = [], right = []) {
   const a = new Set((Array.isArray(left) ? left : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
   const b = new Set((Array.isArray(right) ? right : []).map(normalizeBrushupLedgerKeyword).filter(Boolean));
@@ -1916,17 +2025,28 @@ function buildBrushupProgressionLedger(chapterText, chapterNumber = 1) {
   const middleText = paragraphs.slice(1, -1).join('\n\n') || cleaned;
   const eventKeywords = mostFrequentBrushupKeywords(middleText || cleaned, 12);
   const outcomeKeywords = uniqueBrushupKeywords(lastParagraph, 10);
+  const participantSource = lines.slice(1).join('\n') || cleaned;
+  const participantKeywords = uniqueBrushupKeywords(participantSource.match(/\b[A-Z][A-Za-z0-9'-]{2,}\b/g) || [], 8);
+  const qualityDeltas = buildBrushupQualityDeltas({
+    firstParagraph,
+    middleText,
+    lastParagraph,
+    eventKeywords,
+    outcomeKeywords,
+    participantKeywords,
+  });
   return {
     chapterNumber: Math.max(1, Number(chapterNumber || 1)),
     heading: clipText(heading, 120),
     openingExcerpt: clipText(firstParagraph, 280),
     closingExcerpt: clipText(lastParagraph, 280),
     eventKeywords,
-    participantKeywords: uniqueBrushupKeywords(cleaned.match(/\b[A-Z][A-Za-z0-9'-]{2,}\b/g) || [], 8),
+    participantKeywords,
     outcomeKeywords,
     newFacts: buildBrushupStateKeywords([middleText, lastParagraph, firstParagraph], 8),
     openThreads: buildBrushupStateKeywords([firstParagraph, middleText, outcomeKeywords.join(' ')], 8),
     forbiddenRepeats: buildBrushupStateKeywords([eventKeywords.join(' '), outcomeKeywords.join(' ')], 10),
+    qualityDeltas,
     chars: submissionCharLength(cleaned),
   };
 }
@@ -1942,14 +2062,18 @@ export function detectBrushupEventRepetition(previousLedger = {}, currentLedger 
   const event = keywordOverlap(previousLedger.eventKeywords, currentLedger.eventKeywords);
   const participants = keywordOverlap(previousLedger.participantKeywords, currentLedger.participantKeywords);
   const outcome = keywordOverlap(previousLedger.outcomeKeywords, currentLedger.outcomeKeywords);
-  const repeated = event.count >= 2
+  const eventTarget = keywordOverlap(previousLedger.qualityDeltas?.eventTypeTargets, currentLedger.qualityDeltas?.eventTypeTargets);
+  const repeatedByKeywordShape = event.count >= 2
     && outcome.count >= 1
     && (participants.count >= 1 || event.ratio >= 0.68)
     && (event.ratio >= 0.5 || outcome.ratio >= 0.5);
+  const repeatedByEventTarget = eventTarget.count >= 1
+    && (event.count >= 1 || participants.count >= 1 || outcome.count >= 1);
+  const repeated = repeatedByKeywordShape || repeatedByEventTarget;
   return {
     repeated,
     reason: repeated
-      ? `same event pattern between Chapter ${previousLedger.chapterNumber || '?'} and Chapter ${currentLedger.chapterNumber || '?'}`
+      ? `${repeatedByEventTarget ? 'same event-target pattern' : 'same event pattern'} between Chapter ${previousLedger.chapterNumber || '?'} and Chapter ${currentLedger.chapterNumber || '?'}`
       : '',
     previousChapter: previousLedger.chapterNumber || null,
     currentChapter: currentLedger.chapterNumber || null,
@@ -1957,6 +2081,7 @@ export function detectBrushupEventRepetition(previousLedger = {}, currentLedger 
       event,
       participants,
       outcome,
+      eventTarget,
     },
   };
 }
@@ -1973,11 +2098,24 @@ function formatBrushupLedgerLine(ledger = {}) {
   const chapter = ledger.chapterNumber || '?';
   const event = (ledger.eventKeywords || []).slice(0, 6).join(', ') || 'not extracted';
   const outcome = (ledger.outcomeKeywords || []).slice(0, 5).join(', ') || 'not extracted';
+  const quality = ledger.qualityDeltas || {};
+  const qualityValidation = validateBrushupQualityContract(quality);
   const structuredState = JSON.stringify({
     chapter: ledger.chapterNumber || null,
     new_facts: (ledger.newFacts || []).slice(0, 6),
     open_threads: (ledger.openThreads || []).slice(0, 6),
     forbidden_repeats: (ledger.forbiddenRepeats || []).slice(0, 8),
+  });
+  const qualityPrecision = JSON.stringify({
+    chapter: ledger.chapterNumber || null,
+    opening_state: (quality.openingState || []).slice(0, 6),
+    turning_action: (quality.turningAction || []).slice(0, 6),
+    ending_state: (quality.endingState || []).slice(0, 6),
+    required_delta: (quality.requiredDelta || []).slice(0, 8),
+    concrete_anchors: (quality.concreteAnchors || []).slice(0, 8),
+    event_type_targets: (quality.eventTypeTargets || []).slice(0, 8),
+    contract_valid: qualityValidation.valid,
+    invalid_fields: qualityValidation.issues.slice(0, 5),
   });
   return [
     `Chapter ${chapter}: ${ledger.heading || ''}`.trim(),
@@ -1986,6 +2124,7 @@ function formatBrushupLedgerLine(ledger = {}) {
     `- event keywords: ${event}`,
     `- outcome keywords: ${outcome}`,
     `- structured_state: ${structuredState}`,
+    `- quality_precision_contract: ${qualityPrecision}`,
   ].filter(Boolean).join('\n');
 }
 
@@ -1994,7 +2133,8 @@ function formatBrushupProgressionWarnings(warnings = []) {
     .map(warning => {
       const sharedEvent = warning.overlap?.event?.shared?.slice(0, 5).join(', ') || 'n/a';
       const sharedOutcome = warning.overlap?.outcome?.shared?.slice(0, 5).join(', ') || 'n/a';
-      return `- ${warning.reason}; shared events: ${sharedEvent}; shared outcomes: ${sharedOutcome}`;
+      const sharedEventTarget = warning.overlap?.eventTarget?.shared?.slice(0, 5).join(', ') || 'n/a';
+      return `- ${warning.reason}; shared events: ${sharedEvent}; shared outcomes: ${sharedOutcome}; shared event-targets: ${sharedEventTarget}`;
     })
     .join('\n');
 }
@@ -2013,6 +2153,7 @@ export function buildLongifyBrushupProgressionGuide({
     `Current target: Chapter ${Math.max(1, Number(chapterNumber || 1))} / ${Math.max(1, Number(chapterCount || 1))}`,
     'Positive contract: add or sharpen at least one irreversible progression in this chapter.',
     'Irreversible progression examples: loss, relationship change, secret revealed, point-of-no-return decision, changed destination, changed obligation.',
+    'Quality precision contract: the rewritten prose must visibly advance opening_state -> turning_action -> ending_state; required_delta and concrete_anchors must appear as story movement, not as labels.',
     'Do not solve progression by deleting scenes or summarizing. Keep the chapter as prose and make the event meaning change.',
   ];
   if (prior.length) {
@@ -2144,6 +2285,7 @@ function buildLongifyEvaluationAuditBlock({ formatAudit = null, structureAudit =
     '- 章ごとの因果差分（誰が何を知り、何が可能/不可能になり、何の負債が増えたか）が弱い章は減点する。',
     '- 伏線の未回収、先行セットアップのない回収、クライマックス障壁の弱さは次回方針へ必ず反映する。',
     '- 4コマ/脚本/増補本文/タイトル再掲など本文外形式が残っている場合、80点以上にしない。',
+    '- quality_precision_review: evaluate opening_state -> turning_action -> ending_state; weak required_delta, concrete_anchors, causal cost, or character-state change must lower the score and appear in chapterDirections.',
   ];
   if (formatAudit) {
     const issues = Array.isArray(formatAudit.remainingIssues) && formatAudit.remainingIssues.length

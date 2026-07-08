@@ -54,6 +54,7 @@ import {
   splitLongifyManuscript,
   submissionCharLength,
   syncLongifyTargetSelect,
+  validateBrushupQualityContract,
   validateLongifyChapterDraft,
   validateLongifyEndingCompletion,
 } from '../src/longifyBeta.js';
@@ -943,6 +944,21 @@ const escalatedEventWarning = detectBrushupEventRepetition({
   outcomeKeywords: ['loss', 'truth'],
 });
 assert.equal(escalatedEventWarning.repeated, false);
+const eventTargetRepeatWarning = detectBrushupEventRepetition({
+  chapterNumber: 1,
+  eventKeywords: ['question', 'door'],
+  participantKeywords: ['mentor'],
+  outcomeKeywords: ['warning'],
+  qualityDeltas: { eventTypeTargets: ['question:mentor'] },
+}, {
+  chapterNumber: 2,
+  eventKeywords: ['question', 'archive'],
+  participantKeywords: ['mentor'],
+  outcomeKeywords: ['map'],
+  qualityDeltas: { eventTypeTargets: ['question:mentor'] },
+});
+assert.equal(eventTargetRepeatWarning.repeated, true);
+assert.match(eventTargetRepeatWarning.reason, /event-target/i);
 const progressionLedgers = buildBrushupProgressionLedgers([
   'Chapter 1\nAkari finds a hidden photo, confronts the cafe owner, and promises to keep the light on.',
   'Chapter 2\nAkari leaves the cafe, loses the old key, and learns that her brother protected a child.',
@@ -954,6 +970,24 @@ assert.ok(progressionLedgers[0].closingExcerpt.includes('light'));
 assert.ok(progressionLedgers[0].newFacts.includes('hidden'));
 assert.ok(progressionLedgers[0].openThreads.includes('photo'));
 assert.ok(progressionLedgers[0].forbiddenRepeats.some(token => token.startsWith('confront')));
+assert.ok(progressionLedgers[0].qualityDeltas);
+assert.ok(progressionLedgers[0].qualityDeltas.openingState.includes('akari'));
+assert.ok(progressionLedgers[0].qualityDeltas.turningAction.includes('confronts'));
+assert.ok(progressionLedgers[0].qualityDeltas.endingState.includes('light'));
+assert.ok(progressionLedgers[0].qualityDeltas.requiredDelta.includes('light'));
+assert.ok(progressionLedgers[0].qualityDeltas.concreteAnchors.includes('photo'));
+assert.ok(progressionLedgers[0].qualityDeltas.eventTypeTargets.some(key => key.includes('confronts:akari')));
+const validQualityContract = validateBrushupQualityContract(progressionLedgers[0].qualityDeltas);
+assert.equal(validQualityContract.valid, true);
+const invalidQualityContract = validateBrushupQualityContract({
+  opening_state: ['start'],
+  turning_action: ['choice'],
+  ending_state: ['changed'],
+  required_delta: [],
+  concrete_anchors: ['letter'],
+});
+assert.equal(invalidQualityContract.valid, false);
+assert.ok(invalidQualityContract.emptyFields.includes('required_delta'));
 const progressionGuide = buildLongifyBrushupProgressionGuide({
   chapterNumber: 2,
   chapterCount: 3,
@@ -967,6 +1001,14 @@ assert.match(progressionGuide, /structured_state/i);
 assert.match(progressionGuide, /new_facts/i);
 assert.match(progressionGuide, /open_threads/i);
 assert.match(progressionGuide, /forbidden_repeats/i);
+assert.match(progressionGuide, /quality_precision_contract/i);
+assert.match(progressionGuide, /opening_state/i);
+assert.match(progressionGuide, /turning_action/i);
+assert.match(progressionGuide, /ending_state/i);
+assert.match(progressionGuide, /required_delta/i);
+assert.match(progressionGuide, /concrete_anchors/i);
+assert.match(progressionGuide, /event_type_targets/i);
+assert.match(progressionGuide, /contract_valid/i);
 assert.match(progressionGuide, /Chapter 1/i);
 assert.match(progressionGuide, /same event/i);
 assert.doesNotMatch(progressionGuide, /undefined/);
@@ -980,6 +1022,17 @@ const progressionPrompt = buildLongifyBrushupChapterPrompt({
 });
 assert.match(progressionPrompt, /Progression ledger/i);
 assert.match(progressionPrompt, /irreversible progression/i);
+assert.match(progressionPrompt, /quality precision/i);
+const qualityReviewPrompt = buildLongifyAiReviewPrompt(formatLongifyOutput({
+  title: splitLong.title,
+  chapters: splitLong.chapters,
+}), {
+  mode: 'brushup',
+  targetChars: 9000,
+  chapterCount: splitLong.chapters.length,
+});
+assert.match(qualityReviewPrompt, /quality_precision_review/i);
+assert.match(qualityReviewPrompt, /opening_state -> turning_action -> ending_state/i);
 assert.match(buildLongifyBrushupChapterPrompt({
   title: splitLong.title,
   critiqueText: '\u7b2c1\u7ae0\u306e\u611f\u60c5\u5909\u5316\u3092\u5f37\u3081\u308b',
