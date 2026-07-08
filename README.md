@@ -1,4 +1,4 @@
-# Story Maker v5.2.9 / AI物語メーカー
+# Story Maker v5.3.0 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -292,9 +292,9 @@ Longify beta uses several safety paths because long manuscripts depend on many A
 
 ## Current Quality System / 現行品質システム
 
-The current v5.2.9 release line keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and Longify beta AI-review / auto-brush-up completion gates. It also keeps the legacy long-novel output-mode path fail-closed while the public Longify beta remains the supported long-form workflow. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
+The current v5.3.0 release line keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, GPT-5.x Responses beta routing, and Longify beta AI-review / auto-brush-up completion gates. It also keeps the legacy long-novel output-mode path fail-closed while the public Longify beta remains the supported long-form workflow. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
 
-現在のv5.2.9系では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、Longify betaのAI講評・自動ブラッシュアップ完了判定の安定した置き場所として扱います。あわせて、公開版の長編経路をLongify betaに絞り、旧来の長編小説出力モードはfail-closedのまま維持しています。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
+現在のv5.3.0系では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、GPT-5.x Responses beta経路、Longify betaのAI講評・自動ブラッシュアップ完了判定の安定した置き場所として扱います。あわせて、公開版の長編経路をLongify betaに絞り、旧来の長編小説出力モードはfail-closedのまま維持しています。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -821,13 +821,21 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 |---|---|---|
 | Provider behavior<br>API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input.<br>出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty.<br>同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
 | Rewrite layer<br>改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence.<br>改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary.<br>構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Long-form beta<br>長編β | Longify beta is available in the public UI as a limited beta after OpenAI browser proofs reached passing structure, length, and review scores, while v5.2.9 keeps the legacy long-novel output mode sealed.<br>長編化βは、OpenAI実ブラウザ検証で構造・文字数・講評点の合格を確認したため、限定βとして公開UIで利用できます。一方、v5.2.9でも旧来の長編小説出力モードは封印したままです。 | It remains a draft-expansion and revision aid, not a publication-quality guarantee. v5.2.9 adds a quality-precision contract to improve chapter-to-chapter progression, but low scores should still be treated as revision signals rather than as proof that Longify beta is unavailable.<br>公開品質の保証ではなく、長編下書き化と改稿補助です。v5.2.9では章ごとの進行差分を強める品質精度契約を追加しましたが、低い点数は、長編化βが使えない証拠ではなく改稿シグナルとして扱います。 |
+| Long-form beta<br>長編β | Longify beta is available in the public UI as a limited beta after OpenAI browser proofs reached passing structure, length, and review scores, while v5.3.0 keeps the legacy long-novel output mode sealed.<br>長編化βは、OpenAI実ブラウザ検証で構造・文字数・講評点の合格を確認したため、限定βとして公開UIで利用できます。一方、v5.3.0でも旧来の長編小説出力モードは封印したままです。 | It remains a draft-expansion and revision aid, not a publication-quality guarantee. v5.3.0 keeps the quality-precision contract and adds GPT-5.x Responses beta fallback routing as the default OpenAI path, but low scores should still be treated as revision signals rather than as proof that Longify beta is unavailable.<br>公開品質の保証ではなく、長編下書き化と改稿補助です。v5.3.0では章ごとの進行差分を強める品質精度契約を維持し、OpenAI標準経路をGPT-5.x Responses betaフォールバック優先にしましたが、低い点数は、長編化βが使えない証拠ではなく改稿シグナルとして扱います。 |
 | Longify target ceiling<br>長編化の文字数上限 | The public UI currently allows 10,000-character and 20,000-character targets only.<br>公開UIで現在選択できる最低文字数は10,000字と20,000字のみです。 | 30,000+ targets remain disabled until separate quality proof passes.<br>30,000字以上は、別途品質検証が通るまで無効選択肢として残しています。 |
 | AI review<br>AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees.<br>AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment.<br>合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
 | Publication readiness<br>公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality.<br>生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions.<br>最終利用と公開判断の責任はユーザー側に残ります。 |
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.0 (2026-07-08)
+
+- Changed the default OpenAI text path to GPT-5.x Responses beta with fallback to GPT-5.5, GPT-5.4, GPT-5.4-mini, and the existing Chat Completions route.
+- Kept normal generation on GPT-5.5 first while letting Longify continue across the GPT-5.x fallback chain.
+- Prevented post-evaluation fallback notices from overwriting completed standard Output.
+- Kept Longify retry behavior for repeated episode arcs, but after retries are exhausted it can accept an otherwise valid chapter with an explicit warning instead of failing the whole run.
+- OpenAI実ブラウザ検証で、通常生成は `gpt-5.5 (Responses beta)`、Longify betaは `gpt-5.4 (Responses beta)` で3章10,916字・AI講評82点・形式/構造チェック合格を確認しました。
 
 ### v5.2.9 (2026-07-08)
 

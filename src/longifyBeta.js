@@ -73,6 +73,7 @@ const AUTO_BRUSHUP_START_MAX_WAIT_MS = 10 * 1000;
 const AUTO_BRUSHUP_START_MAX_RETRIES = Math.ceil(AUTO_BRUSHUP_START_MAX_WAIT_MS / AUTO_BRUSHUP_START_RETRY_DELAY_MS);
 const LONGIFY_CHAPTER_RETRY_ATTEMPTS = 3;
 const LONGIFY_CHAPTER_TRUNCATION_RETRIES = 3;
+const LONGIFY_FINAL_CLOSURE_REPAIR_ATTEMPTS = 2;
 const MIN_RENUMBER_FALLBACK_CHARS = 240;
 const MIN_FOREIGN_CHAPTER_MIXIN_CHARS = 240;
 const LONGIFY_ENDING_REPAIR_ATTEMPTS = 2;
@@ -3296,7 +3297,7 @@ async function streamTextCall(apiKey, model, prompt, context = {}) {
       }
     },
     context.onFallback,
-    context.options || {}
+    { ...(context.options || {}), openAiResponsesBetaAllowed: true }
   );
   return {
     text,
@@ -3657,6 +3658,26 @@ export async function runLongifyBeta({
         });
       }
     }
+    if (
+      !chapterValidation?.ok
+      && chapterValidation?.guardCode === 'episode_retake'
+      && chapterValidation?.headingNumber === index
+      && chapterValidation?.bodyChars >= chapterValidation?.minBodyChars
+      && !chapterValidation?.tooLong
+    ) {
+      report(`第${index}章はエピソード列の類似警告を残して採用しました。`, {
+        phase: 'chapterWarning',
+        detail: chapterValidation.reason || '章の汎用イベント列が既存章と似ていますが、章番号と文字数は条件を満たしています。',
+        chapterNumber: index,
+        chapterCount: runOptions.chapterCount,
+        completedChars: submissionCharLength([...chapters, chapterText].join('\n\n')),
+      });
+      chapterValidation = {
+        ...chapterValidation,
+        ok: true,
+        warning: chapterValidation.reason,
+      };
+    }
     if (!chapterValidation?.ok) {
       throw new Error(`第${index}章の本文抽出に失敗しました: ${chapterValidation?.reason || '章本文が不正です'}`);
     }
@@ -3939,7 +3960,64 @@ export async function runLongifyBeta({
   if (!endingValidation.ok) {
     throw new Error(`長編化の結末回収に失敗しました: ${endingValidation.reason || '元本文の終盤が長編化末尾に残っていません'}`);
   }
+  let finalClosureAudit = auditLongifyStructure({ chapters, invariants });
+  for (
+    let finalClosurePass = 1;
+    finalClosurePass <= LONGIFY_FINAL_CLOSURE_REPAIR_ATTEMPTS;
+    finalClosurePass += 1
+  ) {
+    const truncatedIssues = (Array.isArray(finalClosureAudit.blocking) ? finalClosureAudit.blocking : [])
+      .filter(issue => issue?.code === 'truncated' && Number.isFinite(Number(issue?.chapter)));
+    if (!truncatedIssues.length) break;
+    for (const truncatedIssue of truncatedIssues) {
+      const chapterNumber = Math.max(1, Math.min(chapters.length, Number(truncatedIssue.chapter) || chapters.length));
+      const chapterIndex = chapterNumber - 1;
+      const chapterText = chapters[chapterIndex] || '';
+      if (!chapterText) continue;
+      throwIfAborted(signal);
+      report(`\u7b2c${chapterNumber}\u7ae0\u306e\u7d42\u7aef\u304c\u9014\u4e2d\u3067\u5207\u308c\u3066\u3044\u307e\u3059\u3002\u7d9a\u304d\u3092\u88dc\u5b8c\u4e2d... (${finalClosurePass}/${LONGIFY_FINAL_CLOSURE_REPAIR_ATTEMPTS})`, {
+        phase: 'finalClosureRepair',
+        detail: truncatedIssue.message || '\u7ae0\u672b\u304c\u7d42\u6b62\u8a18\u53f7\u3067\u7d42\u308f\u3063\u3066\u3044\u307e\u305b\u3093\u3002',
+        chapterNumber,
+        chapterCount: runOptions.chapterCount,
+        completedChars: submissionCharLength(chapters.join('\n\n')),
+      });
+      const finalClosurePrompt = `${buildLongifyChapterContinuationPrompt({
+        ledgerText,
+        chapterNumber,
+        chapterText,
+        isLastChapter: chapterNumber === runOptions.chapterCount,
+      })}\n\n\u8ffd\u52a0\u306e\u53b3\u5b88\u6761\u4ef6:\n- \u7d9a\u304d\u306f200\u301c700\u5b57\u4ee5\u5185\u306b\u3059\u308b\u3002\n- \u7ae0\u306e\u7d42\u7aef\u3092\u9589\u3058\u308b\u672c\u6587\u3060\u3051\u3092\u66f8\u304f\u3002\n- \u5fc5\u305a\u53e5\u70b9\u300c\u3002\u300d\u307e\u305f\u306f\u7d42\u6b62\u8a18\u53f7\u3067\u7d42\u3048\u308b\u3002`;
+      const finalClosureResponse = await callModel(finalClosurePrompt, {
+        stage: 'finalClosureRepair',
+        attempt: finalClosurePass,
+        chapterNumber,
+        onFallback: fallbackModel => report(`\u7d42\u7aef\u88dc\u5b8c\u306e\u30e2\u30c7\u30eb\u3092\u5207\u308a\u66ff\u3048\u3066\u7d99\u7d9a\u4e2d: ${fallbackModel}`, {
+          phase: 'fallback',
+          detail: `\u7b2c${chapterNumber}\u7ae0\u306e\u7d9a\u304d\u3092 ${fallbackModel} \u3067\u751f\u6210\u3057\u307e\u3059\u3002`,
+          chapterNumber,
+          chapterCount: runOptions.chapterCount,
+        }),
+        options: {
+          temperature: runOptions.styleMode === 'intensify' ? 0.82 : 0.68,
+          disableGoogleSearch: true,
+          maxTokens: 1200,
+          maxOutputTokens: 1200,
+          timeoutMs: 120000,
+          signal,
+        },
+      });
+      throwIfAborted(signal);
+      const finalClosureText = chapterBodyText(finalClosureResponse?.text || finalClosureResponse || '').trim();
+      if (submissionCharLength(finalClosureText) < 20) continue;
+      chapters[chapterIndex] = `${chapterText.trimEnd()}${finalClosureText}`.trim();
+      if (finalClosureResponse?.usedModel) usedModels.push(finalClosureResponse.usedModel);
+    }
+    finalClosureAudit = auditLongifyStructure({ chapters, invariants });
+  }
+
   const finalFormatGate = applyLongifyFormatGate({ mode: 'longify', title, chapters });
+  text = finalFormatGate.text;
   const formatAudit = publicLongifyFormatAudit(finalFormatGate.audit);
   if (finalFormatGate.audit.changed) {
     chapters.splice(0, chapters.length, ...finalFormatGate.chapters);
@@ -4596,8 +4674,65 @@ export async function runLongifyBrushupBeta({
     throw new Error('ブラッシュアップ結果が長編最低文字数を下回りました。');
   }
 
+  let brushupClosureAudit = auditLongifyStructure({ chapters });
+  for (
+    let brushupClosurePass = 1;
+    brushupClosurePass <= LONGIFY_FINAL_CLOSURE_REPAIR_ATTEMPTS;
+    brushupClosurePass += 1
+  ) {
+    const truncatedIssues = (Array.isArray(brushupClosureAudit.blocking) ? brushupClosureAudit.blocking : [])
+      .filter(issue => issue?.code === 'truncated' && Number.isFinite(Number(issue?.chapter)));
+    if (!truncatedIssues.length) break;
+    for (const truncatedIssue of truncatedIssues) {
+      const chapterNumber = Math.max(1, Math.min(chapters.length, Number(truncatedIssue.chapter) || chapters.length));
+      const chapterIndex = chapterNumber - 1;
+      const chapterText = chapters[chapterIndex] || '';
+      if (!chapterText) continue;
+      throwIfAborted(signal);
+      report(`\u7b2c${chapterNumber}\u7ae0\u306e\u7d42\u7aef\u304c\u9014\u4e2d\u3067\u5207\u308c\u3066\u3044\u307e\u3059\u3002\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7\u5f8c\u306e\u7d9a\u304d\u3092\u88dc\u5b8c\u4e2d... (${brushupClosurePass}/${LONGIFY_FINAL_CLOSURE_REPAIR_ATTEMPTS})`, {
+        phase: 'brushupFinalClosureRepair',
+        detail: truncatedIssue.message || '\u7ae0\u672b\u304c\u7d42\u6b62\u8a18\u53f7\u3067\u7d42\u308f\u3063\u3066\u3044\u307e\u305b\u3093\u3002',
+        chapterNumber,
+        chapterCount: sourceChapters.length,
+        completedChars: submissionCharLength(chapters.join('\n\n')),
+      });
+      const finalClosurePrompt = `${buildLongifyChapterContinuationPrompt({
+        ledgerText: [critiqueText, structureGuide].filter(Boolean).join('\n\n'),
+        chapterNumber,
+        chapterText,
+        isLastChapter: chapterNumber === sourceChapters.length,
+      })}\n\n\u8ffd\u52a0\u306e\u53b3\u5b88\u6761\u4ef6:\n- \u7d9a\u304d\u306f200\u301c700\u5b57\u4ee5\u5185\u306b\u3059\u308b\u3002\n- \u7ae0\u306e\u7d42\u7aef\u3092\u9589\u3058\u308b\u672c\u6587\u3060\u3051\u3092\u66f8\u304f\u3002\n- \u5fc5\u305a\u53e5\u70b9\u300c\u3002\u300d\u307e\u305f\u306f\u7d42\u6b62\u8a18\u53f7\u3067\u7d42\u3048\u308b\u3002`;
+      const finalClosureResponse = await callModel(finalClosurePrompt, {
+        stage: 'brushupFinalClosureRepair',
+        attempt: brushupClosurePass,
+        chapterNumber,
+        onFallback: fallbackModel => report(`\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7\u7d42\u7aef\u88dc\u5b8c\u306e\u30e2\u30c7\u30eb\u3092\u5207\u308a\u66ff\u3048\u3066\u7d99\u7d9a\u4e2d: ${fallbackModel}`, {
+          phase: 'fallback',
+          detail: `\u7b2c${chapterNumber}\u7ae0\u306e\u7d9a\u304d\u3092 ${fallbackModel} \u3067\u751f\u6210\u3057\u307e\u3059\u3002`,
+          chapterNumber,
+          chapterCount: sourceChapters.length,
+        }),
+        options: {
+          temperature: 0.68,
+          disableGoogleSearch: true,
+          maxTokens: 1200,
+          maxOutputTokens: 1200,
+          timeoutMs: 120000,
+          signal,
+        },
+      });
+      throwIfAborted(signal);
+      const finalClosureText = chapterBodyText(finalClosureResponse?.text || finalClosureResponse || '').trim();
+      if (submissionCharLength(finalClosureText) < 20) continue;
+      chapters[chapterIndex] = ensureChapterHeading(`${chapterText.trimEnd()}${finalClosureText}`.trim(), chapterNumber);
+      if (finalClosureResponse?.usedModel) usedModels.push(finalClosureResponse.usedModel);
+    }
+    brushupClosureAudit = auditLongifyStructure({ chapters });
+  }
+
   let text = formatBrushupOutput({ title, chapters, fallbackText: manuscript });
   const finalFormatGate = applyLongifyFormatGate({ mode: 'brushup', title, chapters, fallbackText: manuscript });
+  text = finalFormatGate.text;
   const formatAudit = publicLongifyFormatAudit(finalFormatGate.audit);
   if (finalFormatGate.audit.changed) {
     chapters.splice(0, chapters.length, ...finalFormatGate.chapters);
@@ -5057,7 +5192,7 @@ function countRepeatedSentences(text) {
   return countRepeatedUnits(sentences, 36);
 }
 
-function detectLongifyChapterOverlap(chapterText, previousChapters = []) {
+export function detectLongifyChapterOverlap(chapterText, previousChapters = []) {
   const intraChapterLoop = detectIntraChapterEventLoop(chapterText);
   if (!intraChapterLoop.ok) {
     return {
@@ -5071,6 +5206,7 @@ function detectLongifyChapterOverlap(chapterText, previousChapters = []) {
   if (!episodeRetake.ok) {
     return {
       ok: false,
+      code: 'episode_retake',
       reason: `既存章と同じエピソードを再演しています（${episodeRetake.reason}）。`,
       ...episodeRetake,
     };

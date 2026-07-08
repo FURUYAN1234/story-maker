@@ -93,6 +93,19 @@ function streamFromText(parts) {
 
 globalThis.fetch = async () => ({
   ok: true,
+  json: async () => ({ output_text: 'responses default body' }),
+});
+
+try {
+  const result = await Gt('sk-unit-test-key-000000000000', 'gpt-4.1', 'prompt', null, { maxTokens: 64 });
+  assert.equal(result.usedModel, 'gpt-5.5 (Responses beta)');
+  assert.equal(result.text, 'responses default body');
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
+globalThis.fetch = async () => ({
+  ok: true,
   body: streamFromText([
     'data: {"choices":[{"delta":{"content":"hel"}}]}\n',
     'data: {"choices":[{"delta":{"content":"lo"}}]}\n',
@@ -102,7 +115,10 @@ globalThis.fetch = async () => ({
 
 try {
   const chunks = [];
-  const result = await cf('sk-unit-test-key', 'prompt', chunk => chunks.push(chunk), null, { maxTokens: 64 });
+  const result = await cf('sk-unit-test-key-000000000000', 'prompt', chunk => chunks.push(chunk), null, {
+    maxTokens: 64,
+    openAiResponsesBeta: false,
+  });
   assert.equal(result.usedModel, 'gpt-4.1');
   assert.deepEqual(chunks, [
     { text: 'hel', isThought: false },

@@ -52,6 +52,7 @@ export function applyLongifyChapterPostValidationGuards({
         ...nextValidation,
         ok: false,
         reason: overlapIssue.reason,
+        guardCode: overlapIssue.code || 'overlap',
       };
       previousInvalidDraft = chapterText;
     }
@@ -64,6 +65,7 @@ export function applyLongifyChapterPostValidationGuards({
         ...nextValidation,
         ok: false,
         reason: contradiction.reason,
+        guardCode: contradiction.code || 'setting_contradiction',
       };
       previousInvalidDraft = chapterText;
     }

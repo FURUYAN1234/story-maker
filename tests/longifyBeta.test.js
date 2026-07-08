@@ -1562,6 +1562,67 @@ assert.equal(topupBrushupResult.text.includes('八百屋の奥さん'), false);
 assert.ok(topupBrushupResult.text.includes(topupAdditionBlock));
 assert.ok(submissionCharLength(topupBrushupResult.text) >= 14000);
 
+const brushupClosureCalls = [];
+const brushupClosureStages = [];
+const brushupClosureSource = `\u3010Brushup Closure\u3011
+
+\u7b2c1\u7ae0\u3000Open Stall
+
+${'Akari counts the stall receipts, changes one promise into one concrete debt, and ends the scene with the shutters locked. '.repeat(28)}
+
+\u7b2c2\u7ae0\u3000Rain Account
+
+${'Riku carries the rain account to the arcade office, loses a witness, and ends the scene by choosing the next public step. '.repeat(28)}
+
+\u7b2c3\u7ae0\u3000Morning Light
+
+${'Mio returns the lantern to the cafe counter, accepts the cost, and ends the scene with the morning light steady. '.repeat(28)}
+
+${STORY_MAKER_FOOTER}`;
+const brushupClosureChapters = {
+  1: `\u7b2c1\u7ae0\u3000Open Stall\n\n${'Akari counts the stall receipts, changes one promise into one concrete debt, and ends the scene with the shutters locked. '.repeat(24)}`,
+  2: `\u7b2c2\u7ae0\u3000Rain Account\n\n${'Riku carries the rain account to the arcade office, loses a witness, and ends the scene by choosing the next public step. '.repeat(24)}`,
+  3: `\u7b2c3\u7ae0\u3000Morning Light\n\n${'Mio returns the lantern to the cafe counter, accepts the cost, and ends the scene with the morning light steady. '.repeat(24)}`,
+};
+const brushupTruncatedTopup = `${'The added closing scene keeps the debt visible, moves the crowd through the arcade, and returns to the cafe light. '.repeat(20)}The final shared breath remains`;
+const brushupClosureResult = await runLongifyBrushupBeta({
+  storyText: brushupClosureSource,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  targetTotalChars: 10000,
+  onStage: stage => brushupClosureStages.push(stage),
+  callText: async (prompt, context) => {
+    brushupClosureCalls.push({ prompt, context });
+    if (context.stage === 'brushupCritique') {
+      return { text: 'Keep the final debt visible and prevent the top-up from ending mid-sentence.', usedModel: 'mock-brushup-closure-critique' };
+    }
+    if (context.stage === 'brushupTopup') {
+      return { text: brushupTruncatedTopup, usedModel: 'mock-brushup-closure-topup' };
+    }
+    if (context.stage === 'brushupFinalClosureRepair') {
+      return {
+        text: ' and closes when Akari locks the cafe door, thanks the gathered neighbors, and lets the repaired promise rest.',
+        usedModel: 'mock-brushup-closure-repair',
+      };
+    }
+    if (context.stage === 'brushupReview') {
+      return {
+        text: 'AI\u7dcf\u5408\u70b9: 84\u70b9\nAI\u8b1b\u8a55:\n\u88dc\u5f37\u5f8c\u306e\u7d42\u7aef\u88dc\u5b8c\u307e\u3067\u53cd\u6620\u3055\u308c\u3066\u3044\u308b\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c3\u7ae0\u306e\u4f59\u97fb\u3092\u3055\u3089\u306b\u6b8b\u3059\u3002',
+        usedModel: 'mock-brushup-closure-review',
+      };
+    }
+    return {
+      text: brushupClosureChapters[context.chapterNumber] || brushupClosureChapters[3],
+      usedModel: `mock-brushup-closure-chapter-${context.chapterNumber}`,
+    };
+  },
+});
+assert.ok(brushupClosureCalls.some(call => call.context.stage === 'brushupFinalClosureRepair'));
+assert.ok(brushupClosureStages.some(stage => stage.phase === 'brushupFinalClosureRepair' && stage.chapterNumber === 3));
+assert.equal(brushupClosureResult.reviewSource, 'ai');
+assert.equal(brushupClosureResult.structureAudit.ok, true);
+assert.ok(brushupClosureResult.text.includes('lets the repaired promise rest'));
+
 const preTopupLoopCalls = [];
 const preTopupLoopStages = [];
 const preTopupLoopBody = 'Akari opens the cafe ledger, crosses the wet alley, argues at the harbor office, and burns the same receipt before dawn. '.repeat(28);
@@ -2001,6 +2062,48 @@ assert.match(splitLongifyManuscript(episodeRetakeGateResult.text).chapters[1], /
 assert.doesNotMatch(splitLongifyManuscript(episodeRetakeGateResult.text).chapters[1], /別視点の写真/);
 assert.equal(episodeRetakeGateResult.reviewSource, 'ai');
 
+const episodeRetakeRescueCalls = [];
+const episodeRetakeRescueStages = [];
+const episodeRetakeRescueResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 3,
+  targetTotalChars: 10000,
+  onStage: stage => episodeRetakeRescueStages.push(stage),
+  callText: async (prompt, context) => {
+    episodeRetakeRescueCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return { text: 'Fixed ledger: keep retrying generic retakes, but do not fail a valid chapter forever.', usedModel: 'mock-retake-rescue-ledger' };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI総合点: 84点\nAI講評:\n章ごとの前進を確認。',
+        usedModel: 'mock-retake-rescue-review',
+      };
+    }
+    if (context.chapterNumber === 1) {
+      return {
+        text: `第1章　写真の公開\n\n${expandJapaneseChapter(episodeA, 65, '公開後の余波')}`,
+        usedModel: 'mock-retake-rescue-chapter-1',
+      };
+    }
+    if (context.chapterNumber === 2) {
+      return {
+        text: `第2章　別視点の写真\n\n${expandJapaneseChapter(episodeBRetake, 65, '別視点の余波')}`,
+        usedModel: `mock-retake-rescue-chapter-2-${context.retryAttempt || 0}`,
+      };
+    }
+    return {
+      text: `第${context.chapterNumber}章　次の選択\n\n${longChapterBody.repeat(45)}`,
+      usedModel: `mock-retake-rescue-chapter-${context.chapterNumber}`,
+    };
+  },
+});
+assert.ok(episodeRetakeRescueCalls.filter(call => call.context.stage === 'chapter' && call.context.chapterNumber === 2).length >= 4);
+assert.ok(episodeRetakeRescueStages.some(stage => stage.phase === 'chapterWarning' && stage.chapterNumber === 2));
+assert.match(splitLongifyManuscript(episodeRetakeRescueResult.text).chapters[1], /別視点の写真/);
+
 const reviewRetryCalls = [];
 const reviewRetryStages = [];
 const reviewRetryResult = await runLongifyBeta({
@@ -2276,6 +2379,72 @@ const extendedTopupOnlyCalls = extendedTopupCalls.filter(call => call.context.st
 assert.ok(extendedTopupOnlyCalls.length >= 1);
 assert.equal(extendedTopupResult.reviewSource, 'ai');
 assert.ok(submissionCharLength(extendedTopupResult.text) >= 13000);
+
+const finalClosureCalls = [];
+const finalClosureStages = [];
+const finalClosureBaseChapters = {
+  1: `第1章　Harbor Light\n\n${'Akari opens the harbor cafe, compares the old photograph with the register, and learns the owner paid for a secret boat ticket. '.repeat(24)}`,
+  2: `第2章　Ferry Receipt\n\n${'At the ferry office, Riku finds the missing receipt, loses the clerk as a witness, and decides to make the screening public. '.repeat(24)}`,
+  3: `第3章　Dawn Counter\n\n${'Before dawn, Akari brings the reel to the cafe counter, accepts the demolition vote is not over, and leaves the light burning. '.repeat(24)}`,
+};
+const truncatedTopupPiece = `${'A small extra scene tests Akari, keeps the lantern alive, and returns to the promise. '.repeat(14)}The final gesture remains unfinished`;
+const finalClosureResult = await runLongifyBeta({
+  storyText: seedStory,
+  apiKey: '123456789012345678901234567890',
+  model: 'gemini-test',
+  chapterCount: 3,
+  targetTotalChars: 10000,
+  onStage: stage => finalClosureStages.push(stage),
+  callText: async (prompt, context) => {
+    finalClosureCalls.push({ prompt, context });
+    if (context.stage === 'ledger') {
+      return {
+        text: 'Fixed ledger: Akari keeps the harbor light on and ends with a completed promise.',
+        usedModel: 'mock-final-closure-ledger',
+      };
+    }
+    if (context.stage === 'chapter') {
+      return {
+        text: finalClosureBaseChapters[context.chapterNumber],
+        usedModel: `mock-final-closure-chapter-${context.chapterNumber}`,
+      };
+    }
+    if (context.stage === 'topup') {
+      return {
+        text: truncatedTopupPiece,
+        usedModel: 'mock-final-closure-topup',
+      };
+    }
+    if (context.stage === 'finalClosureRepair') {
+      assert.equal(context.chapterNumber, 3);
+      return {
+        text: ' and is completed when Akari closes the register, watches the harbor brighten, and lets the promise rest.',
+        usedModel: 'mock-final-closure-repair',
+      };
+    }
+    if (context.stage === 'longifyReviewRetry') {
+      return {
+        text: 'AI\u7dcf\u5408\u70b9: 84\u70b9\nAI\u8b1b\u8a55:\n\u7d42\u7aef\u88dc\u5b8c\u5f8c\u306b\u63a1\u70b9\u3002\n\u826f\u3044\u70b9:\n\u7d04\u675f\u306e\u4f59\u97fb\u304c\u6b8b\u308b\u3002\n\u554f\u984c\u70b9:\n\u7b2c3\u7ae0\u306e\u4f59\u767d\u3092\u3082\u3046\u5c11\u3057\u5897\u3084\u305b\u308b\u3002\n\u7ae0\u5225\u306e\u6539\u7a3f\u6307\u793a:\n\u7b2c3\u7ae0\u306e\u4f59\u97fb\u3092\u3055\u3089\u306b\u5f37\u3081\u308b\u3002\n\u6b21\u56de\u30d6\u30e9\u30c3\u30b7\u30e5\u30a2\u30c3\u30d7\u65b9\u91dd:\n\u7d42\u7aef\u306e\u611f\u60c5\u3068\u884c\u52d5\u3092\u5897\u3084\u3059\u3002',
+        usedModel: 'mock-final-closure-review-retry',
+      };
+    }
+    if (context.stage === 'longifyReview') {
+      return {
+        text: 'AI総合点: 84点\nAI講評:\n終端補完後に採点。\n章別の改稿指示:\n第3章の余韻をさらに強める。',
+        usedModel: 'mock-final-closure-review',
+      };
+    }
+    return {
+      text: finalClosureBaseChapters[context.chapterNumber] || finalClosureBaseChapters[3],
+      usedModel: 'mock-final-closure-default',
+    };
+  },
+});
+assert.ok(finalClosureCalls.some(call => call.context.stage === 'finalClosureRepair'));
+assert.ok(finalClosureStages.some(stage => stage.phase === 'finalClosureRepair' && stage.chapterNumber === 3));
+assert.equal(finalClosureResult.reviewSource, 'ai');
+assert.equal(finalClosureResult.structureAudit.ok, true);
+assert.ok(finalClosureResult.text.includes('lets the promise rest'));
 
 const retryLongifyCalls = [];
 const retryLongifyResult = await runLongifyBeta({

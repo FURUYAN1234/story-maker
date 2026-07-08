@@ -2,6 +2,32 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-08 v5.3.0 GPT-5.x Responses default release
+
+- User asked to make the standard OpenAI path default to GPT-5.x Responses beta with fallback, verify real API generation in the in-app browser, then version bump, deploy, and run the Antigravity backup.
+- Runtime changes: OpenAI text calls now try the GPT-5.x Responses beta route by default unless explicitly disabled. Normal generation prefers `gpt-5.5`; Longify can continue through `gpt-5.5 -> gpt-5.4 -> gpt-5.4-mini -> existing Chat Completions`.
+- Standard-output safety fix: post-evaluation fallback notices no longer overwrite an already completed standard Output panel. Regression coverage lives in `src/standardFallbackUi.js` and `tests/standardFallbackUi.test.js`.
+- Longify fix: repeated generic episode-arc warnings still trigger retries, but if all retries are exhausted and the chapter otherwise has the correct heading, length, and bounds, Longify adopts it with an explicit warning instead of failing the entire run. Regression coverage was added in `tests/longifyBeta.test.js`.
+- Fresh real API proof used only the user-entered key already stored in the browser UI; Codex verified presence without reading, printing, pasting, or persisting the key. Default local URL had no `gpt5xBeta=1` flag: `http://127.0.0.1:5179/?codexDefaultGpt5Proof=20260708c`.
+- Browser proof: standard generation completed with tag `gpt-5.5 (Responses beta)`, 667 visible chars, self scores 89/87/90, and Output remained full story text rather than fallback status text.
+- Browser proof: Longify beta target `10000` with auto brush-up on completed 3 chapters, 10,916 posting-site chars / 11,399 visible chars, tag `gpt-5.4 (Responses beta)`, format check pass, structure check pass, AI review 82/pass, one explicit episode-arc warning on chapter 2, and no final failure.
+- Verification passed after version bump: `node --test "tests/**/*.test.js"` 74/74, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build` (Vite chunk-size warning only).
+- Local browser smoke after version bump showed `Story Maker v5.3.0`, no Vite overlay, and the stored ChatGPT API session still locked without exposing the key.
+- Deploy proof: `npm run deploy` published `origin/gh-pages` commit `b40904f`; live GitHub Pages `https://furuyan1234.github.io/story-maker/index.html?deploy=v530-codex-20260708b` returned `Story Maker v5.3.0` with JS asset `assets/index-hLQXsLLf.js`. In-app browser live smoke showed `Story Maker v5.3.0`, no Vite overlay, and live-page-origin warning/error logs 0.
+- Git tag, GitHub Release, local distribution sync, and the requested full Antigravity backup are still pending at the time of this note.
+
+## 2026-07-08 GPT-5.x Responses beta local proof and Longify closure repair
+
+- User asked Codex to move Story Maker forward from the old GPT-4-era OpenAI path and test the API in the in-app browser.
+- Runtime changes: `src/openAiResponsesBeta.js` adds the internal Responses API beta route for `?gpt5xBeta=1`; `src/providerClients.js`, `src/legacyMain.js`, and `src/longifyBeta.js` allow that route for standard story generation, long-novel call sites, and Longify. Query model selection such as `?gpt5xModel=gpt-5.5` now wins over UI/default model options.
+- Longify changes: `src/longifyBeta.js` now performs final closure repair before the final format/structure audit in both normal Longify and brush-up paths. Repairs are capped, short, and aimed only at closing truncated chapter endings.
+- Regression coverage: `tests/openAiResponsesBeta.test.js` covers default model candidates, query-model priority, nonstream behavior, streaming opt-in, and fallback; `tests/longifyBeta.test.js` covers final closure repair for normal Longify and brush-up.
+- Fresh in-app browser proof used the user-entered API key in the app UI only; Codex verified presence without reading, printing, pasting, or persisting the key. URL: `http://127.0.0.1:5179/?gpt5xBeta=1&gpt5xModel=gpt-5.5&codexApiProof=20260708`.
+- Browser result: standard seed generation completed with `gpt-5.5 (Responses beta)` and about 3,235 chars. Longify target `10000` plus auto brush-up completed with tag row `ブラッシュアップβ3章13,208字gpt-5.4 (Responses beta)`, final output about 13,898 visible chars, structure check pass, AI score 82/pass, and `brushupFinalClosureRepair` evidence. Important limitation: longer Longify calls fell back from requested `gpt-5.5` to `gpt-5.4 Responses beta`.
+- Verification passed: `node tests\openAiResponsesBeta.test.js`, `node tests\longifyBeta.test.js`, `node tests\longifyContinuity.test.js`, `node --test "tests/**/*.test.js"` 73/73, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build` (Vite chunk-size warning only).
+- Full Opus/Fable consultations timed out during this pass; a shorter Claude advice check succeeded and supported placing closure repair before structure audit. Do not record this as full Opus/Fable approval.
+- No deploy, tag, release, backup, commit, push, or staging was run in this pass.
+
 ## 2026-07-08 v5.2.9 Longify quality-precision release
 
 - User asked Codex to deploy Story Maker and run the full Antigravity backup after the real API proof.
