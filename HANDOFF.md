@@ -14,7 +14,9 @@ This file is public-repository safe. Do not include API keys, private credential
 - Verification passed after version bump: `node --test "tests/**/*.test.js"` 74/74, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `npm run lint --if-present`, `git diff --check -- . ':!dist'` (CRLF warnings only), and `npm run build` (Vite chunk-size warning only).
 - Local browser smoke after version bump showed `Story Maker v5.3.0`, no Vite overlay, and the stored ChatGPT API session still locked without exposing the key.
 - Deploy proof: `npm run deploy` published `origin/gh-pages` commit `b40904f`; live GitHub Pages `https://furuyan1234.github.io/story-maker/index.html?deploy=v530-codex-20260708b` returned `Story Maker v5.3.0` with JS asset `assets/index-hLQXsLLf.js`. In-app browser live smoke showed `Story Maker v5.3.0`, no Vite overlay, and live-page-origin warning/error logs 0.
-- Git tag, GitHub Release, local distribution sync, and the requested full Antigravity backup are still pending at the time of this note.
+- Source commit `6a825a2` is pushed to `origin/main`; annotated tag `v5.3.0` is pushed; GitHub Release is `https://github.com/FURUYAN1234/story-maker/releases/tag/v5.3.0`.
+- Local distribution sync: GitHub Release ZIP was extracted to `C:\story-maker-main`; `package.json` reports `5.3.0`, file count is 292, and no nested duplicate folder was created.
+- The requested full Antigravity backup is the next operation; do not treat this handoff as backup completion until the ZIP artifact is verified.
 
 ## 2026-07-08 GPT-5.x Responses beta local proof and Longify closure repair
 
