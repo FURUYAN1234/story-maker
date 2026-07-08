@@ -2,6 +2,19 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-08 v5.2.9 Longify quality-precision release
+
+- User asked Codex to deploy Story Maker and run the full Antigravity backup after the real API proof.
+- Source commit `4028fa1` is pushed to `origin/main`; annotated tag `v5.2.9` is pushed; GitHub Release is `https://github.com/FURUYAN1234/story-maker/releases/tag/v5.2.9`.
+- Runtime changes: `src/longifyBeta.js` now adds a Longify brush-up `quality_precision_contract` with opening state, turning action, ending state, required delta, concrete anchors, and event-target keys. The event repetition detector can now catch repeated action-target shapes, and the Longify AI review prompt includes `quality_precision_review` guidance.
+- Version bumped to `5.2.9` in package files, `src/version.js`, `index.html`, and README. Regression coverage was added in `tests/longifyBeta.test.js`.
+- Fresh real API proof before deploy used the user-entered browser key without reading, printing, pasting, or persisting it. ChatGPT API standard generation produced a 1,269-char seed; Longify target `10000` reached 10,062 non-whitespace/progress chars before auto brush-up; the new event-target detector fired on Chapter 2 vs Chapter 3; final output reached 10,460 visible chars / 10,089 non-whitespace chars, 3 chapter headings, one v5.2.8 footer, format pass, structure pass, AI score 82/pass, duplicate paragraphs 0, repeated 24-char grams at least 3 times 0, duplicate sentences 1, browser warning/error logs 0, and no Vite overlay.
+- Verification passed after the version bump: `node tests\longifyBeta.test.js`, `node --check src\longifyBeta.js`, `node --check tests\longifyBeta.test.js`, `node --check src\version.js`, `node --test "tests/**/*.test.js"` 72/72, `npm run lint --if-present`, `npm run check:generic-rules`, `npm run check:nano-4koma-contract`, `git diff --check -- . ':!dist'` (CRLF warnings only), `npm run build`, and `npm run deploy` (Vite chunk-size warning only).
+- In-app browser local smoke on `http://127.0.0.1:5179/?longifyBetaDev=1&codexDeploySmoke=529` showed `Story Maker v5.2.9`, target choices 10,000/20,000 enabled and 30,000+ disabled, no Vite overlay, and warning/error logs 0. Served source contains `quality_precision_contract`, `quality_precision_review`, and `event_type_targets`.
+- Deploy proof: `npm run deploy` published `origin/gh-pages` commit `45ea70b`; live GitHub Pages `https://furuyan1234.github.io/story-maker/?deploy=v529-codex-20260708` returned `Story Maker v5.2.9` with JS asset `assets/index-Cn0kxQ1p.js`; the live JS contains `5.2.9`, `quality_precision_contract`, `quality_precision_review`, and `event_type_targets`. In-app browser live smoke showed `Story Maker v5.2.9`, no Vite overlay, and warning/error logs 0.
+- Local distribution sync: GitHub Release ZIP was extracted to `C:\story-maker-main`; `package.json` reports `5.2.9`, file count is 288, and no nested duplicate folder was created.
+- The requested full Antigravity backup is the next operation; do not treat this handoff as backup completion until the ZIP artifact is verified.
+
 ## 2026-07-06 v5.2.8 long-form guard release
 
 - User asked Codex to deploy Story Maker and run the standard full Antigravity backup.
