@@ -283,7 +283,16 @@ async function readOpenAiResponsesStream(response, onChunk) {
   return state;
 }
 
+function resolveLongOutputOptions(prompt, options = {}) {
+  if (options.editorialStage === 'review' || options.editorialStage === 'reviewRetry') return options;
+  const isDirectLong = String(prompt || '').includes('【長編（10000字）直接生成契約】');
+  const isLongBrushup = options.editorialStage === 'brushup' && String(prompt || '').length >= 10000;
+  if (!isDirectLong && !isLongBrushup) return options;
+  return { ...options, timeoutMs: Math.max(Number(options.timeoutMs) || 0, 600000) };
+}
+
 async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options = {}) {
+  options = resolveLongOutputOptions(prompt, options);
   const config = resolveOpenAiResponsesBetaConfig(options);
   if (!config.enabled || config.models.length === 0) return null;
 
@@ -311,6 +320,7 @@ async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options 
 }
 
 async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallback, options = {}) {
+  options = resolveLongOutputOptions(prompt, options);
   const config = resolveOpenAiResponsesBetaConfig(options);
   if (!config.enabled || config.models.length === 0) return null;
   const useStreaming = options.openAiResponsesStream === true;
@@ -356,5 +366,6 @@ export {
   maybeCallOpenAiResponsesBeta,
   maybeStreamOpenAiResponsesBeta,
   parseOpenAiResponsesStreamEvent,
+  resolveLongOutputOptions,
   resolveOpenAiResponsesBetaConfig,
 };

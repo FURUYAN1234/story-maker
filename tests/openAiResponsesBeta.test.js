@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   buildOpenAiResponsesRequestBody,
   extractOpenAiResponsesText,
+  resolveLongOutputOptions,
   resolveOpenAiResponsesBetaConfig,
 } from '../src/openAiResponsesBeta.js';
 import { Gt, yt } from '../src/providerClients.js';
@@ -25,6 +26,10 @@ function streamFromText(parts) {
     },
   });
 }
+
+assert.equal(resolveLongOutputOptions('通常本文', { timeoutMs: 300000 }).timeoutMs, 300000);
+assert.equal(resolveLongOutputOptions('【長編（10000字）直接生成契約】\n本文', { timeoutMs: 300000 }).timeoutMs, 600000);
+assert.equal(resolveLongOutputOptions('講評', { timeoutMs: 120000, editorialStage: 'review' }).timeoutMs, 120000);
 
 const enabledConfig = resolveOpenAiResponsesBetaConfig(
   { openAiResponsesBetaAllowed: true },

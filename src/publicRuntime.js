@@ -8,7 +8,8 @@ import {
 } from './modeContracts.js';
 import { installAlphapolisAssist } from './alphapolisAssist.js';
 import { installKakuyomuAssist } from './kakuyomuAssist.js';
-import { installLongifyBeta, syncLongifyTargetSelect } from './longifyBeta.js';
+import { Gt } from './providerClients.js';
+import { editorialCallOptions, installEditorialBrushupRuntime } from './editorialBrushupRuntime.js';
 import { installPublicOutputCleanup } from './outputCleanup.js';
 import { installStandardTypewriterCursor } from './standardTypewriterRenderer.js';
 
@@ -17,7 +18,7 @@ const FALLBACK_MODE = 'novel';
 const API_SESSION_KEY = 'story-maker.api.session.v500';
 const API_MEMORY_KEY = '__storyMakerApiRuntimeMemoryV500';
 const API_WINDOW_NAME_PREFIX = 'story-maker.api.tab-session.v500:';
-let longifyBetaInstalled = false;
+let editorialBrushupInstalled = false;
 const SA_STANDARD_LOCKED_ATTR = 'data-sa-standard-generating-locked';
 
 const OUTPUT_GUIDE_HTML = `
@@ -570,11 +571,22 @@ function generationIsActive() {
   );
 }
 
-function installLongifyBetaOnce() {
-  if (longifyBetaInstalled) return;
-  installLongifyBeta();
-  if (document.getElementById('btn-longify-beta')?.dataset.longifyInstallerAttached !== 'true') return;
-  longifyBetaInstalled = true;
+async function callEditorialAi(prompt, context = {}) {
+  const session = readApiSession();
+  const provider = session.apiProvider === 'openai' ? 'openai' : 'gemini';
+  const key = normalizeApiKey(provider === 'openai' ? session.openaiKey : session.geminiKey);
+  if (!isRealApiKey(key)) throw new Error('選択中のAPIキーを確認できません');
+  const model = provider === 'openai' ? 'gpt-5.5' : 'gemini-3.5-flash';
+  return Gt(key, model, prompt, null, {
+    ...editorialCallOptions(context),
+    openAiResponsesBetaAllowed: true,
+  });
+}
+
+function installEditorialBrushupOnce() {
+  if (editorialBrushupInstalled) return;
+  installEditorialBrushupRuntime({ doc: document, timers: window, callAi: callEditorialAi });
+  editorialBrushupInstalled = true;
 }
 
 function installOutputAssistLauncher() {
@@ -588,7 +600,7 @@ function installOutputAssistLauncher() {
     if (installed) return;
     installed = true;
     observer.disconnect();
-    installLongifyBetaOnce();
+    installEditorialBrushupOnce();
     installKakuyomuAssist();
     installAlphapolisAssist();
   };
@@ -641,10 +653,7 @@ function installPublicRuntime() {
     generateButton: document.getElementById('btn-generate'),
     longNovelPanel: document.getElementById('long-novel-panel'),
   });
-  syncLongifyTargetSelect();
-  installLongifyBetaOnce();
-  setTimeout(installLongifyBetaOnce, 0);
-  setTimeout(installLongifyBetaOnce, 250);
+  installEditorialBrushupOnce();
   installPublicOutputCleanup();
   installOutputAssistLauncher();
 }

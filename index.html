@@ -452,36 +452,29 @@
           <div class="kakuyomu-form-preview alphapolis-form-preview" id="alphapolis-form-preview" aria-live="polite"></div>
         </div>
       </section>
-      <section class="longify-beta is-unavailable" id="longify-beta" aria-label="Longify beta" aria-disabled="true">
+      <section class="longify-beta" id="longify-beta" aria-label="AI講評・ブラッシュアップ" aria-disabled="false">
         <div class="longify-beta-head">
           <div class="longify-beta-copy">
             <div class="longify-beta-titleline">
               <span class="longify-beta-badge" aria-label="β版">📘 β版</span>
-              <div class="longify-beta-title">この小説を長編化</div>
+              <div class="longify-beta-title">この小説をブラッシュアップ</div>
             </div>
-            <div class="longify-beta-status" id="longify-beta-status">Output生成・貼り付け・TXTインポート後に使用できます</div>
+            <div class="longify-beta-status" id="longify-beta-status">どの出力モードでも、生成後にAI講評と合否を表示します</div>
             <div class="longify-beta-provider-warning hidden" id="longify-gemini-warning" role="note" aria-hidden="true">
-              <strong>Gemini APIは長編化・合格点までの自動ブラッシュアップでは非推奨です</strong>
-              <span>実ブラウザ検証では形式条件を満たしても、章頭と中核イベント列の反復が残り45〜68点付近で停滞しました。80点以上を狙う場合はOpenAI APIを推奨します。</span>
+              <strong>長い本文のブラッシュアップには時間がかかる場合があります</strong>
+              <span>元原稿は、点数または必須品質が改善した候補だけに置き換わります。失敗時は保持されます。</span>
             </div>
           </div>
           <div class="longify-beta-actions">
             <button type="button" class="btn-secondary longify-beta-button" id="btn-longify-beta" disabled>
-              この小説を長編化
+              この小説をブラッシュアップ
             </button>
             <button type="button" class="btn-secondary longify-stop-button hidden" id="btn-longify-stop" disabled>
               中断
             </button>
           </div>
         </div>
-        <div class="longify-beta-controls" aria-label="Longify beta settings">
-          <label class="longify-beta-field" for="longify-target-chars">
-            <span>最低文字数（空白・改行除外）</span>
-            <select id="longify-target-chars" disabled>
-              <option value="">ターゲット設定を読み込み中</option>
-            </select>
-            <small class="longify-beta-limit-note">※数万字以上の生成はAIのリソース不足により当面停止致します</small>
-          </label>
+        <div class="longify-beta-controls" aria-label="AI講評・ブラッシュアップ設定">
           <label class="longify-beta-check" for="longify-auto-brushup-until-pass">
             <input type="checkbox" id="longify-auto-brushup-until-pass" checked>
             <span>合格点まで自動ブラッシュアップ（最大3回）</span>
