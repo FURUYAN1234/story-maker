@@ -1,4 +1,4 @@
-# Story Maker v5.3.0 / AI物語メーカー
+# Story Maker v5.3.1 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -292,9 +292,9 @@ Longify beta uses several safety paths because long manuscripts depend on many A
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.0 release line keeps the public-mode quality layer outside the older large application file and treats it as the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, GPT-5.x Responses beta routing, and Longify beta AI-review / auto-brush-up completion gates. It also keeps the legacy long-novel output-mode path fail-closed while the public Longify beta remains the supported long-form workflow. Its purpose is not to promise a masterpiece every time. It is to push both Gemini and OpenAI away from similar AI-default story shapes and toward outputs that are at least structurally complete, concrete, and reasonably interesting for their selected mode.
+The current v5.3.1 release line adds a direct public `Long-form (10,000 characters+)` mode while keeping the legacy long-novel path sealed. The public-mode quality layer remains the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and GPT-5.x Responses fallback routing.
 
-現在のv5.3.0系では、既存の巨大なアプリ本体の外側にある公開モード用の品質レイヤーを、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、GPT-5.x Responses beta経路、Longify betaのAI講評・自動ブラッシュアップ完了判定の安定した置き場所として扱います。あわせて、公開版の長編経路をLongify betaに絞り、旧来の長編小説出力モードはfail-closedのまま維持しています。目的は、毎回名作を保証することではありません。Gemini と OpenAI の両方で、AI初期値の似たり寄ったりな物語形から離れ、選択モードに対して構造が完走し、具体性があり、そこそこ面白い出力へ寄せることです。
+現在のv5.3.1系では、公開モードへ直接生成の「長編（10000字～）」を追加し、旧来の長編小説経路は封印したまま維持します。公開モード用の品質レイヤーは、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、GPT-5.x Responsesフォールバック経路の安定した置き場所として扱います。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -828,6 +828,13 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.1 (2026-07-11)
+
+- Added the public `長編（10000字～）` mode while preserving the existing short and medium modes.
+- The mode generates the long story directly through the standard provider path and remains separate from the sealed legacy long-novel route.
+- Added fail-closed checks for a minimum 10,000-character body, completion, and duplicate paragraphs.
+- Real OpenAI browser proof completed with 20,785 body characters and no dedicated validation issues.
 
 ### v5.3.0 (2026-07-08)
 
