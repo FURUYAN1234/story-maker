@@ -66,20 +66,32 @@ export async function runEditorialBrushup({
   return { originalText, text: currentText, review: currentReview, attempts, decisions };
 }
 
+function escapeEditorialHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+export function createEditorialReviewMarkup(review, { attempts = 0, error = '' } = {}) {
+  if (error) return `<div class="editorial-review-error"><strong>AI講評を取得できませんでした。</strong><span>本文は保持されています。</span><pre>${escapeEditorialHtml(error)}</pre></div>`;
+  const valid = Boolean(review?.valid && Number.isFinite(review?.score));
+  const score = valid ? Math.max(0, Math.min(100, review.score)) : 0;
+  const passed = valid && score >= EDITORIAL_PASS_SCORE;
+  return [
+    '<div class="editorial-review-card">',
+    '<div class="editorial-review-score-panel">',
+    `<div class="editorial-review-score-label">AI総合点 <span>${passed ? '合格' : '要ブラッシュアップ'}</span></div>`,
+    `<div class="editorial-review-score-value">${valid ? score : '—'}<small>/100</small></div>`,
+    `<div class="editorial-review-score-bar"><div class="editorial-review-score-bar-fill ${passed ? 'passed' : ''}" style="width:${score}%"></div></div>`,
+    attempts ? `<div class="editorial-review-attempts">ブラッシュアップ回数: ${attempts}回</div>` : '',
+    '</div>',
+    `<pre class="editorial-review-commentary">${escapeEditorialHtml(review?.commentary || '講評を取得できませんでした。')}</pre>`,
+    '</div>',
+  ].join('');
+}
+
 export function renderEditorialReview(review, element, { attempts = 0, error = '' } = {}) {
   if (!element) return;
   element.classList?.remove?.('hidden');
-  if (error) {
-    element.textContent = `AI講評を取得できませんでした。本文は保持されています。\n${error}`;
-    return;
-  }
-  const passed = Boolean(review?.valid && review.score >= EDITORIAL_PASS_SCORE);
-  element.textContent = [
-    `AI総合点: ${review?.valid ? `${review.score}点` : '取得失敗'}`,
-    `判定: ${passed ? '合格' : '要ブラッシュアップ'}`,
-    attempts ? `ブラッシュアップ回数: ${attempts}回` : '',
-    `AI講評: ${review?.commentary || '講評を取得できませんでした。'}`,
-  ].filter(Boolean).join('\n');
+  element.innerHTML = createEditorialReviewMarkup(review, { attempts, error });
 }
 
 export function installEditorialBrushupRuntime({ doc = globalThis.document, timers = globalThis, callAi } = {}) {

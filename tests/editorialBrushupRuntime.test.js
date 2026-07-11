@@ -1,8 +1,14 @@
 import assert from 'node:assert/strict';
-import { runEditorialReview, runEditorialBrushup } from '../src/editorialBrushupRuntime.js';
+import { createEditorialReviewMarkup, runEditorialReview, runEditorialBrushup } from '../src/editorialBrushupRuntime.js';
 
 const original = '彼女は古い駅で手紙を拾った。\n\n返事を書き、朝の列車を見送った。';
 const improved = '彼女は古い駅で手紙を拾った。差出人の震えた筆跡に、昨日の後悔が残っていた。\n\n彼女は返事を書き、自分の言葉で別れを告げて朝の列車を見送った。';
+
+const reviewMarkup = createEditorialReviewMarkup({ score: 86, valid: true, commentary: '良い点。\n\n改善点。' }, { attempts: 1 });
+assert.match(reviewMarkup, /editorial-review-score-value[^>]*>86/);
+assert.match(reviewMarkup, /editorial-review-score-bar-fill/);
+assert.match(reviewMarkup, /<pre class="editorial-review-commentary">良い点。\n\n改善点。<\/pre>/);
+assert.match(reviewMarkup, /ブラッシュアップ回数: 1回/);
 
 let reviewCalls = 0;
 const repairedReview = await runEditorialReview({ text: original, mode: 'novel', modeLabel: '短編', callAi: async (_prompt, context) => {

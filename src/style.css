@@ -375,7 +375,19 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .longify-beta-check small{grid-column:2;color:var(--text3);font-size:10px;font-weight:700;line-height:1.4}
 .longify-beta-check:has(input:disabled){opacity:.48;cursor:not-allowed}
 .longify-beta-check:has(input:disabled) input{cursor:not-allowed}
-.longify-beta-review{display:flex;flex-direction:column;gap:7px;border-top:1px solid rgba(34,211,238,.24);padding-top:10px;font-size:12px;line-height:1.55;color:var(--text2)}
+.longify-beta-review{display:block;width:100%;box-sizing:border-box;border:1px solid rgba(34,211,238,.32);border-radius:var(--radius-sm);padding:16px;background:rgba(3,12,24,.52);font-size:14px;line-height:1.8;color:var(--text2)}
+.editorial-review-card{display:grid;gap:16px;width:100%}
+.editorial-review-score-panel{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px 18px;align-items:center;padding:14px 16px;border:1px solid rgba(139,108,255,.35);border-radius:var(--radius-xs);background:rgba(139,108,255,.08)}
+.editorial-review-score-label{font-size:15px;font-weight:900;color:var(--text)}
+.editorial-review-score-label span{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--accent2);font-size:12px}
+.editorial-review-score-value{grid-row:1 / span 2;grid-column:2;font-size:32px;font-weight:950;line-height:1;color:#facc15;font-family:monospace;text-align:right}
+.editorial-review-score-value small{font-size:13px;color:var(--text3);margin-left:3px}
+.editorial-review-score-bar{height:11px;border:1px solid var(--border);border-radius:999px;background:var(--surface3);overflow:hidden}
+.editorial-review-score-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#f59e0b,#facc15);transition:width .3s ease}
+.editorial-review-score-bar-fill.passed{background:linear-gradient(90deg,var(--success),#10b981)}
+.editorial-review-attempts{grid-column:1 / -1;color:var(--text3);font-size:12px;font-weight:700}
+.editorial-review-commentary{width:100%;box-sizing:border-box;margin:0;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-xs);background:rgba(0,0,0,.2);color:var(--text);font:inherit;font-size:14px;line-height:1.9}
+.editorial-review-error{display:grid;gap:6px;color:#fecaca;font-size:14px}.editorial-review-error span{color:var(--text2)}.editorial-review-error pre{white-space:pre-wrap;margin:4px 0 0;color:var(--text3);font:inherit}
 .longify-beta-review.hidden{display:none}
 .longify-beta-review-toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .longify-beta-review-toolbar .btn-secondary{font-size:11px;padding:5px 9px}
