@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v5.3.1</title>
+  <title>Story Maker v5.3.2</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <script type="module" crossorigin src="./assets/index-BWFjj774.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-D21le5HB.css">
+  <script type="module" crossorigin src="./assets/index-DEgycRxd.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DXEhrIwa.css">
 </head>
 <body>
 
@@ -14,7 +14,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.3.1</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.3.2</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
@@ -352,7 +352,7 @@
             <li>左の設定パネルで出力モード・テーマ等を選択</li>
             <li>「ストーリー生成」を押す</li>
             <li>「🎲 全項目ランダム」で一括ランダム設定も可能</li>
-            <li>他で作った本文はOutputへ貼り付け、またはTXT/MDインポートすると、Kakuyomuプレビュー及びアルファポリスプレビューの「この小説を長編化」の元本文として使えます</li>
+            <li>他で作った本文はOutputへ貼り付け、またはTXT/MDインポートすると、AI講評と「この小説をブラッシュアップ」の元本文として使えます</li>
           </ol>
         </div>
       </div>
@@ -389,36 +389,29 @@
           <div class="kakuyomu-form-preview alphapolis-form-preview" id="alphapolis-form-preview" aria-live="polite"></div>
         </div>
       </section>
-      <section class="longify-beta is-unavailable" id="longify-beta" aria-label="Longify beta" aria-disabled="true">
+      <section class="longify-beta" id="longify-beta" aria-label="AI講評・ブラッシュアップ" aria-disabled="false">
         <div class="longify-beta-head">
           <div class="longify-beta-copy">
             <div class="longify-beta-titleline">
               <span class="longify-beta-badge" aria-label="β版">📘 β版</span>
-              <div class="longify-beta-title">この小説を長編化</div>
+              <div class="longify-beta-title">この小説をブラッシュアップ</div>
             </div>
-            <div class="longify-beta-status" id="longify-beta-status">Output生成・貼り付け・TXTインポート後に使用できます</div>
+            <div class="longify-beta-status" id="longify-beta-status">どの出力モードでも、生成後にAI講評と合否を表示します</div>
             <div class="longify-beta-provider-warning hidden" id="longify-gemini-warning" role="note" aria-hidden="true">
-              <strong>Gemini APIは長編化・合格点までの自動ブラッシュアップでは非推奨です</strong>
-              <span>実ブラウザ検証では形式条件を満たしても、章頭と中核イベント列の反復が残り45〜68点付近で停滞しました。80点以上を狙う場合はOpenAI APIを推奨します。</span>
+              <strong>長い本文のブラッシュアップには時間がかかる場合があります</strong>
+              <span>元原稿は、点数または必須品質が改善した候補だけに置き換わります。失敗時は保持されます。</span>
             </div>
           </div>
           <div class="longify-beta-actions">
             <button type="button" class="btn-secondary longify-beta-button" id="btn-longify-beta" disabled>
-              この小説を長編化
+              この小説をブラッシュアップ
             </button>
             <button type="button" class="btn-secondary longify-stop-button hidden" id="btn-longify-stop" disabled>
               中断
             </button>
           </div>
         </div>
-        <div class="longify-beta-controls" aria-label="Longify beta settings">
-          <label class="longify-beta-field" for="longify-target-chars">
-            <span>最低文字数（空白・改行除外）</span>
-            <select id="longify-target-chars" disabled>
-              <option value="">ターゲット設定を読み込み中</option>
-            </select>
-            <small class="longify-beta-limit-note">※数万字以上の生成はAIのリソース不足により当面停止致します</small>
-          </label>
+        <div class="longify-beta-controls" aria-label="AI講評・ブラッシュアップ設定">
           <label class="longify-beta-check" for="longify-auto-brushup-until-pass">
             <input type="checkbox" id="longify-auto-brushup-until-pass" checked>
             <span>合格点まで自動ブラッシュアップ（最大3回）</span>
