@@ -11,6 +11,9 @@ assert.equal(evaluateBrushupCandidate({ originalText: base, currentText: base, c
 assert.equal(evaluateBrushupCandidate({ originalText: base, currentText: base, candidateText: improved, mode: 'novel', formatOk: false, ...reviews }).adopt, false);
 assert.equal(evaluateBrushupCandidate({ originalText: base, currentText: base, candidateText: improved, mode: 'novel', formatOk: true, currentReview: { score: 84, valid: true }, candidateReview: { score: 83, valid: true } }).adopt, false);
 
+const genericLong = `${'長い原稿の内容を保持する。'.repeat(900)}。`;
+assert.equal(evaluateBrushupCandidate({ originalText: genericLong, currentText: genericLong, candidateText: `${'短縮。'.repeat(300)}。`, mode: '4koma', formatOk: true, ...reviews }).issues.includes('content_loss'), true);
+
 const longBody = `${'長い物語の一文。'.repeat(1300)}\n【完】`;
 assert.equal(evaluateBrushupCandidate({ originalText: longBody, currentText: longBody, candidateText: `${'短い。'.repeat(500)}\n【完】`, mode: 'long_10000', formatOk: true, ...reviews }).adopt, false);
 assert.equal(evaluateBrushupCandidate({ originalText: longBody, currentText: longBody, candidateText: longBody, mode: 'long_10000', formatOk: true, ...reviews }).issues.includes('target_length'), false);

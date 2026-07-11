@@ -2,6 +2,19 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-11 v5.3.2 Universal AI Review and Brush-up
+
+- Public `この小説を長編化` was replaced by `この小説をブラッシュアップ`; public target-length controls were removed. Short, medium, and `長編（10000字～）` remain, while legacy long stays sealed.
+- All public generation modes now receive a separate AI review with an 82-point pass gate. Brush-up performs at least one rewrite when explicitly clicked, can continue up to three attempts when auto mode is enabled, and adopts only an improved mechanically valid candidate.
+- Safety gates preserve the current manuscript on API/review failure, reject incomplete or duplicate candidates, retain at least 60% of any 500+ character source, and enforce 10,000+ non-whitespace body characters for `long_10000`.
+- Long direct-generation and 10,000+ character brush-up OpenAI Responses calls use a 600,000 ms timeout. Short review calls remain 120,000 ms.
+- User-reported readability regression was fixed: the review card is full width with a 32 px score, score bar, 14 px commentary, 26.6 px measured line height, and paragraph-preserving `pre-wrap`.
+- Real OpenAI acceptance run 1: direct long generation passed at 24,417 non-whitespace body characters with no dedicated issues; automatic editorial review scored 86/pass.
+- During acceptance run 2, a restored long manuscript was accidentally tested while the active UI mode had reset to 4koma, exposing a real generic content-loss defect: a 25,157-character source could adopt a 1,451-character candidate. The candidate gate was fixed to reject reductions below 60% for all modes, with regression coverage.
+- Real OpenAI acceptance rerun 2: active mode `long_10000`, auto repeat off, exactly one rewrite attempt; final body 24,404 non-whitespace characters / 25,510 visible characters, score 89/pass, completed ending, no continuation marker, duplicate paragraphs 0, and changed text. This supersedes the failed wrong-mode diagnostic run.
+- Earlier real fiction proof also passed: automatic review 86/pass, and a weak 70-character input improved in one adopted attempt to 3,016 visible characters / 86.
+- Before deploy, rerun the full 82-test suite, lint, syntax/diff, and build after the v5.3.2 bump. User explicitly requested deploy and full PS1 backup only after the two long acceptance runs passed. GitHub Release/tag remain out of scope unless separately requested.
+
 ## 2026-07-08 v5.3.0 GPT-5.x Responses default release
 
 - User asked to make the standard OpenAI path default to GPT-5.x Responses beta with fallback, verify real API generation in the in-app browser, then version bump, deploy, and run the Antigravity backup.
@@ -2027,3 +2040,16 @@ These local checks were insufficient; the real Gemini browser run still failed a
 - Source `main` was pushed at `8714d7d60cbd2fe522ebe4e01af8a22544097c74` before this handoff evidence update.
 - No GitHub Release, tag, local distribution sync, or backup was requested or performed.
 - Next approved work: implement `docs/superpowers/specs/2026-07-11-universal-editorial-brushup-design.md`, beginning with a detailed implementation plan.
+# 2026-07-11 Universal AI Editorial Review / Brush-up Implementation
+
+- Replaced the public `この小説を長編化` UI with `この小説をブラッシュアップ`; removed the public target-length selector while preserving `短編`, `中編`, and `長編（10000字～）` and keeping legacy long sealed.
+- Added mode-family review contracts, strict score parsing, an 82-point pass gate, candidate comparison, original-text rollback, and up to three automatic brush-up attempts.
+- Added a 600,000 ms policy for direct `long_10000` OpenAI Responses calls and 10,000+ character brush-up calls; short AI review calls retain a 120,000 ms limit.
+- Every successful standard generation now triggers a separate AI review. Review failure does not fail or replace the generated Output.
+- User caught a UI regression during live proof: the first implementation used plain `textContent`, so the old score presentation CSS was bypassed. The fixed display uses a full-width card, 32 px score, 14 px commentary, 26.6 px measured line height, `pre-wrap` paragraph preservation, and a visible score bar.
+- Fresh real OpenAI browser proof: short generation produced 4,205 characters and automatic AI review 86/pass. After the display fix, another short generation produced 3,436 characters and automatic AI review 86/pass. A deliberately weak 70-character local input was brushed up through the real API in one adopted attempt to 3,016 characters and 86/pass; UI dataset result was `completed`.
+- Browser layout evidence: score `86/100`, score font `32px`, commentary font `14px`, line height `26.6px`, `white-space: pre-wrap`, review width `1760.8px` inside a `1791.2px` parent, target selector absent, configured API shown only as masked/ready.
+- Browser console contained two Chrome-extension message-channel errors; app functional paths completed. No app-origin exception was observed.
+- Verification passed: `node --test "tests/**/*.test.js"` 82/82, lint, focused `node --check`, `git diff --check -- . ':!dist'`, and `npm run build`. Build retained the existing large-chunk warning and isolated-worktree Nano sibling check skip.
+- Remaining live acceptance gap: the new review/brush-up path has real API proof for the fiction family, but a fresh 10,000+ character brush-up and separate live script/practical/special-family runs have not yet been completed. Automated contract coverage exists for all families. Do not call the whole feature fully verified until those live checks are either completed or explicitly waived.
+- No deploy, push, release, tag, version bump, distribution sync, or backup was performed for this brush-up implementation.

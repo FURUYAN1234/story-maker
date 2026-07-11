@@ -1,4 +1,4 @@
-# Story Maker v5.3.1 / AI物語メーカー
+# Story Maker v5.3.2 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -292,9 +292,9 @@ Longify beta uses several safety paths because long manuscripts depend on many A
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.1 release line adds a direct public `Long-form (10,000 characters+)` mode while keeping the legacy long-novel path sealed. The public-mode quality layer remains the stable place for prompt contracts, provider-specific tuning, output cleanup, live output presentation, completion gates, generic-rule checks, and GPT-5.x Responses fallback routing.
+The current v5.3.2 release line keeps direct public `Long-form (10,000 characters+)` generation while replacing public Longify expansion with universal AI editorial review and safe score-driven brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.1系では、公開モードへ直接生成の「長編（10000字～）」を追加し、旧来の長編小説経路は封印したまま維持します。公開モード用の品質レイヤーは、プロンプト契約、API別補正、出力整形、ライブ表示、完走ゲート、汎用ルール検査、GPT-5.x Responsesフォールバック経路の安定した置き場所として扱います。
+現在のv5.3.2系では、直接生成の「長編（10000字～）」を維持しつつ、公開Longify長編化を全モードAI講評と安全な点数駆動ブラッシュアップへ置き換えます。旧来の長編小説経路は封印したままです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -828,6 +828,13 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.2 (2026-07-11)
+
+- Replaced public Longify expansion with universal AI editorial review and `この小説をブラッシュアップ`.
+- Added an 82-point pass gate, up to three automatic attempts, original-text rollback, and cross-mode content-loss rejection.
+- Long-form generation and 10,000+ character brush-up calls use a 10-minute OpenAI Responses timeout.
+- Restored a full-width score card with a 32 px score, readable commentary, and preserved paragraph breaks.
 
 ### v5.3.1 (2026-07-11)
 

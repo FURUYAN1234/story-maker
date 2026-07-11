@@ -30,6 +30,7 @@ export function hasDuplicateEditorialParagraph(text) {
 }
 
 export function evaluateBrushupCandidate({
+  currentText = '',
   candidateText = '',
   mode = '',
   currentReview = null,
@@ -37,6 +38,9 @@ export function evaluateBrushupCandidate({
   formatOk = true,
 } = {}) {
   const issues = [];
+  const currentLength = Array.from(normalizedManuscript(currentText).replace(/\s/gu, '')).length;
+  const candidateLength = Array.from(normalizedManuscript(candidateText).replace(/\s/gu, '')).length;
+  if (currentLength >= 500 && candidateLength < Math.floor(currentLength * 0.6)) issues.push('content_loss');
   if (!formatOk) issues.push('format');
   if (!hasCompletedEditorialEnding(candidateText)) issues.push('unclosed_ending');
   if (hasDuplicateEditorialParagraph(candidateText)) issues.push('duplicate_paragraph');

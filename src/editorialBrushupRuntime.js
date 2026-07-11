@@ -45,7 +45,10 @@ export async function runEditorialBrushup({
   let currentReview = await runEditorialReview({ text: currentText, mode, modeLabel, callAi });
   let attempts = 0;
   const decisions = [];
-  while (attempts < Math.max(1, Math.min(3, Number(maxAttempts) || 3)) && currentReview.score < EDITORIAL_PASS_SCORE) {
+  while (
+    attempts < Math.max(1, Math.min(3, Number(maxAttempts) || 3))
+    && (attempts === 0 || (autoUntilPass && currentReview.score < EDITORIAL_PASS_SCORE))
+  ) {
     attempts += 1;
     const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: currentReview, modeLabel }), {
       stage: 'brushup', mode, charLength: currentText.length, attempt: attempts,
@@ -94,6 +97,14 @@ export function renderEditorialReview(review, element, { attempts = 0, error = '
   element.innerHTML = createEditorialReviewMarkup(review, { attempts, error });
 }
 
+export function isEditorialBrushupReady(output) {
+  return Boolean(
+    output
+    && !output.classList?.contains?.('empty')
+    && String(output.textContent || '').trim().length >= 20
+  );
+}
+
 export function installEditorialBrushupRuntime({ doc = globalThis.document, timers = globalThis, callAi } = {}) {
   const brushupButton = doc?.getElementById?.('btn-longify-beta');
   const generateButton = doc?.getElementById?.('btn-generate');
@@ -105,8 +116,11 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   let reviewRun = 0;
   const currentMode = () => doc.querySelector?.('#mode-chips .chip.active')?.dataset?.v || '';
   const currentModeLabel = () => doc.querySelector?.('#mode-chips .chip.active')?.textContent?.trim() || currentMode();
-  const hasText = () => String(output.textContent || '').trim().length >= 20 && !output.classList?.contains?.('empty');
+  const hasText = () => isEditorialBrushupReady(output);
   const setReady = () => { brushupButton.disabled = !hasText(); };
+  const Observer = doc.defaultView?.MutationObserver || globalThis.MutationObserver;
+  const outputObserver = typeof Observer === 'function' ? new Observer(setReady) : null;
+  outputObserver?.observe?.(output, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   const reviewCurrentOutput = async () => {
     if (!hasText()) return null;
     const token = ++reviewRun;
@@ -163,6 +177,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   setReady();
   return () => {
     reviewRun += 1;
+    outputObserver?.disconnect?.();
     brushupButton.removeEventListener?.('click', onBrushup, { capture: true });
     generateButton?.removeEventListener?.('click', onGenerate);
   };
