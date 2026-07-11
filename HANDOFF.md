@@ -2016,3 +2016,14 @@ These local checks were insufficient; the real Gemini browser run still failed a
 - Verification passed: `node --test "tests/**/*.test.js"` 77/77, focused `node --check`, lint, `git diff --check -- . ':!dist'`, and `npm run build`. Build retained the existing chunk-size warning and skipped the sibling Nano contract check because that sibling source is outside this isolated worktree layout.
 - Branch/worktree: `codex/direct-10000-character-mode` at `C:\Users\sx717\.codex\worktrees\story-maker-direct-10000`.
 - No deploy, push, release, backup, or version bump was performed.
+# 2026-07-11 v5.3.1 Direct 10,000-Character Mode Deploy
+
+- User approved the direct `長編（10000字～）` mode as the stable checkpoint before the separate universal editorial/brush-up implementation.
+- Version is `5.3.1` in package files, `src/version.js`, `index.html`, and README.
+- Public behavior: short and medium remain visible; `長編（10000字～）` is visible; the sealed legacy long-novel mode remains hidden. The direct route enforces a 10,000-character body minimum, completion, and duplicate-paragraph checks.
+- Real OpenAI proof before deploy passed at 20,785 body characters with no dedicated validation issues and a completed ending.
+- Verification passed on merged `main`: `node --test "tests/**/*.test.js"` 77/77, lint, syntax/diff checks, and production build. The build emitted only the existing large-chunk warning.
+- Deploy passed: `npm run deploy` published `origin/gh-pages` commit `39002acd720e92799b28d9fb8f04087eaffbb1e7`. Live `https://furuyan1234.github.io/story-maker/?deploy=v531-codex-20260711` showed title/header `v5.3.1`, exact long-mode label, short/medium present, legacy long hidden, asset `assets/index-BWFjj774.js`, and browser error logs 0.
+- Source `main` was pushed at `8714d7d60cbd2fe522ebe4e01af8a22544097c74` before this handoff evidence update.
+- No GitHub Release, tag, local distribution sync, or backup was requested or performed.
+- Next approved work: implement `docs/superpowers/specs/2026-07-11-universal-editorial-brushup-design.md`, beginning with a detailed implementation plan.
