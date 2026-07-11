@@ -1,7 +1,9 @@
 const LONG_MODE_PATTERN = /\blong\b|long[-\s_]*novel|長編/i;
 
 export function isLongModeSignal(value) {
-  return LONG_MODE_PATTERN.test(String(value || ''));
+  const source = String(value || '');
+  if (/long_10000|長編（10000字～?）/iu.test(source)) return false;
+  return LONG_MODE_PATTERN.test(source);
 }
 
 export function collectPublicModeSignal({
@@ -50,6 +52,7 @@ export function pickPublicModeOption(options = [], currentMode = '', random = Ma
 
 export function resolveOutputModeFromText(value, fallback = '4koma') {
   const text = String(value || '').trim();
+  if (/long_10000|長編（10000字～?）/iu.test(text)) return 'long_10000';
   if (/4koma_scenario|STEP2|シナリオ連携/i.test(text)) return '4koma_scenario';
   if (/4コマ|四コマ|4koma/i.test(text)) return '4koma';
   if (/ショート|掌編|short_short|short/i.test(text)) return 'short_short';

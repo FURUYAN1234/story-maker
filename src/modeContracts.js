@@ -20,6 +20,8 @@ export const PUBLIC_MODES = [
   { value: 'radio', label: 'ラジオドラマ' },
 ];
 
+PUBLIC_MODES.splice(5, 0, { value: 'long_10000', label: '長編（10000字～）' });
+
 export const PUBLIC_MODE_VALUES = PUBLIC_MODES.map(mode => mode.value);
 export const MODE_LABELS = Object.fromEntries(PUBLIC_MODES.map(mode => [mode.value, mode.label]));
 
@@ -108,6 +110,13 @@ export const MODE_LENGTH_TARGETS = {
     cleanupMax: 0,
     rule: 'BGM、SE、会話の間、沈黙、音の変化で場面が動く長さにする。',
   },
+};
+
+MODE_LENGTH_TARGETS.long_10000 = {
+  min: 10000,
+  target: '10,000字以上',
+  cleanupMax: 0,
+  rule: '最初から一つの完結した長編として構成し、既存の短編を水増ししない。',
 };
 
 const SKIP_PATTERNS = [
@@ -217,7 +226,9 @@ const MODE_LENGTH_RULES = Object.fromEntries(
 );
 
 export function isLongModeText(text) {
-  return /\blong\b|long[-_\s]*novel|長編/i.test(String(text || ''));
+  const source = String(text || '');
+  if (/long_10000|長編（10000字～?）/iu.test(source)) return false;
+  return /\blong\b|long[-_\s]*novel|長編/i.test(source);
 }
 
 export function detectModeFromText(text) {

@@ -33,7 +33,11 @@ const ALL_MODES = [
   { value: 'radio', label: 'ラジオドラマ' }
 ];
 
-export const MODES = ALL_MODES.filter(mode => mode.value !== 'long');
+export const MODES = ALL_MODES
+  .flatMap(mode => mode.value === 'long'
+    ? [{ value: 'long_10000', label: '長編（10000字～）' }, mode]
+    : [mode])
+  .filter(mode => mode.value !== 'long');
 
 export const THEME_CATEGORIES = {
   '日常・生活': ['コンビニ', '通学路', 'お昼休み', '雨の日', '洗濯物', '引っ越し', '忘れ物', '遅刻', '卒業式', '初デート'],

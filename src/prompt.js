@@ -11,6 +11,7 @@ import {
   MODES,
 } from './data.js';
 import { MODE_LENGTH_TARGETS } from './modeContracts.js';
+import { buildDirectLong10000Contract, isDirectLong10000Mode } from './directLong10000.js';
 import {
   GENRE_STYLE_GUIDES,
   ENDING_STYLE_GUIDES,
@@ -53,6 +54,7 @@ function collectStyleGuides(settings) {
 }
 
 function outputContract(mode) {
+  if (isDirectLong10000Mode(mode)) return buildDirectLong10000Contract();
   const contracts = {
     '4koma': 'タイトル、1コマ目、2コマ目、3コマ目、4コマ目を必ず置き、各コマに「絵/状況:」「セリフ:」をこの順で書く。通常4コマの完成品なので「狙い:」「意図:」「解説:」などの制作メモを本文に出さない。「セリフ:」の後に説明文や制作意図を足さず、発話、短い独白、効果音だけを書く。番号だけの散文小説にしない。選択された題材の現実感を保ち、別ジャンルの大げさな設定や抽象不条理だけでオチを作らない。4コマ目は誰かの選択と、その結果の小さな損、気まずさ、関係変化まで絵とセリフで分かるオチにする。',
     '4koma_scenario': 'Topic、Logline、Location、Outfit、Punchline、Scenario、[1コマ目]〜[4コマ目]を置く。コマ見出しは必ず単独行で「[1コマ目]」「[2コマ目]」「[3コマ目]」「[4コマ目]」とし、「: 起」「: 承」などの補助語を見出しに足さない。各コマに「[EMOTION:]」「[Camera:]」「状況:」「絵:」「セリフ:」「演出:」「狙い:」をこの順で書く。最新のNano Banana Pro STEP2互換として、各コマの「状況:」には視覚的な状況を1〜2文で書き、各コマの「セリフ:」には最低1つ、必ず「キャラ名「短いセリフ。」」形式の吹き出し用セリフを入れる。「無言」「セリフなし」「台詞なし」だけのコマは禁止。モード名やUI上の機能名を本文やTopicの題材に誤用しない。物語の原因やオチは、選択された題材、登場人物、追加資料の範囲から作る。各コマの絵、演出、狙いはそれぞれ三文以上にし、表情、手元、背景、小物、読者に伝えたい意図を分けて書く。各コマに人物のためらい、見栄、勘違い、手間、沈黙などの人間的な摩擦を入れ、説明ではなく場面で動かす。狙い欄は抽象的な読後感の説明で閉じず、誰が何を選び、何が少し変わったか、絵で見える後始末を書く。4コマ目も必ず「状況:」「セリフ:」「狙い:」まで書き、演出で終わらせない。検索語羅列や背景説明で膨らませず、まず4コマ目の狙いまで完走する。Outfitは具体的な服装を書き、指定不足をそのまま逃げ道にしない。4コマ目の後に別の小説本文を続けない。',
@@ -91,7 +93,8 @@ export function buildPrompt(appState = {}) {
     supplement: valueOf(appState.supplement),
   };
 
-  if (settings.mode === 'long' || /長編|long[-_\s]*novel/i.test(settings.modeLabel)) {
+  if (!isDirectLong10000Mode(settings.mode)
+    && (settings.mode === 'long' || /長編|long[-_\s]*novel/i.test(settings.modeLabel))) {
     return '長編モードは現在機能停止中です。公開版では短編・中編などの公開モードを選択してください。';
   }
 

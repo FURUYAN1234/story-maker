@@ -5,11 +5,11 @@ Target: `C:\Users\sx717\Antigravity\story-maker`
 
 ## Goal
 
-Add an independent left-menu mode labelled `長編（10000字）` while preserving the existing short-story and medium-story buttons. The new mode generates a complete work aimed at a minimum of 10,000 non-whitespace characters from the outset. It must not expand an already generated short story and must not invoke the existing Longify workflow.
+Add an independent left-menu mode labelled `長編（10000字～）` while preserving the existing short-story and medium-story buttons. The new mode generates a complete work aimed at a minimum of 10,000 non-whitespace characters from the outset. It must not expand an already generated short story and must not invoke the existing Longify workflow.
 
 ## User-visible behavior
 
-- Add `長編（10000字）` as a separate output-mode button in the existing left menu.
+- Add `長編（10000字～）` as a separate output-mode button in the existing left menu.
 - Keep the current `短編小説` and `中編小説` modes unchanged.
 - Reuse the current settings, character inputs, provider selection, output area, progress UI, stop behavior, and safe API-session handling.
 - Generate a complete manuscript directly from the selected settings.

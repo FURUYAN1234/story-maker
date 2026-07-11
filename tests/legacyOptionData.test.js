@@ -28,11 +28,12 @@ import {
   zg,
 } from '../src/legacyOptionData.js';
 
-assert.equal(We.length, 15);
+assert.equal(We.length, 16);
 assert.deepEqual(
   We.map(mode => mode.value),
-  ['4koma', '4koma_scenario', 'short_short', 'novel', 'medium', 'long', 'scenario', 'manga', 'essay', 'poem', 'fairy', 'letter', 'diary', 'documentary', 'radio'],
+  ['4koma', '4koma_scenario', 'short_short', 'novel', 'medium', 'long_10000', 'long', 'scenario', 'manga', 'essay', 'poem', 'fairy', 'letter', 'diary', 'documentary', 'radio'],
 );
+assert.equal(We.find(mode => mode.value === 'long_10000')?.label, '長編（10000字～）');
 assert.equal(We.find(mode => mode.value === 'short_short')?.label, 'ショート（1500字～）');
 assert.equal(We.find(mode => mode.value === 'long')?.label, '長編小説(数万字/全章＋指示書)');
 

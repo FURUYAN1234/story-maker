@@ -10,6 +10,7 @@ import {
 
 assert.equal(isLongModeSignal('long'), true);
 assert.equal(isLongModeSignal('long-novel'), true);
+assert.equal(isLongModeSignal('long_10000 \u9577\u7de8\uff0810000\u5b57\uff5e\uff09'), false);
 assert.equal(isLongModeSignal('長編小説'), true);
 assert.equal(isLongModeSignal('短編小説'), false);
 
@@ -44,6 +45,15 @@ assert.deepEqual(
 assert.deepEqual(
   normalizePublicModeOptions([], fallbackOptions).map((option) => option.value),
   ['4koma', 'novel'],
+);
+
+assert.deepEqual(
+  normalizePublicModeOptions([
+    { value: 'novel', label: '\u77ed\u7de8\u5c0f\u8aac' },
+    { value: 'long_10000', label: '\u9577\u7de8\uff0810000\u5b57\uff5e\uff09' },
+    { value: 'long', label: '\u9577\u7de8\u5c0f\u8aac' },
+  ]).map((option) => option.value),
+  ['novel', 'long_10000'],
 );
 
 assert.equal(

@@ -1,9 +1,18 @@
 import { Hd, Jd, Kd, Ud, pt, qd } from './axisPromptDetails.js';
 import { df } from './eraLoreHelpers.js';
+import { buildDirectLong10000Contract, isDirectLong10000Mode } from './directLong10000.js';
 
 function isLegacyLongPromptRequest(e = {}) {
   const mode = String(e?.mode || '').trim().toLowerCase();
   const modeCustom = String(e?.modeCustom || '').trim().toLowerCase();
+  if (isDirectLong10000Mode(mode)) {
+    const contract = buildDirectLong10000Contract();
+    const supplement = String(e?.supplement || '').trim();
+    if (!supplement.includes('【長編（10000字）直接生成契約】')) {
+      e.supplement = [supplement, contract].filter(Boolean).join('\n\n');
+    }
+    return false;
+  }
   return mode === 'long' || /\blong\b|long[-_\s]*novel|\u9577\u7de8/u.test(modeCustom);
 }
 

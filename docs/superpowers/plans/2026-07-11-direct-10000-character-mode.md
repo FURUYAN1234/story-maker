@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a public `長編（10000字）` mode that uses the normal Story Maker generation flow to request a complete manuscript of at least 10,000 non-whitespace characters and verify it with a real API run.
+**Goal:** Add a public `長編（10000字～）` mode that uses the normal Story Maker generation flow to request a complete manuscript of at least 10,000 non-whitespace characters and verify it with a real API run.
 
 **Architecture:** Add a distinct `long_10000` public-mode identifier and a focused helper module for its prompt and deterministic acceptance contract. Keep the existing legacy provider stream and bounded continuation behavior, but route the new mode through explicit target-length and completion checks without invoking sealed `long`/Longify code.
 
@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Keep `short_short`, `novel`, and `medium` behavior unchanged.
-- Visible label must be exactly `長編（10000字）`.
+- Visible label must be exactly `長編（10000字～）`.
 - Target is at least 10,000 characters after excluding whitespace and line breaks.
 - Do not expose or invoke the legacy `long` or Longify route.
 - Do not add dependencies.
@@ -31,7 +31,7 @@
 
 **Interfaces:**
 - Consumes: existing public mode arrays and label maps.
-- Produces: mode id `long_10000`, label `長編（10000字）`, minimum target `10000`.
+- Produces: mode id `long_10000`, label `長編（10000字～）`, minimum target `10000`.
 
 - [ ] **Step 1: Write the failing registry test**
 
@@ -40,9 +40,9 @@ import assert from 'node:assert/strict';
 import { MODES } from '../src/data.js';
 import { PUBLIC_MODE_VALUES, MODE_LABELS, MODE_LENGTH_TARGETS } from '../src/modeContracts.js';
 
-assert.equal(MODES.find(mode => mode.value === 'long_10000')?.label, '長編（10000字）');
+assert.equal(MODES.find(mode => mode.value === 'long_10000')?.label, '長編（10000字～）');
 assert.equal(PUBLIC_MODE_VALUES.includes('long_10000'), true);
-assert.equal(MODE_LABELS.long_10000, '長編（10000字）');
+assert.equal(MODE_LABELS.long_10000, '長編（10000字～）');
 assert.equal(MODE_LENGTH_TARGETS.long_10000.min, 10000);
 assert.equal(MODES.some(mode => mode.value === 'long'), false);
 ```
@@ -54,7 +54,7 @@ Expected: FAIL because `long_10000` is not registered.
 
 - [ ] **Step 3: Add the mode to the existing registries**
 
-Add `{ value: 'long_10000', label: '長編（10000字）' }` after `medium` and add `{ target: '10,000字以上', min: 10000 }` to the length contract. Keep the old `long` entry filtered/sealed.
+Add `{ value: 'long_10000', label: '長編（10000字～）' }` after `medium` and add `{ target: '10,000字以上', min: 10000 }` to the length contract. Keep the old `long` entry filtered/sealed.
 
 - [ ] **Step 4: Run test and confirm GREEN**
 
@@ -167,7 +167,7 @@ Use only boolean/masked UI state or a safe server status endpoint. Never display
 
 - [ ] **Step 4: Run a real 10,000-character generation**
 
-Select `長編（10000字）`, use ordinary generic settings, generate through the browser UI, wait for terminal completion, and save the resulting manuscript plus sanitized run metadata.
+Select `長編（10000字～）`, use ordinary generic settings, generate through the browser UI, wait for terminal completion, and save the resulting manuscript plus sanitized run metadata.
 
 - [ ] **Step 5: Verify live acceptance evidence**
 

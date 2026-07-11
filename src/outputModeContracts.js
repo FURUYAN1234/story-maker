@@ -15,6 +15,8 @@ export const DEFAULT_OUTPUT_MODE_OPTIONS = [
   { value: 'radio', label: 'ラジオドラマ' },
 ];
 
+DEFAULT_OUTPUT_MODE_OPTIONS.splice(5, 0, { value: 'long_10000', label: '長編（10000字～）' });
+
 const OUTPUT_MODE_LABELS = {
   '4koma': '4コマ漫画風',
   '4koma_scenario': 'AI 4koma シナリオ連携',
@@ -32,7 +34,9 @@ const OUTPUT_MODE_LABELS = {
   radio: 'ラジオドラマ',
 };
 
-const PROSE_OUTPUT_MODE_VALUES = new Set(['short_short', 'novel', 'medium', 'essay', 'fairy']);
+OUTPUT_MODE_LABELS.long_10000 = '長編（10000字～）';
+
+const PROSE_OUTPUT_MODE_VALUES = new Set(['short_short', 'novel', 'medium', 'long_10000', 'essay', 'fairy']);
 
 const STRICT_MODE_REQUIREMENTS = {
   '4koma': [

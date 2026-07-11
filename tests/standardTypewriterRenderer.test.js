@@ -134,7 +134,7 @@ assert.equal(
   'already-rendered standard cursor does not redraw itself',
 );
 
-assert.equal(PUBLIC_MODE_VALUES.length, 14);
+assert.equal(PUBLIC_MODE_VALUES.length, 15);
 for (const mode of PUBLIC_MODE_VALUES) {
   const modeOutput = createFakeElement();
   modeOutput.classList.add('output-box');

@@ -9,5 +9,6 @@
 import './modulePreloadPolyfill.js';
 import './qualityBoost.js';
 import './legacyMain.js';
+import './directLong10000Runtime.js';
 import './publicRuntime.js';
 import './generationSettingsIo.js';

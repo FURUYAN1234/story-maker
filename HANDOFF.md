@@ -2008,3 +2008,11 @@ These local checks were insufficient; the real Gemini browser run still failed a
 
 - `src/legacyMain.js` still owns standard generation orchestration, provider streaming, DOM event binding, and some deep long-novel retry/audit wrapper wiring. Treat further decomposition there as a new behavior-risk-managed pass, not as part of this contract/state extraction batch.
 - Final in-app browser smoke proof passed on `http://127.0.0.1:5179/?longdev=1&pin=gemini:m4`: `Story Maker v5.2.1` loaded with `document.readyState=complete`, no Vite overlay, browser error log empty, `document.documentElement.dataset.longNovelSealed === "true"`, the public long-mode chip was hidden and disabled, `#btn-rand-mode` carried the random-exclusion hook, and the hidden `longdev` panel was present under the dev URL. The current UI displayed `⚠ API未設定`; no API generation was run in this proof.
+## 2026-07-11 Direct 10,000-Character Mode
+
+- Added the public left-menu mode `long_10000` with the exact label `長編（10000字～）`; existing short and medium modes remain available, while the sealed legacy long mode remains hidden.
+- The new route reuses standard generation/provider streaming and cleanup, injects a direct 10,000-character contract, and adds fail-closed checks for body length, completion, and duplicate paragraphs. It does not re-enable or depend on the abandoned legacy Longify pipeline.
+- Real OpenAI API browser proof passed on `http://127.0.0.1:5179/`: dedicated result `passed`, dedicated body count `20,785`, no dedicated issues, natural completed ending, generate button restored. The run used the existing Responses fallback path and logged `gpt-5.4 Responses beta` during audit/evaluation fallback.
+- Verification passed: `node --test "tests/**/*.test.js"` 77/77, focused `node --check`, lint, `git diff --check -- . ':!dist'`, and `npm run build`. Build retained the existing chunk-size warning and skipped the sibling Nano contract check because that sibling source is outside this isolated worktree layout.
+- Branch/worktree: `codex/direct-10000-character-mode` at `C:\Users\sx717\.codex\worktrees\story-maker-direct-10000`.
+- No deploy, push, release, backup, or version bump was performed.
