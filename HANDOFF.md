@@ -13,7 +13,9 @@ This file is public-repository safe. Do not include API keys, private credential
 - During acceptance run 2, a restored long manuscript was accidentally tested while the active UI mode had reset to 4koma, exposing a real generic content-loss defect: a 25,157-character source could adopt a 1,451-character candidate. The candidate gate was fixed to reject reductions below 60% for all modes, with regression coverage.
 - Real OpenAI acceptance rerun 2: active mode `long_10000`, auto repeat off, exactly one rewrite attempt; final body 24,404 non-whitespace characters / 25,510 visible characters, score 89/pass, completed ending, no continuation marker, duplicate paragraphs 0, and changed text. This supersedes the failed wrong-mode diagnostic run.
 - Earlier real fiction proof also passed: automatic review 86/pass, and a weak 70-character input improved in one adopted attempt to 3,016 visible characters / 86.
-- Before deploy, rerun the full 82-test suite, lint, syntax/diff, and build after the v5.3.2 bump. User explicitly requested deploy and full PS1 backup only after the two long acceptance runs passed. GitHub Release/tag remain out of scope unless separately requested.
+- Final verification passed after the v5.3.2 bump: the full 82-test suite, lint, syntax/diff, and build. Source commit `1cb16ef` is pushed to `origin/main`; annotated tag `v5.3.2` is pushed; the bilingual GitHub Release is `https://github.com/FURUYAN1234/story-maker/releases/tag/v5.3.2`.
+- Deploy proof: `origin/gh-pages` commit `0d00450e5e2b3537e302fa1142c951e12dff6dd3`; live GitHub Pages returns `Story Maker v5.3.2`, JS `assets/index-DEgycRxd.js`, CSS `assets/index-DXEhrIwa.css`, the brush-up copy/runtime markers, content-loss gate, and score-card styling.
+- User explicitly requested a full PS1 backup after the two long acceptance runs passed. Do not treat this handoff as backup completion until the final ZIP and Drive copy are verified.
 
 ## 2026-07-08 v5.3.0 GPT-5.x Responses default release
 
