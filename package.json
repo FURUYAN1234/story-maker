@@ -1,6 +1,6 @@
 {
   "name": "story-maker",
-  "version": "5.3.2",
+  "version": "5.3.3",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",

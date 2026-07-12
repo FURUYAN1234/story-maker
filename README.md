@@ -1,4 +1,4 @@
-# Story Maker v5.3.2 / AI物語メーカー
+# Story Maker v5.3.3 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -263,9 +263,9 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.2 release line keeps direct public `Long-form (10,000 characters+)` generation while replacing public Longify expansion with universal AI editorial review and safe score-driven brush-up. The legacy long-novel path remains sealed.
+The current v5.3.3 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.2系では、直接生成の「長編（10000字～）」を維持しつつ、公開Longify長編化を全モードAI講評と安全な点数駆動ブラッシュアップへ置き換えます。旧来の長編小説経路は封印したままです。
+現在のv5.3.3系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -803,6 +803,18 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.3 (2026-07-12)
+
+- Added automatic brush-up start after the initial review when the checkbox is enabled, with a 100-point target and up to three attempts.
+- Added visible API activity, elapsed seconds, attempt progress, progressive manuscript rendering, and a single final Story Maker footer.
+- Reused the latest review for each attempt and displayed every candidate score, adoption decision, and rejection reason.
+- Clarified the 90-point pass line versus the 100-point target and now reports exhausted below-pass runs as explicitly unpassed.
+
+- 自動ブラッシュアップON時は初回講評後に自動開始し、100点を目標として最大3回まで実行します。
+- API稼働状況、経過秒、試行回数、本文の流れる表示、最後に1回だけ付与するフッターを追加しました。
+- 各回で直近講評を再利用し、候補点、採用・不採用、拒否理由を進捗ログへ表示します。
+- 合格90点と目標100点を分離し、最大回数終了時に90点未満なら未合格と明示します。
 
 ### v5.3.2 (2026-07-11)
 

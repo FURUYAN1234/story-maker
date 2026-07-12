@@ -1,4 +1,6 @@
-export const EDITORIAL_PASS_SCORE = 82;
+import { hasEditorialModeFormat } from './editorialBrushupCandidate.js';
+
+export const EDITORIAL_PASS_SCORE = 90;
 
 const SCRIPT_MODES = new Set(['scenario', 'manga', 'radio']);
 const PRACTICAL_MODES = new Set(['letter', 'documentary']);
@@ -21,10 +23,16 @@ export function getEditorialReviewFamily(mode = '') {
 
 export function buildEditorialReviewPrompt({ mode = '', modeLabel = '', text = '' } = {}) {
   const family = getEditorialReviewFamily(mode);
+  const mechanicallyValid = hasEditorialModeFormat(text, mode);
   return [
     'あなたは商業編集者です。以下の完成稿だけを講評し、本文を書き直さないでください。',
     `出力モード: ${modeLabel || mode || '未指定'}`,
     `評価軸: ${FAMILY_CRITERIA[family]}`,
+    '出力モードが要求する公開ラベル（例: 絵/状況、セリフ、狙い、ページ、コマ、宛先、本文、結び等）は完成稿の正規構成であり、制作メモや内部指示の露出として減点しないこと。',
+    '末尾の「Created By AI Story Maker V5.3.3」は製品が付与する必須フッターであり、生成ツール名の混入、メタ情報、契約違反として減点しないこと。',
+    mechanicallyValid
+      ? '形式契約はアプリの機械検証に合格済みです。必須ラベル、セリフ欄、狙い欄、製品フッターを形式違反や制作メモ露出として再減点せず、内容・構成・表現・オチの品質を採点してください。'
+      : '形式契約はアプリの機械検証に不合格です。欠落している必須構造を問題点と改稿方針へ具体的に記載してください。',
     '100点満点で厳密に採点し、次の見出しを順番どおりに必ず出力してください。',
     'AI総合点: 0〜100点',
     'AI講評:',
@@ -43,9 +51,18 @@ export function parseEditorialReview(text = '') {
   const commentaryMatch = source.match(/AI講評\s*[:：]\s*([\s\S]*?)(?=\n\s*(?:良い点|問題点|改稿方針|モード契約適合)\s*[:：]|$)/);
   const score = scoreMatch ? Number(scoreMatch[1]) : Number.NaN;
   const commentary = commentaryMatch?.[1]?.trim() || '';
+  const modeFitLabel = '(?:モード契約適合|モード適合度)';
+  const problems = source.match(new RegExp(`問題点\\s*[:：]?\\s*([\\s\\S]*?)(?=\\n\\s*(?:改稿方針|${modeFitLabel})\\s*[:：]|$)`))?.[1]?.trim() || '';
+  const revisionPlan = source.match(new RegExp(`改稿方針\\s*[:：]?\\s*([\\s\\S]*?)(?=\\n\\s*${modeFitLabel}\\s*[:：]|$)`))?.[1]?.trim() || '';
+  const modeFit = source.match(new RegExp(`${modeFitLabel}\\s*[:：]?\\s*([^\\n]*)`))?.[1]?.trim() || '';
+  const structuredValid = Boolean(problems && revisionPlan && modeFit);
   return {
     score,
     commentary,
+    ...(problems ? { problems } : {}),
+    ...(revisionPlan ? { revisionPlan } : {}),
+    ...(modeFit ? { modeFit } : {}),
+    structuredValid,
     valid: Number.isFinite(score) && score >= 0 && score <= 100 && commentary.length > 0,
   };
 }

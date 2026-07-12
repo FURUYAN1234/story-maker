@@ -2,6 +2,15 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-07-12 Brush-up progress and quality-target fix (local only)
+
+- The public v5.3.2 brush-up click was accepted but disabled the button without visible running feedback. Live inspection of the same public tab later showed one completed pass and a score change from 78 to 89.
+- Local source now displays API-running phases for initial review, rewrite attempt N/3, and post-rewrite rescoring. The rewritten manuscript is then revealed progressively instead of appearing all at once, and the button label is restored after success or failure.
+- The pass threshold is now 90. Automatic brush-up aims for 100 and continues for up to three attempts even after crossing 90, while candidate adoption still requires a higher score plus the existing content-loss, ending, duplicate, format, and long-output gates.
+- Focused regression coverage is in `tests/editorialBrushupRuntime.test.js` and `tests/editorialReviewContracts.test.js`. No deploy, push, release, backup, or version bump was performed.
+- API-state correction: two localhost tabs were open. Codex initially inspected the QA tab and incorrectly reported no key; the user's normal localhost tab was then verified with a masked key, `banner locked ok`, and ChatGPT API selected. A real short-story API generation was started there, but the Chrome tab stopped responding to automation before completion evidence could be collected. Do not classify this as missing API input.
+- Final live verification after the progress/quality fixes: a real short story generated at 3,630 chars / 89 points, then automatic brush-up ran 3/3 attempts and finished at 5,816 chars / 91 points. The top progress window showed each generation/rescore stage, progressive reveal was observed growing from 515 to 3,924 to 5,816 chars, and the final watermark appeared once at the end. A separate 78-char QA run verified the yellow API-running banner, hidden initial-generation score board, no watermark during progressive reveal, and exactly one final watermark. The QA URL/text was removed from the visible app and the QA file was deleted afterward.
+
 ## 2026-07-11 v5.3.2 Universal AI Review and Brush-up
 
 - Public `この小説を長編化` was replaced by `この小説をブラッシュアップ`; public target-length controls were removed. Short, medium, and `長編（10000字～）` remain, while legacy long stays sealed.
@@ -2055,3 +2064,58 @@ These local checks were insufficient; the real Gemini browser run still failed a
 - Verification passed: `node --test "tests/**/*.test.js"` 82/82, lint, focused `node --check`, `git diff --check -- . ':!dist'`, and `npm run build`. Build retained the existing large-chunk warning and isolated-worktree Nano sibling check skip.
 - Remaining live acceptance gap: the new review/brush-up path has real API proof for the fiction family, but a fresh 10,000+ character brush-up and separate live script/practical/special-family runs have not yet been completed. Automated contract coverage exists for all families. Do not call the whole feature fully verified until those live checks are either completed or explicitly waived.
 - No deploy, push, release, tag, version bump, distribution sync, or backup was performed for this brush-up implementation.
+
+# 2026-07-12 Brush-up Runtime Progress and Review Reuse Fix
+
+- Local-only fixes raise the editorial pass line to 90 while keeping the automatic target at 100 for up to three attempts. Only higher-scoring, completed, non-duplicated, mode-valid candidates replace the current manuscript.
+- The running UI now shows the yellow API banner, top progress title/log, attempt `N/3`, 100-point target, and elapsed seconds. Standard-generation score bars are hidden during brush-up.
+- The initial generation review is retained and reused for brush-up attempt 1. Attempts 2 and 3 use the immediately preceding rescore as revision guidance, including when a candidate is rejected for adoption.
+- Standard generation and settings remain locked through the automatic initial review. Brush-up also locks generation/settings until its review, rewrite, rescore, progressive reveal, and final footer insertion finish.
+- Rewritten text is progressively revealed; the Story Maker footer is absent during reveal and appended exactly once at the end.
+- Real OpenAI UI proof on localhost: short-story run started at 84, ran 3/3, ended at 91, grew from 8,607 to 16,861 displayed characters, and finished with one footer. A second special-family proof started at 62, skipped duplicate initial review, displayed elapsed seconds, ran 3/3, and ended at 72 with 2,432 displayed characters and one footer.
+- Verification: `node --test "tests/**/*.test.js"` 82/82, focused editorial tests, `npm run build`, and `git diff --check` passed. Build retains the existing large-chunk warning.
+- No deploy, push, release, tag, version bump, distribution sync, backup, commit, or staging was performed. Local Vite remains open on port 5179; its two `scratch/brushup-progress-vite.*.log` files remain in use and untracked.
+- New-generation reset follow-up: clicking `ストーリー生成` now synchronously clears the prior review card, review score/result, brush-up result/attempt count, and cached review, then disables `この小説をブラッシュアップ` until the new manuscript and its AI review complete. Real localhost proof started from a visible 58-point review card and confirmed all old fields empty/hidden and the brush-up button disabled immediately after the second generation click. The second manuscript completed and received a fresh 58-point review before controls were restored.
+- The two 58-point special-family proofs exposed a separate initial-generation quality defect: `4コマ漫画風` returned all four panels plus `絵/状況` and `セリフ`, but omitted every required `狙い:` field. The AI review correctly cited mode-contract violations. This initial-generation contract failure is not fixed by the reset patch and must not be reported as resolved.
+- Subsequent 4koma repair/review hardening now requires exactly four `絵/状況:`, `セリフ:`, and `狙い:` labels. Invalid initial output is automatically repaired under a visible yellow API status before editorial review; repaired output is protected from the normal cleanup observer so verified labels are not stripped during DOM insertion.
+- Review scoring no longer receives the full internal format-contract text, which the model had confused with the evaluation target. A mechanically valid manuscript is instead certified with a short instruction that required public labels and the Story Maker footer are not violations. Real scores changed from false 58/72 deductions to 78 with content-only criticism (explanatory dialogue, punch speed, and surprise), without claiming internal-instruction/footer violations.
+- The brush-up section now uses `is-waiting` visual state before and during initial review: measured opacity `0.48`, saturation `0.35`, disabled button, hidden old review. It returns to opacity `1` only after review completes.
+- A lock-race regression was found and fixed: the first observer version re-disabled generation before the standard runtime's completion transition could trigger review, leaving all controls disabled. The corrected transition treats the standard button unlock as the review-start event, immediately starts review, then applies review-side locking. Fresh real API proof completed at 78 and restored generation, settings, and brush-up controls; yellow alert hidden and waiting class removed.
+
+## 2026-07-12 Final same-generation review reuse and stream-status proof
+
+- Root cause of the repeated pre-brush review was the wrong cache identity: reuse depended on an exact post-cleanup text fingerprint even though a new-generation click already defines the safe cache boundary. Reuse now follows the generation cycle: new generation clears it; the initial review and each accepted final review replace it.
+- Generation and initial-review waiting now disable both the brush-up button and the auto-until-pass checkbox. During brush-up the whole section remains `is-busy`, with measured opacity `0.58`, and generation/brush-up/auto controls locked.
+- Fresh real API proof after an explicit reload: initial review completed at 84; brush-up started directly with `改稿を生成中（1/3回・100点目標）` and never issued `元原稿を講評中`; three automatic attempts ended at 86, so the displayed score did not fall below the same-generation baseline.
+- A second real one-attempt proof sampled the Output every 500 ms. Visible length progressed `6 -> 69 -> 120 -> ... -> 1,224`; every intermediate frame had zero Story Maker footers, and completion had exactly one footer. The running status remained `ブラッシュアップ本文を流れる表示で反映中...（開始からN秒経過）` instead of reverting to a stale rescore phase. It completed `1/3` at 86.
+- Fresh verification after the final status fix: full tests `82/82`, production build, and `git diff --check` passed. No deploy, push, release, tag, version bump, backup, commit, or staging was performed.
+
+## 2026-07-12 Auto-until-pass start correction
+
+- The checked auto-until-pass option previously controlled only repetition after a manual brush-up click. It did not start brush-up automatically after the initial generation review, despite the public label implying automatic operation.
+- Initial review completion now queues brush-up automatically when the checkbox is checked and the score is below the 100-point target. A new generation remains the cache/reset boundary, and unchecked mode still requires a manual click for one attempt.
+- Fresh real API proof used only the Story Generate button: the checkbox stayed checked, initial review completed at 86, brush-up started automatically at `1/3`, advanced through `2/3` and `3/3`, and completed after 76 seconds. No brush-up button click was issued. All candidates failed to exceed 86, so the 86-point manuscript was preserved instead of adopting a lower-scoring result.
+- Fresh verification: full tests `82/82`, production build, and `git diff --check` passed. No deploy, push, release, tag, version bump, backup, commit, staging, or server shutdown was performed.
+
+## 2026-07-12 Per-attempt score/adoption evidence
+
+- Each brush-up attempt already generated a candidate, rescored it, and compared that score with the currently retained manuscript, but the UI exposed only phase names and the final retained score. This made rejected candidates indistinguishable from a missing rescore.
+- The progress log now records every decision as `previous score -> candidate score`, followed by `adopted` or the rejection reasons (`score did not improve`, content loss, format violation, incomplete ending, or duplication).
+- Fresh real API proof: initial 78; attempt 1 candidate 72 rejected for content loss, format violation, and lower score; attempt 2 candidate 84 adopted; attempt 3 candidate 84 rejected because it did not improve. Final retained score was 84, checkbox stayed enabled, and the footer appeared once.
+- There is no 90-point cap in the runtime. The 100-point target and maximum three attempts remain. A retained 89 means no accepted candidate exceeded 89 within those attempts, not that scoring stopped.
+- Fresh verification after adding the decision log: focused editorial runtime test passed, full tests `82/82`, production build, and `git diff --check` passed. Local-only; no deploy, push, release, tag, version bump, backup, commit, or staging.
+
+## 2026-07-12 Pass/target/exhaustion labeling correction
+
+- The runtime intentionally has three separate concepts: pass threshold 90, aspirational brush-up target 100, and a maximum of three attempts. A below-90 run could therefore exhaust its attempts, but the old generic `brush-up complete` text misleadingly looked like a pass.
+- Completion UI now distinguishes `100-point reached`, `passed (score / pass 90)`, and `maximum 3 attempts ended - not passed (score / pass 90)`. The document dataset also records `editorialBrushupOutcome=passed` or `exhausted_unpassed` while the process result remains completed.
+- Fresh real API proof: initial 78; attempt 1 candidate 84 adopted; attempt 2 candidate 72 rejected for format and score; attempt 3 candidate 78 rejected for score. Final UI showed `最大3回終了・未合格（84点／合格90点）` with outcome `exhausted_unpassed`.
+- A 91-point real run exists in this session history, so there is no hard 90-point ceiling. Current evidence nevertheless shows that 90 is a demanding threshold under the current rubric and three-attempt limit.
+- Fresh verification: focused test, full tests `82/82`, production build, and `git diff --check` passed. Local-only; no deploy, push, release, tag, version bump, backup, commit, or staging.
+
+## 2026-07-12 v5.3.3 Deploy and Backup Request
+
+- User explicitly requested deploy and full backup. Public version was raised from `5.3.2` to `5.3.3` across package metadata, title/header, shared version/footer, review contract, tests, and README release notes.
+- Pre-deploy verification passed: full tests `82/82`, lint if present, syntax checks for all `src/**/*.js`, generic-rule guard, Nano 4koma contract check, production build, `git diff --check`, and public secret/local-path scan. Build asset: `assets/index-D8cwPC0u.js`.
+- GPT-5.6 org availability remained unverified because the browser-side `/v1/models` request was blocked by CORS. This release does not change model routing and has current real-API proof on the existing route.
+- Deploy, live-page verification, Release/tag publication, and full backup artifact verification remain pending at this line and must be completed before closing the requested work.

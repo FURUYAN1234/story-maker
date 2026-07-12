@@ -345,7 +345,12 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .longify-beta.is-unavailable .longify-beta-title{color:var(--text2)}
 .longify-beta.is-unavailable .longify-beta-actions,.longify-beta.is-unavailable .longify-beta-controls{opacity:.72}
 .longify-beta.is-unavailable .longify-beta-field select{border-color:var(--border);background:rgba(255,255,255,.035);color:var(--text3)}
-.longify-beta.is-busy{cursor:wait}
+.longify-beta.is-waiting{background:linear-gradient(180deg,rgba(71,85,105,.07),rgba(15,23,42,.16));border-color:rgba(100,116,139,.18);box-shadow:none;opacity:.48;filter:saturate(.35)}
+.longify-beta.is-waiting .longify-beta-badge{background:rgba(100,116,139,.18);color:var(--text3);box-shadow:none}
+.longify-beta.is-waiting .longify-beta-title,.longify-beta.is-waiting .longify-beta-status{color:var(--text3)}
+.longify-beta.is-waiting .longify-beta-controls,.longify-beta.is-waiting .longify-beta-actions{opacity:.55}
+.longify-beta.is-busy{cursor:wait;opacity:.58;filter:saturate(.5);box-shadow:none}
+.longify-beta.is-busy .longify-beta-controls,.longify-beta.is-busy .editorial-review-card{opacity:.7}
 .longify-beta-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .longify-beta-copy{display:flex;flex-direction:column;gap:4px;min-width:220px}
 .longify-beta-titleline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}

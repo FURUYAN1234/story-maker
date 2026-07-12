@@ -348,6 +348,7 @@ try {
   assert.equal(isGenerationInProgress({ textContent: 'AIが考えています... 10秒経過', dataset: {} }), true);
   assert.equal(isGenerationInProgress({ textContent: '受信待機中... 10秒経過', dataset: {} }), true);
   assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: { longifyRendering: 'true' } }), true);
+  assert.equal(isGenerationInProgress({ textContent: '改稿表示中', dataset: { editorialBrushupRendering: 'true' } }), true);
   assert.equal(isGenerationInProgress({ textContent: '長編化完成稿', dataset: { longifyOutput: 'true' } }), true);
   assert.equal(isGenerationInProgress({ textContent: '完成本文', dataset: {} }), false);
   globalThis.document.documentElement.dataset.longifyRendering = 'true';
