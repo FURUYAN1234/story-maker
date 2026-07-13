@@ -97,7 +97,7 @@ The intent is not to force every work into the same template. The contract tells
 | Progress<br>進捗 | Thought log<br>思考ログ | Shows progress messages while API communication is running.<br>API通信中の進行メッセージを表示します。 |
 | Quality<br>品質 | Mode contracts<br>モード契約 | Each public mode receives a required output shape.<br>公開モードごとに必須の出力形を指定します。 |
 | Quality<br>品質 | Short-draft rewrite<br>短すぎる初稿の改稿 | Too-short public drafts are rewritten before they are accepted as final output.<br>公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
-| Quality<br>品質 | Universal AI review and brush-up<br>全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript can receive an AI score, pass/fail label, commentary, and a guarded rewrite. The current pass score is 82.<br>生成・貼り付け・インポートしたすべての原稿をAIが採点・講評し、安全判定付きで改稿できます。現在の合格点は82点です。 |
+| Quality<br>品質 | Universal AI review and brush-up<br>全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript can receive an AI score, pass/fail label, commentary, and a guarded rewrite. The pass score is 90, and automatic brush-up aims for 100 in up to three attempts.<br>生成・貼り付け・インポートしたすべての原稿をAIが採点・講評し、安全判定付きで改稿できます。合格点は90点で、自動ブラッシュアップは最大3回で100点を目指します。 |
 | Quality<br>品質 | Final cleanup<br>最終出力整形 | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display.<br>プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
 | Quality<br>品質 | Completion gates<br>完走ゲート | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored.<br>4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
 
@@ -159,23 +159,23 @@ The public release supports the following 15 output modes. Each mode has a mode 
 
 公開版では次の15モードに対応します。各モードには出力契約があり、単なるラベルではありません。生成本文は、そのモードに合った形で出力されます。
 
-| Mode | Japanese Label | Expected Output Shape |
+| Mode / モード | Japanese Label / 日本語ラベル | Expected Output Shape / 想定出力形式 |
 |---|---|---|
-| `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. |
-| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Topic, logline, location, outfit, punchline, scenario notes, and four panel blocks with emotion/camera/dialogue cues. |
-| `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. |
-| `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. |
-| `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc. |
-| `long_10000` | 長編（10000字～） | One complete long-form manuscript generated directly from the selected premise, with a 10,000 non-whitespace body-character minimum and a finished ending. |
-| `scenario` | 脚本/台本 | `タイトル:`, `登場人物:`, `場面:` plus stage directions and character-name dialogue. |
-| `manga` | ストーリー漫画 | Page and panel descriptions, separated `絵:`, `セリフ:`, and `演出:` details. |
-| `essay` | エッセイ | Claim, observation, reflection, and conclusion without escaping into incident-resolution fiction. |
-| `poem` | 詩・ポエム | Title plus line-based poetic output with concrete images and no explanatory afterword. |
-| `fairy` | 童話/絵本 | Gentle story form with visible action, lesson-like change, and child-readable clarity. |
-| `letter` | 手紙/書簡体 | `宛先:`, paragraphized body, closing, sender, and relationship change through written voice. |
-| `diary` | 日記/独白体 | Date-like or diary-like first-person reflection with self-deception and a small truth. |
-| `documentary` | ドキュメンタリー | `ナレーション:`, testimony, observation, unresolved question, and factual-feeling structure. |
-| `radio` | ラジオドラマ | `BGM:`, `SE:`, narration, dialogue, and sound-driven scene movement. |
+| `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue.<br>導入、展開、オチ、視覚的な動き、セリフで構成する4コマ形式です。 |
+| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Topic, logline, location, outfit, punchline, scenario notes, and four panel blocks with emotion/camera/dialogue cues.<br>テーマ、ログライン、場所、服装、オチ、シナリオメモと、感情・カメラ・セリフを含む4コマ分のブロックを出力します。 |
+| `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning.<br>導入、転換、余韻を備え、最後の一文で意味が変わる短い物語です。 |
+| `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change.<br>欲求、障害、選択、代償、関係性の変化を場面で描く短編小説です。 |
+| `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc.<br>展開、場面の推移、感情の変化を厚く描く3節構成の中編小説です。 |
+| `long_10000` | 長編（10000字～） | One complete long-form manuscript generated directly from the selected premise, with a 10,000 non-whitespace body-character minimum and a finished ending.<br>選択した前提から直接生成する完結した長編原稿です。空白を除く本文10,000字以上と、物語として完結した結末を必須とします。 |
+| `scenario` | 脚本/台本 | `タイトル:`, `登場人物:`, `場面:` plus stage directions and character-name dialogue.<br>`タイトル:`、`登場人物:`、`場面:`に加え、ト書きと役名付きのセリフを出力します。 |
+| `manga` | ストーリー漫画 | Page and panel descriptions, separated `絵:`, `セリフ:`, and `演出:` details.<br>ページ・コマごとの説明を、`絵:`、`セリフ:`、`演出:`に分けて出力します。 |
+| `essay` | エッセイ | Claim, observation, reflection, and conclusion without escaping into incident-resolution fiction.<br>出来事を解決する物語へ逃げず、主張、観察、考察、結論を組み立てます。 |
+| `poem` | 詩・ポエム | Title plus line-based poetic output with concrete images and no explanatory afterword.<br>題名と行単位の詩本文を出力し、具体的なイメージを用い、説明的な後書きは付けません。 |
+| `fairy` | 童話/絵本 | Gentle story form with visible action, lesson-like change, and child-readable clarity.<br>目に浮かぶ行動、教訓につながる変化、子どもにも読みやすい明快さを備えた物語です。 |
+| `letter` | 手紙/書簡体 | `宛先:`, paragraphized body, closing, sender, and relationship change through written voice.<br>`宛先:`、段落を分けた本文、結び、差出人を含め、書かれた言葉を通じた関係性の変化を描きます。 |
+| `diary` | 日記/独白体 | Date-like or diary-like first-person reflection with self-deception and a small truth.<br>日付や日記らしい形式で、自己欺瞞と小さな真実を含む一人称の内省を描きます。 |
+| `documentary` | ドキュメンタリー | `ナレーション:`, testimony, observation, unresolved question, and factual-feeling structure.<br>`ナレーション:`、証言、観察、未解決の問いを用い、事実を追うような構成にします。 |
+| `radio` | ラジオドラマ | `BGM:`, `SE:`, narration, dialogue, and sound-driven scene movement.<br>`BGM:`、`SE:`、ナレーション、セリフを用い、音を軸に場面を展開します。 |
 
 ### Mode Behavior / モード別の動作
 
@@ -202,7 +202,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | Topic / 項目 | Current behavior / 現行動作 |
 |---|---|
 | Direct long-form<br>長編直接生成 | Select `Long-form (10,000 characters+)` before generation. The app requests one completed long manuscript and validates a 10,000+ non-whitespace body-character minimum and a closed ending.<br>生成前に「長編（10000字～）」を選びます。一つの完結した長編として生成し、空白を除く本文10,000字以上と完結した終端を検証します。 |
-| Universal review<br>全モードAI講評 | After any supported mode finishes, the selected provider reviews the visible Output and shows a 0–100 score, pass/fail state, and paragraph-preserving commentary. The pass score is 82.<br>対応モードの生成完了後、選択中のAPIが表示中Outputを読み、0～100点、合否、段落を保持した講評を表示します。合格点は82点です。 |
+| Universal review<br>全モードAI講評 | After any supported mode finishes, the selected provider reviews the visible Output and shows a 0–100 score, pass/fail state, and paragraph-preserving commentary. The pass score is 90.<br>対応モードの生成完了後、選択中のAPIが表示中Outputを読み、0～100点、合否、段落を保持した講評を表示します。合格点は90点です。 |
 | Universal brush-up<br>全モードブラッシュアップ | `この小説をブラッシュアップ` rewrites the current Output in its active output format. It can also use text pasted into Output or imported from TXT/MD.<br>「この小説をブラッシュアップ」は、現在のOutputを選択中の出力形式のまま改稿します。Outputへ貼り付けた本文やTXT/MDからインポートした本文にも使えます。 |
 | Legacy path<br>旧長編経路 | The old chapter-by-chapter `long` mode and its long-novel control panel remain sealed and are not the supported public route.<br>旧章単位の `long` モードと長編小説コントロールパネルは封印中で、公開版の利用経路ではありません。 |
 | Posting previews<br>投稿補助 | Kakuyomu-style and Alphapolis-style previews read the latest Output independently of review and brush-up.<br>Kakuyomuフォーム風・アルファポリスフォーム風プレビューは、講評・ブラッシュアップとは別に最新Outputを読み取ります。 |
@@ -213,14 +213,14 @@ The current public long-form design has two clearly separated parts. `Long-form 
 2. Set the theme, genre, worldview, audience, ending, narration, characters, and optional source material.
 3. Generate the manuscript, or paste/import an existing manuscript into Output.
 4. Read the automatically displayed AI score and commentary.
-5. Leave automatic brush-up on for up to three attempts toward 82, or turn it off to run exactly one rewrite per click.
+5. Leave automatic brush-up on for up to three attempts toward the 100-point target, or turn it off to run exactly one rewrite per click. A score of 90 or higher passes.
 6. Review the retained Output, then copy, save as TXT, or use the posting previews.
 
 1. 出力モードを選びます。新しい長編を作る場合は「長編（10000字～）」を選びます。
 2. テーマ、ジャンル、世界観、読者層、結末、語り口、登場人物、必要なら素材を設定します。
 3. 原稿を生成するか、既存原稿をOutputへ貼り付け／TXT・MDインポートします。
 4. 自動表示されるAI点数と講評を確認します。
-5. 82点を目指して最大3回まで続けるなら自動ブラッシュアップをON、1クリックにつき1回だけ改稿するならOFFにします。
+5. 100点を目標に最大3回まで続けるなら自動ブラッシュアップをON、1クリックにつき1回だけ改稿するならOFFにします。90点以上で合格です。
 6. Outputに保持された原稿を確認し、コピー、TXT保存、投稿プレビューを使います。
 
 ### Display And Controls / 表示と操作
@@ -231,7 +231,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | Score card<br>点数カード | Uses a full-width card with a large score, `/100`, pass/needs-brush-up label, score bar, and optional attempt count.<br>全幅カードに大きな点数、`/100`、合格／要ブラッシュアップ、スコアバー、必要に応じて実行回数を表示します。 |
 | Commentary<br>講評 | Preserves paragraphs and line breaks so concrete revision advice remains readable instead of becoming one dense line.<br>具体的な改稿指示が一行に潰れないよう、段落と改行を保持して表示します。 |
 | Brush-up button<br>ブラッシュアップボタン | Disabled until Output contains a usable manuscript of at least 20 visible characters. While running, settings are protected from conflicting changes.<br>Outputに20文字以上の利用可能な原稿が入るまで無効です。実行中は競合する設定変更を防ぎます。 |
-| Automatic checkbox<br>自動チェック | ON: continues only while the retained score is below 82, up to three rewrite attempts. OFF: performs one rewrite attempt per click.<br>ON: 保持中の点数が82点未満の間だけ最大3回まで改稿します。OFF: クリックごとに1回だけ改稿します。 |
+| Automatic checkbox<br>自動チェック | ON: continues toward the 100-point target for up to three rewrite attempts. OFF: performs one rewrite attempt per click. A retained score of 90 or higher is a pass even if it has not reached 100.<br>ON: 100点を目標に最大3回まで改稿します。OFF: クリックごとに1回だけ改稿します。保持中の点数が100点に届かなくても、90点以上なら合格です。 |
 
 ### Review And Adoption Pipeline / 講評・採用パイプライン
 
@@ -242,7 +242,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | 3. Rewrite<br>改稿 | Sends the current manuscript, active mode, current score, and commentary to the selected provider, requesting completed manuscript text only.<br>現在の原稿、出力モード、点数、講評を選択中APIへ渡し、完成稿本文だけを求めます。 | Preserves the subject, characters, facts, ending, and output format while targeting diagnosed weaknesses.<br>主題、人物、事実、結末、出力形式を保ち、指摘された弱点だけを直します。 |
 | 4. Re-review<br>再講評 | Scores the rewrite before it can replace Output.<br>改稿候補がOutputを置き換える前に再採点します。 | A rewrite is not accepted merely because an API returned text.<br>APIが文章を返しただけでは採用しません。 |
 | 5. Candidate gate<br>候補採用判定 | Adopts only a format-valid, completed, non-duplicated candidate whose score is higher than the retained manuscript.<br>形式が正しく、完結し、段落重複がなく、保持中原稿より高得点の候補だけを採用します。 | Prevents a polished-looking regression from overwriting a better draft.<br>見た目だけ整った劣化稿が良い原稿を上書きするのを防ぎます。 |
-| 6. Continue or stop<br>継続／停止 | With auto mode ON, repeats until the retained score reaches 82 or three attempts have run. With auto mode OFF, stops after the first attempt.<br>自動ONでは保持点が82点に達するか3回実行で停止し、OFFでは1回で停止します。 | Gives a bounded quality loop instead of an uncontrolled rewrite cycle.<br>無制限の改稿ループではなく、上限付き品質ループにします。 |
+| 6. Continue or stop<br>継続／停止 | With auto mode ON, repeats until the retained score reaches 100 or three attempts have run. With auto mode OFF, stops after the first attempt. Completion is labeled separately as 100-point target reached, passed at 90+, or attempts exhausted without passing.<br>自動ONでは保持点が100点に達するか3回実行で停止し、OFFでは1回で停止します。完了時は「100点到達」「90点以上で合格」「最大回数終了・未合格」を分けて表示します。 | Gives a bounded quality loop and reports whether it actually passed.<br>上限付きの品質ループにし、実際に合格したかどうかも明示します。 |
 
 ### Manuscript Protection / 原稿保護
 
@@ -325,9 +325,9 @@ OpenAI can be used for text generation and style-sensitive prose drafting. The a
 
 OpenAI は、文章生成と文体重視の散文生成に使えます。API提供元を切り替えても画面上の設定は維持されるため、プロンプトを手作業で組み直さずに出力傾向を比較できます。公開文章モードでは、分析文が最終出力へ混ざらないよう、モード契約と整形指示を強めています。
 
-For direct long-form generation and long-manuscript brush-up, the OpenAI Responses route uses an extended long-output timeout. The same universal 82-point review and guarded adoption rules apply regardless of provider; provider availability, latency, and output quality can still differ.
+For direct long-form generation and long-manuscript brush-up, the OpenAI Responses route uses an extended long-output timeout. The same universal 90-point pass score, 100-point brush-up target, and guarded adoption rules apply regardless of provider; provider availability, latency, and output quality can still differ.
 
-長編直接生成と長い原稿のブラッシュアップでは、OpenAI Responses経路に長文用の拡張タイムアウトを使います。どのAPIでも全モード共通の82点合格判定と安全な候補採用規則を適用しますが、モデルの利用可否、処理時間、出力品質は提供元ごとに異なる場合があります。
+長編直接生成と長い原稿のブラッシュアップでは、OpenAI Responses経路に長文用の拡張タイムアウトを使います。どのAPIでも全モード共通の90点合格判定、100点のブラッシュアップ目標、安全な候補採用規則を適用しますが、モデルの利用可否、処理時間、出力品質は提供元ごとに異なる場合があります。
 
 ### Provider Switching / 提供元切り替え
 
@@ -633,7 +633,7 @@ Export files are local user actions. The repository should not receive generated
 * **文章生成**: Gemini / OpenAI それぞれに合わせた15公開モード別プロンプト契約と、10,000字以上の長編直接生成
 * **画像理解**: 対応APIでのキャラクターシート読み取りと万能インプット画像解析
 * **作風解析**: テキスト/画像からの文体抽出、構造化JSON出力、作風リライト
-* **品質レイヤー**: モード契約、短稿改稿、API別補正、全モードAI講評、82点基準の最大3回ブラッシュアップ、安全な候補採用、最終出力整形
+* **品質レイヤー**: モード契約、短稿改稿、API別補正、全モードAI講評、90点合格・100点目標の最大3回ブラッシュアップ、安全な候補採用、最終出力整形
 * **公開方式**: GitHub Pages に適した静的Webアプリ
 * **安全設計**: ユーザー入力式APIキー、リポジトリへのキー埋め込みなし
 
