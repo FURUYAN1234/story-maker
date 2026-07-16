@@ -19,6 +19,7 @@ import {
   shouldStartAutomaticBrushup,
   formatEditorialCompletion,
 } from '../src/editorialBrushupRuntime.js';
+import { STORY_MAKER_FOOTER } from '../src/version.js';
 
 const structuredReviewText = (score, commentary = '改善点を具体的に確認した。') => [
   `AI総合点: ${score}点`,
@@ -77,21 +78,24 @@ assert.equal(
 assert.equal(formatEditorialElapsedProgress('API稼働中: 改稿を生成中（1/3回・100点目標）...', 12.9), 'API稼働中: 改稿を生成中（1/3回・100点目標）...（開始から12秒経過）');
 assert.deepEqual(createEditorialTypewriterFrames('abcdefg', { chunkSize: 3 }), ['abc', 'abcdef', 'abcdefg']);
 assert.equal(createEditorialTypewriterFrames('あ'.repeat(1200)).length, 600);
-const editorialReveal = prepareEditorialReveal('本文\n\nCreated By AI Story Maker V5.3.3.');
+const editorialReveal = prepareEditorialReveal(`本文\n\n${STORY_MAKER_FOOTER}.`);
 assert.equal(editorialReveal.bodyText, '本文');
-assert.match(editorialReveal.finalText, /^本文\n\nCreated By AI Story Maker V5\.3\.3$/);
-assert.equal(editorialTextFingerprint('本文\r\n\r\nCreated By AI Story Maker V5.3.3.'), '本文');
-assert.equal(editorialTextFingerprint('本文\n\nCreated By AI Story Maker V5.3.3'), '本文');
-assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 89 }, running: false }), true);
+assert.equal(editorialReveal.finalText, `本文\n\n${STORY_MAKER_FOOTER}`);
+assert.equal(editorialTextFingerprint(`本文\r\n\r\n${STORY_MAKER_FOOTER}.`), '本文');
+assert.equal(editorialTextFingerprint(`本文\n\n${STORY_MAKER_FOOTER}`), '本文');
+assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 84 }, running: false }), true);
+assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 85 }, running: false }), false);
+assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 89 }, running: false }), false);
 assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 100 }, running: false }), false);
 assert.equal(shouldStartAutomaticBrushup({ checked: false, review: { valid: true, score: 70 }, running: false }), false);
 assert.equal(shouldStartAutomaticBrushup({ checked: true, review: { valid: true, score: 70 }, running: true }), false);
-assert.equal(formatEditorialCompletion({ score: 84, attempts: 3, maxAttempts: 3 }), '最大3回終了・未合格（84点／合格90点）');
-assert.equal(formatEditorialCompletion({ score: 92, attempts: 3, maxAttempts: 3 }), 'ブラッシュアップ完了・合格（92点／合格90点）');
-assert.equal(formatEditorialCompletion({ score: 100, attempts: 2, maxAttempts: 3 }), 'ブラッシュアップ完了・100点到達');
+assert.equal(formatEditorialCompletion({ score: 84, attempts: 3, maxAttempts: 3 }), '最大3回終了・要ブラッシュアップ（84点／公開可能85点）');
+assert.equal(formatEditorialCompletion({ score: 89, attempts: 1, maxAttempts: 3 }), 'ブラッシュアップ完了・公開可能（89点／編集合格90点）');
+assert.equal(formatEditorialCompletion({ score: 92, attempts: 3, maxAttempts: 3 }), 'ブラッシュアップ完了・編集合格（92点）');
+assert.equal(formatEditorialCompletion({ score: 100, attempts: 2, maxAttempts: 3 }), 'ブラッシュアップ完了・編集合格（100点）');
 assert.equal(
-  prepareEditorialReviewText('本文\n\nCreated By AI Story Maker V5.3.3.', 'novel', text => `${text}\n\n`),
-  '本文\n\nCreated By AI Story Maker V5.3.3',
+  prepareEditorialReviewText(`本文\n\n${STORY_MAKER_FOOTER}.`, 'novel', text => `${text}\n\n`),
+  `本文\n\n${STORY_MAKER_FOOTER}`,
 );
 
 const structuredBrushupPrompt = buildEditorialBrushupPrompt({
@@ -101,10 +105,12 @@ const structuredBrushupPrompt = buildEditorialBrushupPrompt({
 });
 assert.match(structuredBrushupPrompt, /未解消の問題点: 中盤が弱い/);
 assert.match(structuredBrushupPrompt, /必須の改稿方針: 対立を行動で強める/);
+assert.match(structuredBrushupPrompt, /本文の出来事・観察・判断を更新しないメタ進行文/);
+assert.match(structuredBrushupPrompt, /新しい事実、人物、出来事、設定を足さず/);
 const formatRepairPrompt = buildEditorialFormatRepairPrompt({
   mode: '4koma',
   modeLabel: '4コマ漫画風',
-  text: '1コマ目（起）:\n絵/状況: 店内\nセリフ: 客「はい」\nCreated By AI Story Maker V5.3.3',
+  text: `1コマ目（起）:\n絵/状況: 店内\nセリフ: 客「はい」\n${STORY_MAKER_FOOTER}`,
 });
 assert.match(formatRepairPrompt, /1コマ目、2コマ目、3コマ目、4コマ目/);
 assert.match(formatRepairPrompt, /「絵\/状況:」「セリフ:」「狙い:」/);
@@ -121,6 +127,7 @@ assert.match(reviewMarkup, /editorial-review-score-value[^>]*>86/);
 assert.match(reviewMarkup, /editorial-review-score-bar-fill/);
 assert.match(reviewMarkup, /<pre class="editorial-review-commentary">良い点。\n\n改善点。<\/pre>/);
 assert.match(reviewMarkup, /ブラッシュアップ回数: 1回/);
+assert.match(reviewMarkup, /公開可能・任意ブラッシュアップ/);
 
 const apiAlert = { textContent: '', style: { display: 'none' } };
 const generationScores = { innerHTML: 'old graph', style: { display: 'grid' } };
@@ -144,7 +151,7 @@ assert.equal(repairedReview.score, 80);
 
 let brushupCalls = 0;
 const brushupProgress = [];
-const brushedReviewScores = [78, 85, 92, 100];
+const brushedReviewScores = [78, 85];
 const brushed = await runEditorialBrushup({ text: original, mode: 'novel', modeLabel: '短編', autoUntilPass: true, onProgress: progress => brushupProgress.push(progress), callAi: async (_prompt, context) => {
   brushupCalls += 1;
   if (context.stage === 'review') {
@@ -155,19 +162,13 @@ const brushed = await runEditorialBrushup({ text: original, mode: 'novel', modeL
   throw new Error(`unexpected ${context.stage}`);
 } });
 assert.equal(brushed.text, improved);
-assert.equal(brushed.review.score, 100);
-assert.equal(brushed.attempts, 3);
+assert.equal(brushed.review.score, 85);
+assert.equal(brushed.attempts, 1);
 assert.deepEqual(brushupProgress.map(progress => [progress.phase, progress.attempt]), [
   ['review', 0],
   ['brushup', 1],
   ['review', 1],
   ['decision', 1],
-  ['brushup', 2],
-  ['review', 2],
-  ['decision', 2],
-  ['brushup', 3],
-  ['review', 3],
-  ['decision', 3],
 ]);
 
 let reusedReviewCalls = 0;
@@ -185,15 +186,25 @@ const reused = await runEditorialBrushup({
 assert.equal(reusedReviewCalls, 1);
 assert.equal(reused.attempts, 1);
 
-let passingRewriteCalls = 0;
-const alreadyPassing = await runEditorialBrushup({ text: original, mode: 'novel', modeLabel: '短編', autoUntilPass: true, callAi: async (_prompt, context) => {
-  if (context.stage === 'review') return { text: structuredReviewText(passingRewriteCalls === 0 ? 86 : 90) };
-  if (context.stage === 'brushup') { passingRewriteCalls += 1; return { text: improved }; }
+let requiredRewriteCalls = 0;
+const requiredBrushup = await runEditorialBrushup({ text: original, mode: 'novel', modeLabel: '短編', autoUntilPass: true, callAi: async (_prompt, context) => {
+  if (context.stage === 'review') return { text: structuredReviewText(requiredRewriteCalls === 0 ? 84 : 90) };
+  if (context.stage === 'brushup') { requiredRewriteCalls += 1; return { text: improved }; }
   throw new Error(`unexpected ${context.stage}`);
 } });
-assert.equal(passingRewriteCalls, 3);
-assert.equal(alreadyPassing.attempts, 3);
-assert.equal(alreadyPassing.review.score, 90);
+assert.equal(requiredRewriteCalls, 1);
+assert.equal(requiredBrushup.attempts, 1);
+assert.equal(requiredBrushup.review.score, 90);
+
+let optionalRewriteCalls = 0;
+const optionalBrushup = await runEditorialBrushup({ text: original, mode: 'novel', modeLabel: '短編', autoUntilPass: true, callAi: async (_prompt, context) => {
+  if (context.stage === 'review') return { text: structuredReviewText(optionalRewriteCalls === 0 ? 86 : 90) };
+  if (context.stage === 'brushup') { optionalRewriteCalls += 1; return { text: improved }; }
+  throw new Error(`unexpected ${context.stage}`);
+} });
+assert.equal(optionalRewriteCalls, 1);
+assert.equal(optionalBrushup.attempts, 1);
+assert.equal(optionalBrushup.review.score, 90);
 
 let failedAttempts = 0;
 const failedGuidancePrompts = [];

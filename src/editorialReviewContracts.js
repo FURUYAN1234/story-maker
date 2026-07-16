@@ -1,6 +1,8 @@
 import { hasEditorialModeFormat } from './editorialBrushupCandidate.js';
+import { STORY_MAKER_FOOTER } from './version.js';
 
 export const EDITORIAL_PASS_SCORE = 90;
+export const EDITORIAL_PUBLISHABLE_SCORE = 85;
 
 const SCRIPT_MODES = new Set(['scenario', 'manga', 'radio']);
 const PRACTICAL_MODES = new Set(['letter', 'documentary']);
@@ -21,18 +23,54 @@ export function getEditorialReviewFamily(mode = '') {
   return 'fiction';
 }
 
+export function getEditorialScoreTier(score) {
+  const numericScore = Number(score);
+  if (Number.isFinite(numericScore) && numericScore >= EDITORIAL_PASS_SCORE) {
+    return { id: 'editorial_pass', label: '編集合格', autoBrushupRequired: false };
+  }
+  if (Number.isFinite(numericScore) && numericScore >= EDITORIAL_PUBLISHABLE_SCORE) {
+    return { id: 'publishable', label: '公開可能・任意ブラッシュアップ', autoBrushupRequired: false };
+  }
+  return { id: 'needs_brushup', label: '要ブラッシュアップ', autoBrushupRequired: true };
+}
+
+export function buildCognitiveRhythmEditorialGuidance({ mode = '' } = {}) {
+  const family = getEditorialReviewFamily(mode);
+  if (family === 'script' || family === 'special') return '';
+  if (family === 'practical') {
+    return [
+      '【文章の認知リズム確認】',
+      '説明対象の事実、観察、判断を更新しないメタ進行文（例: これから説明する、ここまで見た）を、出力形式上必要な場合を除いて問題点として指摘してください。',
+      '抽象的な結論が続く箇所は、原稿にある具体的な根拠・観察・判断との往復を確認してください。',
+      '改善案では、新しい事実、人物、出来事、設定を足さず、原稿にある材料だけで説明の接続を整えてください。',
+      '未解消の疑問や約束は、本文内で回収するか、残す理由が読者に分かる形になっているかを確認してください。',
+      'この確認手順や編集用語を完成稿へ露出させないでください。',
+    ].join('\n');
+  }
+  return [
+    '【文章の認知リズム確認】',
+    '本文の出来事・観察・判断を更新しないメタ進行文（例: 次は、ここから、これまでの話を）を、形式上必要な場合を除いて問題点として指摘してください。',
+    '場面や人物の判断が続く箇所は、原稿にある具体的な出来事・感覚・行動との往復を確認してください。',
+    '改善案では、新しい事実、人物、出来事、設定を足さず、原稿にある材料だけで場面の転換や判断の流れを整えてください。',
+    '未解消の疑問や約束は、本文内で回収するか、意図して残すなら読者に分かる形になっているかを確認してください。',
+    'この確認手順や編集用語を完成稿へ露出させないでください。',
+  ].join('\n');
+}
+
 export function buildEditorialReviewPrompt({ mode = '', modeLabel = '', text = '' } = {}) {
   const family = getEditorialReviewFamily(mode);
   const mechanicallyValid = hasEditorialModeFormat(text, mode);
+  const rhythmGuidance = buildCognitiveRhythmEditorialGuidance({ mode });
   return [
     'あなたは商業編集者です。以下の完成稿だけを講評し、本文を書き直さないでください。',
     `出力モード: ${modeLabel || mode || '未指定'}`,
     `評価軸: ${FAMILY_CRITERIA[family]}`,
     '出力モードが要求する公開ラベル（例: 絵/状況、セリフ、狙い、ページ、コマ、宛先、本文、結び等）は完成稿の正規構成であり、制作メモや内部指示の露出として減点しないこと。',
-    '末尾の「Created By AI Story Maker V5.3.3」は製品が付与する必須フッターであり、生成ツール名の混入、メタ情報、契約違反として減点しないこと。',
+    `末尾の「${STORY_MAKER_FOOTER}」は製品が付与する必須フッターであり、生成ツール名の混入、メタ情報、契約違反として減点しないこと。`,
     mechanicallyValid
       ? '形式契約はアプリの機械検証に合格済みです。必須ラベル、セリフ欄、狙い欄、製品フッターを形式違反や制作メモ露出として再減点せず、内容・構成・表現・オチの品質を採点してください。'
       : '形式契約はアプリの機械検証に不合格です。欠落している必須構造を問題点と改稿方針へ具体的に記載してください。',
+    rhythmGuidance,
     '100点満点で厳密に採点し、次の見出しを順番どおりに必ず出力してください。',
     'AI総合点: 0〜100点',
     'AI講評:',

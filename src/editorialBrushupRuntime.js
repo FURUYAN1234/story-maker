@@ -1,6 +1,9 @@
 import {
   EDITORIAL_PASS_SCORE,
+  EDITORIAL_PUBLISHABLE_SCORE,
+  buildCognitiveRhythmEditorialGuidance,
   buildEditorialReviewPrompt,
+  getEditorialScoreTier,
   parseEditorialReview,
 } from './editorialReviewContracts.js';
 import { evaluateBrushupCandidate, hasEditorialModeFormat } from './editorialBrushupCandidate.js';
@@ -9,9 +12,9 @@ import { getGenerationTimeoutMs } from './generationTimeoutPolicy.js';
 import { buildFinalOutputFormatCheck } from './outputModeContracts.js';
 import { cleanOutputForPublicMode } from './outputCleanup.js';
 
-const EDITORIAL_BRUSHUP_TARGET_SCORE = 100;
+const EDITORIAL_BRUSHUP_TARGET_SCORE = EDITORIAL_PUBLISHABLE_SCORE;
 
-export function buildEditorialBrushupPrompt({ text = '', review = {}, modeLabel = '' } = {}) {
+export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '', modeLabel = '' } = {}) {
   return [
     'あなたは商業編集者兼リライターです。元原稿の主題、人物、事実、結末、出力形式を維持して改稿してください。',
     '文字数を増やすこと自体を目的にせず、講評で指摘された問題だけを改善してください。',
@@ -23,6 +26,7 @@ export function buildEditorialBrushupPrompt({ text = '', review = {}, modeLabel 
     `未解消の問題点: ${review?.problems || '本文と総評から特定する'}`,
     `必須の改稿方針: ${review?.revisionPlan || '総評の弱点を具体的な場面修正へ変換する'}`,
     '問題点を一つずつ本文上の変更へ対応させ、前回すでに改善した要素を壊さないでください。',
+    buildCognitiveRhythmEditorialGuidance({ mode }),
     String(text || '').trim(),
   ].join('\n');
 }
@@ -112,15 +116,16 @@ export function editorialTextFingerprint(text = '') {
 }
 
 export function shouldStartAutomaticBrushup({ checked = false, review = null, running = false } = {}) {
-  return Boolean(checked && !running && review?.valid && review.score < EDITORIAL_BRUSHUP_TARGET_SCORE);
+  return Boolean(checked && !running && review?.valid && getEditorialScoreTier(review.score).autoBrushupRequired);
 }
 
 export function formatEditorialCompletion({ score = 0, attempts = 0, maxAttempts = 3 } = {}) {
   const numericScore = Number.isFinite(Number(score)) ? Number(score) : 0;
-  if (numericScore >= EDITORIAL_BRUSHUP_TARGET_SCORE) return 'ブラッシュアップ完了・100点到達';
-  if (numericScore >= EDITORIAL_PASS_SCORE) return `ブラッシュアップ完了・合格（${numericScore}点／合格${EDITORIAL_PASS_SCORE}点）`;
-  if (attempts >= maxAttempts) return `最大${maxAttempts}回終了・未合格（${numericScore}点／合格${EDITORIAL_PASS_SCORE}点）`;
-  return `ブラッシュアップ${attempts}回終了・未合格（${numericScore}点／合格${EDITORIAL_PASS_SCORE}点）`;
+  const tier = getEditorialScoreTier(numericScore);
+  if (tier.id === 'editorial_pass') return `ブラッシュアップ完了・編集合格（${numericScore}点）`;
+  if (tier.id === 'publishable') return `ブラッシュアップ完了・公開可能（${numericScore}点／編集合格${EDITORIAL_PASS_SCORE}点）`;
+  if (attempts >= maxAttempts) return `最大${maxAttempts}回終了・要ブラッシュアップ（${numericScore}点／公開可能${EDITORIAL_PUBLISHABLE_SCORE}点）`;
+  return `ブラッシュアップ${attempts}回終了・要ブラッシュアップ（${numericScore}点／公開可能${EDITORIAL_PUBLISHABLE_SCORE}点）`;
 }
 
 export function prepareEditorialReviewText(text = '', mode = '', cleaner = cleanOutputForPublicMode) {
@@ -193,7 +198,7 @@ export async function runEditorialBrushup({
   ) {
     attempts += 1;
     onProgress?.({ phase: 'brushup', attempt: attempts, maxAttempts: attemptLimit });
-    const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: latestGuidanceReview, modeLabel }), {
+    const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: latestGuidanceReview, mode, modeLabel }), {
       stage: 'brushup', mode, charLength: currentText.length, attempt: attempts,
     });
     const candidateText = String(rewrite?.text || rewrite || '').trim();
@@ -222,13 +227,13 @@ export function createEditorialReviewMarkup(review, { attempts = 0, error = '' }
   if (error) return `<div class="editorial-review-error"><strong>AI講評を取得できませんでした。</strong><span>本文は保持されています。</span><pre>${escapeEditorialHtml(error)}</pre></div>`;
   const valid = Boolean(review?.valid && Number.isFinite(review?.score));
   const score = valid ? Math.max(0, Math.min(100, review.score)) : 0;
-  const passed = valid && score >= EDITORIAL_PASS_SCORE;
+  const tier = getEditorialScoreTier(score);
   return [
     '<div class="editorial-review-card">',
     '<div class="editorial-review-score-panel">',
-    `<div class="editorial-review-score-label">AI総合点 <span>${passed ? '合格' : '要ブラッシュアップ'}</span></div>`,
+    `<div class="editorial-review-score-label">AI総合点 <span>${valid ? tier.label : '要ブラッシュアップ'}</span></div>`,
     `<div class="editorial-review-score-value">${valid ? score : '—'}<small>/100</small></div>`,
-    `<div class="editorial-review-score-bar"><div class="editorial-review-score-bar-fill ${passed ? 'passed' : ''}" style="width:${score}%"></div></div>`,
+    `<div class="editorial-review-score-bar"><div class="editorial-review-score-bar-fill ${tier.id === 'editorial_pass' ? 'passed' : ''}" style="width:${score}%"></div></div>`,
     attempts ? `<div class="editorial-review-attempts">ブラッシュアップ回数: ${attempts}回</div>` : '',
     '</div>',
     `<pre class="editorial-review-commentary">${escapeEditorialHtml(review?.commentary || '講評を取得できませんでした。')}</pre>`,
@@ -375,7 +380,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       renderEditorialReview(review, reviewElement);
       sectionElement?.classList?.remove?.('is-waiting');
       sectionElement?.setAttribute?.('aria-disabled', 'false');
-      statusElement && (statusElement.textContent = review.valid && review.score >= EDITORIAL_PASS_SCORE ? 'AI講評: 合格' : 'AI講評: 要ブラッシュアップ');
+      statusElement && (statusElement.textContent = review.valid ? `AI講評: ${getEditorialScoreTier(review.score).label}` : 'AI講評: 要ブラッシュアップ');
       doc.documentElement.dataset.editorialReviewResult = review.valid ? 'completed' : 'failed';
       doc.documentElement.dataset.editorialReviewScore = review.valid ? String(review.score) : '';
       if (shouldStartAutomaticBrushup({ checked: autoCheckbox?.checked, review, running: brushupRunning })) {
@@ -499,7 +504,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
         message: completionMessage,
       });
       doc.documentElement.dataset.editorialBrushupResult = 'completed';
-      doc.documentElement.dataset.editorialBrushupOutcome = result.review.score >= EDITORIAL_PASS_SCORE ? 'passed' : 'exhausted_unpassed';
+      doc.documentElement.dataset.editorialBrushupOutcome = getEditorialScoreTier(result.review.score).id;
       doc.documentElement.dataset.editorialReviewScore = String(result.review.score);
       doc.documentElement.dataset.editorialBrushupAttempts = String(result.attempts);
     } catch (error) {
@@ -528,7 +533,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   brushupButton.addEventListener('click', onBrushup, { capture: true });
   queueAutomaticBrushup = () => {
     timers.setTimeout(() => {
-      if (!brushupRunning && autoCheckbox?.checked && latestReview?.valid && latestReview.score < EDITORIAL_BRUSHUP_TARGET_SCORE) {
+      if (!brushupRunning && autoCheckbox?.checked && latestReview?.valid && getEditorialScoreTier(latestReview.score).autoBrushupRequired) {
         onBrushup();
       }
     }, 0);

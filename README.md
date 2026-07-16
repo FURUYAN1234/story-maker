@@ -1,4 +1,4 @@
-# Story Maker v5.3.3 / AI物語メーカー
+# Story Maker v5.3.4 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -97,7 +97,7 @@ The intent is not to force every work into the same template. The contract tells
 | Progress<br>進捗 | Thought log<br>思考ログ | Shows progress messages while API communication is running.<br>API通信中の進行メッセージを表示します。 |
 | Quality<br>品質 | Mode contracts<br>モード契約 | Each public mode receives a required output shape.<br>公開モードごとに必須の出力形を指定します。 |
 | Quality<br>品質 | Short-draft rewrite<br>短すぎる初稿の改稿 | Too-short public drafts are rewritten before they are accepted as final output.<br>公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
-| Quality<br>品質 | Universal AI review and brush-up<br>全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript can receive an AI score, pass/fail label, commentary, and a guarded rewrite. The pass score is 90, and automatic brush-up aims for 100 in up to three attempts.<br>生成・貼り付け・インポートしたすべての原稿をAIが採点・講評し、安全判定付きで改稿できます。合格点は90点で、自動ブラッシュアップは最大3回で100点を目指します。 |
+| Quality<br>品質 | Universal AI review and brush-up<br>全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript receives a three-tier AI review and guarded rewrite: 90+ editorial pass, 85–89 publishable with optional brush-up, and 84 or below needs brush-up.<br>生成・貼り付け・インポートしたすべての原稿を三段階でAI採点し、安全判定付きで改稿できます。90点以上は編集合格、85〜89点は公開可能・任意ブラッシュアップ、84点以下は要ブラッシュアップです。 |
 | Quality<br>品質 | Final cleanup<br>最終出力整形 | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display.<br>プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
 | Quality<br>品質 | Completion gates<br>完走ゲート | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored.<br>4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
 
@@ -202,7 +202,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | Topic / 項目 | Current behavior / 現行動作 |
 |---|---|
 | Direct long-form<br>長編直接生成 | Select `Long-form (10,000 characters+)` before generation. The app requests one completed long manuscript and validates a 10,000+ non-whitespace body-character minimum and a closed ending.<br>生成前に「長編（10000字～）」を選びます。一つの完結した長編として生成し、空白を除く本文10,000字以上と完結した終端を検証します。 |
-| Universal review<br>全モードAI講評 | After any supported mode finishes, the selected provider reviews the visible Output and shows a 0–100 score, pass/fail state, and paragraph-preserving commentary. The pass score is 90.<br>対応モードの生成完了後、選択中のAPIが表示中Outputを読み、0～100点、合否、段落を保持した講評を表示します。合格点は90点です。 |
+| Universal review<br>全モードAI講評 | After any supported mode finishes, the selected provider reviews the visible Output and shows a 0–100 score, a three-tier state, and paragraph-preserving commentary: 90+ editorial pass, 85–89 publishable, 84 or below needs brush-up.<br>対応モードの生成完了後、選択中のAPIが表示中Outputを読み、0～100点、三段階判定、段落を保持した講評を表示します。90点以上は編集合格、85〜89点は公開可能、84点以下は要ブラッシュアップです。 |
 | Universal brush-up<br>全モードブラッシュアップ | `この小説をブラッシュアップ` rewrites the current Output in its active output format. It can also use text pasted into Output or imported from TXT/MD.<br>「この小説をブラッシュアップ」は、現在のOutputを選択中の出力形式のまま改稿します。Outputへ貼り付けた本文やTXT/MDからインポートした本文にも使えます。 |
 | Legacy path<br>旧長編経路 | The old chapter-by-chapter `long` mode and its long-novel control panel remain sealed and are not the supported public route.<br>旧章単位の `long` モードと長編小説コントロールパネルは封印中で、公開版の利用経路ではありません。 |
 | Posting previews<br>投稿補助 | Kakuyomu-style and Alphapolis-style previews read the latest Output independently of review and brush-up.<br>Kakuyomuフォーム風・アルファポリスフォーム風プレビューは、講評・ブラッシュアップとは別に最新Outputを読み取ります。 |
@@ -220,7 +220,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 2. テーマ、ジャンル、世界観、読者層、結末、語り口、登場人物、必要なら素材を設定します。
 3. 原稿を生成するか、既存原稿をOutputへ貼り付け／TXT・MDインポートします。
 4. 自動表示されるAI点数と講評を確認します。
-5. 100点を目標に最大3回まで続けるなら自動ブラッシュアップをON、1クリックにつき1回だけ改稿するならOFFにします。90点以上で合格です。
+5. 84点以下だけを最大3回まで自動ブラッシュアップできます。85〜89点は公開可能で、必要なときだけ手動ブラッシュアップを使います。90点以上は編集合格です。
 6. Outputに保持された原稿を確認し、コピー、TXT保存、投稿プレビューを使います。
 
 ### Display And Controls / 表示と操作
@@ -231,7 +231,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | Score card<br>点数カード | Uses a full-width card with a large score, `/100`, pass/needs-brush-up label, score bar, and optional attempt count.<br>全幅カードに大きな点数、`/100`、合格／要ブラッシュアップ、スコアバー、必要に応じて実行回数を表示します。 |
 | Commentary<br>講評 | Preserves paragraphs and line breaks so concrete revision advice remains readable instead of becoming one dense line.<br>具体的な改稿指示が一行に潰れないよう、段落と改行を保持して表示します。 |
 | Brush-up button<br>ブラッシュアップボタン | Disabled until Output contains a usable manuscript of at least 20 visible characters. While running, settings are protected from conflicting changes.<br>Outputに20文字以上の利用可能な原稿が入るまで無効です。実行中は競合する設定変更を防ぎます。 |
-| Automatic checkbox<br>自動チェック | ON: continues toward the 100-point target for up to three rewrite attempts. OFF: performs one rewrite attempt per click. A retained score of 90 or higher is a pass even if it has not reached 100.<br>ON: 100点を目標に最大3回まで改稿します。OFF: クリックごとに1回だけ改稿します。保持中の点数が100点に届かなくても、90点以上なら合格です。 |
+| Automatic checkbox<br>自動チェック | ON: automatically rewrites only manuscripts at 84 or below, stopping once the retained score reaches 85 or after three attempts. OFF: performs one rewrite attempt per click; scores from 85 to 89 remain available for optional manual brush-up.<br>ON: 84点以下だけを自動改稿し、保持点が85点に達するか最大3回で停止します。OFF: クリックごとに1回だけ改稿します。85〜89点は公開可能として任意の手動ブラッシュアップを使えます。 |
 
 ### Review And Adoption Pipeline / 講評・採用パイプライン
 
@@ -242,7 +242,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | 3. Rewrite<br>改稿 | Sends the current manuscript, active mode, current score, and commentary to the selected provider, requesting completed manuscript text only.<br>現在の原稿、出力モード、点数、講評を選択中APIへ渡し、完成稿本文だけを求めます。 | Preserves the subject, characters, facts, ending, and output format while targeting diagnosed weaknesses.<br>主題、人物、事実、結末、出力形式を保ち、指摘された弱点だけを直します。 |
 | 4. Re-review<br>再講評 | Scores the rewrite before it can replace Output.<br>改稿候補がOutputを置き換える前に再採点します。 | A rewrite is not accepted merely because an API returned text.<br>APIが文章を返しただけでは採用しません。 |
 | 5. Candidate gate<br>候補採用判定 | Adopts only a format-valid, completed, non-duplicated candidate whose score is higher than the retained manuscript.<br>形式が正しく、完結し、段落重複がなく、保持中原稿より高得点の候補だけを採用します。 | Prevents a polished-looking regression from overwriting a better draft.<br>見た目だけ整った劣化稿が良い原稿を上書きするのを防ぎます。 |
-| 6. Continue or stop<br>継続／停止 | With auto mode ON, repeats until the retained score reaches 100 or three attempts have run. With auto mode OFF, stops after the first attempt. Completion is labeled separately as 100-point target reached, passed at 90+, or attempts exhausted without passing.<br>自動ONでは保持点が100点に達するか3回実行で停止し、OFFでは1回で停止します。完了時は「100点到達」「90点以上で合格」「最大回数終了・未合格」を分けて表示します。 | Gives a bounded quality loop and reports whether it actually passed.<br>上限付きの品質ループにし、実際に合格したかどうかも明示します。 |
+| 6. Continue or stop<br>継続／停止 | With auto mode ON, repeats only while the retained score is 84 or below, stopping at 85 or after three attempts. Completion distinguishes editorial pass (90+), publishable (85–89), and needs brush-up (84 or below).<br>自動ONでは保持点が84点以下の間だけ改稿し、85点到達または3回実行で停止します。完了時は「編集合格（90点以上）」「公開可能（85〜89点）」「要ブラッシュアップ（84点以下）」を分けて表示します。 | Gives a bounded quality loop and reports the appropriate publication state.<br>上限付きの品質ループにし、公開判断に使える状態を明示します。 |
 
 ### Manuscript Protection / 原稿保護
 
@@ -263,9 +263,9 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.3 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.3.4 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.3系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.3.4系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -327,7 +327,7 @@ OpenAI は、文章生成と文体重視の散文生成に使えます。API提�
 
 For direct long-form generation and long-manuscript brush-up, the OpenAI Responses route uses an extended long-output timeout. The same universal 90-point pass score, 100-point brush-up target, and guarded adoption rules apply regardless of provider; provider availability, latency, and output quality can still differ.
 
-長編直接生成と長い原稿のブラッシュアップでは、OpenAI Responses経路に長文用の拡張タイムアウトを使います。どのAPIでも全モード共通の90点合格判定、100点のブラッシュアップ目標、安全な候補採用規則を適用しますが、モデルの利用可否、処理時間、出力品質は提供元ごとに異なる場合があります。
+長編直接生成と長い原稿のブラッシュアップでは、OpenAI Responses経路に長文用の拡張タイムアウトを使います。どのAPIでも全モード共通の三段階判定（90点以上の編集合格、85〜89点の公開可能、84点以下の要ブラッシュアップ）と安全な候補採用規則を適用しますが、モデルの利用可否、処理時間、出力品質は提供元ごとに異なる場合があります。
 
 ### Provider Switching / 提供元切り替え
 
@@ -633,7 +633,7 @@ Export files are local user actions. The repository should not receive generated
 * **文章生成**: Gemini / OpenAI それぞれに合わせた15公開モード別プロンプト契約と、10,000字以上の長編直接生成
 * **画像理解**: 対応APIでのキャラクターシート読み取りと万能インプット画像解析
 * **作風解析**: テキスト/画像からの文体抽出、構造化JSON出力、作風リライト
-* **品質レイヤー**: モード契約、短稿改稿、API別補正、全モードAI講評、90点合格・100点目標の最大3回ブラッシュアップ、安全な候補採用、最終出力整形
+* **品質レイヤー**: モード契約、短稿改稿、API別補正、全モードAI講評、90点編集合格・85点公開可能・84点以下の最大3回ブラッシュアップ、安全な候補採用、最終出力整形
 * **公開方式**: GitHub Pages に適した静的Webアプリ
 * **安全設計**: ユーザー入力式APIキー、リポジトリへのキー埋め込みなし
 
@@ -803,6 +803,13 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.4 (2026-07-16)
+
+- Added a three-tier editorial state: 90+ is editorial pass, 85–89 is publishable with optional manual brush-up, and 84 or below needs brush-up. Automatic brush-up now runs only for the last tier and stops once the retained score reaches 85 or the three-attempt cap.
+- Added cognitive-rhythm editorial guidance for fiction and practical writing. The review now checks for document-progress prose that does not update the subject matter, source-grounded concrete/abstract movement, unresolved commitments, and rubric leakage without adding new facts.
+- 90点以上を編集合格、85〜89点を公開可能・任意ブラッシュアップ、84点以下を要ブラッシュアップとする三段階判定を追加しました。自動ブラッシュアップは要ブラッシュアップ時だけ実行し、保持点が85点に達するか最大3回で停止します。
+- 小説／実用文向けに認知リズムの編集観点を追加しました。対象の進行を更新しないメタ進行文、原稿内の根拠に基づく具体と抽象の往復、未解消事項、編集用語の本文露出を確認し、新しい事実は加えません。
 
 ### v5.3.3 (2026-07-12)
 
