@@ -1,4 +1,4 @@
-# Story Maker v5.3.4 / AI物語メーカー
+# Story Maker v5.3.5 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -263,9 +263,9 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.4 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.3.5 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.4系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.3.5系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
 
@@ -803,6 +803,12 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.3.5 (2026-07-17)
+
+- Restored automatic high-score brush-up for 85–99-point reviews, capped at three attempts, while retaining only score-improving candidates.
+- Made sub-100 editorial reviews actionable: exact passages, point-loss reasons, and matching numbered revision actions are now visible in the app.
+- Fixed the GPT-5.x Responses request so unsupported temperature parameters do not force fallback, and made all review text boxes wrap safely.
 
 ### v5.3.4 (2026-07-16)
 

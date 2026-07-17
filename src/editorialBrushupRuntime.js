@@ -12,9 +12,27 @@ import { getGenerationTimeoutMs } from './generationTimeoutPolicy.js';
 import { buildFinalOutputFormatCheck } from './outputModeContracts.js';
 import { cleanOutputForPublicMode } from './outputCleanup.js';
 
-const EDITORIAL_BRUSHUP_TARGET_SCORE = EDITORIAL_PUBLISHABLE_SCORE;
+const EDITORIAL_BRUSHUP_TARGET_SCORE = 100;
 
-export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '', modeLabel = '' } = {}) {
+export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '', modeLabel = '', rejectedCandidate = null } = {}) {
+  const highScoreGuidance = Number(review?.score) >= EDITORIAL_PUBLISHABLE_SCORE
+    ? [
+      '【高得点向け精密改稿】',
+      '修正対象を最大3箇所に絞り、講評の問題点と改稿方針へ直接対応する場面だけを精密に直してください。',
+      'それ以外の場面、既に機能している台詞、人物関係、事実、伏線、結末、文体は極力維持してください。',
+      '新しい事件を足して派手にするのではなく、因果、人物の選択と変化、伏線の回収、場面の具体性を既存材料の範囲で強めてください。',
+    ].join('\n')
+    : '';
+  const rejectedGuidance = rejectedCandidate
+    ? [
+      '【前回不採用候補からの注意】',
+      '前回候補は不採用です。その候補で加えた変更は受理済み原稿に存在すると仮定しないでください。',
+      `不採用理由: ${(rejectedCandidate.issues || []).join('・') || '採用条件未達'}`,
+      `不採用候補の講評: ${rejectedCandidate.review?.commentary || 'なし'}`,
+      `不採用候補の問題点: ${rejectedCandidate.review?.problems || 'なし'}`,
+      '以下の受理済み原稿とその講評を正として、同じ失敗を避けた別の局所修正を行ってください。',
+    ].join('\n')
+    : '';
   return [
     'あなたは商業編集者兼リライターです。元原稿の主題、人物、事実、結末、出力形式を維持して改稿してください。',
     '文字数を増やすこと自体を目的にせず、講評で指摘された問題だけを改善してください。',
@@ -26,6 +44,8 @@ export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '',
     `未解消の問題点: ${review?.problems || '本文と総評から特定する'}`,
     `必須の改稿方針: ${review?.revisionPlan || '総評の弱点を具体的な場面修正へ変換する'}`,
     '問題点を一つずつ本文上の変更へ対応させ、前回すでに改善した要素を壊さないでください。',
+    highScoreGuidance,
+    rejectedGuidance,
     buildCognitiveRhythmEditorialGuidance({ mode }),
     String(text || '').trim(),
   ].join('\n');
@@ -116,7 +136,7 @@ export function editorialTextFingerprint(text = '') {
 }
 
 export function shouldStartAutomaticBrushup({ checked = false, review = null, running = false } = {}) {
-  return Boolean(checked && !running && review?.valid && getEditorialScoreTier(review.score).autoBrushupRequired);
+  return Boolean(checked && !running && review?.valid && review.score < EDITORIAL_BRUSHUP_TARGET_SCORE);
 }
 
 export function formatEditorialCompletion({ score = 0, attempts = 0, maxAttempts = 3 } = {}) {
@@ -189,7 +209,7 @@ export async function runEditorialBrushup({
     ? initialReview
     : await runEditorialReview({ text: currentText, mode, modeLabel, callAi, onProgress, attempt: 0, maxAttempts: attemptLimit, requireStructured: true });
   if (!currentReview.valid) throw new Error('AI講評の必須項目を取得できませんでした');
-  let latestGuidanceReview = currentReview;
+  let rejectedCandidate = null;
   let attempts = 0;
   const decisions = [];
   while (
@@ -198,12 +218,11 @@ export async function runEditorialBrushup({
   ) {
     attempts += 1;
     onProgress?.({ phase: 'brushup', attempt: attempts, maxAttempts: attemptLimit });
-    const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: latestGuidanceReview, mode, modeLabel }), {
+    const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: currentReview, mode, modeLabel, rejectedCandidate }), {
       stage: 'brushup', mode, charLength: currentText.length, attempt: attempts,
     });
     const candidateText = String(rewrite?.text || rewrite || '').trim();
     const candidateReview = await runEditorialReview({ text: candidateText, mode, modeLabel, callAi, onProgress, attempt: attempts, maxAttempts: attemptLimit, requireStructured: true });
-    latestGuidanceReview = candidateReview;
     const decision = evaluateBrushupCandidate({
       originalText, currentText, candidateText, mode, currentReview, candidateReview,
       formatOk: Boolean(formatCheck(candidateText, mode)),
@@ -213,6 +232,9 @@ export async function runEditorialBrushup({
     if (decision.adopt) {
       currentText = candidateText;
       currentReview = candidateReview;
+      rejectedCandidate = null;
+    } else {
+      rejectedCandidate = { review: candidateReview, issues: decision.issues };
     }
     if (currentReview.score >= EDITORIAL_BRUSHUP_TARGET_SCORE || !autoUntilPass) break;
   }
@@ -236,7 +258,14 @@ export function createEditorialReviewMarkup(review, { attempts = 0, error = '' }
     `<div class="editorial-review-score-bar"><div class="editorial-review-score-bar-fill ${tier.id === 'editorial_pass' ? 'passed' : ''}" style="width:${score}%"></div></div>`,
     attempts ? `<div class="editorial-review-attempts">ブラッシュアップ回数: ${attempts}回</div>` : '',
     '</div>',
+    '<div class="editorial-review-detail">',
+    '<h4>総評</h4>',
     `<pre class="editorial-review-commentary">${escapeEditorialHtml(review?.commentary || '講評を取得できませんでした。')}</pre>`,
+    '<h4>点数を上げるための問題点</h4>',
+    `<pre class="editorial-review-problems">${escapeEditorialHtml(review?.problems || '具体的な問題点を取得できませんでした。')}</pre>`,
+    '<h4>次の改稿で行うこと</h4>',
+    `<pre class="editorial-review-revision-plan">${escapeEditorialHtml(review?.revisionPlan || '具体的な改稿方針を取得できませんでした。')}</pre>`,
+    '</div>',
     '</div>',
   ].join('');
 }
@@ -533,7 +562,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   brushupButton.addEventListener('click', onBrushup, { capture: true });
   queueAutomaticBrushup = () => {
     timers.setTimeout(() => {
-      if (!brushupRunning && autoCheckbox?.checked && latestReview?.valid && getEditorialScoreTier(latestReview.score).autoBrushupRequired) {
+      if (!brushupRunning && autoCheckbox?.checked && latestReview?.valid && latestReview.score < EDITORIAL_BRUSHUP_TARGET_SCORE) {
         onBrushup();
       }
     }, 0);

@@ -2122,3 +2122,13 @@ These local checks were insufficient; the real Gemini browser run still failed a
 - GitHub Pages deploy succeeded at `origin/gh-pages` commit `0a7e83cb15e8bb46f137056e7f7b842b3c25d400`. Live `https://furuyan1234.github.io/story-maker/?deploy=v533-20260712` shows title/header `v5.3.3`, public runtime active, brush-up UI present, auto option checked, no Vite overlay, and JS asset `assets/index-D8cwPC0u.js`.
 - The downloaded live bundle contains the new `editorialBrushupOutcome`, `exhausted_unpassed`, `editorialBrushupAttempts`, and `score_not_improved` runtime markers.
 - Full backup artifact verification remains pending at this line and must be completed before closing the requested work.
+
+## 2026-07-17 High-score refinement and actionable-review correction
+
+- Local-only correction restored automatic refinement for 85–99-point reviews, with a 100-point target and the existing three-attempt/adoption safety gates. Rejected candidate reviews are now advisory context only; the accepted manuscript and its review remain the source of truth for the next attempt.
+- User feedback exposed that the review card displayed only praise-heavy `AI講評` while hiding parsed `問題点` and `改稿方針`. Reviews below 100 now require 1–3 numbered items with the exact passage, defect, point-loss estimate, and matching repair action. The card visibly separates `総評`, `点数を上げるための問題点`, and `次の改稿で行うこと`.
+- The first UI version let the new long `pre` blocks overflow. All three review text blocks now use width/max-width 100%, `pre-wrap`, `overflow-wrap:anywhere`, `word-break:break-word`, and hidden horizontal overflow. Live measurements were 1,306 px client/scroll width for all three boxes, so no horizontal spill remained.
+- Real API diagnosis found GPT-5.5 Responses calls failing with HTTP 400 because `temperature` is unsupported. The GPT-5.x Responses body now omits it; chat-completions fallback behavior is unchanged. The final live run logged 10 successful GPT-5.5 Responses calls and zero temperature warnings.
+- Fresh real browser proof on the short mode: initial review 85 with concrete 7/4/3-point deductions; attempt 1 candidate 92 adopted; attempt 2 candidate 86 rejected; attempt 3 candidate 88 rejected; final retained manuscript 92/editorial pass, 3 attempts, 3,330 displayed characters, and one Story Maker footer.
+- Fresh verification passed: full tests 82/82, focused editorial/OpenAI/UI tests, syntax checks, generic-rule guard, Nano 4koma contract, `git diff --check`, and production build. The build retains only the existing large-chunk warning.
+- No commit, staging, push, deploy, release, tag, version bump, distribution sync, backup, or server shutdown was performed.

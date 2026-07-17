@@ -63,7 +63,7 @@ assert.equal(blockedConfig.enabled, false);
 const jsonBody = buildOpenAiResponsesRequestBody(
   'gpt-5.5',
   'prompt',
-  { responseMimeType: 'application/json', maxTokens: 123 },
+  { responseMimeType: 'application/json', maxTokens: 123, temperature: 1 },
   false
 );
 assert.equal(jsonBody.model, 'gpt-5.5');
@@ -71,6 +71,7 @@ assert.deepEqual(jsonBody.input, [{ role: 'user', content: 'prompt' }]);
 assert.equal(jsonBody.max_output_tokens, 123);
 assert.equal(jsonBody.text.format.type, 'json_object');
 assert.equal(jsonBody.stream, undefined);
+assert.equal(jsonBody.temperature, undefined);
 
 assert.equal(extractOpenAiResponsesText({ output_text: 'beta body' }), 'beta body');
 assert.equal(

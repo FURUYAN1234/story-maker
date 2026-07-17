@@ -84,9 +84,6 @@ function buildOpenAiResponsesRequestBody(model, prompt, options = {}, stream = f
     input: [{ role: 'user', content: String(prompt || '') }],
     max_output_tokens: maxOutputTokens,
   };
-  if (options.temperature !== undefined) {
-    body.temperature = options.temperature;
-  }
   if (stream) {
     body.stream = true;
   }

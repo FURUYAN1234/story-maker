@@ -43,6 +43,11 @@ assert.ok(fourKomaReviewPrompt.includes(`末尾の「${STORY_MAKER_FOOTER}」`))
 assert.match(fourKomaReviewPrompt, /契約違反として減点しない/);
 const mechanicallyValidFourKoma = [1, 2, 3, 4].map(number => `${number}コマ目:\n絵/状況: 場面${number}\nセリフ: 人物「台詞」\n狙い: 意図`).join('\n');
 assert.match(buildEditorialReviewPrompt({ mode: '4koma', modeLabel: '4コマ漫画風', text: mechanicallyValidFourKoma }), /形式契約はアプリの機械検証に合格済み/);
+const actionableReviewPrompt = buildEditorialReviewPrompt({ mode: 'short', modeLabel: 'ショート', text: '本文' });
+assert.match(actionableReviewPrompt, /100点未満なら、褒めるだけの講評を禁止/);
+assert.match(actionableReviewPrompt, /本文中の該当箇所/);
+assert.match(actionableReviewPrompt, /減点理由/);
+assert.match(actionableReviewPrompt, /問題点と同じ番号/);
 
 assert.deepEqual(
   parseEditorialReview('AI総合点: 84点\nAI講評:\n芯が通っている。\n良い点:\n結末'),
