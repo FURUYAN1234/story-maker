@@ -17,7 +17,6 @@ const LONG_MODE_ENABLED = false;
 const FALLBACK_MODE = 'novel';
 const API_SESSION_KEY = 'story-maker.api.session.v500';
 const API_MEMORY_KEY = '__storyMakerApiRuntimeMemoryV500';
-const API_WINDOW_NAME_PREFIX = 'story-maker.api.tab-session.v500:';
 let editorialBrushupInstalled = false;
 const SA_STANDARD_LOCKED_ATTR = 'data-sa-standard-generating-locked';
 
@@ -51,63 +50,9 @@ function memoryApiStorage() {
   };
 }
 
-function windowNameApiStorage() {
-  const readBag = () => {
-    const raw = String(window?.name || '');
-    if (!raw.startsWith(API_WINDOW_NAME_PREFIX)) return {};
-    try {
-      const parsed = JSON.parse(raw.slice(API_WINDOW_NAME_PREFIX.length));
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-      return {};
-    }
-  };
-  const writeBag = bag => {
-    window.name = `${API_WINDOW_NAME_PREFIX}${JSON.stringify(bag || {})}`;
-  };
-  return {
-    getItem(key) {
-      const bag = readBag();
-      return Object.prototype.hasOwnProperty.call(bag, key) ? bag[key] : null;
-    },
-    setItem(key, value) {
-      const bag = readBag();
-      bag[key] = String(value || '');
-      writeBag(bag);
-    },
-    removeItem(key) {
-      const bag = readBag();
-      delete bag[key];
-      writeBag(bag);
-    },
-  };
-}
-
-function storageUsable(storage) {
-  if (!storage) return false;
-  try {
-    const probeKey = `${API_SESSION_KEY}.probe`;
-    storage.setItem(probeKey, '1');
-    storage.removeItem(probeKey);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function apiStorage() {
-  try {
-    const storageName = ['ses', 'sion', 'Stor', 'age'].join('');
-    const storage = window?.[storageName];
-    if (storageUsable(storage)) return storage;
-  } catch {
-    // Fall through to tab-local reload-resistant storage.
-  }
-  try {
-    return windowNameApiStorage();
-  } catch {
-    return memoryApiStorage();
-  }
+  // Keys must never survive reloads or be exposed through browser persistence.
+  return memoryApiStorage();
 }
 
 function normalizeApiKey(value) {

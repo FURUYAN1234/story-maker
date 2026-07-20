@@ -2,11 +2,14 @@ import assert from 'node:assert/strict';
 
 import {
   API_SESSION_KEY,
-  API_WINDOW_NAME_PREFIX,
   readApiSession,
   restoreApiSession,
   writeApiSession,
 } from '../src/apiSession.js';
+import {
+  installThirdPartyUrlProxyBlock,
+  isBlockedThirdPartyUrlProxy,
+} from '../src/privacyGuards.js';
 
 function installWindow(storage = null) {
   global.window = {
@@ -30,36 +33,34 @@ function createStorage() {
   };
 }
 
-installWindow(null);
-writeApiSession({
-  apiProvider: 'gemini',
-  geminiKey: 'gemini-test-key-1234567890',
-});
-assert.ok(global.window.name.startsWith(API_WINDOW_NAME_PREFIX));
-const restoredFromWindowName = {};
-assert.equal(restoreApiSession(restoredFromWindowName), true);
-assert.equal(restoredFromWindowName.apiProvider, 'gemini');
-assert.equal(restoredFromWindowName.apiKey, 'gemini-test-key-1234567890');
-assert.equal(readApiSession().geminiKey, 'gemini-test-key-1234567890');
-
 const storage = createStorage();
 installWindow(storage);
 writeApiSession({
   apiProvider: 'openai',
   openaiKey: 'sk-test-key-1234567890',
 });
-assert.ok(storage.getItem(API_SESSION_KEY));
-assert.ok(global.window.name.startsWith(API_WINDOW_NAME_PREFIX));
-const restoredFromStorage = {};
-assert.equal(restoreApiSession(restoredFromStorage), true);
-assert.equal(restoredFromStorage.apiProvider, 'openai');
-assert.equal(restoredFromStorage.apiKey, 'sk-test-key-1234567890');
 
-writeApiSession({
-  apiProvider: 'gemini',
-  geminiKey: '',
-  openaiKey: '',
-});
+assert.equal(storage.getItem(API_SESSION_KEY), null, 'API keys must not persist in sessionStorage');
+assert.equal(global.window.name, '', 'API keys must not persist in window.name');
+assert.deepEqual(readApiSession(), {}, 'a reload must not recover an API key');
+assert.equal(restoreApiSession({}), false, 'API key restoration must be disabled');
+
+assert.equal(isBlockedThirdPartyUrlProxy('https://api.codetabs.com/v1/proxy/?quest=https%3A%2F%2Fexample.com'), true);
+assert.equal(isBlockedThirdPartyUrlProxy('https://api.allorigins.win/get?url=https%3A%2F%2Fexample.com'), true);
+assert.equal(isBlockedThirdPartyUrlProxy('https://api.openai.com/v1/responses'), false);
+
+const requests = [];
+const guardedWindow = {
+  fetch(input) {
+    requests.push(String(input));
+    return Promise.resolve('ok');
+  },
+};
+assert.equal(installThirdPartyUrlProxyBlock(guardedWindow), true);
+await assert.rejects(() => guardedWindow.fetch('https://api.codetabs.com/v1/proxy/?quest=https%3A%2F%2Fexample.com'));
+await guardedWindow.fetch('https://api.openai.com/v1/responses');
+assert.deepEqual(requests, ['https://api.openai.com/v1/responses']);
+
 assert.equal(storage.getItem(API_SESSION_KEY), null);
 assert.equal(global.window.name, '');
 

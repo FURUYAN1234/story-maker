@@ -7,6 +7,7 @@
 // 5. generationSettingsIo owns settings import/export and unified save names.
 
 import './modulePreloadPolyfill.js';
+import './privacyGuards.js';
 import './qualityBoost.js';
 import './legacyMain.js';
 import './directLong10000Runtime.js';

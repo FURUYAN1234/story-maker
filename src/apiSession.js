@@ -28,15 +28,6 @@ export function getApiSessionStorage() {
   }
 }
 
-function writeApiSessionToWindowName(session) {
-  try {
-    if (typeof window === 'undefined') return;
-    window.name = `${API_WINDOW_NAME_PREFIX}${JSON.stringify(session || {})}`;
-  } catch {
-    // Ignore unavailable window.name.
-  }
-}
-
 function clearApiSessionFromWindowName() {
   try {
     if (typeof window === 'undefined') return;
@@ -46,89 +37,33 @@ function clearApiSessionFromWindowName() {
   }
 }
 
-export function writeApiSession(state) {
+export function clearPersistedApiSession() {
   try {
     const storage = getApiSessionStorage();
-    if (!state) return;
-    const apiProvider = state.apiProvider === 'openai' ? 'openai' : 'gemini';
-    const currentKey = normalizeApiKey(apiProvider === 'openai'
-      ? state.openaiKey || state.apiKey
-      : state.geminiKey || state.apiKey);
-    const openaiKey = normalizeApiKey(state.openaiKey);
-    const geminiKey = normalizeApiKey(state.geminiKey);
-    if (!currentKey && !openaiKey && !geminiKey) {
-      storage?.removeItem(API_SESSION_KEY);
-      clearApiSessionFromWindowName();
-      return;
-    }
-    const session = { apiProvider, geminiKey, openaiKey };
-    storage?.setItem(API_SESSION_KEY, JSON.stringify(session));
-    writeApiSessionToWindowName(session);
+    storage?.removeItem(API_SESSION_KEY);
+    storage?.removeItem(LEGACY_API_SESSION_KEY);
   } catch {
-    try {
-      if (!state) return;
-      const apiProvider = state.apiProvider === 'openai' ? 'openai' : 'gemini';
-      const session = {
-        apiProvider,
-        geminiKey: normalizeApiKey(state.geminiKey || (apiProvider === 'gemini' ? state.apiKey : '')),
-        openaiKey: normalizeApiKey(state.openaiKey || (apiProvider === 'openai' ? state.apiKey : '')),
-      };
-      if (session.geminiKey || session.openaiKey) writeApiSessionToWindowName(session);
-    } catch {
-      // Session persistence is best-effort only.
-    }
+    // Storage can be disabled; window.name is cleared below when available.
   }
+  clearApiSessionFromWindowName();
+}
+
+export function writeApiSession(state) {
+  // API keys live only in the in-memory UI state for this page instance.
+  // Clear legacy persisted values in case a user upgrades from an older release.
+  void state;
+  clearPersistedApiSession();
 }
 
 export function readApiSession() {
-  const candidates = [];
-  try {
-    const storage = getApiSessionStorage();
-    if (storage) {
-      candidates.push(JSON.parse(storage.getItem(API_SESSION_KEY) || 'null'));
-      candidates.push(JSON.parse(storage.getItem(LEGACY_API_SESSION_KEY) || 'null'));
-    }
-  } catch {
-    // Ignore unavailable or malformed storage.
-  }
-  try {
-    const raw = String(window.name || '');
-    if (raw.startsWith(API_WINDOW_NAME_PREFIX)) {
-      candidates.push(JSON.parse(raw.slice(API_WINDOW_NAME_PREFIX.length)));
-    }
-  } catch {
-    // Ignore malformed window.name payloads.
-  }
-
-  return candidates.reduce((session, candidate) => {
-    if (!candidate || typeof candidate !== 'object') return session;
-    const apiProvider = candidate.apiProvider === 'openai' ? 'openai' : candidate.apiProvider === 'gemini' ? 'gemini' : '';
-    const geminiKey = normalizeApiKey(candidate.geminiKey);
-    const openaiKey = normalizeApiKey(candidate.openaiKey);
-    const apiKey = normalizeApiKey(candidate.apiKey);
-    if (apiProvider) session.apiProvider = apiProvider;
-    if (isRealApiKey(geminiKey)) session.geminiKey = geminiKey;
-    if (isRealApiKey(openaiKey)) session.openaiKey = openaiKey;
-    if (isRealApiKey(apiKey)) session.apiKey = apiKey;
-    return session;
-  }, {});
+  clearPersistedApiSession();
+  return {};
 }
 
 export function restoreApiSession(state) {
-  try {
-    if (!state || state.apiKey) return false;
-    const session = readApiSession();
-    const apiProvider = session.apiProvider === 'openai' ? 'openai' : 'gemini';
-    const currentKey = apiProvider === 'openai' ? session.openaiKey : session.geminiKey;
-    if (!isRealApiKey(currentKey)) return false;
-    state.apiProvider = apiProvider;
-    state.geminiKey = normalizeApiKey(session.geminiKey);
-    state.openaiKey = normalizeApiKey(session.openaiKey);
-    state.apiKey = currentKey;
-    return true;
-  } catch {
-    return false;
-  }
+  void state;
+  clearPersistedApiSession();
+  return false;
 }
 
 export function sanitizeApiSession(session) {
@@ -138,3 +73,5 @@ export function sanitizeApiSession(session) {
     hasOpenAI: isRealApiKey(session?.openaiKey),
   };
 }
+
+clearPersistedApiSession();

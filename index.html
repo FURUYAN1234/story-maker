@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v5.3.5</title>
+  <title>Story Maker v5.3.6</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <script type="module" crossorigin src="./src/main.js"></script>
   <link rel="stylesheet" crossorigin href="./src/style.css">
@@ -14,7 +14,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.3.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.3.6</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
 
     <div id="banner" class="banner">
@@ -32,12 +32,13 @@
         <span class="api-link-sep">/</span>
         <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="api-link api-link-openai">OpenAI API</a>
         <span class="api-link-sep">—</span>
-        <span class="api-notice-security">⚠️ キーは公開ファイルに含めず・ページを閉じると消去・API通信時のみ選択中の提供元へ送信</span>
+        <span class="api-notice-security">⚠️ キーは保存せず、再読み込み・ページを閉じると消去。API通信時のみ選択中の提供元へ送信</span>
         <span class="api-link-sep">|</span>
         <span class="api-notice-security">🔄「API切替」は入力内容やキーを保持したままAPIのみを切り替えます</span>
       </div>
 
       <!-- 📡 AI進捗ログ窓 (常設) -->
+      <div class="api-notice"><a href="./privacy.html" class="api-link">プライバシーポリシー</a></div>
       <div id="progress-window" class="progress-window">
         <div class="progress-header">
           <span class="progress-status-icon">📡</span>
@@ -289,7 +290,7 @@
           <div class="ui-dropzone-icon">📥</div>
           <div class="ui-dropzone-text">
             <strong>画像・URL・テキストをドロップ</strong>
-            <span>または ここにコピペ (Ctrl+V)</span>
+            <span>または ここにコピペ (Ctrl+V) — URL本文の外部取得は行いません</span>
           </div>
           <div class="ui-dropzone-hint">PNG/JPG/WEBP画像、Webリンク、.txt/.mdファイル対応</div>
           <div class="ui-spinner hidden" id="ui-spinner">

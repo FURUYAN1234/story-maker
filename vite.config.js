@@ -78,9 +78,39 @@ function publicAssetGuard() {
   };
 }
 
+function splitFeatureChunks(id) {
+  const path = id.replace(/\\/g, '/');
+  if (path.includes('/src/styleAnalyzer') || path.endsWith('/src/styleGuides.js')) {
+    return 'style-analyzer';
+  }
+  if (
+    path.includes('/src/longNovel')
+    || path.includes('/src/longify')
+    || path.endsWith('/src/longContextMemoHelpers.js')
+    || path.endsWith('/src/longSettingsFormatter.js')
+  ) {
+    return 'long-form';
+  }
+  if (
+    path.includes('/src/editorial')
+    || path.endsWith('/src/consistencyAuditHelpers.js')
+    || path.endsWith('/src/standardThoughtScores.js')
+  ) {
+    return 'editorial-tools';
+  }
+  return undefined;
+}
+
 export default defineConfig({
   base: './',
   plugins: [injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: splitFeatureChunks,
+      },
+    },
+  },
   server: {
     port: 5179,
     strictPort: true,
