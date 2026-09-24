@@ -1,4 +1,10 @@
-const DEFAULT_OPENAI_RESPONSES_BETA_MODELS = ['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini'];
+import {
+  emitOpenAIModelRouteEvent,
+  getOpenAIResponsesRoute,
+  getSelectedOpenAIModelId,
+} from './openAiModelCatalog.js';
+
+const DEFAULT_OPENAI_RESPONSES_BETA_MODELS = getOpenAIResponsesRoute();
 const BETA_QUERY_PARAMS = ['gpt5xBeta', 'openaiResponsesBeta', 'codexOpenAiResponsesBeta'];
 const MODEL_QUERY_PARAMS = ['gpt5xModel', 'openaiResponsesModel', 'codexOpenAiResponsesModel'];
 
@@ -20,7 +26,7 @@ function isFalsyFlag(value) {
 
 function sanitizeModelId(value) {
   const model = String(value || '').trim();
-  return /^gpt-5(?:[.\w-]*)?$/i.test(model) ? model : '';
+  return /^gpt-(?:4|5|6)(?:[.\w-]*)?$/i.test(model) ? model : '';
 }
 
 function uniqueModels(models) {
@@ -67,7 +73,7 @@ function resolveOpenAiResponsesBetaConfig(options = {}, runtime = globalThis) {
   const models = uniqueModels([
     queryModel,
     ...optionModels,
-    ...DEFAULT_OPENAI_RESPONSES_BETA_MODELS,
+    ...getOpenAIResponsesRoute(getSelectedOpenAIModelId()),
   ]);
 
   return {
@@ -296,6 +302,7 @@ async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options 
   for (const model of config.models) {
     try {
       console.info(`[OpenAI Responses beta] trying model: ${model}`);
+      emitOpenAIModelRouteEvent('trying', model);
       if (model !== config.models[0] && typeof onFallback === 'function') {
         onFallback(`${model} Responses beta`);
       }
@@ -306,6 +313,7 @@ async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options 
         throw new Error('Empty Responses API output');
       }
       console.info(`[OpenAI Responses beta] completed model: ${model}, chars: ${text.length}`);
+      emitOpenAIModelRouteEvent('adopted', model);
       return { text, usedModel: `${model} (Responses beta)` };
     } catch (error) {
       console.warn(`Responses beta model ${model} failed:`, error.message);
@@ -325,6 +333,7 @@ async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallbac
   for (const model of config.models) {
     try {
       console.info(`[OpenAI Responses beta] trying ${useStreaming ? 'stream' : 'model'}: ${model}`);
+      emitOpenAIModelRouteEvent('trying', model);
       if (model !== config.models[0] && typeof onFallback === 'function') {
         onFallback(`${model} Responses beta`);
       }
@@ -346,6 +355,7 @@ async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallbac
         onChunk({ text, isThought: false });
         console.info(`[OpenAI Responses beta] completed model: ${model}, chars: ${text.length}`);
       }
+      emitOpenAIModelRouteEvent('adopted', model);
       return { usedModel: `${model} (Responses beta)` };
     } catch (error) {
       console.warn(`Responses beta model ${model} ${useStreaming ? 'stream ' : ''}failed:`, error.message);

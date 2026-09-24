@@ -2,6 +2,30 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-09-24 OpenAI thought-model selector and Luna API proof (local only)
+
+- Added a compact OpenAI-only thought-model selector beneath the API banner. GPT-6 Astra is the OpenAI-mode default; the page-session choice is not persisted, and the card remains visible after an OpenAI key is registered.
+- The selector exposes GPT-6 Astra/Sol/Luna, GPT-5.6 Sol/Terra/Luna, GPT-4.1/mini/nano, and GPT-4o. Each option shows a short description; the adjacent detail area shows the 2026-09-24 Standard short-context input/output price snapshot and selected/attempted/adopted route status.
+- Browser verification covered desktop and 355 px mobile layouts without horizontal overflow, OpenAI/Gemini visibility switching, and Astra restoration when OpenAI mode is reselected after reload. Existing API-key/session behavior remains unchanged: reload clears the session and returns the app to Gemini mode.
+- One authorized real OpenAI run selected, attempted, and adopted GPT-6 Luna without fallback. It produced a 487-character four-panel script, completed the existing automatic review/brush-up flow at 88 points, left the model selector visible, and produced zero browser warning/error logs.
+- After the user re-entered the page-session key, a second explicitly requested Luna verification also selected, attempted, and adopted GPT-6 Luna without fallback. The final four-panel output was 1,023 visible characters; automatic brush-up improved 86 to 88 to 89, finished as public-ready at 89 points, restored the Generate button, kept the selector visible, and produced zero browser warning/error logs.
+- Fresh verification: all 80 tests passed, lint passed, `git diff --check -- . ':!dist'` passed, and `npm run build` passed after reviewing and pinning the current adjacent Nano Banana STEP2 contract hash; Vite completed with only the existing chunk-size warning.
+- No commit, push, deploy, release, version bump, or backup was performed.
+
+## 2026-07-20 Release completion gate repair (local only)
+
+- Added versioned bilingual release notes. English and Japanese sections must
+  contain matching bracketed item IDs.
+- The deploy command now runs release preflight first. A portable Node test
+  runner replaces the OS-specific test command so CI runs the same suite.
+- The public verifier rejects completion unless Pages reports built, the
+  deployed commit matches, and the public page shows the requested version.
+- Witnessed failures: a nonexistent release version fails preflight, and the
+  current v5.3.6 Pages verification fails because GitHub Pages reports
+  building. Therefore the deploy remains incomplete.
+- Fresh local verification: 78/78 tests, production build, syntax checks, and
+  diff check passed. No commit, push, release, deploy, or backup was performed.
+
 ## 2026-07-12 Brush-up progress and quality-target fix (local only)
 
 - The public v5.3.2 brush-up click was accepted but disabled the button without visible running feedback. Live inspection of the same public tab later showed one completed pass and a score change from 78 to 89.

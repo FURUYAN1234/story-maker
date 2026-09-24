@@ -9,7 +9,8 @@ const nanoRoot = process.env.NANO_BANANA_PRO_ROOT
   : path.resolve(rootDir, '..', 'nano-banana-pro');
 
 const nanoPromptFile = path.join(nanoRoot, 'src', 'lib', 'prompts.js');
-const expectedNanoStep2Hash = '8c9925b01db83c345fe9174932d9e9a00ed5dc8e5be8118f4dbb9c3a5a0fbadc';
+// Updated after reviewing the current adjacent Nano Banana Pro STEP2 contract.
+const expectedNanoStep2Hash = 'd399b78980e05f686a2a31d960121d8bed592cea99c199534443ccebf940bad5';
 
 function fail(message) {
   console.error(`[nano-4koma-contract] ${message}`);

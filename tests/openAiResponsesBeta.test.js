@@ -5,6 +5,10 @@ import {
   resolveLongOutputOptions,
   resolveOpenAiResponsesBetaConfig,
 } from '../src/openAiResponsesBeta.js';
+import {
+  resetSelectedOpenAIModelId,
+  setSelectedOpenAIModelId,
+} from '../src/openAiModelCatalog.js';
 import { Gt, yt } from '../src/providerClients.js';
 
 function fakeRuntime(search) {
@@ -36,19 +40,29 @@ const enabledConfig = resolveOpenAiResponsesBetaConfig(
   fakeRuntime('?gpt5xBeta=1')
 );
 assert.equal(enabledConfig.enabled, true);
-assert.deepEqual(enabledConfig.models, ['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini']);
+assert.deepEqual(enabledConfig.models, [
+  'gpt-6-astra', 'gpt-6-sol', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-6-luna',
+  'gpt-5.6-luna', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o',
+]);
 
 const defaultConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
 assert.equal(defaultConfig.enabled, true);
 assert.equal(defaultConfig.source, 'default');
-assert.deepEqual(defaultConfig.models, ['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini']);
+assert.equal(defaultConfig.models[0], 'gpt-6-astra');
+
+setSelectedOpenAIModelId('gpt-6-luna');
+const lunaConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
+assert.deepEqual(lunaConfig.models, [
+  'gpt-6-luna', 'gpt-5.6-luna', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o',
+]);
+resetSelectedOpenAIModelId();
 
 const explicitModelConfig = resolveOpenAiResponsesBetaConfig(
   { openAiResponsesBetaAllowed: true },
-  fakeRuntime('?gpt5xBeta=1&gpt5xModel=gpt-5.6')
+  fakeRuntime('?gpt5xBeta=1&gpt5xModel=gpt-5.6-terra')
 );
 assert.equal(explicitModelConfig.enabled, true);
-assert.deepEqual(explicitModelConfig.models.slice(0, 2), ['gpt-5.6', 'gpt-5.5']);
+assert.deepEqual(explicitModelConfig.models.slice(0, 2), ['gpt-5.6-terra', 'gpt-6-astra']);
 
 const queryModelPriorityConfig = resolveOpenAiResponsesBetaConfig(
   { openAiResponsesBetaAllowed: true, openAiResponsesModels: ['gpt-5.4-mini'] },

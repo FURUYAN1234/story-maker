@@ -10,6 +10,7 @@ import './modulePreloadPolyfill.js';
 import './privacyGuards.js';
 import './qualityBoost.js';
 import './legacyMain.js';
+import './openAiModelUi.js';
 import './directLong10000Runtime.js';
 import './publicRuntime.js';
 import './generationSettingsIo.js';

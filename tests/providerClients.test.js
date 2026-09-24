@@ -98,7 +98,7 @@ globalThis.fetch = async () => ({
 
 try {
   const result = await Gt('sk-unit-test-key-000000000000', 'gpt-4.1', 'prompt', null, { maxTokens: 64 });
-  assert.equal(result.usedModel, 'gpt-5.5 (Responses beta)');
+  assert.equal(result.usedModel, 'gpt-6-astra (Responses beta)');
   assert.equal(result.text, 'responses default body');
 } finally {
   globalThis.fetch = originalFetch;

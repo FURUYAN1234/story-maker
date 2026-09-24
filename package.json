@@ -1,6 +1,6 @@
 {
   "name": "story-maker",
-  "version": "5.3.6",
+  "version": "5.3.7",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",
@@ -9,9 +9,14 @@
     "fix:generic-rules": "node scripts/check-generic-rules.mjs --fix",
     "check:generic-rules": "node scripts/check-generic-rules.mjs",
     "check:nano-4koma-contract": "node scripts/check-nano-4koma-contract.mjs",
+    "test": "node scripts/run-tests.mjs",
+    "release:preflight": "powershell -ExecutionPolicy Bypass -File ..\\scripts\\release_app_preflight.ps1 -App story-maker",
+    "release:app-preflight": "node scripts/release-preflight.mjs",
+    "release:verify": "node scripts/verify-release.mjs",
     "build": "npm run fix:generic-rules && npm run check:generic-rules && npm run check:nano-4koma-contract && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "predeploy": "npm run release:preflight && npm run release:app-preflight && npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",

@@ -1,4 +1,4 @@
-# Story Maker v5.3.6 / AI物語メーカー
+# Story Maker v5.3.7 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -14,7 +14,7 @@ APIキーはユーザーがブラウザUIへ入力します。リポジトリ、
 
 API keys are kept only in the active page memory and are cleared on reload or when the page closes. They are not stored in `localStorage`, `sessionStorage`, or `window.name`. Keys are sent only to the selected provider when an API request is made for generation, image understanding, style analysis, or news-grounded keyword assistance. Story Maker does not send API keys to the repository, issue tracker, release system, documentation, or unrelated external services. URL body fetching through third-party proxy services is disabled; paste source text directly instead. See [PRIVACY.md](./PRIVACY.md) for the full policy.
 
-APIキーは、生成、画像理解、作風解析、ニュース接地キーワード補助などで必要なAPIリクエストを行う時だけ、選択中のAPI提供元へ送信されます。Story Maker は、APIキーをリポジトリ、Issue、リリース管理、公開文書、無関係な外部サービスへ送信しません。
+APIキーはアクティブなページのメモリだけに保持され、リロードまたはページを閉じると消えます。`localStorage`、`sessionStorage`、`window.name` には保存しません。生成、画像理解、作風解析、ニュース接地キーワード補助などで必要なAPIリクエストを行う時だけ、選択中のAPI提供元へ送信されます。Story Maker は、APIキーをリポジトリ、Issue、リリース管理、公開文書、無関係な外部サービスへ送信しません。URL本文の取得に第三者公開プロキシは使用しないため、素材本文は直接貼り付けてください。詳しくは [PRIVACY.md](./PRIVACY.md) を参照してください。
 
 Do not paste API keys into issues, pull requests, release notes, screenshots, public documents, or chat logs.
 
@@ -106,6 +106,12 @@ The intent is not to force every work into the same template. The contract tells
 Story Maker is designed as a small static application, but the generation pipeline is closer to a creative-control engine than a single textarea. The technical value is in how the app converts visible user choices into a stable, provider-aware writing contract.
 
 Story Maker は小さな静的Webアプリとして動きますが、生成パイプラインは単一のテキスト欄ではなく、創作制御エンジンに近い構造です。技術的な価値は、画面上の選択を、API提供元ごとの癖まで考慮した安定した文章生成契約へ変換する点にあります。
+
+### Release Safety / 公開時の安全ゲート
+
+For maintainers, deployment is not treated as release completion. The deploy command first checks a versioned release-note file with paired English/Japanese item IDs, then builds the app. After publication, the release verifier requires GitHub Pages to report `built`, to point to the expected commit, and for the public page to show the requested version. A `building`, failed, stale, or unreachable page remains an incomplete release.
+
+保守者向けには、デプロイ実行だけをリリース完了と扱いません。デプロイ前に、英日で対応する項目IDを持つ版別リリースノートを検査し、本番ビルドを行います。公開後は、GitHub Pages が `built` であること、対象コミットと一致すること、公開ページに対象バージョンが表示されることを確認します。`building`、失敗、古い表示、到達不能のページはリリース未完了です。
 
 ### Multi-Axis Prompt Compiler / 多軸プロンプトコンパイラ
 
@@ -263,13 +269,13 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.6 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.3.7 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.6系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.3.7系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
-The current release line also keeps release identity, footer text, and browser API-session persistence in small runtime modules. `src/main.js` still hosts the legacy UI flow, but version/footer handling now lives in `src/version.js`, and API-key tab/session restoration lives in `src/apiSession.js`. This keeps release text and key persistence behavior consistent without hiding API keys in source files.
+The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them.
 
-現在のリリース系統では、リリース識別、フッター表記、ブラウザ内APIセッション保持も小さな実行時モジュールへ分離しています。`src/main.js` はまだ既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーのタブ内保持と復元は `src/apiSession.js` に分けました。これにより、APIキーをソースへ保存せずに、公開表記とキー保持挙動を揃えています。
+現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
 ### Selected-Mode Priority / 選択モード優先
 
@@ -802,12 +808,29 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 
 ## Release History / 変更履歴
 
+### v5.3.7 (2026-09-24)
+
+- [model-selector] Added a compact OpenAI thought-model selector with GPT-6 Astra as the OpenAI-mode default and GPT-6/Sol/Luna, GPT-5.6, GPT-4.1, and GPT-4o choices.
+- [pricing] Added current Standard short-context input/output price details and concise model descriptions without crowding the native menu.
+- [route] The selected model now drives the Responses route with downward fallback and visible selected/attempted/adopted status.
+- [safety] Kept API keys page-memory-only and isolated the selector from the Gemini path.
+
+- [model-selector] OpenAIモードに、GPT-6 Astraを既定とする思考モデル選択欄を追加しました。GPT-6/Sol/Luna、GPT-5.6、GPT-4.1、GPT-4oを選べます。
+- [pricing] ネイティブメニューを詰まらせず、現在のStandard短文コンテキストの入出力単価と簡潔な概要を表示します。
+- [route] 選択モデルをResponsesルートへ反映し、下位方向フォールバックと選択・試行・採用状態を表示します。
+- [safety] APIキーはページメモリだけに保持し、モデル欄はGemini経路から分離しています。
+
 ### v5.3.6 (2026-07-20)
 
 - API keys are now page-memory-only: legacy `sessionStorage` and `window.name` restore paths are cleared and disabled.
 - URL body retrieval through CodeTabs and AllOrigins is blocked; the app now directs users to paste source text instead.
 - Added GitHub Actions CI, an MIT license, and linked public privacy policy. Production bundles are split into core, editorial, long-form, and style-analysis chunks.
 - Real API smoke tests completed for both OpenAI and Gemini from the local browser UI without reading key values.
+
+- APIキーはページメモリだけに保持し、リロード・ページ終了時に消去します。旧来の `sessionStorage` と `window.name` の復元経路は無効化しました。
+- URL本文の取得で CodeTabs や AllOrigins などの第三者公開プロキシを使わず、素材本文の直接貼り付けを案内します。
+- GitHub Actions CI、MITライセンス、公開プライバシーポリシーを追加しました。本番バンドルはcore、editorial、long-form、style-analysisへ分割しています。
+- APIキー値を読まずに、ローカルブラウザUIからOpenAIとGeminiの実APIスモークテストを完了しました。
 
 ### v5.3.5 (2026-07-17)
 
