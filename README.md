@@ -1,4 +1,4 @@
-# Story Maker v5.3.7 / AI物語メーカー
+# Story Maker v5.3.8 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -267,11 +267,17 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 「長編（10000字～）」の直接生成と長い原稿のブラッシュアップは、数分かかる場合があります。OpenAI Responses経路では、長文を返す段階に最大600秒を確保します。講評だけの通信は全文原稿を返さないため、より短いタイムアウトを使います。
 
+## OpenAI default and fallback / OpenAI既定モデルとフォールバック
+
+GPT-6.1 Sol is the default for development and public builds. Astra remains selectable. Selecting 6.1 Sol starts at 6.1 Sol and falls back through the existing lower models; it does not automatically try Astra. The selection covers story generation, editorial review and brush-up through the common text route. Standard short-context prices as of 2026-10-01 are input USD 2 and output USD 10 per million tokens; image generation and other provider charges are separate.
+
+開発版・公開版ともGPT-6.1 Solを既定にします。Astraは選択肢として保持し、6.1 Sol選択時は既存の下位モデルへフォールバックします。Astraへの自動切替は行いません。共通テキスト経路の物語生成・AI講評・ブラッシュアップに反映します。2026-10-01時点のStandard短文料金は100万トークン当たり入力2米ドル・出力10米ドルです。画像生成等の料金は別です。
+
 ## Current Quality System / 現行品質システム
 
-The current v5.3.7 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.3.8 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.7系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.3.8系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them.
 

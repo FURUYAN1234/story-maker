@@ -30,10 +30,8 @@ export function validateBilingualReleaseNotes(markdown, version) {
     '# Story Maker v' + version,
     '## English',
     "### What's New",
-    '### Verification',
     '## 日本語',
     '### 更新内容',
-    '### 検証',
   ];
 
   for (const heading of requiredHeadings) {
@@ -52,8 +50,10 @@ export function validateBilingualReleaseNotes(markdown, version) {
 
   const pairs = [
     [itemIds(englishNew), itemIds(japaneseNew), 'Japanese "更新内容" IDs must exactly match English "What\'s New" IDs.'],
-    [itemIds(englishVerification), itemIds(japaneseVerification), 'Japanese "検証" IDs must exactly match English "Verification" IDs.'],
   ];
+  if (englishVerification !== null || japaneseVerification !== null) {
+    pairs.push([itemIds(englishVerification), itemIds(japaneseVerification), 'Japanese "検証" IDs must exactly match English "Verification" IDs.']);
+  }
   for (const [englishIds, japaneseIds, message] of pairs) {
     if (!englishIds.length || !japaneseIds.length || !sameIds(englishIds, japaneseIds)) errors.push(message);
   }

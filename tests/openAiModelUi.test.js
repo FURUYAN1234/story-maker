@@ -13,7 +13,7 @@ assert.match(markup, /for="openai-model-select"/);
 assert.match(markup, /GPT-6 Astra（[^）]+）/);
 assert.match(markup, /GPT-5\.6 Terra（[^）]+）/);
 assert.match(markup, /GPT-4\.1 mini（[^）]+）/);
-assert.match(markup, /2026-09-24/);
+assert.match(markup, /2026-10-01/);
 assert.match(markup, /100万トークン/);
 assert.match(markup, /長文コンテキスト/);
 assert.match(markup, /data-model-status="selected"/);

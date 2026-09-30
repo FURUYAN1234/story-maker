@@ -28,6 +28,11 @@ const completeNotes = [
 ].join('\n');
 
 assert.deepEqual(validateBilingualReleaseNotes(completeNotes, '5.3.6'), []);
+const changesOnly = completeNotes
+  .replace('### Verification\n- [tests] Unit tests and production build passed.\n', '')
+  .replace('### 検証\n- [tests] ユニットテストと本番ビルドが成功しました。', '');
+assert.deepEqual(validateBilingualReleaseNotes(changesOnly, '5.3.6'), []);
+assert.ok(validateBilingualReleaseNotes(changesOnly.replace('- [proxy] 外部URLプロキシを無効化しました。', ''), '5.3.6').length > 0);
 
 assert.deepEqual(
   validateBilingualReleaseNotes(completeNotes.replace('- [proxy] 外部URLプロキシを無効化しました。', ''), '5.3.6'),

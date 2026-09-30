@@ -2,6 +2,13 @@
 
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
+## 2026-10-01 v5.3.8 GPT-6.1 Sol rollout
+
+- All 11 models remain selectable, Astra first; Sol 6.1 is the development and production default. Selecting a lower model never automatically escalates to Astra.
+- Real org availability and ordinary four-panel generation/review/three automatic brush-up attempts completed on Sol 6.1. Final 86 points is public-ready under existing criteria, not the 90-point editorial threshold; best candidate retained. All attempts adopted Sol 6.1 without model fallback. Local evidence is in ignored output_sol61.
+- Full 80 tests and production build passed; focused release-gate tests also pass. Reviewed adjacent Nano STEP2 script-only Balloons contract and refreshed its pinned hash; no Story prompt semantics changed. Release notes omit verification-log sections as required by root policy while retaining matched bilingual change IDs.
+- User authorized official release/deploy, existing note plus identical X/Facebook announcements and final full backup after all updated apps. No publication or backup yet.
+
 ## 2026-09-24 OpenAI thought-model selector and Luna API proof (local only)
 
 - Added a compact OpenAI-only thought-model selector beneath the API banner. GPT-6 Astra is the OpenAI-mode default; the page-session choice is not persisted, and the card remains visible after an OpenAI key is registered.
