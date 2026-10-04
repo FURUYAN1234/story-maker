@@ -3,6 +3,7 @@
 This file is public-repository safe. Do not include API keys, private credentials, billing data, private tokens, personal local paths, or unreleased account details.
 
 ## 2026-10-01 v5.3.8 GPT-6.1 Sol rollout
+<!-- Current terms-publication status and acceptance evidence are maintained in the workspace PLAN.md; the historical rollout below is unchanged. -->
 
 - All 11 models remain selectable, Astra first; Sol 6.1 is the development and production default. Selecting a lower model never automatically escalates to Astra.
 - Real org availability and ordinary four-panel generation/review/three automatic brush-up attempts completed on Sol 6.1. Final 86 points is public-ready under existing criteria, not the 90-point editorial threshold; best candidate retained. All attempts adopted Sol 6.1 without model fallback. Local evidence is in ignored output_sol61.
