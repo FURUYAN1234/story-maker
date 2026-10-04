@@ -1,4 +1,4 @@
-# Story Maker v5.3.9 / AI物語メーカー
+# Story Maker v5.4.0 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -275,9 +275,9 @@ GPT-6.1 Sol is the default for development and public builds. Astra remains sele
 
 ## Current Quality System / 現行品質システム
 
-The current v5.3.9 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.4.0 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.3.9系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.4.0系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them.
 
@@ -808,6 +808,11 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope<br>QA範囲 | Current QA verifies representative real browser output, not all possible input combinations.<br>現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed.<br>QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.4.0 (2026-10-04)
+
+- リロード時にAPIキーが消去され、再入力が必要になることを説明する文言へ訂正しました。キーの扱いと生成処理は変更していません。
+- Corrected the reload tooltip to explain that API keys are cleared and must be entered again. Key handling and generation behavior are unchanged.
 
 ### v5.3.9 (2026-10-04)
 - [terms] 個人・業務利用と自身の成果物の収益化を認める利用条件に統一。アプリ本体の有料配布等は事前許可制とし、過去の有効な許諾と第三者の条件を維持します。 / Unify free personal/business use and output monetization terms; paid app distribution and services require prior permission, while valid prior grants and third-party terms remain intact.
