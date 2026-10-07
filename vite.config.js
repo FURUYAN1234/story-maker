@@ -1,3 +1,4 @@
+import { webSecurity } from './scripts/web-security.mjs';
 import { defineConfig } from 'vite';
 
 function removeDivById(html, id) {
@@ -103,7 +104,7 @@ function splitFeatureChunks(id) {
 
 export default defineConfig({
   base: './',
-  plugins: [injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
+  plugins: [webSecurity({ connectSources: ["https://api.openai.com","https://generativelanguage.googleapis.com"] }), injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
   build: {
     rollupOptions: {
       output: {

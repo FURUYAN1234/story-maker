@@ -1,4 +1,4 @@
-# Story Maker v5.4.0 / AI物語メーカー
+# Story Maker v5.4.1 / AI物語メーカー
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
@@ -275,9 +275,9 @@ GPT-6.1 Sol is the default for development and public builds. Astra remains sele
 
 ## Current Quality System / 現行品質システム
 
-The current v5.4.0 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
+The current v5.4.1 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed.
 
-現在のv5.4.0系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+現在のv5.4.1系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them.
 
@@ -809,6 +809,11 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 
 ## Release History / 変更履歴
 
+### v5.4.1 (2026-10-07)
+
+- Imported character names and settings now preserve quotes and markup as text. Added CSP/frame protection, dependency updates, and security checks on every deployment.
+- インポートした登場人物名や設定の引用符・タグを文字として保持するよう修正しました。CSP・埋め込み防御・依存更新と、デプロイごとのセキュリティ検査を追加しました。
+
 ### v5.4.0 (2026-10-04)
 
 - リロード時にAPIキーが消去され、再入力が必要になることを説明する文言へ訂正しました。キーの扱いと生成処理は変更していません。
@@ -1226,3 +1231,9 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 - Built the core static story generator, multi-axis randomization, character controls, style-analysis support, image-assisted input, and GitHub Pages publishing workflow.
 
 - 静的な物語生成基盤、多軸ランダム、登場人物操作、作風解析補助、画像入力補助、GitHub Pages 公開手順を構築しました。
+
+## Browser security / ブラウザーの安全対策
+
+The app limits script execution and API connections with Content Security Policy, disables embedded frames and form submissions, and sends no referrer. Open the app directly in its own tab. API keys remain sensitive while in memory; these protections do not guarantee the absence of every vulnerability. Every deployment checks dependencies, source safeguards and the built policy.
+
+CSPでスクリプト実行・API接続先を制限し、埋め込み表示とフォーム送信を禁止、参照元情報を送信しません。アプリは直接タブで開いてください。メモリー内のAPIキーも機密情報であり、すべての脆弱性がないことを保証するものではありません。毎回のデプロイで依存ライブラリ・ソースの防御・ビルド後の設定を検査します。
