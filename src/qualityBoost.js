@@ -241,7 +241,6 @@ function rewriteContinuationPrompt(text, mode) {
 
 function boostGeminiBody(body) {
   let changed = false;
-  let publicMode = '';
   const next = { ...body };
   if (Array.isArray(next.contents)) {
     next.contents = next.contents.map(content => {
@@ -249,8 +248,6 @@ function boostGeminiBody(body) {
       let partsChanged = false;
       const parts = content.parts.map(part => {
         if (!part || typeof part.text !== 'string') return part;
-        const detectedMode = resolvePromptMode(part.text);
-        if (PUBLIC_MODE_VALUES.includes(detectedMode)) publicMode = detectedMode;
         const text = boostText(part.text);
         if (text !== part.text) {
           changed = true;
@@ -261,13 +258,6 @@ function boostGeminiBody(body) {
       });
       return partsChanged ? { ...content, parts } : content;
     });
-  }
-  if (publicMode && next.generationConfig?.responseMimeType !== 'application/json') {
-    next.generationConfig = {
-      ...next.generationConfig,
-      thinkingConfig: { thinkingBudget: 0 },
-    };
-    changed = true;
   }
   return changed ? next : body;
 }
@@ -868,9 +858,7 @@ async function rewriteShortGeminiText(originalFetch, input, init, body, mode, dr
   const rewriteBody = {
     contents: [{ parts: [{ text: rewritePrompt }] }],
     generationConfig: {
-      temperature: body?.generationConfig?.temperature ?? 0.95,
       maxOutputTokens: Math.max(Number(body?.generationConfig?.maxOutputTokens || 0), 12000),
-      thinkingConfig: { thinkingBudget: 0 },
     },
     safetySettings: body?.safetySettings,
   };

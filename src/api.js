@@ -30,10 +30,7 @@ export const diagnoseConnection = async (apiKey) => {
  */
 async function _callGemini(apiKey, model, prompt, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const generationConfig = { 
-     
-    temperature: options.temperature !== undefined ? options.temperature : 1.0 
-  };
+  const generationConfig = {};
   if (options.maxOutputTokens || options.maxTokens) {
     generationConfig.maxOutputTokens = options.maxOutputTokens || options.maxTokens;
   }
@@ -117,10 +114,7 @@ async function _callGemini(apiKey, model, prompt, options = {}) {
  */
 async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const generationConfig = { 
-     
-    temperature: options.temperature !== undefined ? options.temperature : 0.3 
-  };
+  const generationConfig = {};
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
@@ -446,10 +440,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
     parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
   });
 
-  const generationConfig = { 
-     
-    temperature: options.temperature !== undefined ? options.temperature : 0.4 
-  };
+  const generationConfig = {};
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
   }
@@ -726,16 +717,11 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
  */
 async function _callGeminiStream(apiKey, model, prompt, onChunk, options = {}) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
-  const generationConfig = {  temperature: 1.0 };
+  const generationConfig = {};
   if (options.maxOutputTokens || options.maxTokens) {
     generationConfig.maxOutputTokens = options.maxOutputTokens || options.maxTokens;
   }
   
-  if (!options.disableThinkingConfig && (model.includes("gemini-2.5") || model.includes("gemini-2.0") || model.includes("gemini-3") || model.includes("gemini-3.5"))) {
-    generationConfig.thinkingConfig = {
-      thinkingBudget: 2048
-    };
-  }
   
   if (options.responseMimeType) {
     generationConfig.responseMimeType = options.responseMimeType;
