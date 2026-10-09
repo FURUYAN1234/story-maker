@@ -1,4 +1,4 @@
-# Story Maker v5.4.2 / AI物語メーカー
+# Story Maker v5.4.3 / AI物語メーカー
 
 > **Source code available; free to use.** Ordinary use, free integration and free provision require no application, prior contact or permission from FURU. You may sell and monetize your own works. External API costs and third-party terms are separate. See Terms & Output Rights below. / **ソースコード公開・利用無料。** 通常利用と無料の組み込み・無料提供に、申請・事前連絡・FURUの許可は不要です。自分の作品は販売・収益化できます。外部API料金と第三者の条件は別です。詳しくは「利用条件・作品の権利」をご確認ください。
 
@@ -73,7 +73,7 @@ The intent is not to force every work into the same template. The contract tells
 | Quality / 品質 | Short-draft rewrite / 短すぎる初稿の改稿 | Too-short public drafts are rewritten before they are accepted as final output. / 公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
 | Quality / 品質 | Universal AI review and brush-up / 全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript receives a three-tier AI review and guarded rewrite: 90+ editorial pass, 85–89 publishable with optional brush-up, and 84 or below needs brush-up. / 生成・貼り付け・インポートしたすべての原稿を三段階でAI採点し、安全判定付きで改稿できます。90点以上は編集合格、85〜89点は公開可能・任意ブラッシュアップ、84点以下は要ブラッシュアップです。 |
 | Quality / 品質 | Final cleanup / 最終出力整形 | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display. / プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
-| Quality / 品質 | Completion gates / 完走ゲート | Mode-specific endings such as final 4-koma scenario aim and documentary closing labels are checked or restored. / 4コマシナリオ末尾の狙い、ドキュメンタリーの締めなど、モード固有の終端を確認・復元します。 |
+| Quality / 品質 | Completion gates / 完走ゲート | Mode-specific completion checks include the assembled four-panel scenario and documentary closing labels. / 4コマシナリオは継続応答の結合後に4コマと台詞・配置を確認し、ドキュメンタリーでは締めのラベルを確認します。 |
 
 ## Technology Highlights / 技術ハイライト
 
@@ -120,7 +120,7 @@ The public release supports the following 15 output modes. Each mode has a mode 
 | Mode / モード | Japanese Label / 日本語ラベル | Expected Output Shape / 想定出力形式 |
 |---|---|---|
 | `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. / 導入、展開、オチ、視覚的な動き、セリフで構成する4コマ形式です。 |
-| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Topic, logline, location, outfit, punchline, scenario notes, and four panel blocks with emotion/camera/dialogue cues. / テーマ、ログライン、場所、服装、オチ、シナリオメモと、感情・カメラ・セリフを含む4コマ分のブロックを出力します。 |
+| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Current Nano STEP2 headers, VisualEvidence and four panels with emotion, camera, BalloonLayout, visible action and standalone dialogue or explicit silence. / 現行Nano STEP2のヘッダーとVisualEvidence、感情・カメラ・BalloonLayout・状況・独立した台詞または無言指定を含む4コマを出力します。 |
 | `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. / 導入、転換、余韻を備え、最後の一文で意味が変わる短い物語です。 |
 | `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. / 欲求、障害、選択、代償、関係性の変化を場面で描く短編小説です。 |
 | `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc. / 展開、場面の推移、感情の変化を厚く描く3節構成の中編小説です。 |
@@ -163,7 +163,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 2. Set the theme, genre, worldview, audience, ending, narration, characters, and optional source material. / テーマ、ジャンル、世界観、読者層、結末、語り口、登場人物、必要なら素材を設定します。
 3. Generate the manuscript, or paste/import an existing manuscript into Output. / 原稿を生成するか、既存原稿をOutputへ貼り付け／TXT・MDインポートします。
 4. Read the automatically displayed AI score and commentary. / 自動表示されるAI点数と講評を確認します。
-5. Leave automatic brush-up on for up to three attempts toward the 100-point target, or turn it off to run exactly one rewrite per click. A score of 90 or higher passes. / 84点以下だけを最大3回まで自動ブラッシュアップできます。85〜89点は公開可能で、必要なときだけ手動ブラッシュアップを使います。90点以上は編集合格です。
+5. Leave automatic brush-up on for up to three attempts toward the 100-point target, or turn it off to run exactly one rewrite per click. A score of 90 or higher passes. / 自動ONでは100点を目標に最大3回まで改稿を試みます。OFFでは押すたびに1回だけ実行します。90点以上は編集合格です。
 6. Review the retained Output, then copy, save as TXT, or use the posting previews. / Outputに保持された原稿を確認し、コピー、TXT保存、投稿プレビューを使います。
 
 ### Display And Controls / 表示と操作
@@ -174,7 +174,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | Score card / 点数カード | Uses a full-width card with a large score, `/100`, pass/needs-brush-up label, score bar, and optional attempt count. / 全幅カードに大きな点数、`/100`、合格／要ブラッシュアップ、スコアバー、必要に応じて実行回数を表示します。 |
 | Commentary / 講評 | Preserves paragraphs and line breaks so concrete revision advice remains readable instead of becoming one dense line. / 具体的な改稿指示が一行に潰れないよう、段落と改行を保持して表示します。 |
 | Brush-up button / ブラッシュアップボタン | Disabled until Output contains a usable manuscript of at least 20 visible characters. While running, settings are protected from conflicting changes. / Outputに20文字以上の利用可能な原稿が入るまで無効です。実行中は競合する設定変更を防ぎます。 |
-| Automatic checkbox / 自動チェック | ON: automatically rewrites only manuscripts at 84 or below, stopping once the retained score reaches 85 or after three attempts. OFF: performs one rewrite attempt per click; scores from 85 to 89 remain available for optional manual brush-up. / ON: 84点以下だけを自動改稿し、保持点が85点に達するか最大3回で停止します。OFF: クリックごとに1回だけ改稿します。85〜89点は公開可能として任意の手動ブラッシュアップを使えます。 |
+| Automatic checkbox / 自動チェック | ON: aims for 100 points through at most three rewrites, retaining only better valid candidates. OFF: performs one rewrite attempt per click. / ON: 100点を目標に最大3回まで改稿し、検査を満たして点数が改善した候補だけを保持します。OFF: クリックごとに1回だけ改稿します。 |
 
 ### Review And Adoption Pipeline / 講評・採用パイプライン
 
@@ -185,7 +185,7 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | 3. Rewrite / 改稿 | Sends the current manuscript, active mode, current score, and commentary to the selected provider, requesting completed manuscript text only. / 現在の原稿、出力モード、点数、講評を選択中APIへ渡し、完成稿本文だけを求めます。 | Preserves the subject, characters, facts, ending, and output format while targeting diagnosed weaknesses. / 主題、人物、事実、結末、出力形式を保ち、指摘された弱点だけを直します。 |
 | 4. Re-review / 再講評 | Scores the rewrite before it can replace Output. / 改稿候補がOutputを置き換える前に再採点します。 | A rewrite is not accepted merely because an API returned text. / APIが文章を返しただけでは採用しません。 |
 | 5. Candidate gate / 候補採用判定 | Adopts only a format-valid, completed, non-duplicated candidate whose score is higher than the retained manuscript. / 形式が正しく、完結し、段落重複がなく、保持中原稿より高得点の候補だけを採用します。 | Prevents a polished-looking regression from overwriting a better draft. / 見た目だけ整った劣化稿が良い原稿を上書きするのを防ぎます。 |
-| 6. Continue or stop / 継続／停止 | With auto mode ON, repeats only while the retained score is 84 or below, stopping at 85 or after three attempts. Completion distinguishes editorial pass (90+), publishable (85–89), and needs brush-up (84 or below). / 自動ONでは保持点が84点以下の間だけ改稿し、85点到達または3回実行で停止します。完了時は「編集合格（90点以上）」「公開可能（85〜89点）」「要ブラッシュアップ（84点以下）」を分けて表示します。 | Gives a bounded quality loop and reports the appropriate publication state. / 上限付きの品質ループにし、公開判断に使える状態を明示します。 |
+| 6. Continue or stop / 継続／停止 | With auto mode ON, aims for 100 points and stops at that target or the three-attempt limit. Completion distinguishes editorial pass (90+), publishable (85–89), and needs brush-up (84 or below). / 自動ONでは100点を目標とし、目標到達または3回の上限で停止します。完了時は「編集合格（90点以上）」「公開可能（85〜89点）」「要ブラッシュアップ（84点以下）」を分けて表示します。 | Gives a bounded quality loop and reports the appropriate publication state. / 上限付きの品質ループにし、公開判断に使える状態を明示します。 |
 
 ### Manuscript Protection / 原稿保護
 
@@ -208,7 +208,7 @@ GPT-6.1 Sol is the default for development and public builds. Astra remains sele
 
 ## Current Quality System / 現行品質システム
 
-The current v5.4.2 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.2系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.4.3 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.3系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -236,7 +236,7 @@ Before the generated text is treated as the visible final output, the public cle
 
 ### Completion And Interest Gates / 完走と面白さのゲート
 
-The app does not treat "some text appeared" as enough. Mode-specific completion gates check whether the output reached the part that makes the mode usable: for example, `4koma_scenario` must preserve a real final `狙い:` block for the fourth panel, and `documentary` must end with a documentary-style closing label instead of drifting into unlabeled prose. The browser QA then checks real Gemini/OpenAI outputs for concrete objects, friction, dialogue, choices, and non-generic endings. / このアプリでは、「何か文章が出た」だけでは合格にしません。モード別の完走ゲートで、その形式として使える終端まで到達したかを見ます。たとえば `4koma_scenario` では4コマ目の実質ある `狙い:` を保持し、`documentary` ではラベルなしの散文へ流れず、ドキュメンタリーとしての締めを残します。そのうえで、実ブラウザQAでは Gemini / OpenAI の実出力について、具体物、摩擦、会話、選択、汎用的すぎない終わり方を確認します。
+The app does not treat "some text appeared" as enough. Mode-specific completion gates check whether the output reached the part that makes the mode usable: for example, `4koma_scenario` validates all four assembled panels and matches dialogue speakers/order to BalloonLayout, and `documentary` must end with a documentary-style closing label instead of drifting into unlabeled prose. The browser QA then checks real Gemini/OpenAI outputs for concrete objects, friction, dialogue, choices, and non-generic endings. / このアプリでは、「何か文章が出た」だけでは合格にしません。モード別の完走ゲートで、その形式として使える終端まで到達したかを見ます。たとえば `4koma_scenario` では継続応答を結合した4コマを検証し、台詞の話者・順番とBalloonLayoutを照合し、`documentary` ではラベルなしの散文へ流れず、ドキュメンタリーとしての締めを残します。そのうえで、実ブラウザQAでは Gemini / OpenAI の実出力について、具体物、摩擦、会話、選択、汎用的すぎない終わり方を確認します。
 
 ## API Engine / APIエンジン
 
@@ -644,6 +644,11 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | QA scope / QA範囲 | Current QA verifies representative real browser output, not all possible input combinations. / 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed. / QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
 
 ## Release History / 変更履歴
+
+### v5.4.3 (2026-10-09)
+
+- Updated four-panel scenario integration to current Nano STEP2 rules, including VisualEvidence, BalloonLayout, intentional silence, camera projection, acting and props. / 4コマシナリオ連携を現行Nano STEP2ルールへ更新し、VisualEvidence、BalloonLayout、意図した無言、カメラ投影、身体演技と小道具を反映します。
+- Validates complete assembled scripts, preserves Topic, and keeps received drafts when validation fails. / 継続応答を結合した完成台本を検証し、Topicを保持します。検証エラー時も受信本文を残します。
 
 ### v5.4.2 (2026-10-07)
 

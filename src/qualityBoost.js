@@ -1,3 +1,4 @@
+import { NANO_SCENARIO_CONTRACT, NANO_SCENARIO_OUTPUT_CHECK, NANO_SCENARIO_MARKER, getNanoScenarioIssue } from './nanoScenarioContract.js';
 // Story Maker v5.0.2 public-mode quality booster.
 // Thin runtime layer: prompt rules live in modeContracts.js.
 
@@ -125,7 +126,7 @@ const MODE_REWRITE_TARGETS = Object.fromEntries(
 
 const STRICT_FORMAT_INSTRUCTIONS = {
   '4koma': '4コマ漫画風として、タイトルの後に「1コマ目」「2コマ目」「3コマ目」「4コマ目」を必ず置き、各コマに「絵/状況:」「セリフ:」「狙い:」を含めること。小説本文だけで返すことは禁止。',
-  '4koma_scenario': 'AI 4komaシナリオ連携として、Topic、Logline、Location、Outfit、Punchline、Scenario、[1コマ目]から[4コマ目]を必ず置くこと。各コマは「[EMOTION:]」「[Camera:]」「状況:」「絵:」「セリフ:」「演出:」「狙い:」を含め、各コマの「セリフ:」には最低1つ、必ず「キャラ名「短いセリフ。」」形式の吹き出し用セリフを入れること。',
+  '4koma_scenario': NANO_SCENARIO_OUTPUT_CHECK,
   medium: '中編小説として、先頭から「タイトル:」「第1節」「第2節」「第3節」をこの順で必ず置くこと。第4節や次章予告は禁止。',
   scenario: '脚本/台本として、先頭から「タイトル:」「登場人物:」「場面:」を必ず置くこと。本文はト書きと「人物名: セリフ」で進め、小説の地の文だけで返すことは禁止。',
   manga: 'ストーリー漫画のネームとして、「タイトル:」「ページ1」を置き、各ページ/各コマに「絵:」「セリフ:」「演出:」を必ず書くこと。小説本文だけは禁止。',
@@ -217,7 +218,7 @@ function boostText(text) {
   if (source.includes(QUALITY_MARKER)) return continuationFixed;
   if (!shouldBoostStoryPrompt(uncapped) && !currentUiMode()) return uncapped;
   const strictFormat = strictFormatInstruction(mode);
-  return `${continuationFixed}\n${buildQualityContract(mode)}${strictFormat ? `\n${strictFormat}` : ''}`;
+  return `${continuationFixed}\n${source.includes(NANO_SCENARIO_MARKER) ? buildQualityContract(mode).replace(NANO_SCENARIO_CONTRACT, NANO_SCENARIO_OUTPUT_CHECK) : buildQualityContract(mode)}${strictFormat ? `\n${strictFormat}` : ''}`;
 }
 
 function rewriteContinuationPrompt(text, mode) {
@@ -629,6 +630,10 @@ function rewriteIssue(mode, text, min, options = {}) {
   const body = normalizeFormatLabelMarkdown(stripPrematureEnding(sourceWithoutFooter));
   const internalIssue = internalArtifactIssue(sourceWithoutFooter) || internalArtifactIssue(body);
   if (internalIssue) return internalIssue;
+  if (mode === '4koma_scenario' && options.assembled !== false) {
+    const scenarioIssue = getNanoScenarioIssue(body);
+    if (scenarioIssue) return scenarioIssue;
+  }
   const publicBody = cleanOutputForPublicMode(body, mode);
   const count = countBodyChars(publicBody);
   if (min && count < min) return `本文が短すぎます（${count}/${min}字）`;
@@ -643,8 +648,8 @@ function rewriteIssue(mode, text, min, options = {}) {
     const labelIssue = requiredLabelIssue(mode, body);
     if (labelIssue) return labelIssue;
   }
-  if (mode === '4koma_scenario' && !scenarioFinalAimIsComplete(body)) {
-    return '4コマ目の狙い欄が未完成です';
+  if (mode === '4koma_scenario' && options.assembled !== false && getNanoScenarioIssue(body)) {
+    return '4コマ目の状況と発話または無言指定が未完成です';
   }
   return '';
 }
@@ -892,7 +897,7 @@ async function ensureOpenAiStreamLength(input, init, response, originalFetch) {
     }
   }
   for (let attempt = 0; attempt < MAX_STREAM_REWRITE_ATTEMPTS;) {
-    const issue = rewriteIssue(mode, text, min);
+    const issue = rewriteIssue(mode, text, min, { assembled: false });
     if (!issue) break;
     try {
       attempt += 1;
@@ -902,7 +907,7 @@ async function ensureOpenAiStreamLength(input, init, response, originalFetch) {
       break;
     }
   }
-  const finalIssue = rewriteIssue(mode, text, min);
+  const finalIssue = rewriteIssue(mode, text, min, { assembled: false });
   if (finalIssue) {
     document.documentElement.dataset.smkQualityRewrite = `${mode}:${finalIssue}`;
     return openAiSseResponse(withInternalCompletionMarker(text), response);
@@ -933,7 +938,7 @@ async function ensureGeminiStreamLength(input, init, response, originalFetch) {
     }
   }
   for (let attempt = 0; attempt < MAX_STREAM_REWRITE_ATTEMPTS;) {
-    const issue = rewriteIssue(mode, text, min);
+    const issue = rewriteIssue(mode, text, min, { assembled: false });
     if (!issue) break;
     try {
       attempt += 1;
@@ -943,7 +948,7 @@ async function ensureGeminiStreamLength(input, init, response, originalFetch) {
       break;
     }
   }
-  const finalIssue = rewriteIssue(mode, text, min);
+  const finalIssue = rewriteIssue(mode, text, min, { assembled: false });
   if (finalIssue) {
     document.documentElement.dataset.smkQualityRewrite = `${mode}:${finalIssue}`;
     return geminiSseResponse(withInternalCompletionMarker(text), response);

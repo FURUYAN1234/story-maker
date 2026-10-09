@@ -57,7 +57,7 @@ const fourKomaScenario = Jo({
 assert.match(fourKomaScenario.prompt, /Topic:/);
 assert.match(fourKomaScenario.prompt, /\[1コマ目\]/);
 assert.match(fourKomaScenario.prompt, /状況: \[視覚的な状況/);
-assert.match(fourKomaScenario.prompt, /セリフ: キャラ名「セリフ」/);
+assert.match(fourKomaScenario.prompt, /\nキャラ名「短いセリフ。/);
 assert.match(fourKomaScenario.prompt, /キャラ名「短いセリフ。」/);
 assert.match(fourKomaScenario.prompt, /セリフなし/);
 assert.match(fourKomaScenario.prompt, /台詞なし/);

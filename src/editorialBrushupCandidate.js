@@ -1,5 +1,6 @@
 import { validateDirectLong10000 } from './directLong10000.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
+import { isNanoScenarioComplete } from './nanoScenarioContract.js';
 
 function normalizedManuscript(text) {
   return stripGeneratedFooter(String(text || '')).replace(/\r\n?/g, '\n').trim();
@@ -45,7 +46,7 @@ export function hasEditorialModeFormat(text, mode = '') {
     && matchCount(source, /絵\/状況\s*[:：]/gu) === 4
     && matchCount(source, /セリフ\s*[:：]/gu) === 4
     && matchCount(source, /狙い\s*[:：]/gu) === 4;
-  if (normalizedMode === '4koma_scenario') return hasAll(source, [/Topic\s*:/u, /Logline\s*:/u, /Location\s*:/u, /Outfit\s*:/u, /Punchline\s*:/u, /Scenario\s*:/u, /\[1コマ目\]/u, /\[2コマ目\]/u, /\[3コマ目\]/u, /\[4コマ目\]/u]);
+  if (normalizedMode === '4koma_scenario') return isNanoScenarioComplete(source);
   if (normalizedMode === 'scenario') return hasAll(source, [/タイトル\s*[:：]/u, /登場人物\s*[:：]/u, /場面\s*[:：]/u, /[^\n：:]{1,30}\s*[:：]\s*[^\n]+/u]);
   if (normalizedMode === 'manga') return hasAll(source, [/ページ/u, /コマ/u, /絵\s*[:：]/u, /セリフ\s*[:：]/u, /演出\s*[:：]/u]);
   if (normalizedMode === 'letter') return hasAll(source, [/宛先\s*[:：]/u, /本文\s*[:：]/u, /結び\s*[:：]/u, /差出人\s*[:：]/u]);
@@ -73,8 +74,10 @@ export function evaluateBrushupCandidate({
   const currentLength = Array.from(normalizedManuscript(currentText).replace(/\s/gu, '')).length;
   const candidateLength = Array.from(normalizedManuscript(candidateText).replace(/\s/gu, '')).length;
   if (currentLength >= 500 && candidateLength < Math.floor(currentLength * 0.6)) issues.push('content_loss');
-  if (!formatOk) issues.push('format');
-  if (!hasCompletedEditorialEnding(candidateText)) issues.push('unclosed_ending');
+  const scenarioMode = String(mode).toLowerCase() === '4koma_scenario';
+  const scenarioComplete = scenarioMode && isNanoScenarioComplete(candidateText);
+  if (!formatOk || (scenarioMode && !scenarioComplete)) issues.push('format');
+  if (scenarioMode ? !scenarioComplete : !hasCompletedEditorialEnding(candidateText)) issues.push('unclosed_ending');
   if (hasDuplicateEditorialParagraph(candidateText)) issues.push('duplicate_paragraph');
   if (mode === 'long_10000') {
     for (const issue of validateDirectLong10000(candidateText).issues) {

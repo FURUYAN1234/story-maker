@@ -1,5 +1,14 @@
 # Story Maker Handoff
 
+## 2026-10-09 Nano STEP2 scenario synchronization — release candidate verified
+
+- User scope: current Nano STEP2 four-panel scenario compatibility, real API proof, official Story release, existing note/Facebook update and inline X code block. No backup or X publication in this task. This HANDOFF owns the live record; the official release receipt will record published completion.
+- Shared scenario contract covers camera/composition, gestures, props, reading/tails, facial acting, final staging, wardrobe and current automatic styles. Canonical output includes VisualEvidence, dialogue-matched BalloonLayout, explicit silence and standalone dialogue; obsolete drawing/aim memo fields are removed from this integration mode.
+- Fixed two shared boundaries discovered during live proof: validate assembled output rather than continuation fragments, and judge silent scenario endings structurally rather than with a novel ending marker. Preserve Topic and received drafts on validation failure; revised output must pass the full schema even if a caller supplies a format override.
+- Local evidence: full91 tests, current Nano synchronization, production build, built-security check, app preflight and fresh shared security check (audit0) pass. Focused negative and positive regressions cover malformed layouts/revisions, explicit silence and harmless repeated composition.
+- Revised-source ordinary Sol6.1 API run completed with a new lost-property scenario, automatic review and all3 revision attempts. The valid2771-character original scored92; lower88/89/89 candidates were correctly rejected only for no score improvement. Final result completed/editorial_pass, Sol6.1 selected/attempted/adopted; no false incomplete-ending rejection remains.
+- Final unedited output passes both Story schema and the actual current Nano scenario validator/dialogue parser. Dialogue counts1/1/1/0 match layouts; printed box lettering is not speech. The user accepted parser compatibility as the criterion, irrespective of creative quality. No additional generation is required.
+- Actual visible IAB screen, completion receipt, conditions, final text and parser audit are preserved privately. Official deploy and C-drive distribution parity are next; another chat is waiting for that evidence before its separately authorized backup. Do not start backup here or rerun completed publication.
 ## 2026-10-04 v5.4.0 API explanation correction
 
 - Scope: publish the reviewed prepared wording correction only, with synchronized version metadata and release documentation. API behavior and license terms are unchanged.

@@ -2,6 +2,12 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createServer } from 'vite';
+import { NANO_SCENARIO_RULES, NANO_AUTOMATIC_STYLES, NANO_SCENARIO_CONTRACT } from '../src/nanoScenarioContract.js';
+import { Jo } from '../src/promptBuilder.js';
+import { buildPrompt } from '../src/prompt.js';
+import { buildQualityContract } from '../src/modeContracts.js';
+import { buildOutputModeStrictContract, buildFinalOutputFormatCheck } from '../src/outputModeContracts.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nanoRoot = process.env.NANO_BANANA_PRO_ROOT
@@ -52,39 +58,26 @@ if (!nanoContract) {
   }
 }
 
-const storyChecks = [
-  {
-    file: 'src/promptBuilder.js',
-    markers: ['状況:', 'キャラ名「短いセリフ。', 'セリフなし', '台詞なし'],
-  },
-  {
-    file: 'src/modeContracts.js',
-    markers: ['「[EMOTION:]」「[Camera:]」「状況:」「絵:」「セリフ:」「演出:」「狙い:」', 'キャラ名「短いセリフ。'],
-  },
-  {
-    file: 'src/prompt.js',
-    markers: ['最新のNano Banana Pro STEP2互換', '状況:', 'キャラ名「短いセリフ。'],
-  },
-  {
-    file: 'src/qualityBoost.js',
-    markers: ['「[EMOTION:]」「[Camera:]」「状況:」「絵:」「セリフ:」「演出:」「狙い:」', 'キャラ名「短いセリフ。'],
-  },
-  {
-    file: 'src/outputModeContracts.js',
-    markers: ['状況:', 'キャラ名「短いセリフ。', 'セリフなし', '台詞なし'],
-  },
-];
-
-for (const check of storyChecks) {
-  const absolute = path.join(rootDir, check.file);
-  const source = readText(absolute);
-  for (const marker of check.markers) {
-    if (!source.includes(marker)) {
-      fail(`${check.file} is missing Nano 4koma marker: ${marker}`);
-    }
+// Imported rule exports cover camera, gestures, props, reading/tails, facial
+// acting, payoff staging and wardrobe, beyond the old output-block-only hash.
+const server = await createServer({ root: nanoRoot, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
+try {
+  for (const rule of NANO_SCENARIO_RULES) {
+    const current = await server.ssrLoadModule('/src/lib/'+rule.file);
+    if (current[rule.name] !== rule.text) fail(rule.name+' changed. Review the shared Story Maker scenario contract.');
   }
-}
+  const current = await server.ssrLoadModule('/src/lib/constants.js');
+  const styles = Object.entries(current.STYLE_DRAWING_CONTRACTS).filter(([, value]) => value.automatic).map(([tag]) => ({ tag, recipe: current.COMPACT_EMOTION_STYLES[tag] || current.EMOTION_STYLES[tag].prompt }));
+  if (JSON.stringify(styles) !== JSON.stringify(NANO_AUTOMATIC_STYLES)) fail('Automatic styles or drawing recipes changed. Review Story Maker scenario styles.');
+} finally { await server.close(); }
 
-if (!process.exitCode) {
-  console.log('[nano-4koma-contract] Story Maker 4koma_scenario matches the pinned Nano Banana Pro STEP2 contract.');
+const settings = { mode: '4koma_scenario' };
+for (const prompt of [Jo(settings).prompt, buildPrompt(settings), buildQualityContract(settings.mode), buildOutputModeStrictContract(settings), buildFinalOutputFormatCheck(settings)]) {
+  for (const marker of ['VisualEvidence:', 'BalloonLayout:', 'セリフなし', '無言なら[]', 'anchor', 'route']) {
+    if (!prompt.includes(marker)) fail('An emitted Story prompt is missing '+marker);
+  }
+  if (/無言.*だけのコマは禁止|重複禁止|全コマで吹き出し用セリフ/.test(prompt)) fail('An emitted Story prompt retains contradictory obsolete rules.');
 }
+if (!Jo(settings).prompt.includes(NANO_SCENARIO_CONTRACT)) fail('The ordinary generation entry point must include the shared Nano rules.');
+
+if (!process.exitCode) console.log('[nano-4koma-contract] Current Nano rule exports, automatic styles and Story generation/revision contracts match.');

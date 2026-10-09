@@ -1,7 +1,7 @@
 {
   "license": "SEE LICENSE IN LICENSE",
   "name": "story-maker",
-  "version": "5.4.2",
+  "version": "5.4.3",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",
