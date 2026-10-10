@@ -584,9 +584,21 @@ These terms are governed by the laws of Japan. / 本規約は日本法に準拠�
 
 ---
 
+## Known Limitations / 既知の制限
+
+| Area / 領域 | Limitation / 制限 | Practical meaning / 実用上の意味 |
+|---|---|---|
+| Provider behavior / API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input. / 出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty. / 同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
+| Rewrite layer / 改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence. / 改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary. / 構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
+| Direct long-form / 長編直接生成 | The public `Long-form (10,000 characters+)` mode requests at least 10,000 non-whitespace body characters and a completed ending. / 公開版の「長編（10000字～）」は、空白を除く本文10,000字以上と完結した終端を要求します。 | It is AI generation, not an exact character-count or publication-quality guarantee. Very long responses can take several minutes or fail because of provider limits. / AI生成であり、文字数ぴったりや出版品質を保証するものではありません。長文応答は数分かかるか、提供元の制限で失敗する場合があります。 |
+| AI review and brush-up / AI講評・ブラッシュアップ | The score and commentary are AI-generated editorial signals, not an objective certification. / 点数と講評はAIによる編集上の目安であり、客観的な品質認証ではありません。 | A candidate is adopted only after mechanical and score checks, but users should still read the retained manuscript before publishing. / 候補は機械判定と点数改善を通った場合だけ採用しますが、公開前には保持された原稿を必ず人が確認してください。 |
+| AI review / AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees. / AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment. / 合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
+| Publication readiness / 公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality. / 生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions. / 最終利用と公開判断の責任はユーザー側に残ります。 |
+| QA scope / QA範囲 | Current QA verifies representative real browser output, not all possible input combinations. / 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed. / QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
+
 ## AI Manga Creative Suite / AIまんが制作エコシステム
 
-This project is part of an integrated ecosystem designed to support AI-powered manga, character, story, translation, background, and voice-comic production. / 本プロジェクトは、AIを活用した漫画、キャラクター、物語、翻訳、背景、ボイスコミック制作を支援する統合エコシステムの一部です。
+This app is one component in a broader AI-assisted manga and story production workflow. / このアプリは、AIを活用した漫画・物語制作ワークフローの一部です。
 
 ### Ecosystem Components / 構成システム
 
@@ -631,17 +643,16 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 - [Demo / デモ](https://furuyan1234.github.io/viral-radar/)
 - [Code / コード](https://github.com/FURUYAN1234/viral-radar)
 
-## Known Limitations / 既知の制限
-
-| Area / 領域 | Limitation / 制限 | Practical meaning / 実用上の意味 |
-|---|---|---|
-| Provider behavior / API挙動 | Output quality depends on provider availability, model behavior, prompt complexity, and user-provided input. / 出力品質は、API提供元の状態、モデル挙動、プロンプトの複雑さ、ユーザー入力に左右されます。 | The same settings can still produce different quality depending on Gemini/OpenAI state and input difficulty. / 同じ設定でも、Gemini/OpenAI側の状態や入力の難しさによって品質は変動します。 |
-| Rewrite layer / 改稿レイヤー | The rewrite layer reduces short draft failures but does not guarantee literary excellence. / 改稿レイヤーは短すぎる初稿の失敗を減らしますが、文学的完成度を保証するものではありません。 | It catches common structural failures, but human editing can still be necessary. / 構造的な失敗は減らしますが、人間の編集が不要になるわけではありません。 |
-| Direct long-form / 長編直接生成 | The public `Long-form (10,000 characters+)` mode requests at least 10,000 non-whitespace body characters and a completed ending. / 公開版の「長編（10000字～）」は、空白を除く本文10,000字以上と完結した終端を要求します。 | It is AI generation, not an exact character-count or publication-quality guarantee. Very long responses can take several minutes or fail because of provider limits. / AI生成であり、文字数ぴったりや出版品質を保証するものではありません。長文応答は数分かかるか、提供元の制限で失敗する場合があります。 |
-| AI review and brush-up / AI講評・ブラッシュアップ | The score and commentary are AI-generated editorial signals, not an objective certification. / 点数と講評はAIによる編集上の目安であり、客観的な品質認証ではありません。 | A candidate is adopted only after mechanical and score checks, but users should still read the retained manuscript before publishing. / 候補は機械判定と点数改善を通った場合だけ採用しますが、公開前には保持された原稿を必ず人が確認してください。 |
-| AI review / AI講評 | AI review and pass/fail labels are revision aids, not publication guarantees. / AI講評と合否表示は改稿補助であり、公開品質を保証するものではありません。 | A passing score means the AI review judged it usable, not that the manuscript is ready for public release without human judgment. / 合格点はAI講評上の判定であり、人間の判断なしに公開品質を保証するものではありません。 |
-| Publication readiness / 公開前確認 | Generated text can still require human editing for tone, originality, factual accuracy, legal safety, and publication quality. / 生成本文は、トーン、独自性、事実性、法的安全性、公開品質のために人間の編集が必要になる場合があります。 | Users remain responsible for final use and publication decisions. / 最終利用と公開判断の責任はユーザー側に残ります。 |
-| QA scope / QA範囲 | Current QA verifies representative real browser output, not all possible input combinations. / 現在のQAは実ブラウザでの代表的出力検証であり、すべての入力組み合わせを保証するものではありません。 | Passing QA means tested scenarios worked, not that every possible prompt and file combination is guaranteed. / QA通過は検証済みシナリオの通過であり、全入力パターン保証ではありません。 |
+| **Tool / ツール** | **Role / 役割** | **Repository / リポジトリ** |
+| --- | --- | --- |
+| Super FURU AI 4-koma System / Super FURU AI 4コマシステム | AI 4-panel manga generation / AI 4コマ漫画生成 | [nano-banana-pro](https://github.com/FURUYAN1234/nano-banana-pro) |
+| Story Maker | Story and plot generation / 物語・プロット生成 | [story-maker](https://github.com/FURUYAN1234/story-maker) |
+| AI Character Sheet Maker / AIキャラクターシートメーカー | Character reference generation / キャラクター資料生成 | [character-sheet-maker](https://github.com/FURUYAN1234/character-sheet-maker) |
+| AI Comic Translation Tool / AI漫画翻訳ツール | Manga translation and regeneration / 漫画翻訳・再生成 | [comic-translation](https://github.com/FURUYAN1234/comic-translation) |
+| 360° AI Panorama Generator / 360度AIパノラマ生成ツール | 360-degree background generation / 360度背景生成 | [panoforge](https://github.com/FURUYAN1234/panoforge) |
+| AI Voice Comic Maker / AI音声コミックメーカー | Voice comic video generation / フルボイス動画化 | [ai-voice-comic-maker](https://github.com/FURUYAN1234/ai-voice-comic-maker) |
+| Monogatari Buzz Maker / 物語バズメーカー | Trend research and creative planning / トレンド調査・創作企画 | [viral-radar](https://github.com/FURUYAN1234/viral-radar) |
+| Narration Video Maker / ナレーション動画メーカー | Video generation with narration, subtitles, and BGM / ナレーション・字幕・BGM付き動画生成 | [gemini-narration-studio](https://github.com/FURUYAN1234/gemini-narration-studio) |
 
 ## Release History / 変更履歴
 
