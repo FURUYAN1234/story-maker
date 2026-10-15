@@ -31,7 +31,7 @@ assert.equal(Lt('abc', 'gemini').message, 'APIキーが短すぎます（3文字
 assert.equal(Lt('abc$defghijklmnopqrst', 'gemini').message, 'APIキーに使用できない文字が含まれています。コピー時の余分な文字を除いて入力し直してください。');
 assert.equal(Lt(fakeGeminiKey, 'gemini').ok, true);
 
-assert.equal(gn(fakeOpenAiKey), 'gpt-4.1');
+assert.equal(gn(fakeOpenAiKey), 'gpt-6.1-sol');
 assert.equal(gn(fakeGeminiKey), 'gemini-3.5-flash');
 assert.equal(Qf(fakeOpenAiKey), 'ChatGPT');
 assert.equal(Qf(fakeGeminiKey), 'Gemini');

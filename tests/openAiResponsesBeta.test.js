@@ -42,7 +42,7 @@ const enabledConfig = resolveOpenAiResponsesBetaConfig(
 assert.equal(enabledConfig.enabled, true);
 assert.deepEqual(enabledConfig.models, [
   'gpt-6.1-sol', 'gpt-6-sol', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-6-luna',
-  'gpt-5.6-luna', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o',
+  'gpt-5.6-luna',
 ]);
 
 const defaultConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
@@ -53,7 +53,7 @@ assert.equal(defaultConfig.models[0], 'gpt-6.1-sol');
 setSelectedOpenAIModelId('gpt-6-luna');
 const lunaConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
 assert.deepEqual(lunaConfig.models, [
-  'gpt-6-luna', 'gpt-5.6-luna', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o',
+  'gpt-6-luna', 'gpt-5.6-luna',
 ]);
 resetSelectedOpenAIModelId();
 
@@ -152,7 +152,7 @@ try {
     maxTokens: 77,
   });
   assert.equal(result.text, 'stable fallback');
-  assert.equal(result.usedModel, 'gpt-4.1');
+  assert.equal(result.usedModel, 'gpt-6.1-sol');
   assert.match(requestedUrls[0], /\/v1\/responses$/);
   assert.match(requestedUrls.at(-1), /\/v1\/chat\/completions$/);
 } finally {

@@ -12,8 +12,9 @@ export const GEMINI_MODELS = [
 ];
 
 export const GEMINI_MODEL_VALUES = GEMINI_MODELS.map(model => model.value);
-export const OPENAI_TEXT_MODELS = ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o'];
-export const OPENAI_VISION_MODELS = ['gpt-4.1', 'gpt-4o', 'gpt-4.1-mini'];
+import { getOpenAIChatRoute } from './openAiModelCatalog.js';
+export const OPENAI_TEXT_MODELS = getOpenAIChatRoute('gpt-6.1-sol');
+export const OPENAI_VISION_MODELS = [...OPENAI_TEXT_MODELS];
 
 const ALL_MODES = [
   { value: '4koma', label: '4コマ漫画風' },

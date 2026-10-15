@@ -39,7 +39,7 @@ export const NANO_SCENARIO_RULES = [
   {
     "file": "seasonal-outfit.js",
     "name": "SCENARIO_WARDROBE_CONTRACT",
-    "text": "CHARACTER IDENTITY, NOT STORY SETTING:\nキャラ情報から名前・顔・髪・体格・性格・口調・人物間の関係性を保つ。参考衣装は今回の衣装・舞台・職業・出来事を決める根拠にしない。性格欄の学校・職業上の役割も、今回の場面をその活動へ変える理由にしない。\n今回の題材・原文・ユーザー指定から出来事と役割を先に決め、その行為、場所、季節に合う衣装を選ぶ。衣装を使う口実として学校行事や学生ボランティア等を後付けしない。明示衣装指定を最優先し、学校制服は題材・原文・ユーザー指定に学校活動または制服指定の根拠がある場合だけ選ぶ。\n勤務中で職務上の服装が必要な人物には、職業制服・作業服・安全装備を必須とし、私服や一般的なフォーマル服へ一律に置き換えない。来訪者・客・通行人と勤務者を区別し、場所だけを理由に全員を同じ職業服にしない。役割が異なる場合は人物名または役割ごとに衣装をOutfitへ記載する。職務・行事上の指定がない場合は場面に合う私服等を選ぶ。\n演出強化では確定済みOutfitを維持し、ト書きの衣装もそれに合わせる。参考衣装へ戻さない。この内部ルールは漫画のセリフや画面文字にしない。"
+    "text": "CHARACTER IDENTITY, NOT STORY SETTING:\nキャラ情報から名前・顔・髪・体格・性格・口調・人物間の関係性を保つ。参考衣装は今回の衣装・舞台・職業・出来事を決める根拠にしない。性格欄の学校・職業上の役割も、今回の場面をその活動へ変える理由にしない。\n今回の題材・原文・ユーザー指定から出来事と役割を先に決め、その行為、場所、季節に合う衣装を選ぶ。衣装を使う口実として学校行事や学生ボランティア等を後付けしない。明示衣装指定を最優先し、学校制服は題材・原文・ユーザー指定に学校活動または制服指定の根拠がある場合だけ選ぶ。\n勤務中で職務上の服装が必要な人物には、職業制服・作業服・安全装備を必須とし、私服や一般的なフォーマル服へ一律に置き換えない。来訪者・客・通行人と勤務者を区別し、場所だけを理由に全員を同じ職業服にしない。役割が異なる場合は人物名または役割ごとに衣装をOutfitへ記載する。職務・行事上の指定がない場合は場面に合う私服等を選ぶ。\n「全員コスプレ」等の広い衣装指定は、人物別の具体的な衣装・主な構成・色をOutfitに記載し、状況/Actionの衣装と一致させる。同じ連続場面では再登場時も維持し、衣装の省略を着替えと解釈しない。明示の着替えやコマ限定指定はその範囲を保つ。\n演出強化では確定済みOutfitを維持し、ト書きの衣装もそれに合わせる。参考衣装へ戻さない。衣装の継続のためにCamera・演技・動き・表情・コマ指定の画風を固定/簡略化しない。この内部ルールは漫画のセリフや画面文字にしない。"
   }
 ];
 
@@ -53,7 +53,7 @@ export const NANO_AUTOMATIC_STYLES = [
   },
   {
     "tag": "GEKIGA",
-    "recipe": "Realistic gekiga: Redraw visible faces with small realistic eyes/irises, heavy anatomical eyelids, pronounced nose bridges and carved cheek/jaw planes. 全人物を劇画化。顔にも写実的な陰影と斜線。背景・服だけ劇画にしない。 Brush ink/facial hatching; keep identity/age/color, gaze and Camera/Action. 色は不透明な塗りで鮮明に置き、淡い水彩下地を継承しない。明示された淡色指定は優先。"
+    "recipe": "Realistic gekiga: Rebuild faces as sculptural GEKIGA: narrow eye openings, small irises partly covered by thick anatomical lids; projecting nose bridge, sidewalls and nostril wings; distinct cheekbone and jaw angles. 全人物を劇画化。顔にも写実的な陰影と斜線。背景・服だけ劇画にしない。 Brush ink; fine hatching is primary, solid black secondary. Keep identity/age/color, gaze and Camera/Action. 色は不透明な塗りで鮮明に置き、淡い水彩下地を継承しない。明示された淡色指定は優先。"
   },
   {
     "tag": "WATERCOLOR",
@@ -61,7 +61,7 @@ export const NANO_AUTOMATIC_STYLES = [
   },
   {
     "tag": "POP_ART",
-    "recipe": "Bold graphic actor contours, flat vivid pigment and Ben-Day dots on faces/clothing; Camera/Action/identity/lettering fixed, not background-only dots."
+    "recipe": "顔/髪/服/小物/背景を極太の黒い輪郭、鮮烈で不透明なflat色面、大粒で明瞭な規則的Ben-Day網点で印刷絵へ再構築。網点は顔の陰影にも。グラデやアニメ塗り＋速度線だけは不可。Camera/Action・演技/表情・同一性/固有色・台詞/吹出配置を保持。"
   },
   {
     "tag": "SKETCH",

@@ -3,7 +3,11 @@ import { yf } from '../src/characterImportPrompt.js';
 
 assert.ok(yf.length > 500);
 assert.match(yf, /JSON/);
-assert.match(yf, /JSON配列/);
+assert.match(yf, /JSONオブジェクト/);
+const example = JSON.parse(yf.split('出力例:\n')[1]);
+assert.ok(Array.isArray(example.characters));
+assert.ok(example.characters.length > 0);
+assert.deepEqual(Object.keys(example.characters[0]).sort(), ['name', 'sex', 'role', 'personality', 'note'].sort());
 assert.match(yf, /name/);
 assert.match(yf, /sex/);
 assert.match(yf, /role/);

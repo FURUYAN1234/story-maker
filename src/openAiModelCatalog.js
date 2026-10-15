@@ -10,14 +10,10 @@ const OPENAI_MODEL_OPTIONS = Object.freeze([
   { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', description: '知性とコストを両立する汎用型', inputPriceUsdPerM: 2, outputPriceUsdPerM: 12 },
   { id: 'gpt-6-luna', label: 'GPT-6 Luna', description: '軽量・高速な大量処理向け', inputPriceUsdPerM: 0.1, outputPriceUsdPerM: 0.5 },
   { id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', description: '低コスト重視の大量処理向け', inputPriceUsdPerM: 0.2, outputPriceUsdPerM: 1.2 },
-  { id: 'gpt-4.1', label: 'GPT-4.1', description: '指示追従に強い安定した非推論型', inputPriceUsdPerM: 2, outputPriceUsdPerM: 8 },
-  { id: 'gpt-4.1-mini', label: 'GPT-4.1 mini', description: '小型で高速な汎用モデル', inputPriceUsdPerM: 0.4, outputPriceUsdPerM: 1.6 },
-  { id: 'gpt-4.1-nano', label: 'GPT-4.1 nano', description: '4.1系で最速・最安の軽量型', inputPriceUsdPerM: 0.1, outputPriceUsdPerM: 0.4 },
-  { id: 'gpt-4o', label: 'GPT-4o', description: '互換性を重視した柔軟な定番モデル', inputPriceUsdPerM: 2.5, outputPriceUsdPerM: 10 },
 ]);
 
 const OPENAI_MODEL_IDS = new Set(OPENAI_MODEL_OPTIONS.map(model => model.id));
-const OPENAI_CHAT_MODEL_IDS = ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o'];
+const OPENAI_CHAT_MODEL_IDS = OPENAI_MODEL_OPTIONS.map(({id})=>id);
 let selectedOpenAIModelId = DEFAULT_OPENAI_MODEL_ID;
 
 function normalizeOpenAIModelId(modelId) {
@@ -56,6 +52,21 @@ function getOpenAIChatRoute(modelId = selectedOpenAIModelId) {
   return selectedIndex >= 0
     ? OPENAI_CHAT_MODEL_IDS.slice(selectedIndex)
     : [...OPENAI_CHAT_MODEL_IDS];
+}
+
+export function openAIChatOptions(modelId, maxTokens = 8192) {
+  return /^gpt-(?:6(?:\.\d+)?|5\.6)-/.test(modelId)
+    ? {max_completion_tokens: Math.max(maxTokens, 32768)}
+    : {temperature: 0.3, max_tokens: maxTokens};
+}
+
+export function completedOpenAIChatText(data) {
+  const choice = data?.choices?.[0];
+  const text = choice?.message?.content;
+  if (choice?.finish_reason !== 'stop' || choice?.message?.refusal || typeof text !== 'string' || !text.trim()) {
+    throw Object.assign(new Error('OpenAI response incomplete or refused'), {terminal:true});
+  }
+  return text;
 }
 
 function formatOpenAIModelPrice(model) {

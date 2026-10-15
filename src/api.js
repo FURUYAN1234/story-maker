@@ -2,6 +2,7 @@
 // api.js — Gemini API呼び出し（フォールバック対応）
 // ============================================================
 import { GEMINI_MODELS } from './data.js';
+import { getOpenAIChatRoute, openAIChatOptions, completedOpenAIChatText } from './openAiModelCatalog.js';
 
 export const diagnoseConnection = async (apiKey) => {
     if (!apiKey) return "API Key not set.";
@@ -331,12 +332,7 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 // OpenAI API呼び出しロジック
 // ============================================================
 
-const OPENAI_TEXT_MODELS = [
-    "gpt-4.1",          // Primary: 高品質・1Mコンテキスト
-    "gpt-4.1-mini",     // Backup 1: コスト効率・高速
-    "gpt-4.1-nano",     // Backup 2: 最軽量・最速
-    "gpt-4o",           // Fallback: 安定実績
-];
+const OPENAI_TEXT_MODELS = getOpenAIChatRoute('gpt-6.1-sol');
 
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
   for (const modelId of OPENAI_TEXT_MODELS) {
@@ -351,8 +347,7 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
         body: JSON.stringify({
           model: modelId,
           messages: [{ role: "user", content: prompt }],
-          temperature: 1.0,
-          max_tokens: options.maxTokens || 8192,
+          ...openAIChatOptions(modelId, options.maxTokens),
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
@@ -363,11 +358,11 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
       }
 
       const data = await resp.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+      const text = completedOpenAIChatText(data);
 
       return { text, usedModel: modelId };
     } catch (err) {
+      if (err.terminal) throw err;
       console.warn(`Model ${modelId} failed:`, err.message);
       continue;
     }
@@ -376,13 +371,8 @@ async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
   throw new Error("全モデル接続失敗: OpenAI API Keyが無効か、使用回数の上限（Quota Exceeded）に達しています。");
 }
 
-const OPENAI_VISION_MODELS = [
-    "gpt-4.1",          // Primary: Vision対応・高品質
-    "gpt-4o",           // Backup 1: Vision安定実績
-    "gpt-4.1-mini",     // Backup 2: コスト効率
-];
-
 async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
+  const OPENAI_VISION_MODELS = getOpenAIChatRoute();
   const imageUrl = `data:${mimeType};base64,${imageBase64}`;
   
   for (const modelId of OPENAI_VISION_MODELS) {
@@ -405,8 +395,7 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
               ]
             }
           ],
-          temperature: 0.3,
-          max_tokens: 8192,
+          ...openAIChatOptions(modelId, options.maxTokens),
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
@@ -417,11 +406,11 @@ async function _callOpenAIVision(apiKey, prompt, imageBase64, mimeType, onFallba
       }
 
       const data = await resp.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+      const text = completedOpenAIChatText(data);
 
       return { text, usedModel: modelId };
     } catch (err) {
+      if (err.terminal) throw err;
       console.warn(`Vision Model ${modelId} failed:`, err.message);
       continue;
     }
@@ -510,12 +499,7 @@ async function _callGeminiMultimodal(apiKey, model, prompt, images, options = {}
  * OpenAI マルチモーダルAPI呼び出し（複数画像対応・単一モデル）
  */
 async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options = {}) {
-  const OPENAI_VISION_MODELS = [
-    "gpt-4.1",
-    "gpt-4o",
-    "gpt-4.1-mini"
-  ];
-  
+  const OPENAI_VISION_MODELS = getOpenAIChatRoute();
   for (const modelId of OPENAI_VISION_MODELS) {
     try {
       if (modelId !== OPENAI_VISION_MODELS[0] && onFallback) onFallback(modelId);
@@ -537,8 +521,7 @@ async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options
         body: JSON.stringify({
           model: modelId,
           messages: [{ role: "user", content }],
-          temperature: 0.4,
-          max_tokens: 8192,
+          ...openAIChatOptions(modelId, options.maxTokens),
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })
       });
@@ -549,11 +532,11 @@ async function _callOpenAIMultimodal(apiKey, prompt, images, onFallback, options
       }
 
       const data = await resp.json();
-      const text = data.choices?.[0]?.message?.content || "";
-      if (!text) throw new Error(`Empty response (FinishReason: ${data.choices?.[0]?.finish_reason || "UNKNOWN"})`);
+      const text = completedOpenAIChatText(data);
 
       return { text, usedModel: modelId };
     } catch (err) {
+      if (err.terminal) throw err;
       console.warn(`Vision Model ${modelId} failed:`, err.message);
       continue;
     }
@@ -650,8 +633,7 @@ async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = 
         body: JSON.stringify({
           model: modelId,
           messages: [{ role: "user", content: prompt }],
-          temperature: 1.0,
-          max_tokens: options.maxTokens || 8192,
+          ...openAIChatOptions(modelId, options.maxTokens),
           stream: true,
           response_format: options.responseMimeType === "application/json" ? { type: "json_object" } : undefined,
         })

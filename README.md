@@ -1,4 +1,4 @@
-# Story Maker v5.4.3 / AI物語メーカー
+# Story Maker v5.4.4 / AI物語メーカー
 
 > **Source code available; free to use.** Ordinary use, free integration and free provision require no application, prior contact or permission from FURU. You may sell and monetize your own works. External API costs and third-party terms are separate. See Terms & Output Rights below. / **ソースコード公開・利用無料。** 通常利用と無料の組み込み・無料提供に、申請・事前連絡・FURUの許可は不要です。自分の作品は販売・収益化できます。外部API料金と第三者の条件は別です。詳しくは「利用条件・作品の権利」をご確認ください。
 
@@ -206,9 +206,12 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 GPT-6.1 Sol is the default for development and public builds. Astra remains selectable. Selecting 6.1 Sol starts at 6.1 Sol and falls back through the existing lower models; it does not automatically try Astra. The selection covers story generation, editorial review and brush-up through the common text route. Standard short-context prices as of 2026-10-01 are input USD 2 and output USD 10 per million tokens; image generation and other provider charges are separate. / 開発版・公開版ともGPT-6.1 Solを既定にします。Astraは選択肢として保持し、6.1 Sol選択時は既存の下位モデルへフォールバックします。Astraへの自動切替は行いません。共通テキスト経路の物語生成・AI講評・ブラッシュアップに反映します。2026-10-01時点のStandard短文料金は100万トークン当たり入力2米ドル・出力10米ドルです。画像生成等の料金は別です。
 
+
+OpenAI image analysis and text generation use the selected model and maintained downward fallbacks. The default is `gpt-6.1-sol`; choosing `gpt-6-luna` also applies to single-image and multiple-image analysis. Retiring GPT-4 models are excluded from current options and automatic routes. / OpenAIの画像解析と文章生成は選択モデルから下位候補へ切り替わります。初期選択は`gpt-6.1-sol`で、`gpt-6-luna`を選べば単一画像・複数画像の解析にも反映されます。終了予定のGPT-4系は現行の選択肢と自動経路から除外しています。
+
 ## Current Quality System / 現行品質システム
 
-The current v5.4.3 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.3系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.4.4 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.4系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -655,6 +658,14 @@ A trend-to-story planning tool that converts public Web/RSS signals into practic
 | Narration Video Maker / ナレーション動画メーカー | Video generation with narration, subtitles, and BGM / ナレーション・字幕・BGM付き動画生成 | [gemini-narration-studio](https://github.com/FURUYAN1234/gemini-narration-studio) |
 
 ## Release History / 変更履歴
+
+### v5.4.4 (2026-10-15)
+
+- [vision] Migrated fixed single-image, multiple-image and text-helper routes to maintained Sol/Terra/Luna models with compatible completion parameters. / 固定の単一画像・複数画像解析と補助文章処理を現行のSol/Terra/Lunaへ移行し、互換のある出力上限を設定しました。
+- [models] Removed retiring GPT-4 choices and fallback routes; retained the existing story, camera, acting and scenario contracts. Incomplete analysis output stops before adoption. / 終了予定のGPT-4系を選択肢とフォールバックから除外しました。物語・カメラ・演技・シナリオの契約は維持し、解析応答が未完了なら採用せず停止します。
+- [selection] Single-image and multiple-image analysis now follow the selected OpenAI model and report the attempted and adopted model. / 単一画像・複数画像の解析にもOpenAIの選択モデルを反映し、試行・採用モデルを表示します。
+- [import] Unified the character-import JSON object contract and reject entries without character information. Existing array responses remain supported. / キャラクター取り込みのJSONオブジェクト形式を共通化し、人物情報のない項目を拒否します。従来の配列形式も読み込めます。
+- [nano-contract] Synchronized Nano's current wardrobe-continuity and drawing rules; the deployment gate checks the assembled four-panel format. / Nanoの現行の衣装継続・描画ルールを同期し、公開前に実際に組み立てた4コマ書式を照合します。
 
 ### v5.4.3 (2026-10-09)
 

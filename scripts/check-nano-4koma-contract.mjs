@@ -16,15 +16,11 @@ const nanoRoot = process.env.NANO_BANANA_PRO_ROOT
 
 const nanoPromptFile = path.join(nanoRoot, 'src', 'lib', 'prompts.js');
 // Updated after reviewing the current adjacent Nano Banana Pro STEP2 contract.
-const expectedNanoStep2Hash = '7298b1684733f9673f36990d8d2a83fe40802f23f27468e4fe890832a337d71a';
+const expectedNanoStep2Hash = '698c7efa6d98d89ab57a63f89da8eb963b24ca037e07e7e8445ea76b3d8c0703';
 
 function fail(message) {
   console.error(`[nano-4koma-contract] ${message}`);
   process.exitCode = 1;
-}
-
-function readText(file) {
-  return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
 }
 
 function hash(text) {
@@ -47,21 +43,16 @@ if (!fs.existsSync(nanoPromptFile)) {
   process.exit(0);
 }
 
-const nanoSource = readText(nanoPromptFile);
-const nanoContract = extractNanoStep2Contract(nanoSource);
-if (!nanoContract) {
-  fail('Nano Banana Pro STEP2 contract block was not found. Review Story Maker 4koma_scenario before deploy.');
-} else {
-  const currentHash = hash(nanoContract);
-  if (currentHash !== expectedNanoStep2Hash) {
-    fail(`Nano Banana Pro STEP2 contract changed. Expected ${expectedNanoStep2Hash}, got ${currentHash}. Review Story Maker 4koma_scenario before deploy.`);
-  }
-}
-
 // Imported rule exports cover camera, gestures, props, reading/tails, facial
 // acting, payoff staging and wardrobe, beyond the old output-block-only hash.
 const server = await createServer({ root: nanoRoot, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
 try {
+  // Nano now assembles both panel modes dynamically. Inspect the emitted ordinary
+  // four-panel contract rather than relying on a literal source-template heading.
+  const { getScenarioPrompt } = await server.ssrLoadModule('/src/lib/prompts.js');
+  const nanoContract = extractNanoStep2Contract(getScenarioPrompt({ inputMode: 'manual', manualTopic: '契約確認', targetDate: '2026-10-15', punchlineType: 'Auto', comedyTone: 'standard', customLocation: '', customOutfit: '', newsContext: '', ragReactions: '' }));
+  if (!nanoContract) fail('Nano Banana Pro STEP2 contract block was not found. Review Story Maker 4koma_scenario before deploy.');
+  else if (hash(nanoContract) !== expectedNanoStep2Hash) fail('Nano Banana Pro STEP2 contract changed. Review Story Maker 4koma_scenario before deploy.');
   for (const rule of NANO_SCENARIO_RULES) {
     const current = await server.ssrLoadModule('/src/lib/'+rule.file);
     if (current[rule.name] !== rule.text) fail(rule.name+' changed. Review the shared Story Maker scenario contract.');

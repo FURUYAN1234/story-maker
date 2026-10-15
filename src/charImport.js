@@ -4,33 +4,8 @@
 import { callGenerativeAIVision } from './api.js';
 import { ROLES, PERSONALITIES } from './data.js';
 
-// OCR用プロンプト（キャラクターシート解析）
-const CHAR_ANALYSIS_PROMPT = `この画像はアニメ/漫画のキャラクターシート（設定画・三面図など）です。
-画像内に描かれている全てのキャラクターについて、以下の情報をJSON配列で抽出してください。
-
-【抽出項目】
-1. name: キャラクター名（画像内のテキストから正確に読み取る）
-2. sex: 性別（テキストから読み取るか外見から推測。男性/女性/無性/回答無し など。推測なら(推定)を付与）
-3. role: 物語での役割（テキストから推定、なければ外見や設定文から推測。例：主人公、ヒロイン、ライバルなど）
-4. personality: 性格（テキストから読み取り、なければ表情・ポーズ・設定文から推測。例：元気、クール、ツンデレなど）
-5. note: 外見的特徴・設定メモ（以下を全て含むこと）
-   - 髪型（長さ・スタイル・色）
-   - 服装
-   - 眼鏡の有無
-   - 体格・身長に関する記述
-   - 画像内に書かれた制約条件（「厳禁」「必須」「注意」など）
-   - キャラクター間の関係性（幼馴染、同級生など）
-   - その他読み取れる設定情報全て
-
-【重要ルール】
-- 画像内の日本語テキストを正確に読み取ること（手書き文字も含む）
-- 「厳禁」「必須」「注意」などの制約条件は特に重要なので確実にnoteに含めること
-- 推測で埋めた項目には末尾に「(推定)」と付けること
-- 必ず有効なJSON配列のみを出力すること。説明文・挨拶・マークダウン装飾は一切不要
-- JSONはコードブロックで囲まず、純粋なJSON文字列のみ出力すること
-
-出力例:
-[{"name":"アカリ","sex":"女性","role":"主人公(推定)","personality":"元気","note":"内巻きのミディアムボブ, オレンジ髪, セーラー服, ロングヘア厳禁, 眼鏡厳禁, 甘いものが大好き"}]`;
+import { yf as CHAR_ANALYSIS_PROMPT } from './characterImportPrompt.js';
+import { wf as parseCharacterJson } from './characterImportParsing.js';
 
 /**
  * 画像ファイルをBase64に変換
@@ -46,78 +21,6 @@ function fileToBase64(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-}
-
-// 文字列値内の制御文字（生改行、生タブ）を安全にエスケープする
-function escapeControlCharsInStrings(jsonStr) {
-  let result = '';
-  let inString = false;
-  
-  for (let i = 0; i < jsonStr.length; i++) {
-    const char = jsonStr[i];
-    
-    if (inString) {
-      if (char === '\\') {
-        result += char;
-        if (i + 1 < jsonStr.length) {
-          result += jsonStr[i + 1];
-          i++;
-        }
-      } else if (char === '"') {
-        inString = false;
-        result += char;
-      } else if (char === '\n') {
-        result += '\\n';
-      } else if (char === '\r') {
-        result += '\\n';
-        if (i + 1 < jsonStr.length && jsonStr[i + 1] === '\n') {
-          i++;
-        }
-      } else if (char === '\t') {
-        result += '\\t';
-      } else {
-        result += char;
-      }
-    } else {
-      if (char === '"') {
-        inString = true;
-        result += char;
-      } else {
-        result += char;
-      }
-    }
-  }
-  return result;
-}
-
-/**
- * AIレスポンスからJSONを安全にパース
- */
-function parseCharacterJson(text) {
-  // マークダウンコードブロック除去
-  let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  // JSON配列部分だけを抽出
-  const match = cleaned.match(/\[[\s\S]*\]/);
-  if (!match) throw new Error('AIの応答からキャラクター情報を抽出できませんでした');
-  
-  let raw = match[0];
-  
-  // まず素直にパースを試行
-  try {
-    return JSON.parse(raw);
-  } catch (err) {
-    console.warn('キャラクターJSON初回パース失敗、修復を試行:', err.message);
-  }
-  
-  // 修復処理
-  let fixed = escapeControlCharsInStrings(raw);
-  fixed = fixed.replace(/,\s*([\]}])/g, '$1'); // 末尾カンマ除去
-  
-  try {
-    return JSON.parse(fixed);
-  } catch (err) {
-    throw new Error(`AIの応答JSONの解析に失敗しました。元のエラー: ${err.message}`);
-  }
 }
 
 /**

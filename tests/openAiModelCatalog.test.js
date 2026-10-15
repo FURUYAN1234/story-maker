@@ -21,10 +21,6 @@ const expectedModelIds = [
   'gpt-5.6-terra',
   'gpt-6-luna',
   'gpt-5.6-luna',
-  'gpt-4.1',
-  'gpt-4.1-mini',
-  'gpt-4.1-nano',
-  'gpt-4o',
 ];
 
 assert.equal(DEFAULT_OPENAI_MODEL_ID, 'gpt-6.1-sol');
@@ -40,15 +36,16 @@ assert.deepEqual(getOpenAIResponsesRoute('gpt-6-astra'), expectedModelIds);
 assert.deepEqual(getOpenAIResponsesRoute('gpt-6.1-sol'), expectedModelIds.slice(1));
 assert.ok(!getOpenAIResponsesRoute('gpt-6.1-sol').includes('gpt-6-astra'));
 assert.deepEqual(getOpenAIResponsesRoute('gpt-6-luna'), expectedModelIds.slice(5));
-assert.deepEqual(getOpenAIResponsesRoute('gpt-4.1-mini'), expectedModelIds.slice(8));
-assert.deepEqual(getOpenAIChatRoute('gpt-4.1-mini'), ['gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o']);
+assert.deepEqual(getOpenAIResponsesRoute('gpt-5.6-luna'), ['gpt-5.6-luna']);
+assert.deepEqual(getOpenAIChatRoute('gpt-6-luna'), ['gpt-6-luna','gpt-5.6-luna']);
+assert.ok(OPENAI_MODEL_OPTIONS.every(({id})=>!/^gpt-4/.test(id)));
 assert.deepEqual(getOpenAIResponsesRoute('invalid-model'), expectedModelIds.slice(1));
 assert.equal(getOpenAIModelOption('gpt-6.1-sol').inputPriceUsdPerM, 2);
 assert.equal(getOpenAIModelOption('gpt-6.1-sol').outputPriceUsdPerM, 10);
 
 assert.equal(getOpenAIModelOption('gpt-6-luna').inputPriceUsdPerM, 0.1);
 assert.equal(getOpenAIModelOption('gpt-5.6-terra').outputPriceUsdPerM, 12);
-assert.equal(getOpenAIModelOption('gpt-4.1-mini').outputPriceUsdPerM, 1.6);
+assert.equal(getOpenAIModelOption('gpt-5.6-luna').outputPriceUsdPerM, 1.2);
 assert.equal(
   formatOpenAIModelPrice(getOpenAIModelOption('gpt-6-luna')),
   '入力 $0.10 / 出力 $0.50 USD / 100万トークン'

@@ -119,7 +119,7 @@ try {
     maxTokens: 64,
     openAiResponsesBeta: false,
   });
-  assert.equal(result.usedModel, 'gpt-4.1');
+  assert.equal(result.usedModel, 'gpt-6.1-sol');
   assert.deepEqual(chunks, [
     { text: 'hel', isThought: false },
     { text: 'lo', isThought: false },
