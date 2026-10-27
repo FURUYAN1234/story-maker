@@ -8,7 +8,7 @@ import { buildOutputModeStrictContract, buildFinalOutputFormatCheck } from '../s
 import { detectPublicRewriteIssue } from '../src/qualityBoost.js';
 import { cleanOutputForPublicMode } from '../src/outputCleanup.js';
 import { Gt, yt } from '../src/providerClients.js';
-import { finalizeNanoScenarioOutput, isNanoScenarioComplete } from '../src/nanoScenarioContract.js';
+import { finalizeNanoScenarioOutput, isNanoScenarioComplete, NANO_AUTOMATIC_STYLES } from '../src/nanoScenarioContract.js';
 import { hasEditorialModeFormat, evaluateBrushupCandidate } from '../src/editorialBrushupCandidate.js';
 
 // Synthetic contract fixtures, not paid API evidence.
@@ -41,6 +41,15 @@ test('all generation and revision prompt contracts include current Nano schema w
     assert.doesNotMatch(prompt, /無言.*だけのコマは禁止|全コマで吹き出し用セリフ|重複禁止|同じカメラを2回以上使うことは禁止/);
   }
   assert.doesNotMatch(Jo({ mode: 'novel' }).prompt, /BalloonLayout:/);
+});
+
+test('chibi prompt preserves applicable clothing while allowing scripted costume changes', () => {
+  const chibi = NANO_AUTOMATIC_STYLES.find(({ tag }) => tag === 'CHIBI_GAG')?.recipe;
+  assert.match(chibi, /適用Outfit優先/);
+  assert.match(chibi, /服種\/色\/重ね着をちび化で変えず/);
+  assert.match(chibi, /明示着替えは反映/);
+  const prompt = Jo({ mode: '4koma_scenario' }).prompt;
+  assert.ok(prompt.includes(chibi));
 });
 
 test('normal output gate preserves valid silent and repeated-camera panels plus quoted surface text', () => {

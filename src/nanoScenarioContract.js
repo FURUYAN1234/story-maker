@@ -49,7 +49,7 @@ export const NANO_AUTOMATIC_STYLES = [
   },
   {
     "tag": "CHIBI_GAG",
-    "recipe": "Redraw enlarged heads, shortened torsos and jointed limbs as expressive chibi, not unchanged anime. Keep Camera/Action, acting/gaze/hair/glasses; readable perspective, no zoom for cuteness. 色は不透明な塗りで鮮明に置き、淡い水彩下地を継承しない。明示された淡色指定は優先。"
+    "recipe": "大頭・短い胴・関節ある手足の表情豊かなちびへ再構成。通常アニメのまま不可。Camera/Action・演技/視線/髪/眼鏡と透視を保持、可愛さ目的のズーム禁止。適用Outfit優先、未指定は継続/参照服。服種/色/重ね着をちび化で変えず明示着替えは反映。服の描法/しわは画風/動作に従う。 色は不透明な塗りで鮮明に置き、淡い水彩下地を継承しない。明示された淡色指定は優先。"
   },
   {
     "tag": "GEKIGA",

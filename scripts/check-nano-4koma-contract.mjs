@@ -45,7 +45,7 @@ if (!fs.existsSync(nanoPromptFile)) {
 
 // Imported rule exports cover camera, gestures, props, reading/tails, facial
 // acting, payoff staging and wardrobe, beyond the old output-block-only hash.
-const server = await createServer({ root: nanoRoot, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
+const server = await createServer({ root: nanoRoot, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true, watch: null } });
 try {
   // Nano now assembles both panel modes dynamically. Inspect the emitted ordinary
   // four-panel contract rather than relying on a literal source-template heading.

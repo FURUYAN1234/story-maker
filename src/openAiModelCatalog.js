@@ -1,10 +1,11 @@
 const resolveDefaultOpenAIModelId = () => 'gpt-6.1-sol';
 const DEFAULT_OPENAI_MODEL_ID = resolveDefaultOpenAIModelId();
-const OPENAI_MODEL_PRICE_SNAPSHOT_DATE = '2026-10-01';
+const OPENAI_MODEL_PRICE_SNAPSHOT_DATE = '2026-10-27';
 
 const OPENAI_MODEL_OPTIONS = Object.freeze([
   { id: 'gpt-6-astra', label: 'GPT-6 Astra', description: '最も難しい構成・推敲向け', inputPriceUsdPerM: 10, outputPriceUsdPerM: 50 },
   { id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', description: '新しいSol・物語構成と料金のバランス', inputPriceUsdPerM: 2, outputPriceUsdPerM: 10 },
+  { id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra', description: '画像理解と自然な文章を低コストで両立', inputPriceUsdPerM: 1, outputPriceUsdPerM: 5 },
   { id: 'gpt-6-sol', label: 'GPT-6 Sol', description: '品質とコストのバランス型', inputPriceUsdPerM: 2, outputPriceUsdPerM: 10 },
   { id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', description: '複雑な物語構成に強い高品質型', inputPriceUsdPerM: 4, outputPriceUsdPerM: 20 },
   { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', description: '知性とコストを両立する汎用型', inputPriceUsdPerM: 2, outputPriceUsdPerM: 12 },
