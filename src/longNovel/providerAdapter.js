@@ -16,7 +16,7 @@ export async function callLongNovelProvider({
   }
   const initialModel = provider === 'openai'
     ? 'gpt-4.1'
-    : GEMINI_MODELS[0]?.value || 'gemini-2.5-flash';
+    : GEMINI_MODELS[0]?.value || 'gemini-3.8-flash';
   return callGenerativeAI(apiKey, initialModel, prompt, onFallback, {
     temperature: temperature ?? (provider === 'gemini' ? 0.92 : 0.86),
     maxTokens: maxTokens || 8192,

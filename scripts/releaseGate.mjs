@@ -26,6 +26,18 @@ function sameIds(left, right) {
 
 export function validateBilingualReleaseNotes(markdown, version) {
   const errors = [];
+  // Current releases pair translations at the same location; retain the legacy
+  // validator for historical split-language release notes.
+  if (/^## Changes \/ 更新内容\s*$/m.test(markdown)) {
+    if (!new RegExp('^# Story Maker v' + escapeRegex(version) + '\\s*$', 'm').test(markdown)) {
+      errors.push('Missing current Story Maker version heading.');
+    }
+    const lines = (sectionBody(markdown, '## Changes / 更新内容') || '').split(/\r?\n/).filter(line => line.trim());
+    if (!lines.length || lines.some(line => !/^- \[[a-z0-9_-]+\] [A-Za-z][^\n]+ \/ [^\n]*[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(line))) {
+      errors.push('Every change must pair English / Japanese in the same item.');
+    }
+    return errors;
+  }
   const requiredHeadings = [
     '# Story Maker v' + version,
     '## English',

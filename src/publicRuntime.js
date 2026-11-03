@@ -9,6 +9,7 @@ import {
 import { installAlphapolisAssist } from './alphapolisAssist.js';
 import { installKakuyomuAssist } from './kakuyomuAssist.js';
 import { Gt } from './providerClients.js';
+import { GEMINI_MODEL_VALUES } from './data.js';
 import { editorialCallOptions, installEditorialBrushupRuntime } from './editorialBrushupRuntime.js';
 import { installPublicOutputCleanup } from './outputCleanup.js';
 import { installStandardTypewriterCursor } from './standardTypewriterRenderer.js';
@@ -521,7 +522,7 @@ async function callEditorialAi(prompt, context = {}) {
   const provider = session.apiProvider === 'openai' ? 'openai' : 'gemini';
   const key = normalizeApiKey(provider === 'openai' ? session.openaiKey : session.geminiKey);
   if (!isRealApiKey(key)) throw new Error('選択中のAPIキーを確認できません');
-  const model = provider === 'openai' ? 'gpt-5.5' : 'gemini-3.5-flash';
+  const model = provider === 'openai' ? 'gpt-5.5' : GEMINI_MODEL_VALUES[0];
   return Gt(key, model, prompt, null, {
     ...editorialCallOptions(context),
     openAiResponsesBetaAllowed: true,

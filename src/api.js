@@ -191,7 +191,7 @@ async function _callGeminiVision(apiKey, model, prompt, imageBase64, mimeType, o
  * 画像認識用：キャラクターシート解析等に使用
  * 
  * モデル優先順位は画像認識に最適化された優先順位に準拠
- * gemini-3系はアニメ画像で PROHIBITED_CONTENT を返すため後方に配置
+ * テキストと画像解析は表示カタログと同じ現行GAモデル順を使用
  */
 export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeType, onFallback, options = {}) {
   if (apiKey.trim().startsWith("sk-")) {
@@ -199,13 +199,7 @@ export async function callGenerativeAIVision(apiKey, prompt, imageBase64, mimeTy
   }
 
   // 最新の安定かつ画像認識に適したモデル（非推奨化対策）
-  const IMAGE_MODEL_IDS = [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-flash-latest",
-    "gemini-pro-latest"
-  ];
+  const IMAGE_MODEL_IDS = GEMINI_MODELS.map(model => model.value);
 
   const errors = [];
   let isSafetyBlocked = false;
@@ -260,13 +254,7 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
   }
 
   // 自動フォールバックロジックを最新の最適化リストに更新
-  const fallbackTargets = Array.isArray(options.fallbackModels) ? options.fallbackModels : [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-flash-latest",
-    "gemini-pro-latest"
-  ];
+  const fallbackTargets = Array.isArray(options.fallbackModels) ? options.fallbackModels : GEMINI_MODELS.map(model => model.value);
   const uniqueModels = new Set([
     initialModel,
     ...fallbackTargets
@@ -553,13 +541,7 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
     return _callOpenAIMultimodal(apiKey.trim(), prompt, images, onFallback, options);
   }
 
-  const IMAGE_MODEL_IDS = [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-flash-latest",
-    "gemini-pro-latest"
-  ];
+  const IMAGE_MODEL_IDS = GEMINI_MODELS.map(model => model.value);
 
   const errors = [];
   let isSafetyBlocked = false;
@@ -820,13 +802,7 @@ export async function callGenerativeAIStream(apiKey, initialModel, prompt, onChu
   }
 
   // 自動フォールバックロジックを最新の最適化リストに更新
-  const fallbackTargets = [
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-flash-latest",
-    "gemini-pro-latest"
-  ];
+  const fallbackTargets = GEMINI_MODELS.map(model => model.value);
   const uniqueModels = new Set([
     initialModel,
     ...fallbackTargets

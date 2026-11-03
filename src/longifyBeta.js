@@ -1,4 +1,5 @@
 import { yt } from './providerClients.js';
+import { GEMINI_MODEL_VALUES } from './data.js';
 import {
   buildProgressHeartbeatText,
   createProgressHeartbeat,
@@ -31,7 +32,7 @@ import {
   shouldPreserveOriginalLongifyChapter,
 } from './longifyRetryAudit.js';
 
-const DEFAULT_MODEL = 'gemini-3.5-flash';
+const DEFAULT_MODEL = GEMINI_MODEL_VALUES[0];
 const DEFAULT_CHAPTER_COUNT = 6;
 const LONGIFY_BETA_PUBLIC_ENABLED = true;
 const LONGIFY_TARGET_UNIT_CHARS = 10000;

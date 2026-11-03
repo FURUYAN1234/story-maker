@@ -8,9 +8,9 @@ import {
 
 assert.deepEqual(
   GEMINI_MODELS.map(model => model.value),
-  ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-flash-latest', 'gemini-pro-latest'],
+  ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'],
 );
-assert.deepEqual(GEMINI_MODEL_VALUES, ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-flash-latest', 'gemini-pro-latest']);
+assert.deepEqual(GEMINI_MODEL_VALUES, ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']);
 assert.deepEqual(OPENAI_TEXT_MODELS, ['gpt-6.1-sol','gpt-6.1-terra','gpt-6-sol','gpt-5.6-sol','gpt-5.6-terra','gpt-6-luna','gpt-5.6-luna']);
 assert.deepEqual(OPENAI_VISION_MODELS, OPENAI_TEXT_MODELS);
 

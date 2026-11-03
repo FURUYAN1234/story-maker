@@ -1,3 +1,11 @@
+## Gemini December migration candidate v5.4.6 — 2026-11-03
+
+- Current task: update Gemini fallback candidates and displays, verify real API behavior, and deploy through the established release transaction. No new backup or social publication.
+- Root PLAN points to the private task ledger. Full 96 tests, production build, app preflight and shared security check (production/development audit 0) pass.
+- Ordinary Gemini 3.8 Flash API run completed generation, contradiction repair, editorial evaluation and all three automatic revisions. Final four-panel text and complete dialogue were inspected and saved. Lower-score and malformed revisions were rejected while retaining the 88-point valid original. Official delivery remains pending.
+- UI, editorial and longify primary defaults now use the same Gemini catalog; updating fallback arrays alone had left an old primary active during the first live run. Regression coverage includes these defaults.
+- Preserve existing feature contracts and dedicated image-generation routes.
+
 # Story Maker Handoff
 
 ## 2026-10-09 Nano STEP2 scenario synchronization — release candidate verified
