@@ -195,7 +195,7 @@ function stripLegacyShortLengthCaps(text) {
   const over = chars => `絶対に${chars}字を超えない`;
   const replacements = [
     [new RegExp(`400${wave}650字、4段落以内の完結したショートショートとして出力する。${over(800)}こと。`, 'g'), 'ショートショートとして、本文は1500字以上を下限にする。'],
-    [new RegExp(`400${wave}750字、4段落以内。短い場面で完結させ、${over(800)}。`, 'g'), '本文は1500字以上を下限にし、導入、揺れ、反転、余韻を省略しない。'],
+    [new RegExp(`400${wave}750字、4段落以内。短い場面で完結させ、${over(800)}。`, 'g'), '本文は1500字以上を下限にし、導入から応答・帰結までを描き、反転は題材と結末に必要な場合だけ使う。'],
     [new RegExp(`900${wave}1500字、5段落以内の短編小説として出力する。${over(2000)}こと。`, 'g'), '短編小説として、本文は4500字以上を下限にする。'],
     [new RegExp(`900${wave}1500字、5段落以内。短編小説として閉じ、${2000}字を超えない。`, 'g'), '短編小説として、本文は4500字以上を下限にする。'],
     [new RegExp(`3節だけを使い、各節2段落以内、1800${wave}2600字で起承転結を作る。${over(3200)}こと。`, 'g'), '3節だけを使い、本文は5500字以上を下限にして起承転結を作る。'],
@@ -883,6 +883,7 @@ async function ensureOpenAiStreamLength(input, init, response, originalFetch) {
   if (!/api\.openai\.com/i.test(url || '')) return response;
   const body = parseJsonBody(init?.body);
   if (!body || body.stream !== true || body.response_format?.type === 'json_object') return response;
+  if (shouldSkipQualityPrompt(collectOpenAiText(body))) return response;
   const mode = resolvePromptMode(collectOpenAiText(body));
   if (!PUBLIC_MODE_VALUES.includes(mode)) return response;
   const min = MODE_STRICT_MIN_CHARS[mode] || 0;
@@ -924,6 +925,7 @@ async function ensureGeminiStreamLength(input, init, response, originalFetch) {
   const promptText = body?.contents?.flatMap(content => (
     Array.isArray(content?.parts) ? content.parts.map(part => part?.text || '') : []
   )).join('\n') || '';
+  if (shouldSkipQualityPrompt(promptText)) return response;
   const mode = resolvePromptMode(promptText);
   if (!PUBLIC_MODE_VALUES.includes(mode)) return response;
   const min = MODE_STRICT_MIN_CHARS[mode] || 0;
@@ -1025,6 +1027,10 @@ function boostRequest(input, init = {}) {
   if (!url || !init || typeof init.body !== 'string') return init;
   const body = parseJsonBody(init.body);
   if (!body || typeof body !== 'object') return init;
+  const promptText = /generativelanguage\.googleapis\.com/i.test(url)
+    ? (Array.isArray(body.contents) ? body.contents : []).flatMap(content => (Array.isArray(content?.parts) ? content.parts : []).map(part => part?.text || '')).join('\n')
+    : collectOpenAiText(body);
+  if (shouldSkipQualityPrompt(promptText)) return init;
 
   let nextBody = body;
   if (/generativelanguage\.googleapis\.com/i.test(url)) {

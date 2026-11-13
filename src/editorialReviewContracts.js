@@ -1,5 +1,7 @@
 import { hasEditorialModeFormat } from './editorialBrushupCandidate.js';
 import { STORY_MAKER_FOOTER } from './version.js';
+import { buildStoryStructureGuidance } from './storyStructure.js';
+import { MODE_LENGTH_TARGETS } from './modeContracts.js';
 
 export const EDITORIAL_PASS_SCORE = 90;
 export const EDITORIAL_PUBLISHABLE_SCORE = 85;
@@ -62,8 +64,12 @@ export function buildEditorialReviewPrompt({ mode = '', modeLabel = '', text = '
   const mechanicallyValid = hasEditorialModeFormat(text, mode);
   const rhythmGuidance = buildCognitiveRhythmEditorialGuidance({ mode });
   return [
+    '[SMK_EDITORIAL_REVIEW_ONLY_V1]',
     'あなたは商業編集者です。以下の完成稿だけを講評し、本文を書き直さないでください。',
     `出力モード: ${modeLabel || mode || '未指定'}`,
+    MODE_LENGTH_TARGETS[mode]?.min
+      ? `公開本文の字数下限は${MODE_LENGTH_TARGETS[mode].min}字です。生成時の内部目標は追加の合否条件ではありません。下限を満たす作品を内部目標未達だけで減点せず、具体的な場面不足がある場合はその箇所と影響を示してください。`
+      : '指定された形式と本文の内容に基づいて評価してください。',
     `評価軸: ${FAMILY_CRITERIA[family]}`,
     '出力モードが要求する公開ラベル（例: 絵/状況、セリフ、狙い、ページ、コマ、宛先、本文、結び等）は完成稿の正規構成であり、制作メモや内部指示の露出として減点しないこと。',
     `末尾の「${STORY_MAKER_FOOTER}」は製品が付与する必須フッターであり、生成ツール名の混入、メタ情報、契約違反として減点しないこと。`,
@@ -71,6 +77,7 @@ export function buildEditorialReviewPrompt({ mode = '', modeLabel = '', text = '
       ? '形式契約はアプリの機械検証に合格済みです。必須ラベル、セリフ欄、狙い欄、製品フッターを形式違反や制作メモ露出として再減点せず、内容・構成・表現・オチの品質を採点してください。'
       : '形式契約はアプリの機械検証に不合格です。欠落している必須構造を問題点と改稿方針へ具体的に記載してください。',
     rhythmGuidance,
+    buildStoryStructureGuidance({ mode, phase: 'review' }),
     '100点未満なら、褒めるだけの講評を禁止します。点数を上げるために残っている欠点を、厳しく具体的に示してください。',
     '問題点は1〜3件に絞り、番号を付け、各項目に「本文中の該当箇所（短い引用または場面の特定）」「何が弱いか」「減点理由と失点目安（何点分か）」を含めてください。',
     '改稿方針は問題点と同じ番号を使い、新しい人物・設定・事件を足さず、該当箇所をどう変更すれば失点を回収できるかを具体的に指示してください。',

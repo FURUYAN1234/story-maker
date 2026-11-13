@@ -30,8 +30,8 @@ const structuredReviewText = (score, commentary = '改善点を具体的に確�
   'モード契約適合: 適合',
 ].join('\n');
 
-const original = '彼女は古い駅で手紙を拾った。\n\n返事を書き、朝の列車を見送った。';
-const improved = '彼女は古い駅で手紙を拾った。差出人の震えた筆跡に、昨日の後悔が残っていた。\n\n彼女は返事を書き、自分の言葉で別れを告げて朝の列車を見送った。';
+const original = '描写'.repeat(2300) + '。\n\n' + '彼女は古い駅で手紙を拾った。\n\n返事を書き、朝の列車を見送った。';
+const improved = '描写'.repeat(2300) + '。\n\n' + '彼女は古い駅で手紙を拾った。差出人の震えた筆跡に、昨日の後悔が残っていた。\n\n彼女は返事を書き、自分の言葉で別れを告げて朝の列車を見送った。';
 assert.equal(isEditorialBrushupReady({ textContent: original, classList: { contains: () => false } }), true);
 assert.equal(isEditorialBrushupReady({ textContent: original, classList: { contains: value => value === 'empty' } }), false);
 

@@ -90,7 +90,7 @@ test('editorial adoption retains the shared scenario schema even with an externa
 });
 
 test('editorial adoption permits a complete silent ending without a novel ending marker', () => {
-  const valid = scenarioFixture();
+  const valid = scenarioFixture().replace('状況:', `状況: ${'机の位置と人物の手元が同じ画面内に見える。'.repeat(120)}`);
   const reviews = { currentReview: { valid: true, score: 85 }, candidateReview: { valid: true, score: 90 } };
   assert.equal(evaluateBrushupCandidate({currentText:valid,candidateText:valid,mode:'4koma_scenario',...reviews}).adopt, true);
 });

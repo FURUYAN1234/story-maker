@@ -1,3 +1,21 @@
+## Story Maker v5.4.7 publication — 2026-11-13
+
+- The user now authorizes official deployment, the existing note update, matching X/Facebook image announcements, then a full backup. This replaces the earlier local-only boundary and backup cancellation for this operation.
+- Version metadata and release notes are prepared for v5.4.7. The accepted implementation/API evidence below remains valid; only version and release documentation change for publication. Official receipt, public-page checks, social readback and full-backup verification remain pending.
+
+## Adaptive story structure — 2026-11-13 (local implementation; API verified)
+
+- User scope: apply the supplied three-act reference after publishing the manga app, then verify Story Maker through its ordinary API flow. Manga v7.5.1 publication is complete. Story Maker deployment was not requested; full backup is cancelled.
+- Shared guidance now reaches ordinary and compatibility generation, quality instructions, editorial review and revision. Brief works can combine beats; reflective and documentary forms keep their own structure. Crisis, reversal, death, growth and irreversible choices are optional and must fit the user's topic and ending.
+- Removed conflicting mandatory-reversal language from the final short-output contracts and length repair while retaining the 1,500-character minimum and existing output formats. Reviewed and synchronized the two current Nano staging-rule differences; no scenario schema or pinned hash change.
+- First ordinary GPT-6 Luna run completed generation, review and three revisions. It preserved the valid 88-point original over equal/lower 88/87/87-point candidates. Inspection exposed generation-only length instructions being appended to editorial review and stale timer-generated progress claims; this run is diagnostic evidence, not final acceptance.
+- Fixed the request boundary so editorial review is not rewritten as a prose-generation request, while drafting/revision and minimum-length checks remain active. Review now distinguishes the public minimum from an internal drafting target. Progress uses the selected model and elapsed waiting time, without invented beat/inspection completion.
+- Second ordinary Luna run verified clean review instructions and correct progress, improving 92 → 94 → 96 while rejecting a lower 90-point revision. Actual final-body counting exposed another acceptance gap: a 96-point manuscript was below the public 1,500-character minimum. This result is retained as diagnostic evidence, not accepted completion.
+- Public minimum length now uses cleaned body text excluding title/footer/whitespace. Existing initial format repair handles short manuscripts once and checks the returned result; candidate adoption rejects undersized rewrites even when scored higher. Normal, boundary and failed-repair regressions preserve the valid baseline and mandatory minimum.
+- Third ordinary GPT-6 Luna run completed generation, minimum-length repair, review and all three revisions. It adopted 88 → 93 → 95 and rejected the last 90-point candidate. The accepted body has 2,633 characters excluding title, footer and whitespace, above the 1,500-character public minimum. The quiet two-person library story and small final consequence were retained; no crisis or compulsory reversal was imposed. Minor prose issues remain visible in the 95-point review and are not reported as flawless prose.
+- TXT import also exposed a disabled parent editorial region despite its button being enabled. Readiness now unlocks the parent, button and option together. The final UI was verified through normal TXT import, with no API request in the UI fixture.
+- Current local suite: 107/107 tests passed; final production build and built-security verification passed. The final build only adds the verified editorial-readiness UI change to the API-tested sources. Keep accepted outputs and connected tabs. No Story Maker commit, version bump, deployment or full backup was performed.
+
 ## Gemini December migration candidate v5.4.6 — 2026-11-03
 
 - Current task: update Gemini fallback candidates and displays, verify real API behavior, and deploy through the established release transaction. No new backup or social publication.

@@ -1,4 +1,5 @@
 import { NANO_SCENARIO_CONTRACT, NANO_SCENARIO_OUTPUT_CHECK } from './nanoScenarioContract.js';
+import { buildStoryStructureGuidance } from './storyStructure.js';
 // ============================================================
 // prompt.js - Story Maker v5.0.2
 // Clean compatibility prompt helpers for modular source files.
@@ -59,7 +60,7 @@ function outputContract(mode) {
   const contracts = {
     '4koma': 'タイトル、1コマ目、2コマ目、3コマ目、4コマ目を必ず置き、各コマに「絵/状況:」「セリフ:」をこの順で書く。通常4コマの完成品なので「狙い:」「意図:」「解説:」などの制作メモを本文に出さない。「セリフ:」の後に説明文や制作意図を足さず、発話、短い独白、効果音だけを書く。番号だけの散文小説にしない。選択された題材の現実感を保ち、別ジャンルの大げさな設定や抽象不条理だけでオチを作らない。4コマ目は誰かの選択と、その結果の小さな損、気まずさ、関係変化まで絵とセリフで分かるオチにする。',
     '4koma_scenario': NANO_SCENARIO_CONTRACT,
-    short_short: 'ショートショートとして、導入、揺れ、反転、余韻を省略せず本文で書く。',
+    short_short: 'ショートショートとして、導入から応答・帰結までを本文で描き、反転は必要な場合だけ使う。',
     novel: '短編小説として、地の文と会話で場面を進め、関係や感情を変化させて閉じる。',
     medium: 'タイトル、第1節、第2節、第3節をこの順で置く。3節だけで構成し、各節に場面、会話、行動、後始末を置く。',
     scenario: 'タイトル、登場人物、場面、ト書き、人物名: セリフを守る。散文小説だけにしない。',
@@ -120,6 +121,7 @@ export function buildPrompt(appState = {}) {
     listCharacters(appState.characters),
     settings.supplement ? `\n補足:\n${settings.supplement}` : '',
     guide ? `\n文体ガイド:\n${guide}` : '',
+    buildStoryStructureGuidance({ mode: settings.mode }),
     knowledge ? `\n参考ナレッジ:\n${knowledge}` : '',
     '',
     '読みやすい段落に分け、選択した出力モードの形式を崩さず完成稿だけを出力してください。',

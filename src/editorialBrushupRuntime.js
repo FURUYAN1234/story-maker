@@ -6,15 +6,17 @@ import {
   getEditorialScoreTier,
   parseEditorialReview,
 } from './editorialReviewContracts.js';
-import { evaluateBrushupCandidate, hasEditorialModeFormat } from './editorialBrushupCandidate.js';
+import { evaluateBrushupCandidate, hasEditorialModeFormat, validateEditorialMinimumLength } from './editorialBrushupCandidate.js';
 import { stripGeneratedFooter, withStoryMakerFooter } from './footerHelpers.js';
 import { getGenerationTimeoutMs } from './generationTimeoutPolicy.js';
 import { buildFinalOutputFormatCheck } from './outputModeContracts.js';
 import { cleanOutputForPublicMode } from './outputCleanup.js';
+import { buildStoryStructureGuidance } from './storyStructure.js';
 
 const EDITORIAL_BRUSHUP_TARGET_SCORE = 100;
 
 export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '', modeLabel = '', rejectedCandidate = null } = {}) {
+  const length = validateEditorialMinimumLength(text, mode);
   const highScoreGuidance = Number(review?.score) >= EDITORIAL_PUBLISHABLE_SCORE
     ? [
       '【高得点向け精密改稿】',
@@ -36,6 +38,7 @@ export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '',
   return [
     'あなたは商業編集者兼リライターです。元原稿の主題、人物、事実、結末、出力形式を維持して改稿してください。',
     '文字数を増やすこと自体を目的にせず、講評で指摘された問題だけを改善してください。',
+    length.min ? `本文はタイトル・フッター・空白・改行を除いて最低${length.min}字を維持してください。現在の本文は${length.charCount}字です。下限未達なら既存の場面の応答・動作を具体化し、事件や人物を追加せずに補ってください。` : '',
     '前置き、講評、点数、Markdownコードフェンスは出力せず、完成稿本文だけを返してください。',
     `出力モード: ${modeLabel || '未指定'}`,
     `直近の点数: ${Number.isFinite(review?.score) ? review.score : '未採点'}`,
@@ -47,6 +50,7 @@ export function buildEditorialBrushupPrompt({ text = '', review = {}, mode = '',
     highScoreGuidance,
     rejectedGuidance,
     buildCognitiveRhythmEditorialGuidance({ mode }),
+    buildStoryStructureGuidance({ mode, phase: 'repair' }),
     String(text || '').trim(),
   ].join('\n');
 }
@@ -60,6 +64,7 @@ export function formatEditorialProgress({ phase = '', attempt = 0, maxAttempts =
       format: '出力形式違反',
       unclosed_ending: '未完結',
       duplicate_paragraph: '段落重複',
+      below_min_chars: '本文が字数下限未満',
     };
     const currentScore = Number.isFinite(decision.currentScore) ? decision.currentScore : '―';
     const candidateScore = Number.isFinite(decision.candidateScore) ? decision.candidateScore : '―';
@@ -69,19 +74,36 @@ export function formatEditorialProgress({ phase = '', attempt = 0, maxAttempts =
     return `採点結果（${Math.max(1, Number(attempt) || 1)}/${Math.max(1, Number(maxAttempts) || 3)}回）: 前回${currentScore}点 → 候補${candidateScore}点（${verdict}）`;
   }
   const step = `${Math.max(1, Number(attempt) || 1)}/${Math.max(1, Number(maxAttempts) || 3)}回・100点目標`;
+  if (phase === 'repair') return 'API稼働中: 出力モードの必須形式・字数下限を自動修正中...';
   if (phase === 'brushup') return `API稼働中: 改稿を生成中（${step}）...`;
   if (phase === 'review' && Number(attempt) > 0) return `API稼働中: 改稿後を再採点中（${step}）...`;
   return 'API稼働中: 元原稿を講評中...';
 }
 
 export function buildEditorialFormatRepairPrompt({ text = '', mode = '', modeLabel = '' } = {}) {
+  const length = validateEditorialMinimumLength(text, mode);
   return [
-    '以下の完成稿は指定された出力モードの必須形式を満たしていません。内容、人物、事実、オチを維持したまま、形式だけを修正してください。',
+    '以下の完成稿は指定された出力モードの形式または字数下限を満たしていません。内容、人物、事実、オチを維持し、不適合箇所を修正してください。',
     '説明、講評、採点、Markdownコードフェンスは出力せず、修正済みの完成稿だけを返してください。',
     buildFinalOutputFormatCheck({ mode, modeLabel }),
+    length.min ? `本文は現在${length.charCount}字、公開下限は${length.min}字です（タイトル・フッター・空白・改行は除外）。清書後にも下限を満たすよう、既存場面の応答や動作で${Math.ceil(length.min * 1.2)}字以上を目安に補ってください。` : '',
+    buildStoryStructureGuidance({ mode, phase: 'repair' }),
     '--- 修正対象本文 ---',
     stripGeneratedFooter(String(text || '')).trim(),
   ].join('\n');
+}
+
+export async function prepareEditorialManuscript({ text, mode, modeLabel, callAi, onRepair } = {}) {
+  if (hasEditorialModeFormat(text, mode) && validateEditorialMinimumLength(text, mode).ok) return text;
+  onRepair?.();
+  const repair = await callAi(buildEditorialFormatRepairPrompt({ text, mode, modeLabel }), {
+    stage: 'brushup', mode, charLength: String(text || '').length, attempt: 0,
+  });
+  const repairedText = cleanOutputForPublicMode(String(repair?.text || repair || '').trim(), mode);
+  if (!hasEditorialModeFormat(repairedText, mode) || !validateEditorialMinimumLength(repairedText, mode).ok) {
+    throw new Error('出力モードの必須形式・字数下限を自動修正できませんでした');
+  }
+  return withStoryMakerFooter(repairedText);
 }
 
 export function formatEditorialElapsedProgress(message = '', elapsedSeconds = 0) {
@@ -203,9 +225,12 @@ export async function runEditorialBrushup({
   initialReview = null,
 } = {}) {
   const originalText = String(text || '');
-  let currentText = originalText;
+  let currentText = await prepareEditorialManuscript({
+    text: originalText, mode, modeLabel, callAi,
+    onRepair: () => onProgress?.({ phase: 'repair', attempt: 0, maxAttempts }),
+  });
   const attemptLimit = Math.max(1, Math.min(3, Number(maxAttempts) || 3));
-  let currentReview = initialReview?.valid && initialReview?.structuredValid
+  let currentReview = currentText === originalText && initialReview?.valid && initialReview?.structuredValid
     ? initialReview
     : await runEditorialReview({ text: currentText, mode, modeLabel, callAi, onProgress, attempt: 0, maxAttempts: attemptLimit, requireStructured: true });
   if (!currentReview.valid) throw new Error('AI講評の必須項目を取得できませんでした');
@@ -221,7 +246,7 @@ export async function runEditorialBrushup({
     const rewrite = await callAi(buildEditorialBrushupPrompt({ text: currentText, review: currentReview, mode, modeLabel, rejectedCandidate }), {
       stage: 'brushup', mode, charLength: currentText.length, attempt: attempts,
     });
-    const candidateText = String(rewrite?.text || rewrite || '').trim();
+    const candidateText = stripGeneratedFooter(cleanOutputForPublicMode(String(rewrite?.text || rewrite || '').trim(), mode)).trim();
     const candidateReview = await runEditorialReview({ text: candidateText, mode, modeLabel, callAi, onProgress, attempt: attempts, maxAttempts: attemptLimit, requireStructured: true });
     const decision = evaluateBrushupCandidate({
       originalText, currentText, candidateText, mode, currentReview, candidateReview,
@@ -282,6 +307,15 @@ export function isEditorialBrushupReady(output) {
     && !output.classList?.contains?.('empty')
     && String(output.textContent || '').trim().length >= 20
   );
+}
+
+export function setEditorialReadyState({ button, sectionElement, autoCheckbox, ready } = {}) {
+  if (button) button.disabled = !ready;
+  if (ready) {
+    sectionElement?.classList?.remove?.('is-waiting');
+    sectionElement?.setAttribute?.('aria-disabled', 'false');
+    if (autoCheckbox) autoCheckbox.disabled = false;
+  }
 }
 
 export function setEditorialBrushupRunningState({ button, statusElement, running } = {}) {
@@ -346,7 +380,10 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   const currentMode = () => doc.querySelector?.('#mode-chips .chip.active')?.dataset?.v || '';
   const currentModeLabel = () => doc.querySelector?.('#mode-chips .chip.active')?.textContent?.trim() || currentMode();
   const hasText = () => isEditorialBrushupReady(output);
-  const setReady = () => { brushupButton.disabled = brushupRunning || awaitingGenerationReview || Boolean(generateButton?.disabled) || !hasText(); };
+  const setReady = () => setEditorialReadyState({
+    button: brushupButton, sectionElement, autoCheckbox,
+    ready: !brushupRunning && !awaitingGenerationReview && !generateButton?.disabled && hasText(),
+  });
   const Observer = doc.defaultView?.MutationObserver || globalThis.MutationObserver;
   const outputObserver = typeof Observer === 'function' ? new Observer(setReady) : null;
   outputObserver?.observe?.(output, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
@@ -377,17 +414,12 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
           if (output.dataset) delete output.dataset.editorialBrushupRendering;
         }
       }
-      if (!hasEditorialModeFormat(reviewedText, mode)) {
-        const repairMessage = 'API稼働中: 出力モードの必須形式を自動修正中...';
+      if (!hasEditorialModeFormat(reviewedText, mode) || !validateEditorialMinimumLength(reviewedText, mode).ok) {
+        const repairMessage = 'API稼働中: 出力モードの必須形式・字数下限を自動修正中...';
         statusElement && (statusElement.textContent = repairMessage);
         updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: repairMessage, reset: true });
         updateEditorialAuxiliaryUi({ alertElement: globalAlertElement, scoreBoard: thoughtScoreBoard, message: repairMessage, active: true });
-        const repair = await callAi(buildEditorialFormatRepairPrompt({ text: reviewedText, mode, modeLabel }), {
-          stage: 'brushup', mode, charLength: reviewedText.length, attempt: 0,
-        });
-        const repairedText = String(repair?.text || repair || '').trim();
-        if (!hasEditorialModeFormat(repairedText, mode)) throw new Error('出力モードの必須形式を自動修正できませんでした');
-        reviewedText = withStoryMakerFooter(repairedText);
+        reviewedText = await prepareEditorialManuscript({ text: reviewedText, mode, modeLabel, callAi });
         if (output.dataset) output.dataset.editorialBrushupRendering = 'true';
         try {
           output.textContent = reviewedText;

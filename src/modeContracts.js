@@ -1,4 +1,5 @@
 import { NANO_SCENARIO_CONTRACT, NANO_SCENARIO_OUTPUT_CHECK } from './nanoScenarioContract.js';
+import { buildStoryStructureGuidance } from './storyStructure.js';
 // Story Maker v5.0.2 public-mode contracts.
 // Keep mode names, final prompt contracts, and public-mode detection outside main.js.
 
@@ -43,7 +44,7 @@ export const MODE_LENGTH_TARGETS = {
     min: 1500,
     target: '2800字以上',
     cleanupMax: 0,
-    rule: '導入、揺れ、反転、余韻を場面として書き、あらすじだけで終えない。',
+    rule: '導入から応答・帰結までを場面として書き、反転は必要な場合だけ使い、あらすじだけで終えない。',
   },
   novel: {
     min: 4500,
@@ -121,6 +122,7 @@ MODE_LENGTH_TARGETS.long_10000 = {
 };
 
 const SKIP_PATTERNS = [
+  /^\s*\[SMK_EDITORIAL_REVIEW_ONLY_V1\]/,
   /JSONだけ|JSON only/i,
   /作風解析|style analysis/i,
   /画像を解析|character sheet|キャラクターシート/i,
@@ -259,9 +261,9 @@ export function buildQualityContract(mode) {
     '- 誰かが少し損をする、片付けが残る、謝りきれない、汚れ、忘れ物、待ち時間、沈黙など、生活の摩擦を一つ残す。',
     '- 感情名を説明する前に、手つき、視線、呼吸、匂い、音、紙や布や床などの物理ディテールで読者に分からせる。',
     '- AI的な均一さを避ける。全員が賢く優しく説明し合う展開、都合よく納得する和解、明朗な希望だけの結末は禁止。',
-    '- 主人公または語り手が最後に何を選ぶ話なのかを一文で固定し、本文全体をその選択へ向ける。',
-    '- 欲望、障害、誤解または反転、代償、関係変化を最低一つずつ本文に入れる。',
-    '- 終盤に対立、暴露、発見、ざわめきだけを置いて終わらない。主人公または語り手の選択後に、関係、場所、小物、空気のうち一つがどう変わったかまで書く。',
+    '- その作品で読者が追う人物の目的、問い、関係または観察の軸を定め、本文のつながりを保つ。',
+    '- 欲望、障害、反転、代償、関係変化は題材と尺に必要なものを選ぶ。全項目の挿入は要求しない。',
+    '- 結末は既出の出来事や観察へつなぐ。意図した未解決や不変は保ち、必須の決断や和解を後付けしない。',
     '- 選択された題材、ジャンル、世界観、追加資料の外側にある別ジャンルの設定を、勝手に原因、解決策、オチ、比喩の中心へ持ち込まない。',
     '- 入力にない設定で話を大きくするのではなく、入力済みの人物、場所、小物、会話、手順、感情のずれから具体化する。',
     '- 本文内の著者、差出人、語り手、制作者、記録者などの欄に、アプリ名、AI名、生成ツール名、モード名を入れない。必要な場合は本文世界の人物または役割として自然に書く。',
@@ -274,6 +276,7 @@ export function buildQualityContract(mode) {
     '- 形式ラベル、内部指示、自己評価、チェックリスト、英語メタ説明、プロンプト断片を本文に出さない。',
     ...(MODE_QUALITY_RULES[mode] || []),
     ...(MODE_LENGTH_RULES[mode] ? [MODE_LENGTH_RULES[mode]] : []),
+    buildStoryStructureGuidance({ mode }),
     '出力直前セルフチェック: 形式が合っているか。選択軸から逸れていないか。最後の一文が前半を回収しているか。会話と括弧が閉じているか。チェック結果は出力しない。',
   ].join('\n');
 }

@@ -1,4 +1,4 @@
-# Story Maker v5.4.6 / AI物語メーカー
+# Story Maker v5.4.7 / AI物語メーカー
 
 **Gemini model route / Geminiモデル候補**: `gemini-3.8-flash` → `gemini-3.6-flash` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`. Explicit stable IDs avoid the December 1, 2026 redirects; image-generation models keep their dedicated routes. / 2026年12月1日の旧モデル自動転送に依存しないよう、現行GAモデルを明示します。画像生成は専用のモデル経路を使います。
 
@@ -190,10 +190,12 @@ The current public long-form design has two clearly separated parts. `Long-form 
 | 2. AI review / AI講評 | Requests a structured score and concrete commentary from the selected provider. If the review format is invalid, it retries once with stricter format instructions. / 選択中のAPIへ構造化された点数と具体的講評を求めます。形式不正なら、形式指定を強めて1回再取得します。 | No local placeholder score is shown as a real review. / ローカルの仮点数を実講評として表示しません。 |
 | 3. Rewrite / 改稿 | Sends the current manuscript, active mode, current score, and commentary to the selected provider, requesting completed manuscript text only. / 現在の原稿、出力モード、点数、講評を選択中APIへ渡し、完成稿本文だけを求めます。 | Preserves the subject, characters, facts, ending, and output format while targeting diagnosed weaknesses. / 主題、人物、事実、結末、出力形式を保ち、指摘された弱点だけを直します。 |
 | 4. Re-review / 再講評 | Scores the rewrite before it can replace Output. / 改稿候補がOutputを置き換える前に再採点します。 | A rewrite is not accepted merely because an API returned text. / APIが文章を返しただけでは採用しません。 |
-| 5. Candidate gate / 候補採用判定 | Adopts only a format-valid, completed, non-duplicated candidate whose score is higher than the retained manuscript. / 形式が正しく、完結し、段落重複がなく、保持中原稿より高得点の候補だけを採用します。 | Prevents a polished-looking regression from overwriting a better draft. / 見た目だけ整った劣化稿が良い原稿を上書きするのを防ぎます。 |
+| 5. Candidate gate / 候補採用判定 | Adopts only a format-valid, completed, non-duplicated candidate that meets the public body-length minimum and scores higher than the retained manuscript. / 形式が正しく、完結し、段落重複がなく、本文字数の公開下限を満たし、保持中原稿より高得点の候補だけを採用します。 | Prevents a polished-looking regression from overwriting a better draft. / 見た目だけ整った劣化稿が良い原稿を上書きするのを防ぎます。 |
 | 6. Continue or stop / 継続／停止 | With auto mode ON, aims for 100 points and stops at that target or the three-attempt limit. Completion distinguishes editorial pass (90+), publishable (85–89), and needs brush-up (84 or below). / 自動ONでは100点を目標とし、目標到達または3回の上限で停止します。完了時は「編集合格（90点以上）」「公開可能（85〜89点）」「要ブラッシュアップ（84点以下）」を分けて表示します。 | Gives a bounded quality loop and reports the appropriate publication state. / 上限付きの品質ループにし、公開判断に使える状態を明示します。 |
 
 ### Manuscript Protection / 原稿保護
+
+The public minimum counts body text without the title, footer, completion marker or whitespace. A short initial manuscript receives one repair before editorial review; an undersized rewrite is rejected even when its AI score is higher. Imported text enables the same editorial controls. Review-only requests stay separate from drafting instructions, and progress reports the selected model and elapsed waiting time. / 公開字数の下限は、タイトル・フッター・完結マーカー・空白を除いた本文で数えます。短い初稿は講評前に1回補完し、高得点でも下限未満の改稿は採用しません。取り込んだ本文にも同じ編集欄を使えます。講評用の要求には本文生成の指示を混ぜず、進捗には選択モデルと応答待ち時間を表示します。
 
 | Risk / リスク | Result / 結果 |
 |---|---|
@@ -217,7 +219,7 @@ OpenAI image analysis and text generation use the selected model and maintained 
 
 ## Current Quality System / 現行品質システム
 
-The current v5.4.6 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.6系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.4.7 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.7系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -270,12 +272,14 @@ For direct long-form generation and long-manuscript brush-up, the OpenAI Respons
 
 The writing layer uses recurring narrative methods rather than one-off prompt slogans. These methods are intentionally generic, so they can work with many themes, genres, and formats. / 文章生成層は、一回限りの飾り文句ではなく、繰り返し使える物語設計メソッドを使います。これらはテーマ、ジャンル、形式が変わっても働くよう、意図的に汎用化しています。
 
+Drafting, quality instructions, editorial review and revision share a structure guide adapted from three-act storytelling. Brief pieces can combine beats; longer works can develop responses across scenes. A crisis, death, personal growth, fixed midpoint or reversal is optional. Poetry, essays, letters and diaries retain their form; documentary work must not invent motives, testimony or resolutions. Quiet, unresolved and unchanged endings remain valid when intentional. The guide adds no API stage and preserves the existing format, length and revision limits. / 生成・品質指示・編集評価・改稿で、三幕構成を参考にした設計指針を共有します。短い作品は展開を統合し、長い作品は複数場面の応答を積み重ねます。危機・死・成長・固定位置の中間点・反転は必須にしません。詩、エッセイ、手紙、日記の形式を保ち、記録作品の動機・証言・解決を創作しません。意図した静けさ、未解決、不変も成立した結末として扱います。API工程は増やさず、既存の形式・字数・改稿上限を維持します。
+
 | Method / メソッド | Purpose / 目的 |
 |---|---|
-| Desire and cost / 欲望と代償 | Make the character want something and pay something, even in a short piece. / 短い文章でも、人物が何かを望み、何かを払う構造を作ります。 |
-| Choice focus / 選択の焦点化 | Avoid ending only with an event; make someone choose, refuse, hide, or accept something. / 出来事だけで終わらせず、誰かが選ぶ、拒む、隠す、受け入れる瞬間を作ります。 |
+| Desire and cost / 欲望と代償 | Use aims, obstacles and costs when they serve the subject and length; they are not a mandatory checklist. / 題材と尺に必要なら目的・障害・代償を使い、全項目の挿入は要求しません。 |
+| Choice focus / 選択の焦点化 | Connect action or observation to the ending, preserving intentional silence and open questions. / 行動や観察を帰結へつなぎ、意図した沈黙や開かれた問いを保ちます。 |
 | Information order / 情報開示の順番 | Control what the reader knows first, what is withheld, and what is reinterpreted at the end. / 読者が先に知ること、伏せること、最後に意味が変わることを制御します。 |
-| Relationship change / 関係変化 | Make at least one distance, trust level, misunderstanding, or obligation shift. / 距離、信頼、誤解、義務のどれかが変わるようにします。 |
+| Relationship change / 関係変化 | Show the meaning of a shift or of things staying the same, according to the intended ending. / 指定された結末に合わせ、変化したことや変わらなかったことの意味を描きます。 |
 | Sensory anchoring / 感覚の接地 | Add touch, smell, sound, light, weight, or bodily discomfort to reduce abstract summary. / 触覚、匂い、音、光、重さ、身体の違和感を入れ、抽象的な要約を避けます。 |
 | Human friction / 人間的な摩擦 | Add hesitation, misunderstanding, minor failure, awkward silence, fatigue, or small damage so the scene does not become too smooth. / ためらい、勘違い、小さな失敗、気まずい沈黙、疲れ、少しの損を入れ、場面が滑らかすぎないようにします。 |
 | Aftermath visibility / 後始末の可視化 | Show what remains after the gag, decision, or conflict: cleanup, a shifted object, embarrassment, debt, relief, or a changed distance. / ギャグ、決断、衝突のあとに残る片付け、動いた物、恥、借り、安堵、変わった距離を見せます。 |

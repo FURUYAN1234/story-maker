@@ -1,4 +1,15 @@
+import { getSelectedOpenAIModelId } from './openAiModelCatalog.js';
+
 const THOUGHT_SEPARATOR = '──────────────────────────────────────────────────';
+
+export function selectStandardGenerationRequestModel(provider, fallbackModel) {
+  return provider === 'ChatGPT' ? getSelectedOpenAIModelId() : fallbackModel;
+}
+
+export function formatStandardRequestWaitStatus(elapsedSeconds) {
+  const seconds = Math.max(0, Math.floor(Number(elapsedSeconds) || 0));
+  return `[通信] AIモデルからの応答を待機しています (${seconds}秒経過)`;
+}
 
 export function formatStandardGenerationProgressLog({
   messages = [],

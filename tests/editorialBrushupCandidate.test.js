@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { evaluateBrushupCandidate, hasEditorialModeFormat } from '../src/editorialBrushupCandidate.js';
 
-const base = '朝の駅で、彼女は失くした手紙を見つけた。\n\n選ぶべき道を決め、静かに歩き出した。';
-const improved = '朝の駅で、彼女は失くした手紙を見つけた。紙には昨日まで言えなかった言葉が残っていた。\n\n彼女は相手を責めず、自分で選んだ道を静かに歩き出した。';
+const base = '描写'.repeat(2300) + '。\n\n' + '朝の駅で、彼女は失くした手紙を見つけた。\n\n選ぶべき道を決め、静かに歩き出した。';
+const improved = '描写'.repeat(2300) + '。\n\n' + '朝の駅で、彼女は失くした手紙を見つけた。紙には昨日まで言えなかった言葉が残っていた。\n\n彼女は相手を責めず、自分で選んだ道を静かに歩き出した。';
 const reviews = { currentReview: { score: 78, valid: true }, candidateReview: { score: 84, valid: true } };
 
 assert.equal(hasEditorialModeFormat('宛先: 母へ\n本文: ありがとう。\n結び: また会おう。\n差出人: 私。', 'letter'), true);

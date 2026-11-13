@@ -1,9 +1,21 @@
 import { validateDirectLong10000 } from './directLong10000.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
 import { isNanoScenarioComplete } from './nanoScenarioContract.js';
+import { MODE_LENGTH_TARGETS } from './modeContracts.js';
 
 function normalizedManuscript(text) {
   return stripGeneratedFooter(String(text || '')).replace(/\r\n?/g, '\n').trim();
+}
+
+export function validateEditorialMinimumLength(text, mode = '') {
+  const lines = normalizedManuscript(text).replace(/\n?【完】\s*$/u, '').split('\n');
+  const first = lines[0]?.trim() || '';
+  const proseMode = ['short_short', 'novel', 'medium', 'long_10000', 'fairy'].includes(mode);
+  if (/^(?:タイトル|title)\s*[:：]|^#{1,6}\s+/iu.test(first)
+    || (proseMode && first.length <= 80 && lines[1] === '' && !/[。！？.!?」』]$/u.test(first))) lines.shift();
+  const charCount = Array.from(lines.join('\n').replace(/\s/gu, '')).length;
+  const min = Number(MODE_LENGTH_TARGETS[mode]?.min || 0);
+  return { ok: charCount >= min, charCount, min };
 }
 
 export function hasCompletedEditorialEnding(text) {
@@ -73,6 +85,7 @@ export function evaluateBrushupCandidate({
   const issues = [];
   const currentLength = Array.from(normalizedManuscript(currentText).replace(/\s/gu, '')).length;
   const candidateLength = Array.from(normalizedManuscript(candidateText).replace(/\s/gu, '')).length;
+  if (!validateEditorialMinimumLength(candidateText, mode).ok) issues.push('below_min_chars');
   if (currentLength >= 500 && candidateLength < Math.floor(currentLength * 0.6)) issues.push('content_loss');
   const scenarioMode = String(mode).toLowerCase() === '4koma_scenario';
   const scenarioComplete = scenarioMode && isNanoScenarioComplete(candidateText);
