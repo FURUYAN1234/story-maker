@@ -1,3 +1,5 @@
+import { assertGeneratedPageComposition, SCENARIO_PAGE_COMPOSITION } from './vendor/nanoMangaPageComposition.js';
+
 // Reviewed snapshots of the adjacent Nano STEP2 rules. Portable at runtime;
 // scripts/check-nano-4koma-contract.mjs detects changes to these source exports.
 export const NANO_SCENARIO_RULES = [
@@ -71,14 +73,16 @@ export const NANO_AUTOMATIC_STYLES = [
 
 export const NANO_SCENARIO_MARKER = '[SMK_NANO_STEP2_CONTRACT]';
 
-export const NANO_SCENARIO_OUTPUT_CHECK = `最新のNano Banana Pro STEP2互換。
+export const NANO_SCENARIO_OUTPUT_CHECK = `最新の漫画アプリSTEP2・自由配置4〜8コマ互換。
+物語の準備・行動・反応・帰結に必要なコマ数Nを4〜8から内容に応じて選び、PanelCountReason: に具体的な理由を書く。乱数や4コマ固定、数合わせで決めない。範囲内の明示コマ数は守る。改稿では確定済みコマ数・順序・ページ設計を保持する。
+Scenario:直後にPageComposition:の1行JSONを置く。layout、frames、reason、heroPanels、foregrounds、breakouts、bleedを現行仕様どおり記述する。
 Topic: / Logline: / Location: / VisualEvidence: / Outfit: / Punchline: / Scenario: を具体的に書く。
-単独行の[1コマ目]〜[4コマ目]に「[EMOTION:]」「[Camera:]」「BalloonLayout:」「状況:」と独立した発話行（無言ならセリフなし）をこの順で置く。
+単独行の[1コマ目]〜[Nコマ目]（Nは選択した4〜8の整数）に「[EMOTION:]」「[Camera:]」「BalloonLayout:」「状況:」と独立した発話行（無言ならセリフなし）をこの順で置く。
 BalloonLayout: は1発話1件のJSON配列。{"speaker":"台詞と同じ話者名","x":0.7,"anchor":"画面位置と見える頭","route":"非交差の余白経路"}。0<x<1で台詞順に厳密に減少、数・話者・順番を台詞に一致させる。
 発話は独立行のキャラ名「短いセリフ。」。無言なら[]と独立行の「セリフなし」。「無言」「台詞なし」も意図した無言として保つ。看板・書類等の引用文字は吹き出しにしない。
 自動Cameraは俯瞰・アオリの撮影位置と投影を指定し、魚眼は使わない。明示されたアイレベル・固定・反復構図は保持する。
 人物の左右・前後、視線、左右2つの手の最終役割、小道具の持ち主・接触・状態を整合させる。自動EMOTIONはNORMAL、CHIBI_GAG、GEKIGA、WATERCOLOR、POP_ART、SKETCHから場面に合わせ、明示画風とシリアスな意図を保持する。
-4コマ目も状況と発話（無言指定可）まで書き切る。状況は表情・身体・手・背景・選択後の変化を具体化する。「絵:」「狙い:」等の旧制作メモ欄を加えない。モード名を題材にしない。`;
+選んだ最終コマも状況と発話（無言指定可）まで書き切る。状況は表情・身体・手・背景・選択後の変化を具体化する。「絵:」「狙い:」等の旧制作メモ欄を加えない。モード名を題材にしない。`;
 
 export const NANO_SCENARIO_FORMAT = `Topic: [題材を表す自然な見出し・15文字以内]
 Logline: [誰が何を求め、何を選び、どうなるか]
@@ -86,40 +90,76 @@ Location: [題材と行動が成立する具体的な場所]
 VisualEvidence: [出来事を絵で伝える具体的な手掛かりを「、」区切り]
 Outfit: [人物名または役割ごとに場面に合う具体的な服装]
 Punchline: [選択された結末の方向性]
+PanelCountReason: [今回の展開・見せ場・間に必要な4〜8コマの選択理由]
 Scenario:
-${[1, 2, 3, 4].map(n => `[${n}コマ目]
+PageComposition: [現行ページ構成仕様に従った1行JSON]
+[1コマ目]
 [EMOTION: 場面に合うタグ]
 [Camera: 撮影高度・仰俯角・水平方位・画角・レンズと見える投影]
 BalloonLayout: [{"speaker":"台詞と同じ話者名","x":0.7,"anchor":"話者の画面位置・奥行き・見える頭の輪郭","route":"余白から話者へ非交差の尾"}]
 状況: [視覚的な状況、人物の左右・前後、表情・身体・左右の手・小道具・背景、働きかけと反応、選択後の変化を具体的な一段落で記述]
-キャラ名「短いセリフ。」`).join('\n\n')}`;
+キャラ名「短いセリフ。」
+（同じコマ形式を2から選択した最終番号Nまで繰り返す。Nや省略記号、説明文は出力せず、全コマを実数の連番で書き切る。）`;
 
 export const NANO_SCENARIO_CONTRACT = [
   NANO_SCENARIO_MARKER,
-  '最新のNano Banana Pro STEP2互換。以下は生成・改稿・最終出力の共通契約。',
+  '最新の漫画アプリSTEP2・自由配置4〜8コマ互換。以下は生成・改稿・最終出力の共通契約。',
+  NANO_SCENARIO_OUTPUT_CHECK,
+  SCENARIO_PAGE_COMPOSITION,
   NANO_SCENARIO_FORMAT,
-  '見出しは単独行の[1コマ目]〜[4コマ目]とする。各コマは「[EMOTION:]」「[Camera:]」「BalloonLayout:」「状況:」と独立した発話行（無言ならセリフなし）をこの順で置く。Scenario: の直後は必ず [1コマ目]。4コマ目の状況と発話（無言指定可）まで完走し、その後に別の小説や説明を続けない。',
+  '見出しは単独行の[1コマ目]〜[Nコマ目]（4〜8）とする。各コマは「[EMOTION:]」「[Camera:]」「BalloonLayout:」「状況:」と独立した発話行（無言ならセリフなし）をこの順で置く。Scenario: の直後は必ず PageComposition: の1行JSON、その次に[1コマ目]を置く。最終コマの状況と発話（無言指定可）まで完走し、その後に別の小説や説明を続けない。',
   '発話は発話部分で独立したキャラ名「短いセリフ。」の行にする。話者数や台詞数の数合わせはしない。無言なら[]をBalloonLayoutに置き、発話部分の独立行に「セリフなし」と明記する。「無言」「台詞なし」も無言の意図であり、発話を補わない。発話の末尾は「。」「！」「？」等で閉じ、引用括弧を対応させる。',
   '台詞の引用内引用は保つ。看板・画面・書類・小道具の引用文字は状況または絵に置き、話者や吹き出しとして数えない。明示文字は必要なコマで物の面に従わせる。VisualEvidenceの再登場だけで全文再読を強制しない。',
   '各コマの左右の手はそれぞれ一役とし、最終瞬間の持ち主・接触対象・向きを保持する。完了済みの動作を同時に残さず、物の同一性・状態・位置と人物の知識・口調をコマ間で矛盾させない。',
-  '人物の限定・除外、舞台、衣装、台詞、静けさ、固定・反復構図などのユーザー指定が最優先。指定された人物は4コマのどこかで役割を持つが、全コマへの詰め込みや均等な発話を強制しない。',
+  '人物の限定・除外、舞台、衣装、台詞、静けさ、固定・反復構図などのユーザー指定が最優先。指定された人物は選択した全コマのどこかで役割を持つが、全コマへの詰め込みや均等な発話を強制しない。',
   '題材と結末を保つ。シリアスな題材を勝手にギャグ化せず、原文忠実の指定では事実・順序・因果を変えない。モード名・UI名をTopicや原因にしない。抽象的なまとめや題材と無関係な仕掛けへ逃げない。',
   '各コマの状況は具体的な日本語で書く。表情・手元・背景・小物・選択後の変化を、Cameraから見える一枚の瞬間へまとめる。「絵:」「セリフ:」「狙い:」等の旧制作メモ欄を加えず、発話は独立行にする。既存の意味ある描写を削って尺を合わせない。',
   '自動選択するEMOTIONは '+NANO_AUTOMATIC_STYLES.map(style => style.tag).join('、')+'。画風の種類数・頻度のノルマを設けず、場面に合う反復を許容する。シリアスでは笑わせるための頭身変形を使わない。ユーザーの明示画風を優先する。',
   ...NANO_AUTOMATIC_STYLES.map(style => '- '+style.tag+': '+(style.recipe || '基本のアニメ作画。演技と照明に合わせて表情・陰影を描く。')),
   ...NANO_SCENARIO_RULES.map(rule => rule.text),
-  '出力前に4コマ、各必須欄、台詞・話者・順番とBalloonLayoutを照合する。無言は[]。JSONはBalloonLayoutの配置情報だけに使い、本文全体をJSONにしない。検査結果や内部ルールは出力しない。',
+  '出力前に選択した4〜8コマの連番、PageComposition、各必須欄、台詞・話者・順番とBalloonLayoutを照合する。無言は[]。JSONはPageCompositionとBalloonLayoutの配置情報だけに使い、本文全体をJSONにしない。検査結果や内部ルールは出力しない。',
 ].join('\n\n');
 
 // Validate the emitted schema, never infer speech from quotes in visual prose.
 // Geometric/acting semantics remain subject to Nano's own STEP3 checks and
 // generated-artwork review; this gate cannot prove the final drawing.
+export function getNanoScenarioPanelCount(text = '') {
+  return [...String(text).matchAll(/^\[(\d+)コマ目(?:\s*[:：]\s*[^\]\n]+)?\][^\S\n]*$/gm)].length;
+}
+
+// A finished response can still need format repair. Do not request a continuation
+// just because its page geometry is invalid; strict validation remains below.
+export function hasNanoScenarioEnding(text = '') {
+  const source = String(text).replace(/\r\n?/g, '\n').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+  const headers = [...source.matchAll(/^\[(\d+)コマ目(?:\s*[:：]\s*[^\]\n]+)?\][^\S\n]*$/gm)];
+  if (headers.length < 4 || headers.length > 8 || headers.some((h, i) => Number(h[1]) !== i + 1)) return false;
+  const preface = source.slice(0, headers[0].index);
+  let expectedCount;
+  try { expectedCount = JSON.parse(preface.match(/^PageComposition:\s*(.+)$/m)?.[1]).frames?.length; } catch { /* Format repair handles malformed metadata. */ }
+  const reasonCount = Number(preface.match(/^PanelCountReason:.*?([4-8４-８])\s*コマ/m)?.[1]?.normalize('NFKC'));
+  if ((expectedCount && expectedCount !== headers.length) || (reasonCount && reasonCount !== headers.length)) return false;
+  const lastPanel = source.slice(headers.at(-1).index);
+  if (!/^状況\s*[:：]\s*\S.+$/m.test(lastPanel)) return false;
+  const lastLine = lastPanel.split('\n').map(line => line.trim()).filter(line => line && !/^(?:(?:Created|Generated) By AI Story Maker|【完】)/.test(line)).at(-1);
+  if (/^(?:無言|セリフなし|台詞なし)[。.!]?$/.test(lastLine || '')) return true;
+  const quote = lastLine?.indexOf('「') ?? -1;
+  if (quote <= 0 || !/[。！？!?]」$/.test(lastLine)) return false;
+  let depth = 0;
+  for (const char of lastLine.slice(quote)) {
+    if (char === '「') depth++;
+    if (char === '」') depth--;
+    if (depth < 0) return false;
+  }
+  return depth === 0;
+}
+
 export function getNanoScenarioIssue(text = '') {
   const source = String(text).replace(/<thought>[\s\S]*?<\/thought>/gi, '').replace(/\r\n/g, '\n');
-  const headers = [...source.matchAll(/^\[([1-4])コマ目(?:\s*[:：]\s*[起承転結])?\]\s*$/gm)];
-  if (headers.map(h => h[1]).join(',') !== '1,2,3,4') return '4コマ見出しは1〜4の順に各1回必要です';
+  const headers = [...source.matchAll(/^\[(\d+)コマ目(?:\s*[:：]\s*[^\]\n]+)?\][^\S\n]*$/gm)];
+  if (headers.length < 4 || headers.length > 8 || headers.some((h, i) => Number(h[1]) !== i + 1)) return 'コマ見出しは4〜8コマ、1から最終番号まで順に各1回必要です';
+  try { assertGeneratedPageComposition(source, headers.length); } catch (error) { return error.message; }
   const preface = source.slice(0, headers[0].index);
-  for (const label of ['Topic', 'Logline', 'Location', 'VisualEvidence', 'Outfit', 'Punchline']) {
+  for (const label of ['Topic', 'Logline', 'Location', 'VisualEvidence', 'Outfit', 'Punchline', 'PanelCountReason']) {
     if (!new RegExp('^'+label+':[^\\S\\n]*\\S[^\\n]*$', 'm').test(preface)) return `${label}が未記入です`;
   }
   if (!/^Scenario:\s*$/m.test(preface)) return 'Scenario:が必要です';

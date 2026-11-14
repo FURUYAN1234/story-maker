@@ -1,6 +1,6 @@
 import { validateDirectLong10000 } from './directLong10000.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
-import { isNanoScenarioComplete } from './nanoScenarioContract.js';
+import { isNanoScenarioComplete, getNanoScenarioPanelCount } from './nanoScenarioContract.js';
 import { MODE_LENGTH_TARGETS } from './modeContracts.js';
 
 function normalizedManuscript(text) {
@@ -89,6 +89,8 @@ export function evaluateBrushupCandidate({
   if (currentLength >= 500 && candidateLength < Math.floor(currentLength * 0.6)) issues.push('content_loss');
   const scenarioMode = String(mode).toLowerCase() === '4koma_scenario';
   const scenarioComplete = scenarioMode && isNanoScenarioComplete(candidateText);
+  if (scenarioMode && isNanoScenarioComplete(currentText)
+      && getNanoScenarioPanelCount(currentText) !== getNanoScenarioPanelCount(candidateText)) issues.push('panel_count_changed');
   if (!formatOk || (scenarioMode && !scenarioComplete)) issues.push('format');
   if (scenarioMode ? !scenarioComplete : !hasCompletedEditorialEnding(candidateText)) issues.push('unclosed_ending');
   if (hasDuplicateEditorialParagraph(candidateText)) issues.push('duplicate_paragraph');

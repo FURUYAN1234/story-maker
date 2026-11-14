@@ -8,25 +8,68 @@ import { buildOutputModeStrictContract, buildFinalOutputFormatCheck } from '../s
 import { detectPublicRewriteIssue } from '../src/qualityBoost.js';
 import { cleanOutputForPublicMode } from '../src/outputCleanup.js';
 import { Gt, yt } from '../src/providerClients.js';
-import { finalizeNanoScenarioOutput, isNanoScenarioComplete, NANO_AUTOMATIC_STYLES } from '../src/nanoScenarioContract.js';
+import { finalizeNanoScenarioOutput, isNanoScenarioComplete, hasNanoScenarioEnding, NANO_AUTOMATIC_STYLES } from '../src/nanoScenarioContract.js';
 import { hasEditorialModeFormat, evaluateBrushupCandidate } from '../src/editorialBrushupCandidate.js';
 
-// Synthetic contract fixtures, not paid API evidence.
-export function scenarioFixture({ silent = true } = {}) {
-  return `Topic: 返却の順番
-Logline: 係員が返却札を直し、来訪者が並び直す。
-Location: 屋内の受付
-VisualEvidence: 返却札、貸出箱
-Outfit: 係員は作業用ベスト、来訪者は普段着
-Punchline: 静かな余韻
-Scenario:
-${[1, 2, 3, 4].map(n => `[${n}コマ目]
-[EMOTION: NORMAL]
-[Camera: 係員の右後方、高い位置から浅く見下ろす俯瞰。頭頂と箱の天面が見える。]
-BalloonLayout: ${silent && n === 4 ? '[]' : '[{"speaker":"係員","x":0.7,"anchor":"画面右奥の係員の頭","route":"右上の余白から頭の輪郭へ短い尾"}]'}
-状況: 係員が右奥で返却札を支え、左手前の来訪者が札を見つめる。札には「返却」と印字されている。係員は右手で札を持つ。左手は箱の縁を支える。来訪者は口を閉じて札へ目を向ける。肩が少し下がる。箱の天面が光を受ける。札を直す選択によって待つ場所が変わり、来訪者が箱を持ち直して一歩進む後始末を見せる。
-${silent && n === 4 ? 'セリフなし' : '係員「こちらへどうぞ。」'}`).join('\n\n')}`;
-}
+import { scenarioFixture } from '../scripts/fixtures/nanoScenarioFixture.mjs';
+
+test('free-layout manga scenarios retain all four to eight panels and PageComposition through cleanup', () => {
+  for (const count of [4, 5, 6, 7, 8]) {
+    const source = scenarioFixture({ count });
+    assert.equal(isNanoScenarioComplete(source), true, `${count} panels must be accepted`);
+    const cleaned = cleanOutputForPublicMode(source, '4koma_scenario');
+    assert.equal(isNanoScenarioComplete(cleaned), true, `${count} panels must survive cleanup`);
+    assert.equal(cleaned.match(/^PageComposition: .+$/m)?.[0], source.match(/^PageComposition: .+$/m)?.[0]);
+    assert.equal((cleaned.match(/^\[\dコマ目\]/gm) || []).length, count);
+  }
+});
+
+test('manga scenario prompts choose four to eight panels by content and preserve authored page design on revision', () => {
+  const settings = { mode: '4koma_scenario' };
+  for (const prompt of [Jo(settings).prompt, buildPrompt(settings), buildQualityContract(settings.mode), buildOutputModeStrictContract(settings), buildFinalOutputFormatCheck(settings)]) {
+    assert.match(prompt, /4〜8/);
+    assert.match(prompt, /PageComposition:/);
+    assert.match(prompt, /PanelCountReason:/);
+    assert.doesNotMatch(prompt, /Scenario: の直後は必ず \[1コマ目\]|出力前に4コマ、|正確に4コマ|4コマ目も状況/);
+  }
+});
+
+test('free-layout generation rejects missing, duplicate and malformed page design, invalid frames and out-of-range panel totals', () => {
+  const source = scenarioFixture({ count: 6 });
+  const metadata = source.match(/^PageComposition: .+$/m)[0];
+  const c = JSON.parse(metadata.slice('PageComposition: '.length));
+  for (const broken of [
+    scenarioFixture({ count: 3 }), scenarioFixture({ count: 9 }),
+    scenarioFixture({ composition: false }), source.replace(metadata, metadata+'\n'+metadata),
+    source.replace(metadata, 'PageComposition: {'),
+    source.replace(metadata, 'PageComposition: '+JSON.stringify({...c, layout:'free',frames:[{x:0,y:0,w:1,h:1}]})),
+    source.replace(metadata, 'PageComposition: '+JSON.stringify({...c, foregrounds:[],breakouts:[{panel:1,into:[2],part:'係員の右手'}]})),
+    source.replace(/^PanelCountReason:.*\n/m,''),
+  ]) assert.equal(isNanoScenarioComplete(broken), false);
+  const bad = source.replace(metadata, metadata+'\n'+metadata);
+  assert.equal(isNanoScenarioComplete(cleanOutputForPublicMode(bad, '4koma_scenario')), false, 'cleanup must not hide duplicate metadata');
+});
+
+test('editorial adoption preserves six-panel structure while accepting a valid improvement', () => {
+  const pad = source => source.replace('状況:', '状況: '+ '箱を受け取る人物の手と視線が動きに合わせて変わる。'.repeat(120));
+  const currentText = pad(scenarioFixture({ count: 6 }));
+  const review = { currentReview:{valid:true,score:85}, candidateReview:{valid:true,score:90}, mode:'4koma_scenario' };
+  assert.equal(evaluateBrushupCandidate({currentText,candidateText:currentText,...review}).adopt,true);
+  const reduced = evaluateBrushupCandidate({currentText,candidateText:pad(scenarioFixture({count:4})),...review});
+  assert.equal(reduced.adopt,false);
+  assert.ok(reduced.issues.includes('panel_count_changed'));
+});
+
+test('a received scenario ending is distinct from valid geometry and an actually truncated response', () => {
+  const complete = scenarioFixture({ count: 6 });
+  const broken = complete.replace(/^PageComposition:.*$/m, 'PageComposition: '+JSON.stringify({layout:'free',frames:Array.from({length:6},()=>({x:0,y:0,w:1,h:1}))}));
+  assert.equal(isNanoScenarioComplete(broken), false);
+  assert.equal(hasNanoScenarioEnding(broken), true, 'invalid geometry goes to format repair, not continuation');
+  assert.equal(hasNanoScenarioEnding(broken.slice(0, broken.indexOf('[6コマ目]'))), false);
+  assert.equal(hasNanoScenarioEnding(complete.slice(0, complete.indexOf('[6コマ目]'))), false, 'PanelCountReason also retains the planned count');
+  assert.equal(hasNanoScenarioEnding(complete.replace(/セリフなし$/, '係員「途中で')), false);
+  assert.equal(hasNanoScenarioEnding(complete.replace(/セリフなし$/, '係員「『六コマ』で完了です。」')), true);
+});
 
 test('all generation and revision prompt contracts include current Nano schema without old contradictory rules', () => {
   const settings = { mode: '4koma_scenario', theme: '返却の順番', characters: [{ name: '係員' }] };
@@ -134,28 +177,19 @@ test('partial Responses and streaming continuations are validated only after com
 
 test('the ordinary workflow keeps Topic and validates at the assembled output boundary', () => {
   const source = fs.readFileSync(new URL('../src/legacyMain.js', import.meta.url), 'utf8');
-  assert.ok(source.includes('G.mode==="4koma_scenario"&&isNanoScenarioComplete(da(oe).story||oe)'));
+  assert.ok(source.includes('G.mode==="4koma_scenario"&&hasNanoScenarioEnding(da(oe).story||oe)'));
   assert.ok(source.includes('ce=finalizeNanoScenarioOutput(G.mode,ce);const Ve=G.mode==="4koma_scenario"?[]:ce.split('));
   assert.ok(source.includes('ce=re(ce),ce=finalizeNanoScenarioOutput(G.mode,ce)'));
   assert.ok(source.includes('a.textContent=J.draft'));
   assert.equal(finalizeNanoScenarioOutput('novel', '通常の別形式'), '通常の別形式');
 });
 
-test('the current Nano parser consumes Story format, silence and physical-surface quotes', async () => {
-  const nanoRoot = new URL('../../nano-banana-pro/', import.meta.url);
-  if (!fs.existsSync(new URL('package.json', nanoRoot))) return;
+test('the current Nano parser consumes Story format and rejects malformed scenarios', async () => {
   const { createServer } = await import('vite');
-  const { fileURLToPath } = await import('node:url');
-  const server = await createServer({ root: fileURLToPath(nanoRoot), appType: 'custom', logLevel: 'silent', server: { middlewareMode: true } });
-  try {
-    const { validateMangaScenario, getScenarioPanelBlocks } = await server.ssrLoadModule('/src/lib/scenario-validation.js');
-    const { extractDialogueOnly } = await server.ssrLoadModule('/src/lib/panel-utils.js');
-    const source = scenarioFixture();
-    assert.equal(validateMangaScenario(source, '係員、来訪者').ok, true);
-    for (const panel of getScenarioPanelBlocks(source)) {
-      const entries = extractDialogueOnly(panel.text, '係員、来訪者', { asEntries: true, forImagePrompt: true });
-      assert.equal(entries.length, panel.num === 4 ? 0 : 1);
-      if (entries.length) assert.equal(entries[0].text, 'こちらへどうぞ。');
-    }
-  } finally { await server.close(); }
+  const { defaultNanoRoot, checkContractSources } = await import('../scripts/nanoContractSources.mjs');
+  const { checkParserCompatibility } = await import('../scripts/nanoParserCompatibility.mjs');
+  assert.deepEqual(checkContractSources(), []);
+  const server = await createServer({ root: defaultNanoRoot, configFile: false, envFile: false, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true, watch: null } });
+  try { assert.ok(await checkParserCompatibility(server) >= 7); }
+  finally { await server.close(); }
 });

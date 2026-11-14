@@ -6069,7 +6069,7 @@ export function installLongifyBeta() {
     ...(baseOptions || {}),
     progressMode: 'brushup',
     brushupAttempt: attempt || 1,
-    maxBrushupAttempts: AUTO_BRUSHUP_MAX_ATTEMPTS,
+    maxBrushupAttempts: isAutoBrushupChecked() ? AUTO_BRUSHUP_MAX_ATTEMPTS : 1,
   });
   const createLongifyProgressOptions = (baseOptions = {}) => ({
     ...(baseOptions || {}),
@@ -6245,7 +6245,7 @@ export function installLongifyBeta() {
       setStopButtonState(stopButton, true);
       setControlsDisabled(true, { brushupMode: true });
       button.textContent = 'ブラッシュアップ中...';
-      setTextContent(statusEl, `ブラッシュアップ ${brushupProgressOptions.brushupAttempt}周目/${AUTO_BRUSHUP_MAX_ATTEMPTS} を開始しています`);
+      setTextContent(statusEl, `ブラッシュアップ ${brushupProgressOptions.brushupAttempt}周目/${brushupProgressOptions.maxBrushupAttempts} を開始しています`);
       const progressLog = document.getElementById('progress-log');
       if (progressLog) progressLog.textContent = '';
       startAiProgressHeartbeat({

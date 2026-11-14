@@ -12,6 +12,8 @@ import { getGenerationTimeoutMs } from './generationTimeoutPolicy.js';
 import { buildFinalOutputFormatCheck } from './outputModeContracts.js';
 import { cleanOutputForPublicMode } from './outputCleanup.js';
 import { buildStoryStructureGuidance } from './storyStructure.js';
+import { getNanoScenarioIssue, getNanoScenarioPanelCount } from './nanoScenarioContract.js';
+import { SCENARIO_PAGE_COMPOSITION } from './vendor/nanoMangaPageComposition.js';
 
 const EDITORIAL_BRUSHUP_TARGET_SCORE = 100;
 
@@ -65,6 +67,7 @@ export function formatEditorialProgress({ phase = '', attempt = 0, maxAttempts =
       unclosed_ending: '未完結',
       duplicate_paragraph: '段落重複',
       below_min_chars: '本文が字数下限未満',
+      panel_count_changed: '確定済みコマ数の変更',
     };
     const currentScore = Number.isFinite(decision.currentScore) ? decision.currentScore : '―';
     const candidateScore = Number.isFinite(decision.candidateScore) ? decision.candidateScore : '―';
@@ -82,11 +85,20 @@ export function formatEditorialProgress({ phase = '', attempt = 0, maxAttempts =
 
 export function buildEditorialFormatRepairPrompt({ text = '', mode = '', modeLabel = '' } = {}) {
   const length = validateEditorialMinimumLength(text, mode);
+  const isManga = mode === '4koma_scenario';
+  const issue = isManga ? getNanoScenarioIssue(text) : '';
+  const count = isManga ? getNanoScenarioPanelCount(text) : 0;
   return [
     '以下の完成稿は指定された出力モードの形式または字数下限を満たしていません。内容、人物、事実、オチを維持し、不適合箇所を修正してください。',
     '説明、講評、採点、Markdownコードフェンスは出力せず、修正済みの完成稿だけを返してください。',
     buildFinalOutputFormatCheck({ mode, modeLabel }),
-    length.min ? `本文は現在${length.charCount}字、公開下限は${length.min}字です（タイトル・フッター・空白・改行は除外）。清書後にも下限を満たすよう、既存場面の応答や動作で${Math.ceil(length.min * 1.2)}字以上を目安に補ってください。` : '',
+    issue ? `【実検査で検出した不適合】${issue}` : '',
+    isManga ? SCENARIO_PAGE_COMPOSITION : '',
+    count >= 4 && count <= 8 ? `原稿の${count}コマを維持し、コマを追加・削除・統合しないでください。台詞・話者・順序・各コマの出来事を保持し、不正な配置や必須欄だけを修正してください。` : '',
+    isManga ? 'PageCompositionは全矩形の各組で重なりを計算し、右から左・上から下の順序を確認してください。前景人物の重なりはforegroundsに書き、物語のコマ矩形は重ねません。bleedはx=0、y=0、x+w=1、y+h=1に一致する外周の辺だけです。外周に接しない辺はbleedから外してください。' : '',
+    length.min ? (length.ok
+      ? `本文は現在${length.charCount}字で最低${length.min}字を満たしています。字数を増やすための加筆は不要です。`
+      : `本文は現在${length.charCount}字、公開下限は${length.min}字です（タイトル・フッター・空白・改行は除外）。清書後にも下限を満たすよう、既存場面の応答や動作で${Math.ceil(length.min * 1.2)}字以上を目安に補ってください。`) : '',
     buildStoryStructureGuidance({ mode, phase: 'repair' }),
     '--- 修正対象本文 ---',
     stripGeneratedFooter(String(text || '')).trim(),
@@ -100,8 +112,14 @@ export async function prepareEditorialManuscript({ text, mode, modeLabel, callAi
     stage: 'brushup', mode, charLength: String(text || '').length, attempt: 0,
   });
   const repairedText = cleanOutputForPublicMode(String(repair?.text || repair || '').trim(), mode);
-  if (!hasEditorialModeFormat(repairedText, mode) || !validateEditorialMinimumLength(repairedText, mode).ok) {
-    throw new Error('出力モードの必須形式・字数下限を自動修正できませんでした');
+  const count = mode === '4koma_scenario' ? getNanoScenarioPanelCount(text) : 0;
+  const repairedCount = mode === '4koma_scenario' ? getNanoScenarioPanelCount(repairedText) : 0;
+  const changedCount = count >= 4 && count <= 8 && count !== repairedCount;
+  const length = validateEditorialMinimumLength(repairedText, mode);
+  if (changedCount || !hasEditorialModeFormat(repairedText, mode) || !length.ok) {
+    const issue = changedCount ? `${count}コマから${repairedCount}コマへ変更されています`
+      : (mode === '4koma_scenario' ? getNanoScenarioIssue(repairedText) : '') || (!length.ok ? `本文${length.charCount}字／下限${length.min}字` : '必須形式が不適合です');
+    throw Object.assign(new Error(`出力モードの必須形式・字数下限を自動修正できませんでした: ${issue}`), { code: 'EDITORIAL_FORMAT_REPAIR_FAILED', draft: repairedText });
   }
   return withStoryMakerFooter(repairedText);
 }
@@ -452,6 +470,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       if (token !== reviewRun) return null;
       renderEditorialReview(null, reviewElement, { error: error?.message || String(error) });
       statusElement && (statusElement.textContent = 'AI講評を取得できませんでした（本文は保持）');
+      updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: `AI講評・形式修正が終了しました（失敗・本文は保持）: ${error?.message || String(error)}` });
       doc.documentElement.dataset.editorialReviewResult = 'failed';
       sectionElement?.classList?.remove?.('is-waiting');
       sectionElement?.setAttribute?.('aria-disabled', 'false');
@@ -631,10 +650,11 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   };
 }
 
-export function editorialCallOptions({ stage, mode, charLength } = {}) {
+export function editorialCallOptions({ stage, mode, charLength, signal } = {}) {
   const timeoutMs = getGenerationTimeoutMs({ stage, mode, charLength });
   return {
     editorialStage: stage,
+    ...(signal ? {signal} : {}),
     disableGoogleSearch: true,
     maxTokens: stage === 'brushup' ? 32768 : 4096,
     maxOutputTokens: stage === 'brushup' ? 32768 : 4096,

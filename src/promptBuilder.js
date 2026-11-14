@@ -22,7 +22,7 @@ function Jo(e){if(isLegacyLongPromptRequest(e))return{prompt:"\u9577\u7de8\u30e2
 `);const h=e.charCount?`
 ※ 指定文字数：約${e.charCount}文字程度`:"",v=e.supplement?`
 【追加指示】
-${e.supplement}`:"",y={"4koma":"4コマネタ","4koma_scenario":"AI 4koma シナリオ",short_short:"ショートショート",novel:"短編小説",medium:"中編小説",long:"長編小説",scenario:"脚本/台本",manga:"ストーリー漫画",essay:"エッセイ",poem:"詩・ポエム",tale:"童話/絵本",letter:"手紙/書簡体",diary:"日記/独白体",documentary:"ドキュメンタリー",radio:"ラジオドラマ"},S=e.modeCustom||y[t]||t,b={"4koma":`
+${e.supplement}`:"",y={"4koma":"4コマネタ","4koma_scenario":"漫画シナリオ（4〜8コマ）",short_short:"ショートショート",novel:"短編小説",medium:"中編小説",long:"長編小説",scenario:"脚本/台本",manga:"ストーリー漫画",essay:"エッセイ",poem:"詩・ポエム",tale:"童話/絵本",letter:"手紙/書簡体",diary:"日記/独白体",documentary:"ドキュメンタリー",radio:"ラジオドラマ"},S=e.modeCustom||y[t]||t,b={"4koma":`
 
 【文体指定：4コマ漫画風】
 起承転結を4段階で明確にし、最後に笑いまたは意外性のあるオチをつけること。文体は軽快でテンポよく、深刻になりすぎないこと。セリフ主体で進行させること。暗い展開・壮大な伏線は原則不要。`,short_short:`
@@ -82,7 +82,7 @@ ${I}`),M&&(K+=`
 ${M}`),T&&(K+=`
 
 【語り口指定：${p}】
-${T}`);let G="";t==="4koma_scenario"?G=`あなたはプロの4コマ漫画シナリオライターです。以下の設定に基づき、画像生成4コマ漫画アプリのSTEP2シナリオ入力欄に直接コピペして使える形式でシナリオを出力してください。
+${T}`);let G="";t==="4koma_scenario"?G=`あなたはプロの漫画シナリオライターです。以下の設定に基づき、物語に必要な4〜8コマを選び、画像生成漫画アプリの自由配置モードのSTEP2シナリオ入力欄に直接コピペして使える形式でシナリオを出力してください。
 
 【基本設定】
 ・ジャンル: ${n}

@@ -61,8 +61,8 @@ assert.match(fourKomaScenario.prompt, /\nキャラ名「短いセリフ。/);
 assert.match(fourKomaScenario.prompt, /キャラ名「短いセリフ。」/);
 assert.match(fourKomaScenario.prompt, /セリフなし/);
 assert.match(fourKomaScenario.prompt, /台詞なし/);
-assert.match(fourKomaScenario.prompt, /Scenario: の直後は必ず \[1コマ目\]/);
-assert.ok(fourKomaScenario.tags.includes('AI 4koma シナリオ'));
+assert.match(fourKomaScenario.prompt, /Scenario: の直後は必ず PageComposition:/);
+assert.ok(fourKomaScenario.tags.includes('漫画シナリオ（4〜8コマ）'));
 
 const sealedLong = Jo({
   mode: 'long',

@@ -17,7 +17,7 @@ export const OPENAI_VISION_MODELS = [...OPENAI_TEXT_MODELS];
 
 const ALL_MODES = [
   { value: '4koma', label: '4コマ漫画風' },
-  { value: '4koma_scenario', label: 'AI 4koma シナリオ連携（STEP2）' },
+  { value: '4koma_scenario', label: '漫画シナリオ連携（4〜8コマ・STEP2）' },
   { value: 'short_short', label: 'ショート（1500字～）' },
   { value: 'novel', label: '短編小説（4500字～）' },
   { value: 'medium', label: '中編小説（5500字～）' },

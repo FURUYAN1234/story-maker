@@ -118,6 +118,7 @@ function buildCurrentSettingsExport() {
   const state = {
     mode: getActiveModeValue(),
     modeSource: 'screen',
+    mangaSameCharacterSheets: byId('nano-same-character-sheets')?.checked === true,
     characters: collectCharacters(),
     locked: collectLockedSections(),
     universalAssets: collectUniversalAssets(),
@@ -246,6 +247,8 @@ async function applyGenerationSettings(payload) {
   }
   unlockAllSectionsForImport();
   applyMode(settings);
+  const sameSheets=byId('nano-same-character-sheets');
+  if(sameSheets) {sameSheets.checked=settings.mangaSameCharacterSheets === true;dispatchInput(sameSheets);}
   for (const config of AXIS_CONFIGS) {
     applyAxis(config, settings.axes?.[config.key] || {});
   }

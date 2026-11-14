@@ -139,7 +139,14 @@ async function readOpenAiError(response) {
   return `OpenAI Responses HTTP ${status} - ${message}`;
 }
 
+function throwIfExternalAbort(options = {}) {
+  if (options.signal?.aborted) {
+    throw options.signal.reason ?? new DOMException('Request cancelled', 'AbortError');
+  }
+}
+
 function createAbortController(options = {}) {
+  throwIfExternalAbort(options);
   const controller = new AbortController();
   let cleanupSignal = () => {};
   let timeoutId = null;
@@ -159,16 +166,21 @@ function createAbortController(options = {}) {
     timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   }
 
+  const clearRequestTimeout = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = null;
+  };
   return {
     signal: controller.signal,
+    clearTimeout: clearRequestTimeout,
     cleanup() {
       cleanupSignal();
-      if (timeoutId) clearTimeout(timeoutId);
+      clearRequestTimeout();
     },
   };
 }
 
-async function requestOpenAiResponses(apiKey, model, prompt, options = {}, stream = false) {
+async function requestOpenAiResponses(apiKey, model, prompt, options, stream, readResponse) {
   const abort = createAbortController(options);
   try {
     const response = await fetch('https://api.openai.com/v1/responses', {
@@ -180,11 +192,16 @@ async function requestOpenAiResponses(apiKey, model, prompt, options = {}, strea
       signal: abort.signal,
       body: JSON.stringify(buildOpenAiResponsesRequestBody(model, prompt, options, stream)),
     });
+    // Keep the existing response-header timeout, but retain cancellation while reading the body.
+    abort.clearTimeout();
     if (!response.ok) {
       throw new Error(await readOpenAiError(response));
     }
-    return response;
+    const result = await readResponse(response);
+    throwIfExternalAbort(options);
+    return result;
   } catch (error) {
+    throwIfExternalAbort(options);
     if (error?.name === 'AbortError') {
       throw new Error(`Aborted: ${model} Responses beta`);
     }
@@ -295,19 +312,20 @@ function resolveLongOutputOptions(prompt, options = {}) {
 }
 
 async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options = {}) {
+  throwIfExternalAbort(options);
   options = resolveLongOutputOptions(prompt, options);
   const config = resolveOpenAiResponsesBetaConfig(options);
   if (!config.enabled || config.models.length === 0) return null;
 
   for (const model of config.models) {
     try {
+      throwIfExternalAbort(options);
       console.info(`[OpenAI Responses beta] trying model: ${model}`);
       emitOpenAIModelRouteEvent('trying', model);
       if (model !== config.models[0] && typeof onFallback === 'function') {
         onFallback(`${model} Responses beta`);
       }
-      const response = await requestOpenAiResponses(apiKey, model, prompt, options, false);
-      const payload = await response.json();
+      const payload = await requestOpenAiResponses(apiKey, model, prompt, options, false, response => response.json());
       const text = extractOpenAiResponsesText(payload);
       if (!text) {
         throw new Error('Empty Responses API output');
@@ -316,6 +334,7 @@ async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options 
       emitOpenAIModelRouteEvent('adopted', model);
       return { text, usedModel: `${model} (Responses beta)` };
     } catch (error) {
+      throwIfExternalAbort(options);
       console.warn(`Responses beta model ${model} failed:`, error.message);
       continue;
     }
@@ -325,6 +344,7 @@ async function maybeCallOpenAiResponsesBeta(apiKey, prompt, onFallback, options 
 }
 
 async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallback, options = {}) {
+  throwIfExternalAbort(options);
   options = resolveLongOutputOptions(prompt, options);
   const config = resolveOpenAiResponsesBetaConfig(options);
   if (!config.enabled || config.models.length === 0) return null;
@@ -332,22 +352,22 @@ async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallbac
 
   for (const model of config.models) {
     try {
+      throwIfExternalAbort(options);
       console.info(`[OpenAI Responses beta] trying ${useStreaming ? 'stream' : 'model'}: ${model}`);
       emitOpenAIModelRouteEvent('trying', model);
       if (model !== config.models[0] && typeof onFallback === 'function') {
         onFallback(`${model} Responses beta`);
       }
       if (useStreaming) {
-        const response = await requestOpenAiResponses(apiKey, model, prompt, options, true);
-        const streamState = await readOpenAiResponsesStream(response, onChunk);
+        const streamState = await requestOpenAiResponses(apiKey, model, prompt, options, true,
+          response => readOpenAiResponsesStream(response, onChunk));
         if (streamState.emittedChars <= 0) {
           const eventSummary = [...new Set(streamState.eventTypes)].join(', ') || 'none';
           throw new Error(`Empty Responses stream output (events: ${eventSummary})`);
         }
         console.info(`[OpenAI Responses beta] completed stream model: ${model}, chars: ${streamState.emittedChars}`);
       } else {
-        const response = await requestOpenAiResponses(apiKey, model, prompt, options, false);
-        const payload = await response.json();
+        const payload = await requestOpenAiResponses(apiKey, model, prompt, options, false, response => response.json());
         const text = extractOpenAiResponsesText(payload);
         if (!text) {
           throw new Error('Empty Responses API output');
@@ -358,6 +378,7 @@ async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallbac
       emitOpenAIModelRouteEvent('adopted', model);
       return { usedModel: `${model} (Responses beta)` };
     } catch (error) {
+      throwIfExternalAbort(options);
       console.warn(`Responses beta model ${model} ${useStreaming ? 'stream ' : ''}failed:`, error.message);
       continue;
     }
@@ -367,6 +388,7 @@ async function maybeStreamOpenAiResponsesBeta(apiKey, prompt, onChunk, onFallbac
 }
 
 export {
+  createAbortController,
   DEFAULT_OPENAI_RESPONSES_BETA_MODELS,
   buildOpenAiResponsesRequestBody,
   extractOpenAiResponsesText,
@@ -375,4 +397,5 @@ export {
   parseOpenAiResponsesStreamEvent,
   resolveLongOutputOptions,
   resolveOpenAiResponsesBetaConfig,
+  throwIfExternalAbort,
 };

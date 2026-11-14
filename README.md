@@ -1,4 +1,4 @@
-# Story Maker v5.4.7 / AI物語メーカー
+# Story Maker v5.4.8 / AI物語メーカー
 
 **Gemini model route / Geminiモデル候補**: `gemini-3.8-flash` → `gemini-3.6-flash` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`. Explicit stable IDs avoid the December 1, 2026 redirects; image-generation models keep their dedicated routes. / 2026年12月1日の旧モデル自動転送に依存しないよう、現行GAモデルを明示します。画像生成は専用のモデル経路を使います。
 
@@ -12,6 +12,23 @@ Demo URL / デモサイト: [https://furuyan1234.github.io/story-maker/](https:/
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
 Story Maker is a static web application for generating creative text with Google Gemini API or OpenAI API. Its 15 public output modes include direct `Long-form (10,000 characters+)` generation, and every supported Output can receive an AI editorial score and guarded brush-up. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract. / Story Maker は、Google Gemini API または OpenAI API を使って創作文を生成する静的Webアプリです。15の公開出力モードには「長編（10000字～）」の直接生成が含まれ、対応するすべてのOutputでAI編集採点と安全判定付きブラッシュアップを使えます。単なるプロンプト入力欄ではなく、出力モード、テーマ、ジャンル、世界観、読者層、時代、結末、語り口、登場人物、素材入力、画像入力、作風解析を組み合わせて、生成用の契約を組み立てます。
+
+## Manga app compatibility / 漫画アプリとの互換性
+
+Scenario integration targets the manga app’s default 4–8-panel free-layout mode. Story Maker chooses the panel count from the story, keeps page composition through cleanup, and rejects revisions that change an accepted panel count. The separate four-panel story mode remains available. / シナリオ連携は漫画アプリの既定の4〜8コマ自由配置モードに対応します。物語からコマ数を選び、最終整形でもページ構成を保持し、採用済みコマ数を変える改稿は拒否します。別の「4コマ漫画風」モードは維持します。
+
+Local start, tests and builds run a source-drift and parser compatibility gate. The Antigravity release route also checks Story Maker before publishing the manga app. See [compatibility maintenance](docs/manga-compatibility.md). / ローカル起動・テスト・ビルドで仕様差分と実パーサーの互換性を自動検査します。Antigravityの正式公開手順では漫画アプリ公開前にもStory Makerを照合します。[互換性検査の手順](docs/manga-compatibility.md)を参照してください。
+
+
+### Character handoff / 人物設定の受け渡し
+
+Select “the same character sheets are supplied in both apps” only when you have supplied them to both apps. This is your declaration; Story Maker does not compare images or detect identical sheets. When checked, it outputs the scenario only. When unchecked, it automatically creates a separate STEP1 character text after the final scenario. Names, appearance and clothing follow the scenario and supplied settings; different ages of the same person stay within one entry. This additional generation uses the selected API. / 「漫画システムにも同じキャラクターシートを貼っています」は、両方へ同じ資料を入れた場合に選びます。利用者の自己申告を使い、画像の同一性を自動判定しません。チェック時は台本だけを出力し、未チェック時は最終台本の完成後にSTEP1用の人物設定を別途自動生成します。名前・外見・服装を台本と入力設定に合わせ、同一人物の年齢違いは一つの項目内にまとめます。この追加生成には選択中APIを使います。
+
+1. Copy the character text to the manga app’s STEP1 “人物設定” (`#reference-recognition-editor`). / 人物設定だけをコピーし、漫画アプリのSTEP1「人物設定」（`#reference-recognition-editor`）へ貼ります。
+2. Copy the scenario to STEP2 “生成されたシナリオ”, then run STEP3 to build the image prompt. The scenario copy route is **STEP2 → STEP3**. / 台本だけをSTEP2「生成されたシナリオ」へ貼り、STEP3で画像指示文を作ります。台本コピーの経路は **STEP2 → STEP3** です。
+3. Use STEP4 for image generation. Full copy retains clearly separated STEP1 and scenario sections; separate copy buttons avoid mixing their contents. / STEP4で画像を生成します。全体コピーではSTEP1用と台本用を区切り、それぞれの個別コピーボタンで混在を避けられます。
+
+With no character-reference images, usable STEP1 character text defines the cast in both API prompts and Web copy. Backgrounds and style examples are not character references. With character images, their identity priority is retained. Empty or insufficient character text does not bypass input validation. / 人物参照画像がなくても、十分なSTEP1の人物設定があればAPI指示文とWebコピーの両方で人物を定義します。背景や描法見本は人物参照画像として扱いません。人物画像がある場合は、その同一性を優先する既存の動作を保ちます。空欄や不十分な設定で入力検査を迂回することはできません。
 
 ## API Key Safety / APIキーの安全性
 
@@ -79,7 +96,7 @@ The intent is not to force every work into the same template. The contract tells
 | Quality / 品質 | Short-draft rewrite / 短すぎる初稿の改稿 | Too-short public drafts are rewritten before they are accepted as final output. / 公開モードの初稿が短すぎる場合、最終採用前に改稿します。 |
 | Quality / 品質 | Universal AI review and brush-up / 全モードAI講評・ブラッシュアップ | Every generated, pasted, or imported manuscript receives a three-tier AI review and guarded rewrite: 90+ editorial pass, 85–89 publishable with optional brush-up, and 84 or below needs brush-up. / 生成・貼り付け・インポートしたすべての原稿を三段階でAI採点し、安全判定付きで改稿できます。90点以上は編集合格、85〜89点は公開可能・任意ブラッシュアップ、84点以下は要ブラッシュアップです。 |
 | Quality / 品質 | Final cleanup / 最終出力整形 | Prompt artifacts, stale completion markers, and unreadable endings are cleaned before display. / プロンプト断片、古い完了マーカー、読みにくい終端を表示前に整えます。 |
-| Quality / 品質 | Completion gates / 完走ゲート | Mode-specific completion checks include the assembled four-panel scenario and documentary closing labels. / 4コマシナリオは継続応答の結合後に4コマと台詞・配置を確認し、ドキュメンタリーでは締めのラベルを確認します。 |
+| Quality / 品質 | Completion gates / 完走ゲート | Mode-specific completion checks include the assembled 4–8-panel scenario and authored page composition and documentary closing labels. / 漫画シナリオは継続応答の結合後に4〜8コマとページ構成・台詞・配置を確認し、ドキュメンタリーでは締めのラベルを確認します。 |
 
 ## Technology Highlights / 技術ハイライト
 
@@ -126,7 +143,7 @@ The public release supports the following 15 output modes. Each mode has a mode 
 | Mode / モード | Japanese Label / 日本語ラベル | Expected Output Shape / 想定出力形式 |
 |---|---|---|
 | `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. / 導入、展開、オチ、視覚的な動き、セリフで構成する4コマ形式です。 |
-| `4koma_scenario` | AI 4koma シナリオ連携（STEP2） | Current Nano STEP2 headers, VisualEvidence and four panels with emotion, camera, BalloonLayout, visible action and standalone dialogue or explicit silence. / 現行Nano STEP2のヘッダーとVisualEvidence、感情・カメラ・BalloonLayout・状況・独立した台詞または無言指定を含む4コマを出力します。 |
+| `4koma_scenario` | 漫画シナリオ連携（4〜8コマ・STEP2） | Chooses 4–8 panels from story content for the manga app’s default free-layout mode. Includes PanelCountReason, PageComposition, VisualEvidence, emotion, camera, BalloonLayout, visible action and dialogue or explicit silence. / 漫画アプリの既定の自由配置モードに合わせ、物語に必要な4〜8コマを選びます。PanelCountReason・PageComposition・VisualEvidence、感情・カメラ・BalloonLayout・状況・台詞または無言指定を含みます。 |
 | `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. / 導入、転換、余韻を備え、最後の一文で意味が変わる短い物語です。 |
 | `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. / 欲求、障害、選択、代償、関係性の変化を場面で描く短編小説です。 |
 | `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc. / 展開、場面の推移、感情の変化を厚く描く3節構成の中編小説です。 |
@@ -219,7 +236,7 @@ OpenAI image analysis and text generation use the selected model and maintained 
 
 ## Current Quality System / 現行品質システム
 
-The current v5.4.7 release line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.7系では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.4.8 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.4.8ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -247,7 +264,7 @@ Before the generated text is treated as the visible final output, the public cle
 
 ### Completion And Interest Gates / 完走と面白さのゲート
 
-The app does not treat "some text appeared" as enough. Mode-specific completion gates check whether the output reached the part that makes the mode usable: for example, `4koma_scenario` validates all four assembled panels and matches dialogue speakers/order to BalloonLayout, and `documentary` must end with a documentary-style closing label instead of drifting into unlabeled prose. The browser QA then checks real Gemini/OpenAI outputs for concrete objects, friction, dialogue, choices, and non-generic endings. / このアプリでは、「何か文章が出た」だけでは合格にしません。モード別の完走ゲートで、その形式として使える終端まで到達したかを見ます。たとえば `4koma_scenario` では継続応答を結合した4コマを検証し、台詞の話者・順番とBalloonLayoutを照合し、`documentary` ではラベルなしの散文へ流れず、ドキュメンタリーとしての締めを残します。そのうえで、実ブラウザQAでは Gemini / OpenAI の実出力について、具体物、摩擦、会話、選択、汎用的すぎない終わり方を確認します。
+The app does not treat "some text appeared" as enough. Mode-specific completion gates check whether the output reached the part that makes the mode usable: for example, `4koma_scenario` validates all 4–8 assembled panels and page composition, and matches dialogue speakers/order to BalloonLayout, and `documentary` must end with a documentary-style closing label instead of drifting into unlabeled prose. The browser QA then checks real Gemini/OpenAI outputs for concrete objects, friction, dialogue, choices, and non-generic endings. / このアプリでは、「何か文章が出た」だけでは合格にしません。モード別の完走ゲートで、その形式として使える終端まで到達したかを見ます。たとえば `4koma_scenario` では継続応答を結合した4〜8コマとページ構成を検証し、台詞の話者・順番とBalloonLayoutを照合し、`documentary` ではラベルなしの散文へ流れず、ドキュメンタリーとしての締めを残します。そのうえで、実ブラウザQAでは Gemini / OpenAI の実出力について、具体物、摩擦、会話、選択、汎用的すぎない終わり方を確認します。
 
 ## API Engine / APIエンジン
 

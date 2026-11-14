@@ -602,7 +602,7 @@ function draftRestartIssue(mode, body) {
     return '';
   }
   if (mode === 'radio' && countLines(/^タイトル\s*[:：]/gm) > 1) return '完成後にラジオドラマの先頭ラベルが再出現しています';
-  if (mode === '4koma_scenario' && countLines(/^Topic:/gm) > 1) return '完成後に4コマシナリオの先頭ラベルが再出現しています';
+  if (mode === '4koma_scenario' && countLines(/^Topic:/gm) > 1) return '完成後に漫画シナリオの先頭ラベルが再出現しています';
   if (mode === '4koma' && countLines(/(?:^|\n)1コマ目/g) > 1) return '完成後に4コマの先頭ラベルが再出現しています';
   if (mode === 'medium') {
     const section3 = source.search(/^第3節/m);
@@ -649,7 +649,7 @@ function rewriteIssue(mode, text, min, options = {}) {
     if (labelIssue) return labelIssue;
   }
   if (mode === '4koma_scenario' && options.assembled !== false && getNanoScenarioIssue(body)) {
-    return '4コマ目の状況と発話または無言指定が未完成です';
+    return '選択した最終コマの状況と発話または無言指定が未完成です';
   }
   return '';
 }

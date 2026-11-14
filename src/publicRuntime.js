@@ -12,6 +12,7 @@ import { Gt } from './providerClients.js';
 import { GEMINI_MODEL_VALUES } from './data.js';
 import { editorialCallOptions, installEditorialBrushupRuntime } from './editorialBrushupRuntime.js';
 import { installPublicOutputCleanup } from './outputCleanup.js';
+import { installNanoCharacterHandoff } from './nanoCharacterHandoff.js';
 import { installStandardTypewriterCursor } from './standardTypewriterRenderer.js';
 
 const LONG_MODE_ENABLED = false;
@@ -601,6 +602,7 @@ function installPublicRuntime() {
   });
   installEditorialBrushupOnce();
   installPublicOutputCleanup();
+  installNanoCharacterHandoff({doc:document,timers:window,callAi:callEditorialAi});
   installOutputAssistLauncher();
 }
 

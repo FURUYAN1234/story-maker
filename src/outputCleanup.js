@@ -7,6 +7,7 @@ import {
   detectModeFromText,
 } from './modeContracts.js';
 import { STORY_MAKER_FOOTER } from './version.js';
+import { isNanoScenarioComplete } from './nanoScenarioContract.js';
 
 const MODE_MAX_CHARS = Object.fromEntries(
   Object.entries(MODE_LENGTH_TARGETS)
@@ -734,6 +735,7 @@ function clean4koma(text) {
 }
 
 function scenarioChunkIsComplete(text) {
+  if (isNanoScenarioComplete(text)) return true;
   const source = String(text || '');
   return /^Topic:/m.test(source)
     && /^Scenario:/m.test(source)
@@ -817,9 +819,9 @@ function balanceScenarioTopicLine(text) {
 
 function normalizeScenarioPanelLabels(text) {
   return String(text || '').replace(
-    /^\[([1-4１２３４一二三四])\s*コマ目(?:\s*[:：]\s*[起承転結])?\]\s*$/gm,
+    /^\[([1-8１２３４５６７８一二三四五六七八])\s*コマ目(?:\s*[:：]\s*[^\]\n]+)?\]\s*$/gm,
     (_, panel) => {
-      const normalized = { '１': '1', '２': '2', '３': '3', '４': '4', '一': '1', '二': '2', '三': '3', '四': '4' }[panel] || panel;
+      const normalized = { '１': '1', '２': '2', '３': '3', '４': '4', '５': '5', '６': '6', '７': '7', '８': '8', '一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6', '七': '7', '八': '8' }[panel] || panel;
       return `[${normalized}コマ目]`;
     },
   );
@@ -827,8 +829,13 @@ function normalizeScenarioPanelLabels(text) {
 
 function removeScenarioPrefaceBeforeFirstPanel(text) {
   return normalizeBreaks(text).replace(
-    /^(Scenario:\s*)\n+[\s\S]*?(?=^\[1コマ目\])/m,
-    (_, label) => `${label}\n`,
+    /^(Scenario:[^\S\n]*)\n+([\s\S]*?)(?=^\[1コマ目\])/m,
+    (_, label, preface) => {
+      // Keep authored page metadata verbatim, including duplicates/malformed
+      // lines so the validator can reject them instead of silently repairing.
+      const metadata = preface.split('\n').filter(line => /^\s*PageComposition\s*[:：]/.test(line));
+      return `${label}\n${metadata.length ? metadata.join('\n')+'\n' : ''}`;
+    },
   );
 }
 

@@ -7,7 +7,7 @@ export const QUALITY_MARKER = '[SMK_PUBLIC_MODE_QUALITY_BOOST_V500]';
 
 export const PUBLIC_MODES = [
   { value: '4koma', label: '4コマ漫画風' },
-  { value: '4koma_scenario', label: 'AI 4koma シナリオ連携' },
+  { value: '4koma_scenario', label: '漫画シナリオ連携（4〜8コマ）' },
   { value: 'short_short', label: 'ショートショート' },
   { value: 'novel', label: '短編小説' },
   { value: 'medium', label: '中編小説' },
@@ -122,6 +122,7 @@ MODE_LENGTH_TARGETS.long_10000 = {
 };
 
 const SKIP_PATTERNS = [
+  /\[SMK_NANO_CHARACTER_HANDOFF\]/,
   /^\s*\[SMK_EDITORIAL_REVIEW_ONLY_V1\]/,
   /JSONだけ|JSON only/i,
   /作風解析|style analysis/i,
