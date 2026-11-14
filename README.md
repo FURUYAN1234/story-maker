@@ -8,10 +8,22 @@
 
 Demo URL / デモサイト: [https://furuyan1234.github.io/story-maker/](https://furuyan1234.github.io/story-maker/)
 
+### PDF manuals / PDFマニュアル
+
+Japanese A4 guides cover application operation and OpenAI / Gemini API setup. / 日本語A4版でアプリの操作とOpenAI・Gemini APIの取得・設定を説明します。
+
+[![Open the application manual PDF / 操作マニュアルPDFを開く](docs/assets/story-maker-manual-button.png)](https://furuyan1234.github.io/story-maker/downloads/story-maker-manual.pdf)
+
+[![Open the OpenAI / Gemini API setup guide PDF / OpenAI・Gemini API設定ガイドPDFを開く](docs/assets/story-maker-api-guide-button.png)](https://furuyan1234.github.io/story-maker/downloads/story-maker-api-guide.pdf)
+
+
+
 
 [!['ChatGPT Image 2026年6月25日 22_19_30'](https://github.com/user-attachments/assets/d850ac7f-aa1c-40cc-a378-b8c6673c726c)](https://youtu.be/pqYVxUUg0Cs?si=27g1I3tO2EuZkOuxJ)
 
 Story Maker is a static web application for generating creative text with Google Gemini API or OpenAI API. Its 15 public output modes include direct `Long-form (10,000 characters+)` generation, and every supported Output can receive an AI editorial score and guarded brush-up. It is not a plain prompt box. It combines output mode, theme, genre, worldview, audience, era, ending style, narration, characters, source material, optional image input, and optional style analysis into a structured generation contract. / Story Maker は、Google Gemini API または OpenAI API を使って創作文を生成する静的Webアプリです。15の公開出力モードには「長編（10000字～）」の直接生成が含まれ、対応するすべてのOutputでAI編集採点と安全判定付きブラッシュアップを使えます。単なるプロンプト入力欄ではなく、出力モード、テーマ、ジャンル、世界観、読者層、時代、結末、語り口、登場人物、素材入力、画像入力、作風解析を組み合わせて、生成用の契約を組み立てます。
+
+Use the related-app buttons below the top controls to open Character Maker or the manga app in a separate tab. Each button explains where to use the saved sheet or copied scenario. / 上部の操作欄の下にある連携アプリボタンから、キャラクターメーカー・漫画アプリを別タブで開けます。保存したシートやコピーした台本の使い先も、各ボタンの説明で案内します。
 
 ## Manga app compatibility / 漫画アプリとの互換性
 
@@ -22,9 +34,9 @@ Local start, tests and builds run a source-drift and parser compatibility gate. 
 
 ### Character handoff / 人物設定の受け渡し
 
-Select “the same character sheets are supplied in both apps” only when you have supplied them to both apps. This is your declaration; Story Maker does not compare images or detect identical sheets. When checked, it outputs the scenario only. When unchecked, it automatically creates a separate STEP1 character text after the final scenario. Names, appearance and clothing follow the scenario and supplied settings; different ages of the same person stay within one entry. This additional generation uses the selected API. / 「漫画システムにも同じキャラクターシートを貼っています」は、両方へ同じ資料を入れた場合に選びます。利用者の自己申告を使い、画像の同一性を自動判定しません。チェック時は台本だけを出力し、未チェック時は最終台本の完成後にSTEP1用の人物設定を別途自動生成します。名前・外見・服装を台本と入力設定に合わせ、同一人物の年齢違いは一つの項目内にまとめます。この追加生成には選択中APIを使います。
+When Story Maker has actually imported character-sheet images into its character settings, it outputs the scenario only. Supply the same sheets to the manga app and include references for all characters used. Images are not automatically compared between apps. Without an imported character sheet, Story Maker adds separate STEP1 character text after the final scenario and provides full, scenario-only and character-only copy. Names, appearance and clothing follow the scenario; different ages of one person stay within one entry. / Story Makerでキャラクターシート画像を実際に取り込み人物登録した場合は、台本だけを出力します。漫画アプリにも同じシートを読み込み、登場人物全員の資料を用意してください。両アプリの画像の同一性は自動照合しません。シート未取り込み時は、最終台本の完成後にSTEP1用人物設定を別途追加し、全文・台本のみ・人物設定のみの3種類をコピーできます。名前・外見・服装を台本に合わせ、同一人物の年齢違いは一つの項目内にまとめます。
 
-1. Copy the character text to the manga app’s STEP1 “人物設定” (`#reference-recognition-editor`). / 人物設定だけをコピーし、漫画アプリのSTEP1「人物設定」（`#reference-recognition-editor`）へ貼ります。
+1. Copy the character text to the manga app’s STEP1 “人物情報” (`#reference-recognition-editor`). / 人物設定だけをコピーし、漫画アプリのSTEP1「人物情報」（`#reference-recognition-editor`）へ貼ります。
 2. Copy the scenario to STEP2 “生成されたシナリオ”, then run STEP3 to build the image prompt. The scenario copy route is **STEP2 → STEP3**. / 台本だけをSTEP2「生成されたシナリオ」へ貼り、STEP3で画像指示文を作ります。台本コピーの経路は **STEP2 → STEP3** です。
 3. Use STEP4 for image generation. Full copy retains clearly separated STEP1 and scenario sections; separate copy buttons avoid mixing their contents. / STEP4で画像を生成します。全体コピーではSTEP1用と台本用を区切り、それぞれの個別コピーボタンで混在を避けられます。
 

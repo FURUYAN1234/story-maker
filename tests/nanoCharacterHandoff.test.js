@@ -26,17 +26,23 @@ test('character handoff uses actual scenario names, clothing and user settings, 
   assert.equal(buildNanoFullCopy('',source),source);
 });
 
-test('same-sheet self report suppresses API use and settings export preserves only an explicit boolean', async () => {
-  let input={source,mode:'4koma_scenario',sameSheets:true,settled:true,busy:false,characters:[]},calls=0,state;
+test('registered image provenance suppresses helper use, including mixed rosters; old self reports do not', async () => {
+  let input={source,mode:'4koma_scenario',sameSheets:false,settled:true,busy:false,characters:[{name:'係員',characterSheetImported:true},{name:'来訪者'}]},calls=0,state;
   const controller=createNanoCharacterHandoff({getInput:()=>input,onState:s=>state=s,callAi:async()=>{calls++;return cast;}});
   await controller.sync();
-  assert.equal(calls,0);assert.equal(state.phase,'same-sheets');
-  input={...input,sameSheets:false};await controller.sync();
+  assert.equal(calls,0);assert.equal(state.phase,'sheet-imported');
+  input={...input,sameSheets:true,characters:[{name:'係員',characterSheetImported:'true'},{name:'来訪者'}]};await controller.sync();
   assert.equal(calls,1);assert.equal(state.phase,'ready');
   await controller.sync();assert.equal(calls,1,'same accepted output is reused');
-  input={...input,sameSheets:true};await controller.sync();assert.equal(state.phase,'same-sheets');
-  assert.equal(parseGenerationSettingsExport(buildGenerationSettingsExport({mangaSameCharacterSheets:true})).settings.mangaSameCharacterSheets,true);
-  assert.equal(parseGenerationSettingsExport(buildGenerationSettingsExport({mangaSameCharacterSheets:'false'})).settings.mangaSameCharacterSheets,false);
+  input={...input,characters:[{name:'係員',characterSheetImported:true}]};await controller.sync();assert.equal(state.phase,'sheet-imported');
+  const imported=parseGenerationSettingsExport(buildGenerationSettingsExport({characters:input.characters}));
+  assert.equal(imported.settings.characters[0].characterSheetImported,true);
+  for(const value of [undefined,false,'true']) {
+    const old=parseGenerationSettingsExport(buildGenerationSettingsExport({mangaSameCharacterSheets:true,characters:[{name:'係員',characterSheetImported:value}]}));
+    assert.equal(old.settings.characters[0].characterSheetImported,false);
+    assert.equal(old.settings.mangaSameCharacterSheets,undefined);
+  }
+  input={...input,characters:[]};await controller.sync();assert.equal(state.phase,'ready','deleting the last imported actor enables text handoff again');
 });
 
 test('handoff waits for a valid settled scenario, rejects failed repairs and ignores stale responses', async () => {
@@ -44,9 +50,9 @@ test('handoff waits for a valid settled scenario, rejects failed repairs and ign
   const controller=createNanoCharacterHandoff({getInput:()=>input,onState:s=>state=s,callAi:()=>{calls++;return new Promise(r=>resolve=r);}});
   await controller.sync();assert.equal(calls,0);
   input={...input,busy:false,settled:true};const pending=controller.sync();
-  input={...input,sameSheets:true};await controller.sync();resolve(cast);await pending;
-  assert.equal(state.phase,'same-sheets','late API response must not restore suppressed text');
-  input={...input,sameSheets:false};const resumed=controller.sync();resolve(cast);await resumed;
+  input={...input,characters:[{name:'係員',characterSheetImported:true}]};await controller.sync();resolve(cast);await pending;
+  assert.equal(state.phase,'sheet-imported','late API response must not restore suppressed text');
+  input={...input,characters:[]};const resumed=controller.sync();resolve(cast);await resumed;
   assert.equal(calls,2);assert.equal(state.phase,'ready');
   let badCalls=0;
   input={...input,sameSheets:false};

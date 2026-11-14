@@ -2,6 +2,7 @@ import { getNanoScenarioIssue } from './nanoScenarioContract.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
 
 export const NANO_CHARACTER_MARKER = '[SMK_NANO_CHARACTER_HANDOFF]';
+export const hasImportedCharacterSheet = (characters = []) => characters.some(character => character.characterSheetImported === true);
 
 export function buildNanoCharacterPrompt(source, characters = [], issue = '') {
   return [
@@ -53,7 +54,7 @@ export function createNanoCharacterHandoff({getInput,callAi,onState}) {
     const input=getInput();
     const source=stripGeneratedFooter(input.source || '').trim();
     if(input.mode!=='4koma_scenario') {cancel();attempted='';onState({phase:'hidden',text:''});return;}
-    if(input.sameSheets) {cancel();attempted='';onState({phase:'same-sheets',text:''});return;}
+    if(hasImportedCharacterSheet(input.characters)) {cancel();attempted='';onState({phase:'sheet-imported',text:''});return;}
     if(input.busy || !input.settled || getNanoScenarioIssue(source)) {
       cancel();attempted='';onState({phase:'waiting',text:''});return;
     }
@@ -82,20 +83,21 @@ export function createNanoCharacterHandoff({getInput,callAi,onState}) {
 
 export function installNanoCharacterHandoff({doc=globalThis.document,timers=globalThis,callAi,clipboard=globalThis.navigator?.clipboard}={}) {
   const byId=id=>doc.getElementById(id);
-  const output=byId('output'), same=byId('nano-same-character-sheets'), box=byId('nano-character-handoff');
-  if(!output || !same || !box)return ()=>{};
+  const output=byId('output'), box=byId('nano-character-handoff');
+  if(!output || !box)return ()=>{};
   let state={phase:'waiting',text:''}, scheduled;
   const copyTimers=new Map();
   const currentMode=()=>doc.querySelector('#mode-chips .chip.active')?.dataset.v;
   const getInput=()=>{
     const data=doc.documentElement.dataset;
-    return {source:output.textContent,mode:currentMode(),sameSheets:same.checked,
+    return {source:output.textContent,mode:currentMode(),
       busy:Boolean(byId('btn-generate')?.disabled || byId('settings')?.classList.contains('generating') || data.editorialBrushupResult==='running'),
       settled:output.dataset.manualOutput==='true' || data.editorialBrushupResult==='completed'
         || (data.editorialReviewResult==='completed' && (!byId('longify-auto-brushup-until-pass')?.checked || Number(data.editorialReviewScore)>=100)),
       characters:[...doc.querySelectorAll('#char-list .char-card')].map(card=>({
         name:card.querySelector('.char-name-input')?.value || '',
         note:card.querySelector('.char-memo')?.value || '',
+        characterSheetImported:card.dataset.characterSheetImported==='true',
         attributes:[...card.querySelectorAll('.char-sel')].map(el=>el.value).filter(Boolean).join('、'),
       })),
     };
@@ -103,15 +105,19 @@ export function installNanoCharacterHandoff({doc=globalThis.document,timers=glob
   const render=next=>{
     state=next;
     const manga=currentMode()==='4koma_scenario';
+    const imported=hasImportedCharacterSheet(getInput().characters);
     byId('nano-handoff-options').classList.toggle('hidden',!manga);
-    box.classList.toggle('hidden',!manga || same.checked);
+    byId('nano-handoff-status').textContent=imported
+      ? 'キャラクターシートから人物を登録済みのため、シナリオだけを出力します。漫画のSTEP1にも同じシートを読み込み、登場人物全員分の資料を用意してください。両アプリの画像が同じかは自動照合しません。'
+      : 'キャラクターシートを取り込んでいないため、台本の完成後にSTEP1用の人物設定をAPIで追加生成します。全文・シナリオ・人物設定をそれぞれコピーできます。';
+    box.classList.toggle('hidden',!manga || imported);
     byId('nano-scenario-boundary').classList.toggle('hidden',!manga);
     byId('nano-character-text').textContent=next.text;
     byId('nano-character-status').textContent={waiting:'台本の完成後に人物設定を追加生成します。',running:'APIでSTEP1用の人物設定を生成中…',ready:'ここまでがSTEP1用です。人物設定だけをコピーして貼り付けてください。',failed:`人物設定を作成できませんでした：${next.error || ''}`}[next.phase] || '';
     byId('nano-copy-characters').disabled=next.phase!=='ready';
     byId('nano-retry-characters').classList.toggle('hidden',next.phase!=='failed');
     byId('nano-copy-scenario').disabled=Boolean(getNanoScenarioIssue(output.textContent));
-    byId('btn-copy').disabled=manga && !same.checked && next.phase!=='ready';
+    byId('btn-copy').disabled=manga && !imported && next.phase!=='ready';
     box.dataset.phase=next.phase;
   };
   const controller=createNanoCharacterHandoff({getInput,callAi,onState:render});
@@ -128,10 +134,9 @@ export function installNanoCharacterHandoff({doc=globalThis.document,timers=glob
   const copyAll=event=>{
     if(currentMode()!=='4koma_scenario')return;
     event.preventDefault();event.stopImmediatePropagation();
-    copy(byId('btn-copy'),buildNanoFullCopy(same.checked?'':state.text,output.textContent));
+    copy(byId('btn-copy'),buildNanoFullCopy(hasImportedCharacterSheet(getInput().characters)?'':state.text,output.textContent));
   };
   const retry=()=>controller.sync({retry:true});
-  same.addEventListener('change',schedule);
   byId('nano-copy-characters').addEventListener('click',copyCharacters);
   byId('nano-copy-scenario').addEventListener('click',copyScenario);
   byId('nano-retry-characters').addEventListener('click',retry);
@@ -141,9 +146,9 @@ export function installNanoCharacterHandoff({doc=globalThis.document,timers=glob
   const observer=new Observer(schedule);
   observer.observe(output,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class','data-manual-output']});
   observer.observe(byId('mode-chips'),{attributes:true,subtree:true,attributeFilter:['class']});
-  if(byId('char-list'))observer.observe(byId('char-list'),{childList:true,subtree:true});
+  if(byId('char-list'))observer.observe(byId('char-list'),{childList:true,subtree:true,attributes:true,attributeFilter:['data-character-sheet-imported']});
   observer.observe(byId('btn-generate'),{attributes:true,attributeFilter:['disabled']});
   observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-editorial-review-result','data-editorial-brushup-result','data-editorial-review-score']});
   schedule();
-  return ()=>{controller.dispose();observer.disconnect();timers.clearTimeout(scheduled);for(const timer of copyTimers.values())timers.clearTimeout(timer);same.removeEventListener('change',schedule);byId('nano-copy-characters').removeEventListener('click',copyCharacters);byId('nano-copy-scenario').removeEventListener('click',copyScenario);byId('nano-retry-characters').removeEventListener('click',retry);byId('btn-copy').removeEventListener('click',copyAll,{capture:true});byId('char-list')?.removeEventListener('input',schedule);};
+  return ()=>{controller.dispose();observer.disconnect();timers.clearTimeout(scheduled);for(const timer of copyTimers.values())timers.clearTimeout(timer);byId('nano-copy-characters').removeEventListener('click',copyCharacters);byId('nano-copy-scenario').removeEventListener('click',copyScenario);byId('nano-retry-characters').removeEventListener('click',retry);byId('btn-copy').removeEventListener('click',copyAll,{capture:true});byId('char-list')?.removeEventListener('input',schedule);};
 }

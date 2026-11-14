@@ -60,6 +60,7 @@ function sanitizeCharacters(characters = []) {
     role: cleanText(character?.role, 160),
     personality: cleanText(character?.personality, 160),
     note: cleanText(character?.note, 2000),
+    characterSheetImported: character?.characterSheetImported === true,
   }));
 }
 
@@ -111,7 +112,6 @@ export function buildGenerationSettingsExport(state, values = {}, date = new Dat
       mode: cleanText(state?.mode, 80),
       modeCustom: cleanText(values.modeCustom, 200),
       modeSource: cleanText(state?.modeSource, 80),
-      mangaSameCharacterSheets: state?.mangaSameCharacterSheets === true,
       axes: sanitizeAxisSettings(values.axesDetailed || {}),
       characters: sanitizeCharacters(state?.characters || []),
       supplement: cleanText(values.supplement, 5000),
@@ -132,7 +132,6 @@ export function parseGenerationSettingsExport(input) {
       mode: cleanText(payload.settings.mode, 80),
       modeCustom: cleanText(payload.settings.modeCustom, 200),
       modeSource: cleanText(payload.settings.modeSource, 80),
-      mangaSameCharacterSheets: payload.settings.mangaSameCharacterSheets === true,
       axes: sanitizeAxisSettings(payload.settings.axes || {}),
       characters: sanitizeCharacters(payload.settings.characters || []),
       supplement: cleanText(payload.settings.supplement, 5000),

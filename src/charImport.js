@@ -357,7 +357,8 @@ export function initCharImport(state, renderChars, getApiKey) {
           sex: c.sex || '',
           role: c.role || '',
           personality: c.personality || '',
-          note: c.note || ''
+          note: c.note || '',
+          characterSheetImported: true,
         });
       });
       renderChars();

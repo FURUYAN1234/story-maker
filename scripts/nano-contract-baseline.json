@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "mangaVersion": "7.5.2",
-  "mangaCommit": "a2364753bf382e289fa9ab1c8822962043707dbe",
+  "mangaCommit": "8097b8b1e04842adde82a538ef41d182acc732a3",
   "scope": "Story Maker 4–8-panel free-layout scenario and STEP1 text character import; reviewed manga 7.5.2 candidate at mangaCommit; changes require compatibility review, not automatic baseline refresh",
   "files": {
     "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
@@ -12,7 +12,7 @@
     "src/lib/manga-page-composition.js": "90fab1cc475ef1c3ef868f4cbeb14ea6de48816e6e074d5ffcdd668cd0d4344e",
     "src/lib/story-structure.js": "119d3760ad01fe08068789777b4cc8f41b7efb6b4d3845afc8d4587d9c4250d7",
     "src/lib/ending-mode-policy.js": "0a46d176163ab0b876067df0c198e98766b66e0110214a4c9d6c47f1250f2b5a",
-    "src/lib/reference-assets.js": "e23486c3a45ec6231ed242fbb58f35f90cd53d8388c2418fe7e0a65abc0aea35"
+    "src/lib/reference-assets.js": "fc6d192bd3f6f796285e1714153c4e3ce74201f302bb97dfe6ee0aabfed20f9f"
   },
   "freeLayoutPromptSha256": "e4fbb2f759035131d4f5a58d16db3925fd2f069b26810c2edf2911f199af5c50"
 }

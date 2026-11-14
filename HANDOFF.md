@@ -1,3 +1,10 @@
+## Local candidate checkpoint v5.4.8 — 2026-11-14
+
+- Existing-app update: operation/API PDFs, visible separate-tab manual links, bilingual README and release notes are prepared. Local candidate only; no push, tag, release, deployment or backup.
+- The ordinary Character Maker → Story Maker → manga integration completed real API verification before the latest manga guard/camera patch. That latest manga patch still requires its own API verification; this checkpoint does not claim it passed. Character sheets remain manually imported; images are not compared across apps.
+- Imported character-sheet provenance now selects scenario-only output; otherwise STEP1 character text and the three copy routes remain available. Reviewed peer source hashes are retained; the paired manga commit is recorded in scripts/nano-contract-baseline.json.
+- The private task ledger /home/furu/Codex/work/story-manga-contract-20261114 owns acceptance and saved test/build evidence. Shared preflight will be recorded after this local commit; a clean candidate is not deployment authorization. Historical sections below retain their original timestamps.
+
 ## Story Maker v5.4.8 candidate — 2026-11-14 (verified; deployment approval pending)
 
 - Manga scenario mode now chooses4–8 panels from content, retains PageComposition, preserves silence/dialogue, and checks the actual peer parser. Source drift/missing source blocks development, tests and build; CI provides the peer checkout. Manga official release validation also runs this gate.
