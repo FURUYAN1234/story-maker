@@ -1,3 +1,14 @@
+## Final local release preparation v5.5.0 — 2026-11-14
+
+- Initial API setup hides stop and reservation. Readiness OR active communication shows the body-level fixed red control (top20/right12, 76px band); idle/stopped remains disabled. Readiness changes cannot hide an active stop. Model explanations/prices wrap; narrow/short screens remain scrollable.
+- This revision changes presentation and its regression coverage, not v5.4.9 provider/session cancellation logic. Root supplied prior normal/stop/restart live API acceptance. Latest v5.5.0 final live UI check remains root-owned and pending.
+- Operation/API PDFs already generated, synchronized and visually reviewed by root. Independent source stacking/lock review found no blocking issue. Local commit is preparation only; root owns push, official transaction, public readback, note/SNS and full backup.
+
+## Upper-right emergency stop v5.5.0 candidate — 2026-11-14
+
+- User explicitly requires a consistent upper-right emergency stop across all nine apps, disabled while idle/stopped, with real API/browser verification before existing publication and final full backup.
+- v5.4.9 was officially published with note/X/Facebook readback. This revision retains its API/session logic and accepted real API cancellation/restart evidence; only placement, labels, responsive model details and version/guides change.
+- Body-level fixed top-right control has reserved top space and remains outside disabled tool regions. Model explanations/prices wrap; short desktop windows can scroll. Root owns final live UI checks and official publication; do not treat this source checkpoint as completion.
 ## Local force-disconnect candidate v5.4.9 — 2026-11-14
 
 - User requested shared stop during AI thought/communication, then conditional official deployment, existing note/X/Facebook updates and full backup. Follow-up requires conspicuous red/yellow emergency-stop styling across apps and disabled controls while idle/stopped. Root owns delivery; implementation agent has not committed/pushed/published.

@@ -5,10 +5,13 @@ import { beginAiCommunication, getAiCommunicationState, stopAiCommunication, sub
 export function installAiCommunicationUi(doc = globalThis.document) {
   const button = doc?.getElementById?.('btn-ai-disconnect');
   const status = doc?.getElementById?.('ai-disconnect-status');
+  const bar = doc?.getElementById?.('ai-disconnect-bar');
+  const banner = doc?.getElementById?.('banner');
   if (!button) return () => {};
   const render = ({active, stopped}) => {
+    if (bar) bar.hidden = !banner?.classList?.contains('ok') && active === 0;
     button.disabled = active === 0 || stopped;
-    button.textContent = stopped ? '⏹ 緊急停止済み（AI通信を中断）' : '⏹ 緊急停止（AI通信を切断）';
+    button.textContent = stopped ? '⏹ 停止済み' : '⏹ 緊急停止';
     if (status) status.textContent = stopped
       ? '通信と後続の自動処理を中断しました。再実行は各実行ボタンから行えます。'
       : active ? 'AI通信中：思考待ち・受信中でも中断できます。' : '';
@@ -37,8 +40,11 @@ export function installAiCommunicationUi(doc = globalThis.document) {
   doc.addEventListener('drop', restart, true);
   doc.addEventListener('paste', restart, true);
   const unsubscribe = subscribeAiCommunication(render);
+  const Observer = doc?.defaultView?.MutationObserver;
+  const readinessObserver = Observer && banner ? new Observer(() => render(getAiCommunicationState())) : null;
+  readinessObserver?.observe(banner, {attributes:true, attributeFilter:['class']});
   render(getAiCommunicationState());
-  return () => { unsubscribe(); button.removeEventListener('click',stop); for (const type of ['click','change','drop','paste']) doc.removeEventListener(type,restart,true); };
+  return () => { unsubscribe(); readinessObserver?.disconnect(); button.removeEventListener('click',stop); for (const type of ['click','change','drop','paste']) doc.removeEventListener(type,restart,true); };
 }
 
 if (typeof document !== 'undefined') {

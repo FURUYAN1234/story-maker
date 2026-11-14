@@ -9,16 +9,27 @@ test('global disconnect stays reachable, preserves draft/settings/keys and reset
   const button = {disabled:true, addEventListener:(type,fn)=>listeners.set(`button:${type}`,fn),removeEventListener(){}};
   const status = {textContent:''};
   const draft = {textContent:'元原稿'}, settings = {value:'本人の題材'}, key = {value:'test-only-memory-value'};
-  const elements = {'btn-ai-disconnect':button,'ai-disconnect-status':status,output:draft,supplement:settings,apikey:key};
+  let configured = false;
+  let notifyReadiness;
+  const bar = {hidden:false};
+  const banner = {classList:{contains:()=>configured}};
+  const elements = {'btn-ai-disconnect':button,'ai-disconnect-status':status,'ai-disconnect-bar':bar,banner,output:draft,supplement:settings,apikey:key};
   const doc = {getElementById:id=>elements[id],addEventListener:(type,fn)=>listeners.set(type,fn),removeEventListener(){}};
+  doc.defaultView = {MutationObserver:class {constructor(fn){notifyReadiness=fn;} observe(){} disconnect(){}}};
   const dispose = installAiCommunicationUi(doc);
   try {
     assert.equal(button.disabled,true);
+    assert.equal(bar.hidden,true,'initial API setup has no stop control');
+    configured = true; notifyReadiness();
+    assert.equal(bar.hidden,false,'configured workspace exposes the inactive stop');
     const pending = withAiCommunication(()=>new Promise(()=>{}));
     assert.equal(button.disabled,false);
+    configured = false; notifyReadiness();
+    assert.equal(bar.hidden,false,'an active request stays stoppable during API switching');
     listeners.get('button:click')();
     await assert.rejects(pending,{name:'AbortError'});
     assert.equal(button.disabled,true);
+    assert.equal(bar.hidden,true,'unconfigured stopped state hides the control');
     assert.match(status.textContent,/中断/);
     assert.equal(draft.textContent,'元原稿'); assert.equal(settings.value,'本人の題材'); assert.equal(key.value,'test-only-memory-value');
     const click = id => listeners.get('click')({target:{closest:()=>({id,disabled:false})}});
