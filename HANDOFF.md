@@ -1,3 +1,8 @@
+## Disabled emergency stop appearance v5.5.2 — 2026-11-14
+
+- Root live5.5.1 confirmed disabled=true and manuscript preserved, but dedicated last CSS tokens deliberately painted disabled controls dark red with opacity1. Only emergency-stop disabled background/border now neutral gray. Active red, initial hidden state, fixed position and cancellation/provider code untouched.
+- Regression rejects reddish disabled background, requires active red and readable contrast, plus existing lifecycle tests. Root owns live visual acceptance and publication; no paid API rerun needed for CSS-only behavior delta. Prior5.5.1 tags/notes immutable.
+
 ## Single visible emergency stop v5.5.1 — 2026-11-14
 
 - Root found busy Voice/Narration duplicates; cross-app narrow source audit exposed Story longify inline stop alongside global stop. Sealed legacy long-novel local stop is also kept hidden defensively. Central setInternalAiStopState always hides internal controls while preserving enabled programmatic dispatch. Global handler still clicks longify controller and stops the common session. Provider, prompts, format/minimum length, generation and output adoption unchanged.

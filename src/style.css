@@ -2327,10 +2327,10 @@ textarea{resize:vertical;min-height:56px;line-height:1.6}
 .ai-disconnect-bar { flex-shrink:0; min-height:76px; background:var(--surface); }
 .ai-disconnect-bar[hidden] { display:none; }
 .ai-disconnect-bar button { position:fixed; top:20px; right:12px; z-index:10001; max-width:calc(100vw - 24px); min-height:44px; border-radius:6px; padding:0.5rem 0.8rem; font-size:14px; line-height:1.4; cursor:pointer; }
-:root { --stop-bg:#b91c1c; --stop-hover:#dc2626; --stop-disabled:#743132; --stop-border:#fca5a5; --stop-focus:#fde047; }
+:root { --stop-bg:#b91c1c; --stop-hover:#dc2626; --stop-disabled:#525252; --stop-border:#fca5a5; --stop-focus:#fde047; }
 #btn-ai-disconnect, .longify-stop-button, .btn-ln-abort { background:var(--stop-bg); border:2px solid var(--stop-border); color:#fff; font-weight:800; }
 #btn-ai-disconnect:not(:disabled):hover, .longify-stop-button:not(:disabled):hover, .btn-ln-abort:not(:disabled):hover { background:var(--stop-hover); color:#fff; }
-#btn-ai-disconnect:disabled, .longify-stop-button:disabled, .btn-ln-abort:disabled { background:var(--stop-disabled); color:#fff; border-color:#bf7c7c; opacity:1!important; cursor:default; }
+#btn-ai-disconnect:disabled, .longify-stop-button:disabled, .btn-ln-abort:disabled { background:var(--stop-disabled); color:#fff; border-color:#a3a3a3; opacity:1!important; cursor:default; }
 #btn-ai-disconnect:focus-visible, .longify-stop-button:focus-visible, .btn-ln-abort:focus-visible { outline:3px solid var(--stop-focus); outline-offset:3px; }
 #ai-disconnect-status { font-size:0.8rem; line-height:1.5; overflow-wrap:anywhere; }
 #ai-disconnect-status:not(:empty) { padding:0.5rem 1rem; }
