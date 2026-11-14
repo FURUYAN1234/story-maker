@@ -6,6 +6,11 @@
 
 [![Story Maker デモサイトを開く。リンク先: https://furuyan1234.github.io/story-maker/](docs/assets/demo-site-button.png)](https://furuyan1234.github.io/story-maker/)
 
+[![Download the Windows local app ZIP / Windows用ローカルアプリZIPをダウンロード](docs/assets/local-download-banner.png)](https://github.com/FURUYAN1234/story-maker/archive/refs/heads/main.zip)
+
+**Local app ZIP / ローカルアプリZIP:** Download and extract the entire ZIP, then double-click `start_Story_app.bat` on Windows. Node.js / npm must be installed first. Internet access and the selected provider's API key are required for AI API features; API charges are separate. / ZIP全体をダウンロードしてすべて展開し、Windowsで `start_Story_app.bat` をダブルクリックします。Node.js / npm を事前に導入。AIのAPI機能にはインターネット接続と利用する事業者のAPIキーが必要で、API利用料金は別途かかります。
+
+
 Demo URL / デモサイト: [https://furuyan1234.github.io/story-maker/](https://furuyan1234.github.io/story-maker/)
 
 ### PDF manuals / PDFマニュアル
