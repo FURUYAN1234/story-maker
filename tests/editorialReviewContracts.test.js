@@ -36,12 +36,12 @@ assert.match(buildEditorialReviewPrompt({ mode: 'short', modeLabel: '短編', te
 assert.doesNotMatch(buildEditorialReviewPrompt({ mode: 'script', modeLabel: '脚本', text: '本文' }), /本文の出来事・観察・判断を更新しないメタ進行文/);
 assert.match(buildEditorialReviewPrompt({ mode: '4koma_scenario', modeLabel: '4コマ', text: '本文' }), /モード固有/);
 const fourKomaReviewPrompt = buildEditorialReviewPrompt({ mode: '4koma', modeLabel: '4コマ漫画風', text: '本文' });
-assert.match(fourKomaReviewPrompt, /絵\/状況、セリフ、狙い/);
+assert.match(fourKomaReviewPrompt, /絵\/状況・セリフ/);
 assert.doesNotMatch(fourKomaReviewPrompt, /【最終出力形式チェック】/);
 assert.match(fourKomaReviewPrompt, /制作メモや内部指示の露出として減点しない/);
 assert.ok(fourKomaReviewPrompt.includes(`末尾の「${STORY_MAKER_FOOTER}」`));
 assert.match(fourKomaReviewPrompt, /契約違反として減点しない/);
-const mechanicallyValidFourKoma = [1, 2, 3, 4].map(number => `${number}コマ目:\n絵/状況: 場面${number}\nセリフ: 人物「台詞」\n狙い: 意図`).join('\n');
+const mechanicallyValidFourKoma = [1, 2, 3, 4].map(number => `${number}コマ目:\n絵/状況: 場面${number}\nセリフ: 人物「台詞」`).join('\n');
 assert.match(buildEditorialReviewPrompt({ mode: '4koma', modeLabel: '4コマ漫画風', text: mechanicallyValidFourKoma }), /形式契約はアプリの機械検証に合格済み/);
 const actionableReviewPrompt = buildEditorialReviewPrompt({ mode: 'short', modeLabel: 'ショート', text: '本文' });
 assert.match(actionableReviewPrompt, /100点未満なら、褒めるだけの講評を禁止/);

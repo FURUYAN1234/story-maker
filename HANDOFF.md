@@ -1,3 +1,9 @@
+## Ordinary four-panel format correction — 2026-11-14
+
+- Root live Luna output exposed contradictory contracts: prompt/cleanup excluded production-note 狙い fields, while mode/quality prompts and editorial validation required four of them, making repaired cleaned text fail. Unified ordinary 4koma to four ordered panels with nonempty picture/situation then dialogue fields. Missing/duplicate/out-of-order panels and empty/misordered fields still fail. 4koma_scenario contract unchanged.
+- Captured live output now passes format; its446 characters remain below the existing600 minimum and still require content-preserving repair. No minimum was relaxed. Regression covers valid cleaned output bypassing unnecessary repair, successful necessary repair, malformed/short repair rejection. Root owns final real-API normal/repair acceptance before publication.
+- Source/guides/PDF candidate remains5.5.0; no provider/model/cancellation changes. Full regression/build/security/preflight results recorded privately. Prior candidate not published; root owns publication and final backup.
+
 ## Final local release preparation v5.5.0 — 2026-11-14
 
 - Initial API setup hides stop and reservation. Readiness OR active communication shows the body-level fixed red control (top20/right12, 76px band); idle/stopped remains disabled. Readiness changes cannot hide an active stop. Model explanations/prices wrap; narrow/short screens remain scrollable.

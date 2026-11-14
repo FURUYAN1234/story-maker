@@ -46,18 +46,22 @@ function hasAll(source, patterns) {
   return patterns.every(pattern => pattern.test(source));
 }
 
-function matchCount(source, pattern) {
-  return (source.match(pattern) || []).length;
+function hasFourKomaFormat(source) {
+  const panels = [...source.matchAll(/^\s*([0-9]+)コマ目(?:[（(][^）)\n]*[）)])?\s*[:：]?\s*$/gm)];
+  if (panels.length !== 4 || panels.some((panel, index) => Number(panel[1]) !== index + 1)) return false;
+  return panels.every((panel, index) => {
+    const body = source.slice(panel.index + panel[0].length, panels[index + 1]?.index ?? source.length);
+    const fields = [...body.matchAll(/^\s*(絵\/状況|セリフ)\s*[:：][\t ]*/gm)];
+    if (fields.length !== 2 || fields[0][1] !== '絵/状況' || fields[1][1] !== 'セリフ') return false;
+    return fields.every((field, fieldIndex) => body.slice(field.index + field[0].length, fields[fieldIndex + 1]?.index ?? body.length).trim().length > 0);
+  });
 }
 
 export function hasEditorialModeFormat(text, mode = '') {
   const source = normalizedManuscript(text);
   const normalizedMode = String(mode || '').toLowerCase();
   if (!source) return false;
-  if (normalizedMode === '4koma') return hasAll(source, [/1コマ目/u, /2コマ目/u, /3コマ目/u, /4コマ目/u])
-    && matchCount(source, /絵\/状況\s*[:：]/gu) === 4
-    && matchCount(source, /セリフ\s*[:：]/gu) === 4
-    && matchCount(source, /狙い\s*[:：]/gu) === 4;
+  if (normalizedMode === '4koma') return hasFourKomaFormat(source);
   if (normalizedMode === '4koma_scenario') return isNanoScenarioComplete(source);
   if (normalizedMode === 'scenario') return hasAll(source, [/タイトル\s*[:：]/u, /登場人物\s*[:：]/u, /場面\s*[:：]/u, /[^\n：:]{1,30}\s*[:：]\s*[^\n]+/u]);
   if (normalizedMode === 'manga') return hasAll(source, [/ページ/u, /コマ/u, /絵\s*[:：]/u, /セリフ\s*[:：]/u, /演出\s*[:：]/u]);

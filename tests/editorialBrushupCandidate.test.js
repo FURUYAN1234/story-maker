@@ -9,9 +9,9 @@ assert.equal(hasEditorialModeFormat('宛先: 母へ\n本文: ありがとう。\
 assert.equal(hasEditorialModeFormat('母へ\nありがとう。\n私より。', 'letter'), false);
 assert.equal(hasEditorialModeFormat('タイトル: 朝\n登場人物: 二人\nBGM: 静か\nSE: 雨音', 'radio'), true);
 assert.equal(hasEditorialModeFormat('普通の小説本文。', 'radio'), false);
-const validFourKoma = [1, 2, 3, 4].map(number => `${number}コマ目:\n絵/状況: 場面${number}\nセリフ: 人物「台詞」\n狙い: 意図`).join('\n');
+const validFourKoma = [1, 2, 3, 4].map(number => `${number}コマ目:\n絵/状況: 場面${number}\nセリフ: 人物「台詞」`).join('\n');
 assert.equal(hasEditorialModeFormat(validFourKoma, '4koma'), true);
-assert.equal(hasEditorialModeFormat(validFourKoma.replace(/狙い: 意図\s*$/u, ''), '4koma'), false);
+assert.equal(hasEditorialModeFormat(validFourKoma.replace(/セリフ: 人物「台詞」\s*$/u, ''), '4koma'), false);
 
 assert.equal(evaluateBrushupCandidate({ originalText: base, currentText: base, candidateText: improved, mode: 'novel', formatOk: true, ...reviews }).adopt, true);
 assert.equal(evaluateBrushupCandidate({ originalText: base, currentText: base, candidateText: `${improved}\n\n${improved}`, mode: 'novel', formatOk: true, ...reviews }).adopt, false);

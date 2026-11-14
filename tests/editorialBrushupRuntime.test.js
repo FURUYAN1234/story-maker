@@ -122,7 +122,7 @@ const formatRepairPrompt = buildEditorialFormatRepairPrompt({
   text: `1コマ目（起）:\n絵/状況: 店内\nセリフ: 客「はい」\n${STORY_MAKER_FOOTER}`,
 });
 assert.match(formatRepairPrompt, /1コマ目、2コマ目、3コマ目、4コマ目/);
-assert.match(formatRepairPrompt, /「絵\/状況:」「セリフ:」「狙い:」/);
+assert.match(formatRepairPrompt, /「絵\/状況:」「セリフ:」/);
 assert.doesNotMatch(formatRepairPrompt, /Created By AI Story Maker/);
 const progressTitle = { textContent: '' };
 const progressLog = { textContent: '' };
