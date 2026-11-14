@@ -1,3 +1,4 @@
+import { captureAiOperation, subscribeAiCommunication } from '../src/aiCommunication.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -32,9 +33,9 @@ test('ordinary image import marks only registered characters, never analysis fai
     const nodes=new Map(['ci-dropzone','ci-file-input','ci-status'].map(id=>[id,element()]));
     const state={characters:[],locked:{}},document={getElementById:id=>nodes.get(id),createElement:()=>({firstElementChild:{}}),body:{appendChild:()=>{}}};
     let register,rendered=0;
-    const install=new Function('document','If','Gd','wf','$f','Sf','Cf','Nf','setTimeout','console','yf',`${functionBody};return kf;`)(
+    const install=new Function('document','If','Gd','wf','$f','Sf','Cf','Nf','setTimeout','console','yf','captureAiOperation',`const sharedAiProviders={Gd};${functionBody};return kf;`)(
       document,async()=> 'fixture',async()=>{if(outcome==='failure')throw new Error('analysis failed');return {text:JSON.stringify([{name:'係員',sex:'',role:'',personality:'',note:'黒い短髪、紺色の作業着'}])};},
-      wf,x=>x,x=>x,()=>'<div></div>',(_chars,callback)=>{register=callback;},()=>0,{error:()=>{}},'analysis prompt',
+      wf,x=>x,x=>x,()=>'<div></div>',(_chars,callback)=>{register=callback;},()=>0,{error:()=>{}},'analysis prompt',captureAiOperation,
     );
     install(state,()=>rendered++,()=> 'test-only-key');
     nodes.get('ci-file-input').fire('change',{target:{files:[{type:'image/png',name:'sheet.png'}],value:'selected'}});
@@ -62,7 +63,7 @@ test('live character cards and settings export/import carry explicit provenance 
   assert.deepEqual(exported.settings.characters.map(c=>c.characterSheetImported),[true,false]);
   let apply;
   const listener=legacy.slice(legacy.indexOf('document.addEventListener("story-maker:apply-imported-characters"')).trim();
-  new Function('document','s','et',listener)({addEventListener:(_event,fn)=>{apply=fn;}},state,render);
+  new Function('document','s','et','subscribeAiCommunication',listener)({addEventListener:(_event,fn)=>{apply=fn;}},state,render,subscribeAiCommunication);
   apply({detail:{characters:exported.settings.characters}});
   assert.deepEqual(state.characters.map(c=>c.characterSheetImported),[true,false]);
   apply({detail:{characters:[{name:'係員',characterSheetImported:'true'},{name:'来訪者'}]}});

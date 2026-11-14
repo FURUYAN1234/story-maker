@@ -8,6 +8,7 @@
 
 import './modulePreloadPolyfill.js';
 import './privacyGuards.js';
+import './aiCommunicationUi.js';
 import './qualityBoost.js';
 import './legacyMain.js';
 import './openAiModelUi.js';

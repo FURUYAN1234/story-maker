@@ -1,3 +1,4 @@
+import { captureAiOperation, getAiCommunicationState } from './aiCommunication.js';
 import {
   EDITORIAL_PASS_SCORE,
   EDITORIAL_PUBLISHABLE_SCORE,
@@ -288,7 +289,16 @@ function escapeEditorialHtml(value = '') {
   return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
 
-export function createEditorialReviewMarkup(review, { attempts = 0, error = '' } = {}) {
+export function describeEditorialTermination(error, { brushup = false } = {}) {
+  if (error?.name === 'AbortError') {
+    const status = brushup ? 'ブラッシュアップを中断しました（元原稿を保持）' : 'AI講評を中断しました（本文は保持）';
+    return { cancelled: true, result: 'cancelled', status, message: status };
+  }
+  return { cancelled: false, result: 'failed', status: brushup ? 'ブラッシュアップ失敗（元原稿を保持）' : 'AI講評を取得できませんでした（本文は保持）', message: `${brushup ? 'ブラッシュアップ失敗・元原稿を保持' : 'AI講評・形式修正が終了しました（失敗・本文は保持）'}: ${error?.message || String(error)}` };
+}
+
+export function createEditorialReviewMarkup(review, { attempts = 0, error = '', cancelled = false } = {}) {
+  if (cancelled) return '<div class="editorial-review-cancelled"><strong>AI処理を中断しました。</strong><span>本文は保持されています。再実行は各実行ボタンから行えます。</span></div>';
   if (error) return `<div class="editorial-review-error"><strong>AI講評を取得できませんでした。</strong><span>本文は保持されています。</span><pre>${escapeEditorialHtml(error)}</pre></div>`;
   const valid = Boolean(review?.valid && Number.isFinite(review?.score));
   const score = valid ? Math.max(0, Math.min(100, review.score)) : 0;
@@ -313,10 +323,10 @@ export function createEditorialReviewMarkup(review, { attempts = 0, error = '' }
   ].join('');
 }
 
-export function renderEditorialReview(review, element, { attempts = 0, error = '' } = {}) {
+export function renderEditorialReview(review, element, { attempts = 0, error = '', cancelled = false } = {}) {
   if (!element) return;
   element.classList?.remove?.('hidden');
-  element.innerHTML = createEditorialReviewMarkup(review, { attempts, error });
+  element.innerHTML = createEditorialReviewMarkup(review, { attempts, error, cancelled });
 }
 
 export function isEditorialBrushupReady(output) {
@@ -412,6 +422,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   generationLockObserver?.observe?.(generateButton, { attributes: true, attributeFilter: ['disabled'] });
   generationLockObserver?.observe?.(settingsElement, { attributes: true, attributeFilter: ['class'] });
   const reviewCurrentOutput = async () => {
+    const operationCallAi = captureAiOperation().bind(callAi);
     if (!hasText()) return null;
     const token = ++reviewRun;
     const reviewGenerateWasDisabled = Boolean(generateButton?.disabled);
@@ -437,7 +448,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
         statusElement && (statusElement.textContent = repairMessage);
         updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: repairMessage, reset: true });
         updateEditorialAuxiliaryUi({ alertElement: globalAlertElement, scoreBoard: thoughtScoreBoard, message: repairMessage, active: true });
-        reviewedText = await prepareEditorialManuscript({ text: reviewedText, mode, modeLabel, callAi });
+        reviewedText = await prepareEditorialManuscript({ text: reviewedText, mode, modeLabel, callAi: operationCallAi });
         if (output.dataset) output.dataset.editorialBrushupRendering = 'true';
         try {
           output.textContent = reviewedText;
@@ -452,7 +463,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       statusElement && (statusElement.textContent = reviewMessage);
       updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: reviewMessage, reset: true });
       updateEditorialAuxiliaryUi({ alertElement: globalAlertElement, scoreBoard: thoughtScoreBoard, message: reviewMessage, active: true });
-      const review = await runEditorialReview({ text: reviewedText, mode: currentMode(), modeLabel: currentModeLabel(), callAi, requireStructured: true });
+      const review = await runEditorialReview({ text: reviewedText, mode: currentMode(), modeLabel: currentModeLabel(), callAi: operationCallAi, requireStructured: true });
       if (token !== reviewRun) return null;
       latestReview = review.valid ? review : null;
       latestReviewText = review.valid ? editorialTextFingerprint(output.textContent) : '';
@@ -468,10 +479,11 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       return review;
     } catch (error) {
       if (token !== reviewRun) return null;
-      renderEditorialReview(null, reviewElement, { error: error?.message || String(error) });
-      statusElement && (statusElement.textContent = 'AI講評を取得できませんでした（本文は保持）');
-      updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: `AI講評・形式修正が終了しました（失敗・本文は保持）: ${error?.message || String(error)}` });
-      doc.documentElement.dataset.editorialReviewResult = 'failed';
+      const termination = describeEditorialTermination(error);
+      renderEditorialReview(null, reviewElement, { error: error?.message || String(error), cancelled: termination.cancelled });
+      statusElement && (statusElement.textContent = termination.status);
+      updateEditorialProgressSurface({ titleElement: progressTitleElement, logElement: progressLogElement, message: termination.message });
+      doc.documentElement.dataset.editorialReviewResult = termination.result;
       sectionElement?.classList?.remove?.('is-waiting');
       sectionElement?.setAttribute?.('aria-disabled', 'false');
       return null;
@@ -486,13 +498,17 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       setReady();
     }
   };
+  let generationOperation = captureAiOperation();
   startPendingReview = () => {
+    try { generationOperation.check(); } catch { awaitingGenerationReview = false; reviewStartQueued = true; return; }
+    if (getAiCommunicationState().stopped) { awaitingGenerationReview = false; reviewStartQueued = true; return; }
     if (!awaitingGenerationReview || reviewStartQueued || generateButton?.disabled) return;
     if (output.textContent === generationInitialText || !hasText()) return;
     reviewStartQueued = true;
     reviewCurrentOutput();
   };
   const onBrushup = async event => {
+    const operationCallAi = captureAiOperation().bind(callAi);
     event?.preventDefault?.();
     event?.stopImmediatePropagation?.();
     if (!hasText()) return;
@@ -544,7 +560,7 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
         mode: currentMode(),
         modeLabel: currentModeLabel(),
         autoUntilPass: autoCheckbox?.checked === true,
-        callAi,
+        callAi: operationCallAi,
         initialReview: reusableReview,
         onProgress: progress => {
           const message = formatEditorialProgress(progress);
@@ -589,14 +605,15 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       doc.documentElement.dataset.editorialBrushupAttempts = String(result.attempts);
     } catch (error) {
       output.textContent = source;
-      renderEditorialReview(null, reviewElement, { error: error?.message || String(error) });
-      statusElement && (statusElement.textContent = 'ブラッシュアップ失敗（元原稿を保持）');
+      const termination = describeEditorialTermination(error, { brushup: true });
+      renderEditorialReview(null, reviewElement, { error: error?.message || String(error), cancelled: termination.cancelled });
+      statusElement && (statusElement.textContent = termination.status);
       updateEditorialProgressSurface({
         titleElement: progressTitleElement,
         logElement: progressLogElement,
-        message: `ブラッシュアップ失敗・元原稿を保持（${error?.message || String(error)}）`,
+        message: termination.message,
       });
-      doc.documentElement.dataset.editorialBrushupResult = 'failed';
+      doc.documentElement.dataset.editorialBrushupResult = termination.result;
     } finally {
       timers.clearInterval(elapsedTimer);
       brushupRunning = false;
@@ -612,13 +629,16 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
   };
   brushupButton.addEventListener('click', onBrushup, { capture: true });
   queueAutomaticBrushup = () => {
+    const scheduledOperation = captureAiOperation();
     timers.setTimeout(() => {
-      if (!brushupRunning && autoCheckbox?.checked && latestReview?.valid && latestReview.score < EDITORIAL_BRUSHUP_TARGET_SCORE) {
+      try { scheduledOperation.check(); } catch { return; }
+      if (!getAiCommunicationState().stopped && !brushupRunning && autoCheckbox?.checked && latestReview?.valid && latestReview.score < EDITORIAL_BRUSHUP_TARGET_SCORE) {
         onBrushup();
       }
     }, 0);
   };
   const onGenerate = () => {
+    generationOperation = captureAiOperation();
     reviewRun += 1;
     awaitingGenerationReview = true;
     reviewStartQueued = false;

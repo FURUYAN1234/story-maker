@@ -1,3 +1,4 @@
+import { captureAiOperation } from './aiCommunication.js';
 import { getNanoScenarioIssue } from './nanoScenarioContract.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
 
@@ -51,6 +52,7 @@ export function createNanoCharacterHandoff({getInput,callAi,onState}) {
   let token=0, active=null, attempted='', cached=null;
   const cancel=()=>{token++;active?.abort();active=null;};
   const sync=async({retry=false}={})=>{
+    const operationCallAi=captureAiOperation().bind(callAi);
     const input=getInput();
     const source=stripGeneratedFooter(input.source || '').trim();
     if(input.mode!=='4koma_scenario') {cancel();attempted='';onState({phase:'hidden',text:''});return;}
@@ -66,7 +68,7 @@ export function createNanoCharacterHandoff({getInput,callAi,onState}) {
     try {
       let issue='';
       for(let attempt=0;attempt<2;attempt++) {
-        const response=await callAi(buildNanoCharacterPrompt(source,input.characters,issue),{stage:'character_setup',mode:'4koma_scenario',charLength:source.length,signal:active.signal});
+        const response=await operationCallAi(buildNanoCharacterPrompt(source,input.characters,issue),{stage:'character_setup',mode:'4koma_scenario',charLength:source.length,signal:active.signal});
         if(token!==mine)return;
         const text=String(response?.text || response || '').trim();
         const validation=validateNanoCharacterText(text,source,input.characters);
@@ -121,7 +123,7 @@ export function installNanoCharacterHandoff({doc=globalThis.document,timers=glob
     box.dataset.phase=next.phase;
   };
   const controller=createNanoCharacterHandoff({getInput,callAi,onState:render});
-  const schedule=()=>{timers.clearTimeout(scheduled);scheduled=timers.setTimeout(()=>controller.sync(),100);};
+  const schedule=()=>{const operation=captureAiOperation();timers.clearTimeout(scheduled);scheduled=timers.setTimeout(()=>{try{operation.check();}catch{return;}controller.sync();},100);};
   const copy=async(button,text)=>{
     button.dataset.copyLabel ||= button.textContent;
     timers.clearTimeout(copyTimers.get(button));
