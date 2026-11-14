@@ -1,3 +1,8 @@
+## Single visible emergency stop v5.5.1 — 2026-11-14
+
+- Root found busy Voice/Narration duplicates; cross-app narrow source audit exposed Story longify inline stop alongside global stop. Sealed legacy long-novel local stop is also kept hidden defensively. Central setInternalAiStopState always hides internal controls while preserving enabled programmatic dispatch. Global handler still clicks longify controller and stops the common session. Provider, prompts, format/minimum length, generation and output adoption unchanged.
+- New patch follows published5.5.0; tag remains untouched. README/operation/API PDF versions and release notes synchronized. Tests cover hidden controller lifecycle, programmatic stop and global-disconnect dispatch; root owns live long-form stop/UI acceptance and any publication. No new paid API claim.
+
 ## Ordinary four-panel format correction — 2026-11-14
 
 - Root live Luna output exposed contradictory contracts: prompt/cleanup excluded production-note 狙い fields, while mode/quality prompts and editorial validation required four of them, making repaired cleaned text fail. Unified ordinary 4koma to four ordered panels with nonempty picture/situation then dialogue fields. Missing/duplicate/out-of-order panels and empty/misordered fields still fail. 4koma_scenario contract unchanged.

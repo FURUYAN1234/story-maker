@@ -1,4 +1,4 @@
-# Story Maker v5.5.0 / AI物語メーカー
+# Story Maker v5.5.1 / AI物語メーカー
 
 **Stop AI communication / AI通信の強制切断:** Use the upper-right “緊急停止” button while waiting for thought or receiving a response. It aborts browser requests and blocks automatic continuation, retries and fallback; late responses are discarded. Standard generation restores the previous Output, and brushup keeps its source draft. Settings and the in-memory API key remain available for another run. This does not guarantee cancellation of processing or charges at the API provider. / 思考待ち・受信中は右上の「緊急停止」でブラウザーの通信と後続の自動継続・再試行・フォールバックを止め、遅延応答を破棄します。通常生成は生成前のOutputへ戻し、ブラッシュアップは元原稿を保持します。設定とメモリー内のAPIキーを保ったまま各実行ボタンから再実行できます。API提供元での処理・課金停止は保証しません。
 
@@ -256,7 +256,7 @@ OpenAI image analysis and text generation use the selected model and maintained 
 
 ## Current Quality System / 現行品質システム
 
-The current v5.5.0 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.0ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.5.1 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.1ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -942,3 +942,5 @@ This update further strengthens security while preserving the existing creation 
 The app limits script execution and API connections with Content Security Policy, disables embedded frames and form submissions, and sends no referrer. Open the app directly in its own tab. API keys remain sensitive while in memory; these protections do not guarantee the absence of every vulnerability. Every deployment checks dependencies, source safeguards and the built policy. / CSPでスクリプト実行・API接続先を制限し、埋め込み表示とフォーム送信を禁止、参照元情報を送信しません。アプリは直接タブで開いてください。メモリー内のAPIキーも機密情報であり、すべての脆弱性がないことを保証するものではありません。毎回のデプロイで依存ライブラリ・ソースの防御・ビルド後の設定を検査します。
 
 **Ordinary four-panel format / 通常4コマの形式:** Keep four ordered panels, each with nonempty picture/situation and dialogue fields. Production-note fields are not required. Missing/duplicate panels, empty fields and the existing minimum length still fail validation. / 通常4コマは順序どおりの4区画と、各区画の空でない「絵/状況」「セリフ」を検査します。「狙い」などの制作メモは必須ではありません。コマの欠落・重複・空欄と既存の字数下限は引き続き検査します。
+
+During generation, use the single red **Emergency stop** at the upper right, including long-form work. Inline stop controllers remain internal. / 長編処理中も、画面右上の赤い **緊急停止** 一つから中断します。欄内の重複する停止ボタンは表示しません。

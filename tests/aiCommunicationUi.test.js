@@ -8,12 +8,14 @@ test('global disconnect stays reachable, preserves draft/settings/keys and reset
   const listeners = new Map();
   const button = {disabled:true, addEventListener:(type,fn)=>listeners.set(`button:${type}`,fn),removeEventListener(){}};
   const status = {textContent:''};
+  let inlineStops = 0;
+  const internalStop = {hidden:true,disabled:false,click(){inlineStops++;}};
   const draft = {textContent:'元原稿'}, settings = {value:'本人の題材'}, key = {value:'test-only-memory-value'};
   let configured = false;
   let notifyReadiness;
   const bar = {hidden:false};
   const banner = {classList:{contains:()=>configured}};
-  const elements = {'btn-ai-disconnect':button,'ai-disconnect-status':status,'ai-disconnect-bar':bar,banner,output:draft,supplement:settings,apikey:key};
+  const elements = {'btn-longify-stop':internalStop,'btn-ai-disconnect':button,'ai-disconnect-status':status,'ai-disconnect-bar':bar,banner,output:draft,supplement:settings,apikey:key};
   const doc = {getElementById:id=>elements[id],addEventListener:(type,fn)=>listeners.set(type,fn),removeEventListener(){}};
   doc.defaultView = {MutationObserver:class {constructor(fn){notifyReadiness=fn;} observe(){} disconnect(){}}};
   const dispose = installAiCommunicationUi(doc);
@@ -27,6 +29,8 @@ test('global disconnect stays reachable, preserves draft/settings/keys and reset
     configured = false; notifyReadiness();
     assert.equal(bar.hidden,false,'an active request stays stoppable during API switching');
     listeners.get('button:click')();
+    assert.equal(inlineStops,1,'global stop still reaches the hidden longify controller');
+    assert.equal(internalStop.hidden,true,'controller does not become another visible stop');
     await assert.rejects(pending,{name:'AbortError'});
     assert.equal(button.disabled,true);
     assert.equal(bar.hidden,true,'unconfigured stopped state hides the control');

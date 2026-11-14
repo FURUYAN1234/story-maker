@@ -1,3 +1,4 @@
+import { setInternalAiStopState } from './internalAiStopControls.js';
 import { yt } from './providerClients.js';
 import { GEMINI_MODEL_VALUES } from './data.js';
 import {
@@ -5676,9 +5677,7 @@ function setLongifyPanelState(panelState = {}) {
 }
 
 function setStopButtonState(stopButton, running) {
-  if (!stopButton) return;
-  stopButton.classList.toggle('hidden', !running);
-  stopButton.disabled = !running;
+  setInternalAiStopState(stopButton, running);
 }
 
 function sealLongifyBetaPanel({ button, statusEl, stopButton, autoBrushupCheckbox } = {}) {
