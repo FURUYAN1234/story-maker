@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "7.5.2",
-  "mangaCommit": "8097b8b1e04842adde82a538ef41d182acc732a3",
-  "scope": "Story Maker 4–8-panel free-layout scenario and STEP1 text character import; reviewed manga 7.5.2 candidate at mangaCommit; changes require compatibility review, not automatic baseline refresh",
+  "mangaVersion": "7.5.6",
+  "mangaCommit": "c16ac5de4ac13f30e05b7267ab88b248ee7393e0",
+  "scope": "Story Maker 4–8-panel free-layout and STEP1 import; reviewed manga7.5.6 foreground aliases, draft/commit name synchronization and scene-led focal-depth wording. The emitted prompt differs only in its reviewed camera/focus instruction; schema/styles/parser unchanged; actual peer parser15 cases pass. Baselines require review, never automatic acceptance.",
   "files": {
     "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
     "src/lib/scenario-provider.js": "e5751fd0387e52fe1bb26e44ee891aef3598a26afee3d432d749752a2450209b",
     "src/lib/scenario-validation.js": "37eebd4f00654ea4fd2929819e21ba130dd0aff78ab52b4b159aa8a0b057537c",
-    "src/lib/panel-utils.js": "f68970532253c5eb5b805140cc4f78e8063fa57cb28014a6f5a408978f3b8603",
+    "src/lib/panel-utils.js": "18073efc295b3030b4cb4be5ab7da7184b096c57dd2edc5f29ec6d500c63bcf2",
     "src/lib/bubble-text.js": "28d5f4c2be4b67e40f0ca100da4adff029b96ff70cf8817620ee102526172a45",
     "src/lib/manga-page-composition.js": "90fab1cc475ef1c3ef868f4cbeb14ea6de48816e6e074d5ffcdd668cd0d4344e",
     "src/lib/story-structure.js": "119d3760ad01fe08068789777b4cc8f41b7efb6b4d3845afc8d4587d9c4250d7",
     "src/lib/ending-mode-policy.js": "0a46d176163ab0b876067df0c198e98766b66e0110214a4c9d6c47f1250f2b5a",
-    "src/lib/reference-assets.js": "fc6d192bd3f6f796285e1714153c4e3ce74201f302bb97dfe6ee0aabfed20f9f"
+    "src/lib/reference-assets.js": "80a19b09ecd53108eb703493afdc65b71884c79add3fccc0b3c70a9338ebac2e"
   },
-  "freeLayoutPromptSha256": "e4fbb2f759035131d4f5a58d16db3925fd2f069b26810c2edf2911f199af5c50"
+  "freeLayoutPromptSha256": "a4790617f0660b1a944a70f85d2393ea0b9d2748e766d324354752231ffa6aed"
 }
