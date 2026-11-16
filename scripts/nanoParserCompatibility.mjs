@@ -56,5 +56,20 @@ export async function checkParserCompatibility(server) {
     assert.equal(isNanoScenarioComplete(scenarioFixture({ count })), false, `${count} panels must fail`);
     assert.equal(validateMangaScenario(scenarioFixture({ count, composition: false }), cast, { scenarioMode: 'experimental-manga' }).ok, false);
   }
-  return cases.length + invalid.length + 4;
+  const {createBookPageMode}=await server.ssrLoadModule('/src/lib/page-production-contract.js');
+  const {readPageComposition,scenarioPageCompositionInstruction,SCENARIO_PAGE_COMPOSITION:ordinaryGuidance}=await server.ssrLoadModule('/src/lib/manga-page-composition.js');
+  assert.equal(scenarioPageCompositionInstruction('experimental-manga'),ordinaryGuidance,'ordinary 4–8 generation guidance must stay unchanged');
+  for(const count of [1,2,3]){
+    const composition={layout:'vertical_page',reason:'指定された動作と読順に必要な固定ページ。',heroPanels:[1],foregrounds:[],breakouts:[],bleed:[]};
+    const source=scenarioFixture({count,silent:false,composition:false}).replace(/Scenario:\r?\n/,'Scenario:\nPageComposition: '+JSON.stringify(composition)+'\n');
+    const book=validateMangaScenario(source,cast,{scenarioMode:createBookPageMode(count)});
+    assert.equal(book.ok,true,`${count}-panel explicit book mode must accept current shared schema`);
+    assert.equal(readPageComposition(source,count).layout,'vertical_page');
+    assert.equal(getScenarioPanelBlocks(source).length,count);
+    for(const panel of getScenarioPanelBlocks(source))assert.deepEqual(extractDialogueOnly(panel.text,cast,{asEntries:true,forImagePrompt:true}).map(entry=>entry.text),['こちらへどうぞ。']);
+    assert.equal(isNanoScenarioComplete(source),false,'Story Maker remains a 4–8-panel authoring product');
+    assert.equal(validateMangaScenario(source,cast,{scenarioMode:'experimental-manga'}).structuralValid,false,'ordinary free-layout must not silently become book mode');
+    assert.equal(validateMangaScenario(source,cast,{scenarioMode:createBookPageMode(count+1)}).structuralValid,false,'book page count remains fixed');
+  }
+  return cases.length + invalid.length + 4 + 9;
 }

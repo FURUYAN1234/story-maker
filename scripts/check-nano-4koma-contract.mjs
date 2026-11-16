@@ -45,6 +45,7 @@ if (!fs.existsSync(nanoPromptFile)) {
 for (const error of checkContractSources(nanoRoot)) fail(error);
 if (process.exitCode) process.exit(process.exitCode);
 if (sourceHash(fs.readFileSync(path.join(nanoRoot, 'src/lib/manga-page-composition.js'), 'utf8')) !== sourceHash(fs.readFileSync(new URL('../src/vendor/nanoMangaPageComposition.js', import.meta.url), 'utf8'))) fail('The bundled PageComposition validator differs from the current manga source. Review and synchronize it.');
+if (sourceHash(fs.readFileSync(path.join(nanoRoot, 'src/lib/page-production-contract.js'), 'utf8')) !== sourceHash(fs.readFileSync(new URL('../src/vendor/page-production-contract.js', import.meta.url), 'utf8'))) fail('The bundled internal book-mode dependency differs from the reviewed manga source.');
 if (process.exitCode) process.exit(process.exitCode);
 
 // Imported rule exports cover camera, gestures, props, reading/tails, facial

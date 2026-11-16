@@ -35,3 +35,9 @@ Source drift means **review required**, not proven incompatibility. Line-ending 
 4. Only after review, update `scripts/nano-contract-baseline.json` and any reviewed prompt hash. Do not refresh hashes merely to silence a failure. / 差分確認後にのみ基準ハッシュを更新します。検査を通すだけの無条件更新は禁止です。
 
 These are checks at explicit development/release events. No resident watcher, periodic job, automatic code rewrite, deployment or paid generation is installed. / 開発・公開操作時の検査です。常駐監視、定期実行、ソースの自動書換え、デプロイ、有料生成は追加していません。
+
+## Reviewed manga 8.0.0 boundary / 漫画8.0.0の確認範囲
+
+The shared validator and its pure `page-production-contract.js` dependency include an explicit internal book-page mode for 1–3 panels. Story Maker continues to author and accept 4–8 panels; it does not enable that book workflow. The ordinary four-panel and free-layout prompt/style contracts remain unchanged. Compatibility checks exercise 24 valid/invalid cases, including book-only 1–3 acceptance by the manga parser, rejection by ordinary modes, and exact dialogue/character handoff. / 共通の検証モジュールと純粋な依存ファイルを同期しました。漫画側の明示的な本ページモードは1〜3コマにも対応しますが、Story Makerの生成・受入範囲は4〜8コマのままです。通常の4コマ・自由配置の指示と画風は維持し、24件の正常・異常例でモードの区別、台詞と人物設定の受け渡しを確認します。
+
+The reviewed source hashes match published manga [v8.0.0](https://github.com/FURUYAN1234/nano-banana-pro/releases/tag/v8.0.0), commit `f9dcfd64d224a8434878b1f6d865a6113ba5f7bc`. The annotated tag resolves to that commit. These compatibility checks are not a new paid API validation. No provider/model, output mode, or automatic deployment changes are included. / 基準ハッシュは公開済み漫画アプリv8.0.0のコミット `f9dcfd64d224a8434878b1f6d865a6113ba5f7bc` と一致し、注釈付きタグも同コミットを指します。互換性検査は新たな有料API検証を意味しません。モデル・出力モード・自動公開は変更していません。

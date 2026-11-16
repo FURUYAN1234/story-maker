@@ -1,18 +1,21 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "7.5.6",
-  "mangaCommit": "c16ac5de4ac13f30e05b7267ab88b248ee7393e0",
-  "scope": "Story Maker 4–8-panel free-layout and STEP1 import; reviewed manga7.5.6 foreground aliases, draft/commit name synchronization and scene-led focal-depth wording. The emitted prompt differs only in its reviewed camera/focus instruction; schema/styles/parser unchanged; actual peer parser15 cases pass. Baselines require review, never automatic acceptance.",
+  "mangaVersion": "8.0.0",
+  "mangaCommit": "f9dcfd64d224a8434878b1f6d865a6113ba5f7bc",
+  "scope": "Reviewed published manga8.0.0 (v8.0.0, f9dcfd64d224a8434878b1f6d865a6113ba5f7bc): additive book-page-1..8 mode and outline-authoring opt-in; ordinary four-panel and 4–8 free-layout prompts/styles unchanged. Camera errors now identify the actual failed condition. Story Maker remains 4–8, rejects book-only1–3, preserves text/wardrobe/dialogue/STEP1. Source and pure PageComposition dependency synchronized; actual peer parser24 valid/invalid compatibility cases pass. Baselines require review, never automatic acceptance.",
   "files": {
     "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
-    "src/lib/scenario-provider.js": "e5751fd0387e52fe1bb26e44ee891aef3598a26afee3d432d749752a2450209b",
-    "src/lib/scenario-validation.js": "37eebd4f00654ea4fd2929819e21ba130dd0aff78ab52b4b159aa8a0b057537c",
+    "src/lib/scenario-provider.js": "88276fc2b47c3e6db4037df3d1ded58feb365d91e92711ca22705eda0d7bdf1f",
+    "src/lib/scenario-validation.js": "0b3674e7ffa7a4ae7a4dd41fbc954e5834059c7630b76291a010907403bb7253",
     "src/lib/panel-utils.js": "18073efc295b3030b4cb4be5ab7da7184b096c57dd2edc5f29ec6d500c63bcf2",
     "src/lib/bubble-text.js": "28d5f4c2be4b67e40f0ca100da4adff029b96ff70cf8817620ee102526172a45",
-    "src/lib/manga-page-composition.js": "90fab1cc475ef1c3ef868f4cbeb14ea6de48816e6e074d5ffcdd668cd0d4344e",
-    "src/lib/story-structure.js": "119d3760ad01fe08068789777b4cc8f41b7efb6b4d3845afc8d4587d9c4250d7",
+    "src/lib/manga-page-composition.js": "44a3bcb65fbfeb276b597c3299a0b92aaa0e04d2144ba90b660cfa35aa996cba",
+    "src/lib/story-structure.js": "aa4830a5986817fa177fec7308bb84182ee29539cfb33b1950e06e9292cc77c5",
     "src/lib/ending-mode-policy.js": "0a46d176163ab0b876067df0c198e98766b66e0110214a4c9d6c47f1250f2b5a",
-    "src/lib/reference-assets.js": "80a19b09ecd53108eb703493afdc65b71884c79add3fccc0b3c70a9338ebac2e"
+    "src/lib/reference-assets.js": "80a19b09ecd53108eb703493afdc65b71884c79add3fccc0b3c70a9338ebac2e",
+    "src/lib/page-production-contract.js": "acb021b9e2c04835ba39d2182c31ebe9872302a7419916b94b1a30ec8f0c1b8c"
   },
-  "freeLayoutPromptSha256": "ce125d072497b6f77444640f74530b482c5e93f8ccd357e3558f5c1aca0da27a"
+  "freeLayoutPromptSha256": "ce125d072497b6f77444640f74530b482c5e93f8ccd357e3558f5c1aca0da27a",
+  "reviewedWorkingTree": false,
+  "mangaTag": "v8.0.0"
 }

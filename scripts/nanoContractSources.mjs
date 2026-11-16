@@ -17,6 +17,7 @@ export const contractSourceFiles = [
   'src/lib/panel-utils.js',
   'src/lib/bubble-text.js',
   'src/lib/manga-page-composition.js',
+  'src/lib/page-production-contract.js',
   'src/lib/story-structure.js',
   'src/lib/ending-mode-policy.js',
   'src/lib/reference-assets.js',
