@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "8.0.0",
-  "mangaCommit": "f9dcfd64d224a8434878b1f6d865a6113ba5f7bc",
-  "scope": "Reviewed published manga8.0.0 (v8.0.0, f9dcfd64d224a8434878b1f6d865a6113ba5f7bc): additive book-page-1..8 mode and outline-authoring opt-in; ordinary four-panel and 4–8 free-layout prompts/styles unchanged. Camera errors now identify the actual failed condition. Story Maker remains 4–8, rejects book-only1–3, preserves text/wardrobe/dialogue/STEP1. Source and pure PageComposition dependency synchronized; actual peer parser24 valid/invalid compatibility cases pass. Baselines require review, never automatic acceptance.",
+  "mangaVersion": "8.0.2",
+  "mangaCommit": "901f2baae6fb8ba3d0b099a00147ca69024bc39e",
+  "scope": "Reviewed published manga8.0.2, commit901f2baae6fb8ba3d0b099a00147ca69024bc39e (annotated v8.0.2 resolves to the same commit). Only scenario-validation.js baseline hash changes from prior review: safe draft validation catches malformed four-panel composition before structural inspection; strict generation assertions and ordinary4–8/explicitbook1–3 boundaries stay unchanged. Actual peer parser29 cases pass; Story runtime/vendor/models/version unchanged.",
   "files": {
     "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
     "src/lib/scenario-provider.js": "88276fc2b47c3e6db4037df3d1ded58feb365d91e92711ca22705eda0d7bdf1f",
-    "src/lib/scenario-validation.js": "0b3674e7ffa7a4ae7a4dd41fbc954e5834059c7630b76291a010907403bb7253",
+    "src/lib/scenario-validation.js": "16c4610e6d270e289db7d2104e41ff2daffad36722f2a173b06e82bf8ad6ec2f",
     "src/lib/panel-utils.js": "18073efc295b3030b4cb4be5ab7da7184b096c57dd2edc5f29ec6d500c63bcf2",
     "src/lib/bubble-text.js": "28d5f4c2be4b67e40f0ca100da4adff029b96ff70cf8817620ee102526172a45",
     "src/lib/manga-page-composition.js": "44a3bcb65fbfeb276b597c3299a0b92aaa0e04d2144ba90b660cfa35aa996cba",
@@ -17,5 +17,5 @@
   },
   "freeLayoutPromptSha256": "ce125d072497b6f77444640f74530b482c5e93f8ccd357e3558f5c1aca0da27a",
   "reviewedWorkingTree": false,
-  "mangaTag": "v8.0.0"
+  "mangaTag": "v8.0.2"
 }

@@ -71,5 +71,25 @@ export async function checkParserCompatibility(server) {
     assert.equal(validateMangaScenario(source,cast,{scenarioMode:'experimental-manga'}).structuralValid,false,'ordinary free-layout must not silently become book mode');
     assert.equal(validateMangaScenario(source,cast,{scenarioMode:createBookPageMode(count+1)}).structuralValid,false,'book page count remains fixed');
   }
-  return cases.length + invalid.length + 4 + 9;
+  const freeComposition={layout:'free',reason:'手渡しから返却の動作を順に読む。',frames:Array.from({length:4},(_,i)=>({x:0,y:i/4,w:1,h:1/4})),heroPanels:[1],foregrounds:JSON.parse(speaking.match(/^PageComposition: (.+)$/m)[1]).foregrounds,breakouts:[],bleed:[]};
+  const json=JSON.stringify(freeComposition);
+  const editable=speaking.replace(/^PageComposition:.*$/m,'PageComposition: '+json);
+  const options={scenarioMode:'experimental-manga'};
+  const originalValidation=validateMangaScenario(editable,cast,options);
+  assert.equal(originalValidation.ok,true,'valid free four-panel source remains accepted');
+  assert.equal(isNanoScenarioComplete(editable),true);
+  const drafts=[json.slice(0,-1),'',JSON.stringify({...freeComposition,frames:[]})];
+  for(const draft of drafts){
+    const source=editable.replace(json,draft),unchanged=source;
+    let validation;
+    assert.doesNotThrow(()=>{validation=validateMangaScenario(source,cast,options);},'an editable draft must return invalid, not throw');
+    assert.equal(validation.ok,false);
+    assert.equal(validation.structuralValid,false);
+    assert.match(validation.compositionError,/PageComposition/);
+    assert.equal(isNanoScenarioComplete(source),false,'Story must still reject incomplete/invalid composition');
+    assert.equal(source,unchanged,'inspection must not repair or replace source text');
+  }
+  assert.deepEqual(validateMangaScenario(editable,cast,options),originalValidation,'restoring the exact original text restores validity');
+  assert.equal(isNanoScenarioComplete(editable),true);
+  return cases.length + invalid.length + 4 + 9 + drafts.length + 2;
 }
