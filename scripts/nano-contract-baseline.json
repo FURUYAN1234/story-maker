@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "8.0.2",
-  "mangaCommit": "901f2baae6fb8ba3d0b099a00147ca69024bc39e",
-  "scope": "Reviewed published manga8.0.2, commit901f2baae6fb8ba3d0b099a00147ca69024bc39e (annotated v8.0.2 resolves to the same commit). Only scenario-validation.js baseline hash changes from prior review: safe draft validation catches malformed four-panel composition before structural inspection; strict generation assertions and ordinary4–8/explicitbook1–3 boundaries stay unchanged. Actual peer parser29 cases pass; Story runtime/vendor/models/version unchanged.",
+  "mangaVersion": "8.0.4",
+  "mangaCommit": "577429c38ca0fffe8a7c18abfea0255f68262bb6",
+  "scope": "Reviewed published manga v8.0.4 (the public main and annotated release tag resolve to the same commit). Source hashes and bundled PageComposition are identical to that revision. The 29 parser compatibility cases cover ordinary 4–8-panel scenarios, explicit book mode and rejected malformed inputs. The current manga development changes are tracked separately from this published boundary.",
   "files": {
     "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
-    "src/lib/scenario-provider.js": "88276fc2b47c3e6db4037df3d1ded58feb365d91e92711ca22705eda0d7bdf1f",
+    "src/lib/scenario-provider.js": "3015887d967cd352aaa2b6ea1991f19fcb960e44c8a4d8a795276383304d75e5",
     "src/lib/scenario-validation.js": "16c4610e6d270e289db7d2104e41ff2daffad36722f2a173b06e82bf8ad6ec2f",
-    "src/lib/panel-utils.js": "18073efc295b3030b4cb4be5ab7da7184b096c57dd2edc5f29ec6d500c63bcf2",
+    "src/lib/panel-utils.js": "80ec23e0c5e4e65be32b75e43da961888e6ad8d8674c91785ef9130a4db84745",
     "src/lib/bubble-text.js": "28d5f4c2be4b67e40f0ca100da4adff029b96ff70cf8817620ee102526172a45",
-    "src/lib/manga-page-composition.js": "44a3bcb65fbfeb276b597c3299a0b92aaa0e04d2144ba90b660cfa35aa996cba",
+    "src/lib/manga-page-composition.js": "1b02f279dc8482324c8c7de22835677212c9d155de7f21d4edc07576b5f2fa54",
     "src/lib/story-structure.js": "aa4830a5986817fa177fec7308bb84182ee29539cfb33b1950e06e9292cc77c5",
     "src/lib/ending-mode-policy.js": "0a46d176163ab0b876067df0c198e98766b66e0110214a4c9d6c47f1250f2b5a",
     "src/lib/reference-assets.js": "80a19b09ecd53108eb703493afdc65b71884c79add3fccc0b3c70a9338ebac2e",
@@ -17,5 +17,5 @@
   },
   "freeLayoutPromptSha256": "ce125d072497b6f77444640f74530b482c5e93f8ccd357e3558f5c1aca0da27a",
   "reviewedWorkingTree": false,
-  "mangaTag": "v8.0.2"
+  "mangaTag": "v8.0.4"
 }

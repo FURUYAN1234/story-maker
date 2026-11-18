@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "name": "story-maker",
-  "version": "5.5.2",
+  "version": "5.5.3",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",
@@ -25,5 +25,8 @@
   "devDependencies": {
     "gh-pages": "6.3.0",
     "vite": "6.4.5"
+  },
+  "overrides": {
+    "picomatch": "npm:@ryotsu/picomatch@4.0.7-a"
   }
 }

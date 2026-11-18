@@ -41,20 +41,23 @@ const enabledConfig = resolveOpenAiResponsesBetaConfig(
 );
 assert.equal(enabledConfig.enabled, true);
 assert.deepEqual(enabledConfig.models, [
-  'gpt-6.1-sol', 'gpt-6.1-terra', 'gpt-6-sol', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-6-luna',
+  'gpt-6-luna',
   'gpt-5.6-luna',
 ]);
 
 const defaultConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
 assert.equal(defaultConfig.enabled, true);
 assert.equal(defaultConfig.source, 'default');
-assert.equal(defaultConfig.models[0], 'gpt-6.1-sol');
+assert.equal(defaultConfig.models[0], 'gpt-6-luna');
 
-setSelectedOpenAIModelId('gpt-6-luna');
-const lunaConfig = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
-assert.deepEqual(lunaConfig.models, [
-  'gpt-6-luna', 'gpt-5.6-luna',
-]);
+for (const id of ['gpt-6.2-sol', 'gpt-6.2-astra']) {
+  setSelectedOpenAIModelId(id);
+  const config = resolveOpenAiResponsesBetaConfig({}, fakeRuntime(''));
+  const body = buildOpenAiResponsesRequestBody(config.models[0], 'test');
+  assert.equal(body.model, id);
+  assert.equal(body.temperature, undefined);
+  assert.equal(body.reasoning?.effort, undefined);
+}
 resetSelectedOpenAIModelId();
 
 const explicitModelConfig = resolveOpenAiResponsesBetaConfig(
@@ -62,7 +65,7 @@ const explicitModelConfig = resolveOpenAiResponsesBetaConfig(
   fakeRuntime('?gpt5xBeta=1&gpt5xModel=gpt-5.6-terra')
 );
 assert.equal(explicitModelConfig.enabled, true);
-assert.deepEqual(explicitModelConfig.models.slice(0, 2), ['gpt-5.6-terra', 'gpt-6.1-sol']);
+assert.deepEqual(explicitModelConfig.models.slice(0, 2), ['gpt-5.6-terra', 'gpt-6-luna']);
 
 const queryModelPriorityConfig = resolveOpenAiResponsesBetaConfig(
   { openAiResponsesBetaAllowed: true, openAiResponsesModels: ['gpt-5.4-mini'] },
@@ -152,7 +155,7 @@ try {
     maxTokens: 77,
   });
   assert.equal(result.text, 'stable fallback');
-  assert.equal(result.usedModel, 'gpt-6.1-sol');
+  assert.equal(result.usedModel, 'gpt-6-luna');
   assert.match(requestedUrls[0], /\/v1\/responses$/);
   assert.match(requestedUrls.at(-1), /\/v1\/chat\/completions$/);
 } finally {

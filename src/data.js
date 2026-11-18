@@ -12,7 +12,7 @@ export const GEMINI_MODELS = [
 
 export const GEMINI_MODEL_VALUES = GEMINI_MODELS.map(model => model.value);
 import { getOpenAIChatRoute } from './openAiModelCatalog.js';
-export const OPENAI_TEXT_MODELS = getOpenAIChatRoute('gpt-6.1-sol');
+export const OPENAI_TEXT_MODELS = getOpenAIChatRoute();
 export const OPENAI_VISION_MODELS = [...OPENAI_TEXT_MODELS];
 
 const ALL_MODES = [

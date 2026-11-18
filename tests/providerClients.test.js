@@ -98,7 +98,7 @@ globalThis.fetch = async () => ({
 
 try {
   const result = await Gt('sk-unit-test-key-000000000000', 'gpt-4.1', 'prompt', null, { maxTokens: 64 });
-  assert.equal(result.usedModel, 'gpt-6.1-sol (Responses beta)');
+  assert.equal(result.usedModel, 'gpt-6-luna (Responses beta)');
   assert.equal(result.text, 'responses default body');
 } finally {
   globalThis.fetch = originalFetch;
@@ -119,7 +119,7 @@ try {
     maxTokens: 64,
     openAiResponsesBeta: false,
   });
-  assert.equal(result.usedModel, 'gpt-6.1-sol');
+  assert.equal(result.usedModel, 'gpt-6-luna');
   assert.deepEqual(chunks, [
     { text: 'hel', isThought: false },
     { text: 'lo', isThought: false },

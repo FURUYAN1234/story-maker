@@ -15,7 +15,7 @@ assert.match(markup, /GPT-6\.1 Terra（[^）]+）/);
 assert.match(markup, /GPT-5\.6 Terra（[^）]+）/);
 assert.match(markup, /GPT-6 Luna（[^）]+）/);
 assert.doesNotMatch(markup, /gpt-4/);
-assert.match(markup, /2026-10-27/);
+assert.match(markup, /2026-11-18/);
 assert.match(markup, /100万トークン/);
 assert.match(markup, /長文コンテキスト/);
 assert.match(markup, /data-model-status="selected"/);

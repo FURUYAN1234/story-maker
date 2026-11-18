@@ -57,7 +57,7 @@ test('manga format repair includes exact geometry errors and page rules without 
   await assert.rejects(runtime.prepareEditorialManuscript({text:broken,mode:'4koma_scenario',callAi:async()=>complete.slice(0,complete.indexOf('[6コマ目]'))}), /6コマ.*5コマ/);
 });
 
-test('a failed automatic format repair clears the running state and preserves the draft', async () => {
+test('automatic review clears the running state after failure and a subsequent successful review', async () => {
   const elements = new Map();
   const element = id => {
     if (!elements.has(id)) {
@@ -71,8 +71,13 @@ test('a failed automatic format repair clears the running state and preserves th
   const doc = {getElementById:element,documentElement:{dataset:{}},querySelector:()=>({dataset:{v:'4koma_scenario'},textContent:'漫画シナリオ'})};
   let poll;
   const timers = {setInterval:callback=>{poll=callback;return 1;},clearInterval(){}};
-  let calls=0;
-  const cleanup = runtime.installEditorialBrushupRuntime({doc,timers,callAi:async()=>{calls++;throw new Error('検証用の通信失敗');}});
+  let calls = 0;
+  let throwOnce = true;
+  const cleanup = runtime.installEditorialBrushupRuntime({doc,timers,callAi:async()=>{
+    calls++;
+    if (throwOnce) { throwOnce = false; throw new Error('検証用の通信失敗'); }
+    return { text: 'AI総合点: 94点\nAI講評: 場面のつながりを確認。\n良い点: 結末。\n問題点: 動作の曖昧さ。\n改稿方針: 手元を具体化。\nモード契約適合: 適合' };
+  }});
   element('btn-generate').listeners.click();
   element('output').textContent = scenarioFixture({composition:false});
   poll();
@@ -84,5 +89,15 @@ test('a failed automatic format repair clears the running state and preserves th
   assert.match(element('progress-title-text').textContent,/終了.*失敗/);
   assert.doesNotMatch(element('progress-title-text').textContent,/API稼働中/);
   assert.match(element('output').textContent,/Topic: 返却の順番/);
+
+  element('btn-generate').listeners.click();
+  element('output').textContent = scenarioFixture({count:6}).replace('状況:', '状況: '+'二人の視線と手元を描く。'.repeat(150));
+  poll();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(calls,2);
+  assert.equal(doc.documentElement.dataset.editorialReviewResult,'completed');
+  assert.equal(element('btn-generate').disabled,false);
+  assert.equal(element('global-alert').style.display,'none');
+  assert.equal(element('progress-title-text').textContent,'AI進捗・思考ログ: AI講評完了・編集合格');
   cleanup();
 });

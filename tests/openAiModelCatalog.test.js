@@ -14,7 +14,9 @@ import {
 } from '../src/openAiModelCatalog.js';
 
 const expectedModelIds = [
+  'gpt-6.2-astra',
   'gpt-6-astra',
+  'gpt-6.2-sol',
   'gpt-6.1-sol',
   'gpt-6.1-terra',
   'gpt-6-sol',
@@ -24,25 +26,25 @@ const expectedModelIds = [
   'gpt-5.6-luna',
 ];
 
-assert.equal(DEFAULT_OPENAI_MODEL_ID, 'gpt-6.1-sol');
-assert.equal(resolveDefaultOpenAIModelId(true), 'gpt-6.1-sol');
-assert.equal(resolveDefaultOpenAIModelId(false), 'gpt-6.1-sol');
-assert.equal(OPENAI_MODEL_PRICE_SNAPSHOT_DATE, '2026-10-27');
+assert.equal(DEFAULT_OPENAI_MODEL_ID, 'gpt-6-luna');
+assert.equal(resolveDefaultOpenAIModelId(true), 'gpt-6-luna');
+assert.equal(resolveDefaultOpenAIModelId(false), 'gpt-6-luna');
+assert.equal(OPENAI_MODEL_PRICE_SNAPSHOT_DATE, '2026-11-18');
 assert.deepEqual(OPENAI_MODEL_OPTIONS.map(model => model.id), expectedModelIds);
 assert.ok(OPENAI_MODEL_OPTIONS.every(model => model.description.length >= 10));
 assert.ok(OPENAI_MODEL_OPTIONS.every(model => Number.isFinite(model.inputPriceUsdPerM)));
 assert.ok(OPENAI_MODEL_OPTIONS.every(model => Number.isFinite(model.outputPriceUsdPerM)));
 
-assert.deepEqual(getOpenAIResponsesRoute('gpt-6-astra'), expectedModelIds);
-assert.deepEqual(getOpenAIResponsesRoute('gpt-6.1-sol'), expectedModelIds.slice(1));
+assert.deepEqual(getOpenAIResponsesRoute('gpt-6.2-astra'), expectedModelIds);
+assert.deepEqual(getOpenAIResponsesRoute('gpt-6.1-sol'), expectedModelIds.slice(3));
 assert.ok(!getOpenAIResponsesRoute('gpt-6.1-sol').includes('gpt-6-astra'));
-assert.deepEqual(getOpenAIResponsesRoute('gpt-6.1-terra'), expectedModelIds.slice(2));
+assert.deepEqual(getOpenAIResponsesRoute('gpt-6.1-terra'), expectedModelIds.slice(4));
 assert.ok(!getOpenAIResponsesRoute('gpt-6.1-terra').includes('gpt-6.1-sol'));
-assert.deepEqual(getOpenAIResponsesRoute('gpt-6-luna'), expectedModelIds.slice(6));
+assert.deepEqual(getOpenAIResponsesRoute('gpt-6-luna'), expectedModelIds.slice(-2));
 assert.deepEqual(getOpenAIResponsesRoute('gpt-5.6-luna'), ['gpt-5.6-luna']);
 assert.deepEqual(getOpenAIChatRoute('gpt-6-luna'), ['gpt-6-luna','gpt-5.6-luna']);
 assert.ok(OPENAI_MODEL_OPTIONS.every(({id})=>!/^gpt-4/.test(id)));
-assert.deepEqual(getOpenAIResponsesRoute('invalid-model'), expectedModelIds.slice(1));
+assert.deepEqual(getOpenAIResponsesRoute('invalid-model'), expectedModelIds.slice(-2));
 assert.equal(getOpenAIModelOption('gpt-6.1-sol').inputPriceUsdPerM, 2);
 assert.equal(getOpenAIModelOption('gpt-6.1-sol').outputPriceUsdPerM, 10);
 assert.equal(getOpenAIModelOption('gpt-6.1-terra').inputPriceUsdPerM, 1);
@@ -60,8 +62,8 @@ assert.equal(
 setSelectedOpenAIModelId('gpt-6-luna');
 assert.equal(getSelectedOpenAIModelId(), 'gpt-6-luna');
 setSelectedOpenAIModelId('not-available');
-assert.equal(getSelectedOpenAIModelId(), 'gpt-6.1-sol');
+assert.equal(getSelectedOpenAIModelId(), 'gpt-6-luna');
 resetSelectedOpenAIModelId();
-assert.equal(getSelectedOpenAIModelId(), 'gpt-6.1-sol');
+assert.equal(getSelectedOpenAIModelId(), 'gpt-6-luna');
 
 console.log('openAiModelCatalog tests passed');

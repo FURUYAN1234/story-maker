@@ -470,7 +470,13 @@ export function installEditorialBrushupRuntime({ doc = globalThis.document, time
       renderEditorialReview(review, reviewElement);
       sectionElement?.classList?.remove?.('is-waiting');
       sectionElement?.setAttribute?.('aria-disabled', 'false');
-      statusElement && (statusElement.textContent = review.valid ? `AI講評: ${getEditorialScoreTier(review.score).label}` : 'AI講評: 要ブラッシュアップ');
+      const reviewLabel = review.valid ? getEditorialScoreTier(review.score).label : '要ブラッシュアップ';
+      if (statusElement) statusElement.textContent = `AI講評: ${reviewLabel}`;
+      updateEditorialProgressSurface({
+        titleElement: progressTitleElement,
+        logElement: progressLogElement,
+        message: `AI講評${review.valid ? '完了' : '終了'}・${reviewLabel}`,
+      });
       doc.documentElement.dataset.editorialReviewResult = review.valid ? 'completed' : 'failed';
       doc.documentElement.dataset.editorialReviewScore = review.valid ? String(review.score) : '';
       if (shouldStartAutomaticBrushup({ checked: autoCheckbox?.checked, review, running: brushupRunning })) {

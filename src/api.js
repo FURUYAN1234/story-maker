@@ -320,9 +320,8 @@ export async function callGenerativeAI(apiKey, initialModel, prompt, onFallback,
 // OpenAI API呼び出しロジック
 // ============================================================
 
-const OPENAI_TEXT_MODELS = getOpenAIChatRoute('gpt-6.1-sol');
-
 async function _callOpenAI(apiKey, prompt, onFallback, options = {}) {
+  const OPENAI_TEXT_MODELS = getOpenAIChatRoute();
   for (const modelId of OPENAI_TEXT_MODELS) {
     try {
       if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);
@@ -594,6 +593,7 @@ export async function callGenerativeAIMultimodal(apiKey, prompt, images, onFallb
  * OpenAI APIストリーミング呼び出し
  */
 async function _callOpenAIStream(apiKey, prompt, onChunk, onFallback, options = {}) {
+  const OPENAI_TEXT_MODELS = getOpenAIChatRoute();
   for (const modelId of OPENAI_TEXT_MODELS) {
     try {
       if (modelId !== OPENAI_TEXT_MODELS[0] && onFallback) onFallback(modelId);

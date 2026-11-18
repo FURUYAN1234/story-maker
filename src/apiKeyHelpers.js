@@ -1,7 +1,7 @@
 import { normalizeApiKey } from './apiSession.js';
 import { GEMINI_MODEL_VALUES } from './data.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-6.1-sol';
+import { DEFAULT_OPENAI_MODEL_ID } from './openAiModelCatalog.js';
 const DEFAULT_GEMINI_MODEL = GEMINI_MODEL_VALUES[0];
 
 export function normalizeKey(value) {
@@ -46,7 +46,7 @@ export function validateApiKey(value, provider) {
 }
 
 export function defaultModelForKey(value) {
-  return normalizeKey(value).startsWith('sk-') ? DEFAULT_OPENAI_MODEL : DEFAULT_GEMINI_MODEL;
+  return normalizeKey(value).startsWith('sk-') ? DEFAULT_OPENAI_MODEL_ID : DEFAULT_GEMINI_MODEL;
 }
 
 export function providerLabelForKey(value) {

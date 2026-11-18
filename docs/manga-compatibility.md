@@ -36,6 +36,10 @@ Source drift means **review required**, not proven incompatibility. Line-ending 
 
 These are checks at explicit development/release events. No resident watcher, periodic job, automatic code rewrite, deployment or paid generation is installed. / 開発・公開操作時の検査です。常駐監視、定期実行、ソースの自動書換え、デプロイ、有料生成は追加していません。
 
+## Reviewed public manga 8.0.4 / 公開版漫画8.0.4との互換性
+
+The current baseline is pinned to the published manga v8.0.4 source (commit `577429c38ca0fffe8a7c18abfea0255f68262bb6`). The 29 compatibility cases pass against that source. The local manga checkout may contain changes in progress. Set `NANO_BANANA_PRO_ROOT` to a separate checkout of the published source when verifying Story Maker against the public version. / 現行基準は公開中の漫画v8.0.4ソースに固定しています。実パーサーの互換性29ケースが合格しました。手元の漫画アプリを編集中の場合は、公開版の別チェックアウトを `NANO_BANANA_PRO_ROOT` に指定してStory Makerとの互換性を確認できます。
+
 ## Reviewed manga 8.0.0 boundary / 漫画8.0.0の確認範囲
 
 The shared validator and its pure `page-production-contract.js` dependency include an explicit internal book-page mode for 1–3 panels. Story Maker continues to author and accept 4–8 panels; it does not enable that book workflow. The ordinary four-panel and free-layout prompt/style contracts remain unchanged. Compatibility checks exercise 29 valid/invalid cases, including book-only 1–3 acceptance by the manga parser, rejection by ordinary modes, and exact dialogue/character handoff. / 共通の検証モジュールと純粋な依存ファイルを同期しました。漫画側の明示的な本ページモードは1〜3コマにも対応しますが、Story Makerの生成・受入範囲は4〜8コマのままです。通常の4コマ・自由配置の指示と画風は維持し、29件の正常・異常例でモードの区別、台詞と人物設定の受け渡しを確認します。

@@ -1,4 +1,8 @@
-# Story Maker v5.5.2 / AI物語メーカー
+# Story Maker v5.5.3 / AI物語メーカー
+
+OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
+
+Standard input / output per million tokens: GPT-6 Luna $0.10 / $0.50, GPT-6.2 Sol $2 / $10, GPT-6.2 Astra $8 / $40 (November 18, 2026). / 100万トークン当たりの通常入力／出力単価はGPT-6 Luna $0.10／$0.50、GPT-6.2 Sol $2／$10、GPT-6.2 Astra $8／$40です（2026年11月18日確認）。
 
 **Stop AI communication / AI通信の強制切断:** Use the upper-right “緊急停止” button while waiting for thought or receiving a response. It aborts browser requests and blocks automatic continuation, retries and fallback; late responses are discarded. Standard generation restores the previous Output, and brushup keeps its source draft. Settings and the in-memory API key remain available for another run. This does not guarantee cancellation of processing or charges at the API provider. / 思考待ち・受信中は右上の「緊急停止」でブラウザーの通信と後続の自動継続・再試行・フォールバックを止め、遅延応答を破棄します。通常生成は生成前のOutputへ戻し、ブラッシュアップは元原稿を保持します。設定とメモリー内のAPIキーを保ったまま各実行ボタンから再実行できます。API提供元での処理・課金停止は保証しません。
 
@@ -249,14 +253,14 @@ Direct `Long-form (10,000 characters+)` generation and brush-up of a long manusc
 
 ## OpenAI default and fallback / OpenAI既定モデルとフォールバック
 
-GPT-6.1 Sol is the default for development and public builds. Astra and GPT-6.1 Terra remain selectable. Selecting 6.1 Sol starts at 6.1 Sol, then tries 6.1 Terra and the remaining lower models; it does not automatically try Astra. The selection covers story generation, editorial review and brush-up through the common text route. Standard short-context prices as of 2026-10-27 are input USD 2/output USD 10 for Sol and input USD 1/output USD 5 for Terra per million tokens; image generation and other provider charges are separate. / 開発版・公開版ともGPT-6.1 Solを既定にします。AstraとGPT-6.1 Terraも選択できます。6.1 Sol選択時はSolから開始し、6.1 Terraを経て残りの下位モデルへフォールバックします。Astraへの自動切替は行いません。共通テキスト経路の物語生成・AI講評・ブラッシュアップに反映します。2026-10-27時点のStandard短文料金は100万トークン当たりSolが入力2米ドル／出力10米ドル、Terraが入力1米ドル／出力5米ドルです。画像生成等の料金は別です。
+GPT-6 Luna is the default for development and public builds. Astra and GPT-6.1 Terra remain selectable. Selecting 6.1 Sol starts at 6.1 Sol, then tries 6.1 Terra and the remaining lower models; it does not automatically try Astra. The selection covers story generation, editorial review and brush-up through the common text route. Standard short-context prices as of 2026-10-27 are input USD 2/output USD 10 for Sol and input USD 1/output USD 5 for Terra per million tokens; image generation and other provider charges are separate. / 開発版・公開版ともGPT-6 Lunaを既定にします。AstraとGPT-6.1 Terraも選択できます。6.1 Sol選択時はSolから開始し、6.1 Terraを経て残りの下位モデルへフォールバックします。Astraへの自動切替は行いません。共通テキスト経路の物語生成・AI講評・ブラッシュアップに反映します。2026-10-27時点のStandard短文料金は100万トークン当たりSolが入力2米ドル／出力10米ドル、Terraが入力1米ドル／出力5米ドルです。画像生成等の料金は別です。
 
 
-OpenAI image analysis and text generation use the selected model and maintained downward fallbacks. The default is `gpt-6.1-sol`; choosing `gpt-6-luna` also applies to single-image and multiple-image analysis. Retiring GPT-4 models are excluded from current options and automatic routes. / OpenAIの画像解析と文章生成は選択モデルから下位候補へ切り替わります。初期選択は`gpt-6.1-sol`で、`gpt-6-luna`を選べば単一画像・複数画像の解析にも反映されます。終了予定のGPT-4系は現行の選択肢と自動経路から除外しています。
+OpenAI image analysis and text generation use the selected model and maintained downward fallbacks. The default is `gpt-6-luna`. Your selected model also applies to single-image and multiple-image analysis. Retiring GPT-4 models are excluded from current options and automatic routes. / OpenAIの画像解析と文章生成は選択モデルから下位候補へ切り替わります。初期選択は`gpt-6.1-sol`で、`gpt-6-luna`を選べば単一画像・複数画像の解析にも反映されます。終了予定のGPT-4系は現行の選択肢と自動経路から除外しています。
 
 ## Current Quality System / 現行品質システム
 
-The current v5.5.2 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.2ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.5.3 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.3ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
