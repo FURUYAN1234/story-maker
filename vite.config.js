@@ -105,7 +105,7 @@ function splitFeatureChunks(id) {
 
 export default defineConfig({
   base: './',
-  plugins: [furuMcpBuild("story-maker", 45932), webSecurity({ connectSources: ["https://api.openai.com","https://generativelanguage.googleapis.com"] }), injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
+  plugins: [webSecurity({ connectSources: ["https://api.openai.com","https://generativelanguage.googleapis.com"] }), furuMcpBuild("story-maker", 45932), injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
   build: {
     rollupOptions: {
       output: {
