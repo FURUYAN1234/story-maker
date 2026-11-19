@@ -1,4 +1,4 @@
-# Story Maker v5.5.3 / AI物語メーカー
+# Story Maker v5.5.4 / AI物語メーカー
 
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
@@ -260,7 +260,7 @@ OpenAI image analysis and text generation use the selected model and maintained 
 
 ## Current Quality System / 現行品質システム
 
-The current v5.5.3 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.3ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.5.4 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.4ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
@@ -950,3 +950,21 @@ The app limits script execution and API connections with Content Security Policy
 During generation, use the single red **Emergency stop** at the upper right, including long-form work. Inline stop controllers remain internal. / 長編処理中も、画面右上の赤い **緊急停止** 一つから中断します。欄内の重複する停止ボタンは表示しません。
 
 Emergency stop is red while AI work is active and disabled gray while idle, finished, stopped or after an error. / 緊急停止はAI処理中だけ赤で有効になり、待機・完了・停止・エラー後はグレーで無効になります。
+
+
+## Local MCP / ローカルMCP
+
+Windows users can start/stop the service, check for a release, and stage an update from `Launch-MCP.cmd`. Open the local app and click **MCP接続** to pair from the application itself. / Windowsでは `Launch-MCP.cmd` からMCPの起動・停止、更新確認・適用を行えます。起動した画面の **MCP接続** でも接続できます。更新候補は公開Releaseが指すコミットのソースから別フォルダへビルドし、成功後に切替先を記録します。作業中の画面は保存後に停止してください。
+
+The MCP server starts a build-verified copy on loopback port `45932`. Install the dependencies and build this application's source before configuring Codex. The API key is entered in the application's normal browser UI and is not passed to MCP. / MCPサーバーはビルドを照合し、ローカルの `45932` 番で対象アプリを起動します。このアプリのソースを展開して依存関係を入れ、ビルドしてからCodexに登録します。APIキーは通常のアプリ画面で入力します。
+
+```powershell
+npm ci
+npm --prefix mcp ci
+npm run build
+codex mcp add story-maker -- node "C:\absolute\path\to\story-maker\Launch-Codex-MCP.mjs"
+```
+
+Call `story_connection` and open its one-time URL in the same Codex chat's in-app browser. Wait for `MCP 接続済み`, then run `story_generate_manga_script` with a unique `requestId`. Read `story_job_get` until it returns a terminal state. Check the existing result before retrying an `unknown` job. / `story_connection` の一時URLを実行チャットの内蔵ブラウザーで開き、自動接続を確認します。ジョブは `story_job_get` で結果まで追跡してください。MCP接続をAI側で確立できない場合は、対象アプリの画面を示してユーザーに接続を依頼します。
+
+The result includes separate scenario and character text plus the combined manga application input. Use the corresponding STEP 1 and STEP 2 state of the intended manga project. / 結果の人物設定と台本を、対象漫画のSTEP1・STEP2へ渡せます。

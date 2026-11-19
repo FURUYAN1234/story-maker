@@ -15,3 +15,4 @@ import './openAiModelUi.js';
 import './directLong10000Runtime.js';
 import './publicRuntime.js';
 import './generationSettingsIo.js';
+import './mcp-story.js';

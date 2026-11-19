@@ -15,7 +15,7 @@ const nanoRoot = defaultNanoRoot;
 
 const nanoPromptFile = path.join(nanoRoot, 'src', 'lib', 'prompts.js');
 // Updated after reviewing the current adjacent Nano Banana Pro STEP2 contract.
-const expectedNanoStep2Hash = '698c7efa6d98d89ab57a63f89da8eb963b24ca037e07e7e8445ea76b3d8c0703';
+const expectedNanoStep2Hash = '7488550e38d8009de1156f9232fad02df1261ddd1b3fca35acadd356420524b1';
 const baseline = JSON.parse(fs.readFileSync(new URL('./nano-contract-baseline.json', import.meta.url), 'utf8'));
 
 function fail(message) {

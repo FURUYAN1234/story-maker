@@ -1,0 +1,3 @@
+interface:
+  display_name: "Story Maker MCP"
+  short_description: "漫画台本と人物設定を生成・連携"

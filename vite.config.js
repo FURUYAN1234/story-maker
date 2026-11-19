@@ -1,3 +1,4 @@
+import { furuMcpBuild } from './mcp/build.mjs';
 import { webSecurity } from './scripts/web-security.mjs';
 import { defineConfig } from 'vite';
 
@@ -104,7 +105,7 @@ function splitFeatureChunks(id) {
 
 export default defineConfig({
   base: './',
-  plugins: [webSecurity({ connectSources: ["https://api.openai.com","https://generativelanguage.googleapis.com"] }), injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
+  plugins: [furuMcpBuild("story-maker", 45932), webSecurity({ connectSources: ["https://api.openai.com","https://generativelanguage.googleapis.com"] }), injectLongNovelDevEntry(), stripDormantLongNovelPanel(), publicAssetGuard()],
   build: {
     rollupOptions: {
       output: {
