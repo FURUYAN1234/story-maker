@@ -1,24 +1,23 @@
 .furu-mcp-connection {
-  margin-inline-start: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  margin-inline-start: auto;
+  gap: 8px;
   flex-wrap: wrap;
   max-width: 100%;
-  padding: 8px 12px;
-  color: #f8fafc;
-  background: #16293d;
-  border: 1px solid #7095bd;
-  border-radius: 8px;
-  font: 14px / 1.5 system-ui, sans-serif;
+  color: #c4d7e9;
+  font: 12px / 1.4 system-ui, sans-serif;
 }
 
 .furu-mcp-connection button {
   color: #182132;
   background: #ffd286;
-  border: 0;
-  border-radius: 4px;
-  padding: 5px 9px;
+  border: 1px solid #a5753f;
+  border-radius: 6px;
+  min-height: 40px;
+  padding: 3px 11px;
+  font: 600 13px / 1.4 system-ui, sans-serif;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -27,14 +26,19 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 16px;
   padding: 8px 12px;
 }
-
+.furu-mcp-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
 .furu-mcp-resources a {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  min-height: 40px;
   padding: 3px 11px;
   border: 1px solid #779ec8;
   border-radius: 6px;
@@ -50,13 +54,25 @@
   text-decoration: underline;
 }
 
+@media (max-width: 640px) {
+  .furu-mcp-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-basis: 100%;
+  }
+  .furu-mcp-links a {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
 /* A connected app uses the single MCP stop control in the upper toolbar. */
 .furu-mcp-active :is(#btn-ai-disconnect, #ai-emergency-stop, #stop-ai) {
   visibility: hidden;
 }
 
-body:not(.furu-mcp-active) .furu-mcp-resources:has(.furu-mcp-connection) {
-  padding-inline-end: 136px;
+.furu-mcp-active #ai-disconnect-bar {
+  display: none;
 }
 
 body:has(.furu-mcp-resources) :is(nav.manual-links, a.api-link[href$="-manual.pdf"], a.api-link[href$="-api-guide.pdf"]) {

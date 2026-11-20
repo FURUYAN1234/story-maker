@@ -24,8 +24,13 @@ function showMcpResources(appId) {
     link.rel = 'noopener noreferrer';
     return link;
   });
-  nav.append(skill, guide, ...manualLinks);
-  document.body.prepend(nav);
+  const links = document.createElement('div');
+  links.className = 'furu-mcp-links';
+  links.append(skill, guide, ...manualLinks);
+  nav.append(links);
+  const stopBar = document.getElementById('ai-disconnect-bar');
+  if (stopBar) stopBar.after(nav);
+  else document.body.prepend(nav);
   return nav;
 }
 

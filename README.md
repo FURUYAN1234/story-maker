@@ -1,4 +1,6 @@
-# Story Maker v5.5.4 / AI物語メーカー
+# Story Maker v5.5.5 / AI物語メーカー
+
+[Release notes / 更新内容](docs/releases/v5.5.5.md)
 
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
@@ -260,7 +262,7 @@ OpenAI image analysis and text generation use the selected model and maintained 
 
 ## Current Quality System / 現行品質システム
 
-The current v5.5.4 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.4ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
+The current v5.5.5 source line keeps direct public `Long-form (10,000 characters+)` generation while providing visible, score-driven universal AI editorial review and brush-up. The legacy long-novel path remains sealed. / 現在のv5.5.5ソース版では、直接生成の「長編（10000字～）」を維持しつつ、全モードAI講評と進捗・採点結果が見える安全な点数駆動ブラッシュアップを提供します。旧来の長編小説経路は封印したままです。
 
 The current release line keeps release identity, footer text, and page-memory API state in small runtime modules. `src/main.js` still hosts the legacy UI flow, while `src/version.js` owns version/footer handling. `src/publicRuntime.js` holds keys only for the active page, and `src/apiSession.js` clears legacy browser-persistence values instead of restoring them. / 現在のリリース系統では、リリース識別、フッター表記、ページメモリ内のAPI状態を小さな実行時モジュールへ分離しています。`src/main.js` は既存UIフローの中心ですが、版数とフッターは `src/version.js`、APIキーは `src/publicRuntime.js` がアクティブなページ内だけで扱います。`src/apiSession.js` は旧来のブラウザ保存値を復元せず削除します。
 
