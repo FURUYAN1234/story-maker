@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "8.0.9",
-  "mangaCommit": "6b2d6a780e6ce31d2b0359540ae18bc49126c635",
-  "scope": "Reviewed published Super FURU AI 4-koma System v8.0.9 for Story Maker MCP handoff. Panel counts, page composition, panel-local balloon coordinates and optional y are checked by the canonical parser compatibility tests.",
+  "mangaVersion": "8.1.1",
+  "mangaCommit": "f383f5571132961abd8e6cbacbc08b71ea2d4c04",
+  "scope": "Reviewed candidate Super FURU AI 4-koma System v8.1.1 for Story Maker MCP handoff. Role plaques remain in-scene lettering. Existing dialogue, panel counts, page composition and balloon fields pass the parser compatibility checks.",
   "files": {
-    "docs/scenario_spec.md": "703d4f43caa8bd65326b230760b5364617c234c5379be022e19f6e7cd373ccae",
+    "docs/scenario_spec.md": "54ad618a7f093f397508767e13ab8dd98d7ef9ac6062d3f30781ebaeee21e89c",
     "src/lib/scenario-provider.js": "3015887d967cd352aaa2b6ea1991f19fcb960e44c8a4d8a795276383304d75e5",
     "src/lib/scenario-validation.js": "adbd156bb6243713f29f5c7d3ec1c753eea4245b97b6fbbabbd777454922a11d",
-    "src/lib/panel-utils.js": "2ae9def2aac0482b8b782a485f5f354c034b4865690093174c662363140dae11",
+    "src/lib/panel-utils.js": "630ca1e9620475d85ead0e087e68337f144cb6f88f577dc23bb47c5cacd03e8b",
     "src/lib/bubble-text.js": "28006a79f28f7d05718f47cfbb187e0fe620da7d3f743548de26e9163a654e40",
     "src/lib/manga-page-composition.js": "1b02f279dc8482324c8c7de22835677212c9d155de7f21d4edc07576b5f2fa54",
     "src/lib/story-structure.js": "aa4830a5986817fa177fec7308bb84182ee29539cfb33b1950e06e9292cc77c5",
@@ -17,5 +17,5 @@
   },
   "freeLayoutPromptSha256": "b7a0b9518687d7462e78ea5faf69086b94793d30d873f6a53dc072202afa4100",
   "reviewedWorkingTree": false,
-  "mangaTag": "v8.0.9"
+  "mangaTag": "v8.1.1"
 }
