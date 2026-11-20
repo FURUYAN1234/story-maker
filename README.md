@@ -39,6 +39,10 @@ Story Maker is a static web application for generating creative text with Google
 
 Use the related-app buttons below the top controls to open Character Maker or the manga app in a separate tab. Each button explains where to use the saved sheet or copied scenario. / 上部の操作欄の下にある連携アプリボタンから、キャラクターメーカー・漫画アプリを別タブで開けます。保存したシートやコピーした台本の使い先も、各ボタンの説明で案内します。
 
+## Introduction video / 紹介動画
+
+[![Watch the Story Maker introduction / Story Makerの紹介動画を見る](https://i.ytimg.com/vi/ZV2PaPCnPUQ/hqdefault.jpg)](https://youtu.be/ZV2PaPCnPUQ)
+
 ## Manga app compatibility / 漫画アプリとの互換性
 
 Scenario integration targets the manga app’s default 4–8-panel free-layout mode. Story Maker chooses the panel count from the story, keeps page composition through cleanup, and rejects revisions that change an accepted panel count. The separate four-panel story mode remains available. / シナリオ連携は漫画アプリの既定の4〜8コマ自由配置モードに対応します。物語からコマ数を選び、最終整形でもページ構成を保持し、採用済みコマ数を変える改稿は拒否します。別の「4コマ漫画風」モードは維持します。
