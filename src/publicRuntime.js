@@ -518,7 +518,7 @@ function generationIsActive() {
   );
 }
 
-async function callEditorialAi(prompt, context = {}) {
+export async function callEditorialAi(prompt, context = {}) {
   const session = readApiSession();
   const provider = session.apiProvider === 'openai' ? 'openai' : 'gemini';
   const key = normalizeApiKey(provider === 'openai' ? session.openaiKey : session.geminiKey);

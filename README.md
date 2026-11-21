@@ -1,6 +1,6 @@
-# Story Maker v5.5.5 / AI物語メーカー
+# Story Maker v5.5.6 / AI物語メーカー
 
-[Release notes / 更新内容](docs/releases/v5.5.5.md)
+[Release notes / 更新内容](docs/releases/v5.5.6.md)
 
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
@@ -173,7 +173,7 @@ The public release supports the following 15 output modes. Each mode has a mode 
 | Mode / モード | Japanese Label / 日本語ラベル | Expected Output Shape / 想定出力形式 |
 |---|---|---|
 | `4koma` | 4コマ漫画風 | Four-panel beat structure with setup, turn, punchline, visual action, and dialogue. / 導入、展開、オチ、視覚的な動き、セリフで構成する4コマ形式です。 |
-| `4koma_scenario` | 漫画シナリオ連携（4〜8コマ・STEP2） | Chooses 4–8 panels from story content for the manga app’s default free-layout mode. Includes PanelCountReason, PageComposition, VisualEvidence, emotion, camera, BalloonLayout, visible action and dialogue or explicit silence. / 漫画アプリの既定の自由配置モードに合わせ、物語に必要な4〜8コマを選びます。PanelCountReason・PageComposition・VisualEvidence、感情・カメラ・BalloonLayout・状況・台詞または無言指定を含みます。 |
+| `4koma_scenario` | One-page manga (4–8 panels) / 1ページ漫画（4〜8コマ） | Chooses 4–8 panels from story content for the manga app’s default free-layout mode. Includes PanelCountReason, PageComposition, VisualEvidence, emotion, camera, BalloonLayout, visible action and dialogue or explicit silence. / 漫画アプリの既定の自由配置モードに合わせ、物語に必要な4〜8コマを選びます。PanelCountReason・PageComposition・VisualEvidence、感情・カメラ・BalloonLayout・状況・台詞または無言指定を含みます。 |
 | `short_short` | ショート（1500字～） | Compact prose with setup, turn, aftertaste, and a final line that changes the meaning. / 導入、転換、余韻を備え、最後の一文で意味が変わる短い物語です。 |
 | `novel` | 短編小説（4500字～） | Scene-based short fiction with desire, obstacle, choice, cost, and relationship change. / 欲求、障害、選択、代償、関係性の変化を場面で描く短編小説です。 |
 | `medium` | 中編小説（5500字～） | Three-section prose with stronger development, scene movement, and a larger emotional arc. / 展開、場面の推移、感情の変化を厚く描く3節構成の中編小説です。 |
@@ -972,5 +972,13 @@ codex mcp add story-maker -- node "C:\absolute\path\to\story-maker\Launch-Codex-
 ```
 
 Call `story_connection` and open its one-time URL in the same Codex chat's in-app browser. Wait for `MCP 接続済み`, then run `story_generate_manga_script` with a unique `requestId`. Read `story_job_get` until it returns a terminal state. Check the existing result before retrying an `unknown` job. / `story_connection` の一時URLを実行チャットの内蔵ブラウザーで開き、自動接続を確認します。ジョブは `story_job_get` で結果まで追跡してください。MCP接続をAI側で確立できない場合は、対象アプリの画面を示してユーザーに接続を依頼します。
+
+### Multi-page manga / 複数ページ漫画
+
+The output modes have two manga script buttons: **1ページ漫画（4〜8コマ）** and **複数ページ漫画（各4〜8コマ）**. For multiple pages, enter panel counts for a fixed plan, such as `4, 6`, or let the app choose the length. The app develops one outline and drafts each page in order, carrying the preceding page's final panel and common cast into the next page. Copy each accepted page to its matching manga page.
+
+出力モードに **1ページ漫画（4〜8コマ）** と **複数ページ漫画（各4〜8コマ）** が並びます。複数ページを固定する場合は `4, 6` のように各ページのコマ数を入力します。自動を選ぶと、題材に合わせて本文のページ数を決めます。全体の構成を決め、前ページの最後のコマと共通の人物設定を引き継ぎながら本文を順に作ります。採用した台本はページごとにコピーして漫画アプリへ渡せます。
+
+MCP `story_generate_manga_script` accepts `input.brief` plus optional `input.book`. Use `{ "mode": "fixed", "pagePanelCounts": [4, 4] }` for two four-panel pages or `{ "mode": "auto" }` to let Story Maker choose. Omit `book` for a single page. Read `book.pages` in `pageNumber` order and use the shared `characters`. / MCPでは `input.brief` に加えて `input.book` で指定します。省略時は従来の1ページです。`book.pages` を `pageNumber` 順に読み、作品共通の `characters` を使います。
 
 The result includes separate scenario and character text plus the combined manga application input. Use the corresponding STEP 1 and STEP 2 state of the intended manga project. / 結果の人物設定と台本を、対象漫画のSTEP1・STEP2へ渡せます。

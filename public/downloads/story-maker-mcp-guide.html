@@ -9,7 +9,7 @@ h1{font-size:clamp(1.7rem,5vw,2.5rem);line-height:1.25}h2{margin-top:2rem}
 p,li{max-width:47rem}pre{overflow:auto;padding:.9rem 1rem;background:Canvas;border:1px solid GrayText;border-radius:.5rem}a{color:LinkText}
 </style></head>
 <body>
-<header><a href="../">アプリに戻る</a><h1>Story Maker v5.5.5のMCP導入</h1></header>
+<header><a href="../">アプリに戻る</a><h1>Story Maker v5.5.6のMCP導入</h1></header>
 <h2>Windowsで起動する</h2>
 <ol><li>公式GitHubリポジトリのソースZIPを展開し、Node.js 22.16以降を用意します。</li><li><code>Launch-MCP.cmd</code> を開き、「Start MCP and open the application」を選びます。ウィンドウを切り替えるときは、作業を保存してから停止してください。</li><li>画面の「MCP接続」から接続できます。Codexからは実行チャットの内蔵ブラウザーで <code>story_connection</code> が返す一時URLを開くと自動接続します。</li></ol>
 <h2>Codexに登録する</h2>
@@ -19,6 +19,9 @@ p,li{max-width:47rem}pre{overflow:auto;padding:.9rem 1rem;background:Canvas;bord
 <h2>生成して次のアプリへ渡す</h2>
 <p><code>story_generate_manga_script</code> で開始し、<code>story_job_get</code> で完了と成果物を確認します。停止は <code>story_job_cancel</code> で依頼できます。</p>
 <p>返った人物設定と台本は、採用後に漫画のSTEP1とSTEP2へ渡せます。</p>
+<p>複数ページは <code>input.brief</code> に加え、<code>input.book</code> を指定します。各4コマの本文2ページにする例です。</p>
+<pre><code>{"brief":"作品の題材と制作条件","book":{"mode":"fixed","pagePanelCounts":[4,4]}}</code></pre>
+<p><code>{"mode":"auto"}</code> で作品に合うページ数を選べます。<code>book</code> を省くと従来の1ページです。複数ページは <code>book.pages</code> の <code>pageNumber</code> 順に採用台本を渡し、共通の人物設定は <code>characters</code> から取得します。</p>
 <p><a href="./story-maker-mcp-skill.zip" download>制作スキルZIPを取得</a>。展開した <code>story-maker-manga-script</code> フォルダーをCodexのスキル用フォルダーに配置し、<code>SKILL.md</code> が見えることを確認します。</p>
 <h2>更新する</h2>
 <p>起動バッチの「Check for an application update」または「Update the application」を使います。更新候補は別の場所に展開・ビルドされ、成功した版だけが次回起動の対象になります。</p>

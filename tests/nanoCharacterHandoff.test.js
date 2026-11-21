@@ -45,6 +45,18 @@ test('registered image provenance suppresses helper use, including mixed rosters
   input={...input,characters:[]};await controller.sync();assert.equal(state.phase,'ready','deleting the last imported actor enables text handoff again');
 });
 
+test('an invented background profile does not block a complete valid roster', async () => {
+  const unnamed = cast.split('\n\n')[1].replace('## 2. 来訪者', '## 3. 運営側の人');
+  const input={source,mode:'4koma_scenario',settled:true,busy:false,characters:[{name:'係員'},{name:'来訪者'}]};
+  let state;
+  const make = result => createNanoCharacterHandoff({getInput:()=>input,onState:s=>state=s,callAi:async()=>result});
+  await make(`${cast}\n\n${unnamed}`).sync();
+  assert.equal(state.phase,'ready');
+  assert.equal(state.text,cast);
+  await make(`${cast.split('\n\n')[0]}\n\n${unnamed.replace('## 3.', '## 2.')}`).sync();
+  assert.equal(state.phase,'failed','a missing requested character must still fail');
+});
+
 test('handoff waits for a valid settled scenario, rejects failed repairs and ignores stale responses', async () => {
   let input={source,mode:'4koma_scenario',sameSheets:false,settled:false,busy:true,characters:[]},calls=0,state,resolve;
   const controller=createNanoCharacterHandoff({getInput:()=>input,onState:s=>state=s,callAi:()=>{calls++;return new Promise(r=>resolve=r);}});

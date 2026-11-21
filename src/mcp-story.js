@@ -1,8 +1,11 @@
-import { getAiCommunicationState, stopAiCommunication } from './aiCommunication.js';
+import { beginAiCommunication, getAiCommunicationState, stopAiCommunication } from './aiCommunication.js';
 import { stripGeneratedFooter } from './footerHelpers.js';
 import { connectFuruMcp, mcpAppError } from './mcp-connection.js';
 import { buildNanoFullCopy } from './nanoCharacterHandoff.js';
 import { getNanoScenarioIssue } from './nanoScenarioContract.js';
+import { generateMangaBook } from './mangaBook.js';
+import { callEditorialAi } from './publicRuntime.js';
+import { installMangaBookPanel } from './mangaBookPanel.js';
 
 const byId = id => document.getElementById(id);
 
@@ -47,21 +50,47 @@ async function generateMangaScript({ brief }, signal) {
 }
 
 let operation;
+async function executeStory(input, onProgress) {
+  if (operation || getAiCommunicationState().active || byId('btn-generate')?.disabled) throw mcpAppError('APP_BUSY');
+  if (!byId('banner')?.classList.contains('ok')) throw mcpAppError('API_REQUIRED');
+  const controller = new AbortController();
+  operation = controller;
+  const pageBudget = input.book?.pagePanelCounts?.length ?? (input.book ? 50 : 1);
+  const timeout = setTimeout(() => {
+    controller.abort(new DOMException('Timed out', 'TimeoutError'));
+    stopAiCommunication();
+  }, 900000 * pageBudget);
+  try {
+    if (!input.book) return await generateMangaScript(input, controller.signal);
+    beginAiCommunication();
+    return await generateMangaBook({ brief: input.brief, ...input.book }, {
+      signal: controller.signal,
+      onProgress,
+      planBook: (prompt, signal) => callEditorialAi(prompt, { stage: 'manga_book_plan', mode: '4koma_scenario', signal }),
+      generatePage: (brief, signal) => generateMangaScript({ brief }, signal),
+    });
+  } finally {
+    clearTimeout(timeout);
+    operation = undefined;
+  }
+}
+
+function stopStory() {
+  operation?.abort();
+  stopAiCommunication();
+}
+
+const panel = installMangaBookPanel({
+  generate: executeStory,
+  stop: stopStory,
+});
+
 connectFuruMcp({
   appId: 'story-maker',
   readiness: () => Boolean(byId('banner')?.classList.contains('ok')),
   async execute(action, input) {
     if (action !== 'generate_manga_script') throw mcpAppError('OUTPUT_INVALID');
-    operation = new AbortController();
-    const timeout = setTimeout(() => {
-      operation.abort(new DOMException('Timed out', 'TimeoutError'));
-      stopAiCommunication();
-    }, 900000);
-    try { return await generateMangaScript(input, operation.signal); }
-    finally { clearTimeout(timeout); operation = undefined; }
+    return input.book && panel ? panel.run(input) : executeStory(input);
   },
-  stop() {
-    operation?.abort();
-    stopAiCommunication();
-  },
+  stop: stopStory,
 });

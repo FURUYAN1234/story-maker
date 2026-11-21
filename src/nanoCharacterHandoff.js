@@ -10,7 +10,7 @@ export function buildNanoCharacterPrompt(source, characters = [], issue = '') {
     NANO_CHARACTER_MARKER,
     '完成した漫画台本を、参照画像なしで描くための人物設定に変換してください。台本の改稿・続編・講評はしません。',
     '漫画アプリのSTEP1「人物設定」へ貼るテキストだけを返します。人物ごとに「## 1. 名前」「## 2. 名前」の見出しを付け、名前は台本の表記に一致させます。人物以外の見出し、前置き、コードフェンス、画像番号、架空の添付画像やM1等の参照IDは出力しません。',
-    '全ての主要な登場人物を含め、無言の人物も省きません。同一人物の年齢違い・回想は同一人物の項目内で説明し、別人を追加しません。',
+    '名前が台本に記載された主要人物を含め、名前のある無言の人物も省きません。手元や後ろ姿だけで描く無名の人には新しい名前や人物欄を作りません。同一人物の年齢違い・回想は同一人物の項目内で説明します。',
     '各人物に「基本:」「外見:」「服装:」「性格・口調:」「関係・演技:」を記述します。外見は年齢感、髪の色・長さ・形、顔、眼鏡・髭、体格を具体化し、画像がなくても人物を描き分けられるようにします。',
     '入力と台本に明示された容姿・衣装・関係を最優先し、矛盾させません。指定がない創作上の外見だけを補完し、実在人物の未確認情報を事実として足しません。台本中の動作・台詞・物語は変更しません。',
     issue ? `前回の不適合: ${issue}。人物設定だけを修正して返してください。` : '',
@@ -48,6 +48,20 @@ export function buildNanoFullCopy(characterText, source) {
   return characterText ? `【STEP1用：人物設定・ここから】\n${characterText.trim()}\n【STEP1用：ここまで】\n\n【ここから下は台本用：STEP2へ貼付 → STEP3】\n${scenario}` : scenario;
 }
 
+// An invented alias for an unnamed extra need not discard a complete roster.
+// Keep missing speakers, malformed blocks and unrecognized required actors invalid.
+function removeUnlistedProfiles(text, source) {
+  const normalized = text.replace(/\r\n?/g, '\n');
+  const headings = [...normalized.matchAll(/^##\s+(\d+)[.．][^\S\n]*([^\n]+)$/gm)];
+  let number = 0;
+  return headings.flatMap((heading, i) => {
+    const name = heading[2].trim();
+    if (!source.includes(name)) return [];
+    const body = normalized.slice(heading.index + heading[0].length, headings[i+1]?.index ?? normalized.length).trim();
+    return `## ${++number}. ${name}\n${body}`;
+  }).join('\n\n');
+}
+
 export function createNanoCharacterHandoff({getInput,callAi,onState}) {
   let token=0, active=null, attempted='', cached=null;
   const cancel=()=>{token++;active?.abort();active=null;};
@@ -70,8 +84,12 @@ export function createNanoCharacterHandoff({getInput,callAi,onState}) {
       for(let attempt=0;attempt<2;attempt++) {
         const response=await operationCallAi(buildNanoCharacterPrompt(source,input.characters,issue),{stage:'character_setup',mode:'4koma_scenario',charLength:source.length,signal:active.signal});
         if(token!==mine)return;
-        const text=String(response?.text || response || '').trim();
-        const validation=validateNanoCharacterText(text,source,input.characters);
+        let text=String(response?.text || response || '').trim();
+        let validation=validateNanoCharacterText(text,source,input.characters);
+        if (!validation.ok && validation.issue.endsWith('は台本に登場しない名前です')) {
+          text=removeUnlistedProfiles(text, source);
+          validation=validateNanoCharacterText(text,source,input.characters);
+        }
         if(validation.ok) {cached={key,text};onState({phase:'ready',text});return;}
         issue=validation.issue;
       }
