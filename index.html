@@ -7,13 +7,13 @@
 <style id="app-frame-guard">html{display:none!important}</style>
 <script>if(window.top===window.self){document.getElementById('app-frame-guard').remove();}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Maker v5.5.5</title>
+  <title>Story Maker v5.5.6</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <script type="module" crossorigin src="./assets/index-mqdpn9l6.js"></script>
+  <script type="module" crossorigin src="./assets/index-CsCPgY6s.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/long-form-_HcLk1jN.js">
-  <link rel="modulepreload" crossorigin href="./assets/editorial-tools-BhmNJYbm.js">
+  <link rel="modulepreload" crossorigin href="./assets/editorial-tools-D-zsLyGF.js">
   <link rel="modulepreload" crossorigin href="./assets/style-analyzer-BY_IWF9u.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-t7ZYCqLK.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-CgIl-Rab.css">
 </head>
 <body>
   <div id="ai-disconnect-bar" class="ai-disconnect-bar" hidden>
@@ -24,7 +24,7 @@
   <div class="fixed-header-wrapper">
     <!-- 🚀 Header / Control Bar (API Settings) -->
     <header class="title-bar">
-      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.5.5</span> <span class="title-sub">— AI物語メーカー</span></h1>
+      <h1><svg class="logo-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(139,108,255,0.15)"/><path d="M8 7h8M8 11h5" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round"/></svg> Story Maker <span class="title-version">v5.5.6</span> <span class="title-sub">— AI物語メーカー</span></h1>
     </header>
     <div id="ai-disconnect-status" role="status" aria-live="polite"></div>
 
@@ -124,6 +124,24 @@
           </div>
         </div>
         <div class="chips" id="mode-chips"></div>
+        <form id="manga-book-form" class="manga-book-form hidden">
+          <label>本文ページ数
+            <select id="manga-book-count-mode" class="custom-input">
+              <option value="fixed">ページ数とコマ数を指定</option>
+              <option value="auto">作品に合わせて自動で決める</option>
+            </select>
+          </label>
+          <label id="manga-book-counts-label">ページごとのコマ数（例 4, 6 は全2ページ）
+            <input id="manga-book-counts" class="custom-input" type="text" value="4, 4" autocomplete="off">
+          </label>
+          <label>題材・制作条件
+            <textarea id="manga-book-brief" class="custom-textarea" rows="4" placeholder="企画、あらすじ、雰囲気などを入力"></textarea>
+          </label>
+          <div class="manga-book-actions">
+            <button type="submit" class="btn-secondary" id="manga-book-generate">複数ページ台本を生成</button>
+            <button type="button" class="btn-secondary" id="manga-book-stop" disabled>中断</button>
+          </div>
+        </form>
         <div class="custom-input-wrap">
           <input type="text" class="custom-input" id="mode-custom" placeholder="プリセットにない形式を入力" autocomplete="off">
           <button class="custom-clear-btn hidden" id="mode-custom-clear">✕</button>
@@ -376,6 +394,16 @@
         <div id="long-novel-panel" class="long-novel-panel hidden" aria-hidden="true"></div>
       </div>
 
+      <section id="manga-book-output" class="nano-handoff manga-book-output hidden" aria-labelledby="manga-book-result-title">
+        <h3 id="manga-book-result-title">複数ページ漫画の台本</h3>
+        <p id="manga-book-status" role="status"></p>
+        <p id="manga-book-summary"></p>
+        <div id="manga-book-pages"></div>
+        <details id="manga-book-cast" class="hidden">
+          <summary>作品全体の人物設定</summary>
+          <pre id="manga-book-characters" class="nano-character-text"></pre>
+        </details>
+      </section>
       <section id="nano-character-handoff" class="nano-handoff hidden" aria-label="STEP1用の人物設定">
         <h3>ここからはSTEP1用：人物設定</h3>
         <p>下の人物設定を、漫画システムのSTEP1「人物設定」へ貼り付けてください。参照画像なしでも人物を描き分けるための情報です。</p>
