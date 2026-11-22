@@ -11,6 +11,22 @@ export function mangaBookFixedCounts(value) {
   return counts;
 }
 
+export function mangaPagePreview(scenario) {
+  const source = scenario.replace(/\r\n?/g, '\n');
+  const headers = [...source.matchAll(/^\[(\d+コマ目(?:\s*[:：][^\]\n]+)?)\][^\S\n]*$/gm)];
+  return headers.map((header, index) => {
+    const body = source.slice(header.index + header[0].length, headers[index + 1]?.index)
+      .split('\n')
+      .filter(line => !/^(?:BalloonLayout\s*[:：]|\[EMOTION:)/.test(line.trimStart()))
+      .map(line => line.replace(/^\[Camera:\s*(.*?)\]\s*$/, 'カメラ：$1'))
+      .map(line => line.replace(/^状況\s*[:：]\s*/, '状況: '))
+      .filter(line => line.trim());
+    const camera = body.findIndex(line => line.startsWith('カメラ：'));
+    if (camera >= 0) body.push(...body.splice(camera, 1));
+    return { title: header[1], body: body.join('\n') };
+  });
+}
+
 function readPlan(response, fixedCounts) {
   const text = String(response?.text ?? response).trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');
   let plan;

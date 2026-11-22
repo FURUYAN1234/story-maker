@@ -1,10 +1,24 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { generateMangaBook, mangaBookFixedCounts } from '../src/mangaBook.js';
+import { generateMangaBook, mangaBookFixedCounts, mangaPagePreview } from '../src/mangaBook.js';
 import { input, output } from '../mcp/app.mjs';
 import { scenarioFixture } from '../scripts/fixtures/nanoScenarioFixture.mjs';
 
 const plan = (...counts) => JSON.stringify({ title: '返却の順番', summary: '札を直して列を作り直す。', pages: counts.map((panelCount, index) => ({ panelCount, beat: `${index + 1}ページ目の展開` })) });
+
+test('the page preview starts with the panels without exposing layout data', () => {
+  const scenario = scenarioFixture({ count: 5 }).replace(/\n/g, '\r\n');
+  const panels = mangaPagePreview(scenario);
+  assert.deepEqual(panels.map(panel => panel.title), ['1コマ目', '2コマ目', '3コマ目', '4コマ目', '5コマ目']);
+  assert.match(panels[0].body, /^状況: 係員/);
+  assert.match(panels[0].body, /係員「こちらへどうぞ。」/);
+  assert.match(panels[0].body, /カメラ：係員の右後方/);
+  assert.match(panels.at(-1).body, /セリフなし/);
+  assert.doesNotMatch(panels.map(panel => panel.body).join('\n'), /PageComposition|BalloonLayout|\[EMOTION|\[Camera|\r/);
+  assert.deepEqual(mangaPagePreview('コマ見出しなし'), []);
+  assert.match(scenario, /PageComposition:.*\r\n/);
+  assert.match(scenario, /BalloonLayout: \[\{/);
+});
 
 test('a fixed book sends the shared cast and preceding script to page two', async () => {
   const pageBriefs = [];

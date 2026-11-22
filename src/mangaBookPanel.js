@@ -1,5 +1,5 @@
 import { mcpAppError } from './mcp-connection.js';
-import { mangaBookFixedCounts } from './mangaBook.js';
+import { mangaBookFixedCounts, mangaPagePreview } from './mangaBook.js';
 
 export function installMangaBookPanel({ generate, stop }) {
   const byId = id => document.getElementById(`manga-book-${id}`);
@@ -20,12 +20,17 @@ export function installMangaBookPanel({ generate, stop }) {
   function appendPage(page) {
     const entry = document.createElement('details');
     const label = document.createElement('summary');
-    const script = document.createElement('pre');
     const copy = document.createElement('button');
+    const raw = document.createElement('details');
+    const rawLabel = document.createElement('summary');
+    const rawScript = document.createElement('pre');
     entry.open = page.pageNumber === 1;
     label.textContent = `本文${page.pageNumber}P（${page.panelCount}コマ）`;
-    script.className = 'nano-character-text';
-    script.textContent = page.scenario;
+    raw.className = 'manga-book-raw';
+    rawLabel.textContent = '漫画アプリ連携用の台本を表示';
+    rawScript.className = 'nano-character-text';
+    rawScript.textContent = page.scenario;
+    raw.append(rawLabel, rawScript);
     copy.type = 'button';
     copy.className = 'btn-secondary';
     copy.textContent = `本文${page.pageNumber}Pの台本をコピー`;
@@ -34,10 +39,23 @@ export function installMangaBookPanel({ generate, stop }) {
         await navigator.clipboard.writeText(page.scenario);
         status.textContent = `本文${page.pageNumber}Pの台本をコピーしました。`;
       } catch {
-        status.textContent = 'コピーできませんでした。台本を選択してコピーしてください。';
+        raw.open = true;
+        rawLabel.focus();
+        status.textContent = 'コピーできませんでした。開いた連携用台本を選択してコピーしてください。';
       }
     });
-    entry.append(label, script, copy);
+    entry.append(label, copy);
+    for (const panel of mangaPagePreview(page.scenario)) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h4');
+      const body = document.createElement('pre');
+      section.className = 'manga-book-panel';
+      heading.textContent = panel.title;
+      body.textContent = panel.body;
+      section.append(heading, body);
+      entry.append(section);
+    }
+    entry.append(raw);
     pages.append(entry);
   }
 
