@@ -1,6 +1,6 @@
-# Story Maker v5.5.6 / AI物語メーカー
+# Story Maker v5.5.7 / AI物語メーカー
 
-[Release notes / 更新内容](docs/releases/v5.5.6.md)
+[Release notes / 更新内容](docs/releases/v5.5.7.md)
 
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
@@ -522,7 +522,7 @@ Export files are local user actions. The repository should not receive generated
 3. Double-click `start_Story_app.bat`, or run the following commands: / `start_Story_app.bat` をダブルクリックするか、次のコマンドを実行します。
 
 ```powershell
-npm install
+npm ci
 npm run dev -- --host 0.0.0.0 --port 5179
 ```
 
@@ -962,11 +962,10 @@ Emergency stop is red while AI work is active and disabled gray while idle, fini
 
 Windows users can start/stop the service, check for a release, and stage an update from `Launch-MCP.cmd`. Open the local app and click **MCP接続** to pair from the application itself. / Windowsでは `Launch-MCP.cmd` からMCPの起動・停止、更新確認・適用を行えます。起動した画面の **MCP接続** でも接続できます。更新候補は公開Releaseが指すコミットのソースから別フォルダへビルドし、成功後に切替先を記録します。作業中の画面は保存後に停止してください。
 
-The MCP server starts a build-verified copy on loopback port `45932`. Install the dependencies and build this application's source before configuring Codex. The API key is entered in the application's normal browser UI and is not passed to MCP. / MCPサーバーはビルドを照合し、ローカルの `45932` 番で対象アプリを起動します。このアプリのソースを展開して依存関係を入れ、ビルドしてからCodexに登録します。APIキーは通常のアプリ画面で入力します。
+The MCP server starts a build-verified copy on loopback port `45932`. Run `npm ci` to install both the app and MCP dependencies, then build before configuring Codex. The API key is entered in the application's normal browser UI and is not passed to MCP. / MCPサーバーはビルドを照合し、ローカルの `45932` 番で対象アプリを起動します。ソースを展開し、`npm ci` で本体とMCPの依存関係を入れ、ビルドしてからCodexに登録します。APIキーは通常のアプリ画面で入力します。
 
 ```powershell
 npm ci
-npm --prefix mcp ci
 npm run build
 codex mcp add story-maker -- node "C:\absolute\path\to\story-maker\Launch-Codex-MCP.mjs"
 ```

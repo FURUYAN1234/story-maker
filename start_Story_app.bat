@@ -10,12 +10,16 @@ if errorlevel 1 goto NODE_MISSING
 where npm >nul 2>nul
 if errorlevel 1 goto NPM_MISSING
 
-if not exist node_modules (
-    echo [INFO] node_modules not found. Installing dependencies...
-    call npm install
-)
+if not exist "node_modules\vite\package.json" goto INSTALL
+if not exist "mcp\node_modules\zod\package.json" goto INSTALL
+goto LAUNCH
 
-if not exist node_modules goto INSTALL_ERROR
+:INSTALL
+echo [INFO] Installing Story Maker and MCP dependencies...
+call npm ci
+if errorlevel 1 goto INSTALL_ERROR
+
+:LAUNCH
 
 echo [INFO] Launching development server...
 call npm run dev -- --open --base ./

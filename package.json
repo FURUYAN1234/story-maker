@@ -1,11 +1,12 @@
 {
   "license": "MIT",
   "name": "story-maker",
-  "version": "5.5.6",
+  "version": "5.5.7",
   "private": true,
   "description": "AI Story Maker - multi-axis randomized story generator for Gemini and OpenAI APIs",
   "type": "module",
   "scripts": {
+    "postinstall": "npm ci --prefix mcp --ignore-scripts",
     "predev": "npm run check:nano-4koma-contract",
     "dev": "vite",
     "fix:generic-rules": "node scripts/check-generic-rules.mjs --fix",

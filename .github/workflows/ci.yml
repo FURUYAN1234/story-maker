@@ -31,6 +31,7 @@ jobs:
           cache: npm
           cache-dependency-path: |
             story-maker/package-lock.json
+            story-maker/mcp/package-lock.json
             nano-banana-pro/package-lock.json
       - name: Install manga parser dependencies
         run: npm ci
