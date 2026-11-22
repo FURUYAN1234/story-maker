@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { createServer } from 'vite';
 import { generateMangaBook, mangaBookFixedCounts, mangaPagePreview } from '../src/mangaBook.js';
 import { input, output } from '../mcp/app.mjs';
 import { scenarioFixture } from '../scripts/fixtures/nanoScenarioFixture.mjs';
@@ -10,14 +12,83 @@ test('the page preview starts with the panels without exposing layout data', () 
   const scenario = scenarioFixture({ count: 5 }).replace(/\n/g, '\r\n');
   const panels = mangaPagePreview(scenario);
   assert.deepEqual(panels.map(panel => panel.title), ['1コマ目', '2コマ目', '3コマ目', '4コマ目', '5コマ目']);
-  assert.match(panels[0].body, /^状況: 係員/);
+  assert.match(panels[0].body, /^状況：係員/);
   assert.match(panels[0].body, /係員「こちらへどうぞ。」/);
-  assert.match(panels[0].body, /カメラ：係員の右後方/);
   assert.match(panels.at(-1).body, /セリフなし/);
-  assert.doesNotMatch(panels.map(panel => panel.body).join('\n'), /PageComposition|BalloonLayout|\[EMOTION|\[Camera|\r/);
+  assert.doesNotMatch(panels.map(panel => panel.body).join('\n'), /PageComposition|BalloonLayout|EMOTION|Camera|カメラ：|\r/);
   assert.deepEqual(mangaPagePreview('コマ見出しなし'), []);
   assert.match(scenario, /PageComposition:.*\r\n/);
   assert.match(scenario, /BalloonLayout: \[\{/);
+});
+
+test('book mode isolates intermediate output and copies the complete unmodified script', async () => {
+  const server = await createServer({ configFile: false, appType: 'custom', logLevel: 'silent', server: { middlewareMode: true, watch: null } });
+  const savedDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  const savedNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  try {
+    const { installMangaBookPanel } = await server.ssrLoadModule('/src/mangaBookPanel.js');
+    const element = () => {
+      const children = [];
+      const classes = new Set();
+      const handlers = new Map();
+      return {
+        children, textContent: '',
+        classList: {
+          add: value => classes.add(value),
+          remove: value => classes.delete(value),
+          contains: value => classes.has(value),
+          toggle(value, on) { if (on) classes.add(value); else classes.delete(value); },
+        },
+        append: (...nodes) => children.push(...nodes),
+        replaceChildren: (...nodes) => children.splice(0, children.length, ...nodes),
+        addEventListener: (type, listener) => handlers.set(type, listener),
+        click: event => handlers.get('click')?.(event),
+        focus() {},
+      };
+    };
+    const elements = new Map();
+    const get = id => {
+      if (!elements.has(id)) elements.set(id, element());
+      return elements.get(id);
+    };
+    Object.defineProperty(globalThis, 'document', { configurable: true, value: { getElementById: get, createElement: element } });
+    let copied;
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { async writeText(value) { copied = value; } } } });
+    get('output').textContent = '通常画面の原稿';
+    get('btn-output-clear').addEventListener('click', () => { get('output').textContent = 'はじめ方'; });
+    const scenario = scenarioFixture({ count: 5 });
+    const panel = installMangaBookPanel({
+      stop() {},
+      async generate(_request, onProgress) {
+        assert.equal(get('output-panel').classList.contains('manga-book-view'), true);
+        get('output').textContent = scenario;
+        get('btn-generate').click({ isTrusted: false });
+        assert.equal(get('output-panel').classList.contains('manga-book-view'), true, 'internal generation must not show its draft');
+        const page = { pageNumber: 1, panelCount: 5, scenario };
+        onProgress({ stage: 'complete-page', page });
+        return { book: { title: '返却の順番', summary: '試験用', pages: [page] }, characters: '' };
+      },
+    });
+    await panel.run({});
+    const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
+    assert.match(css, /\.output-panel\.manga-book-view[^\n]*#output(?:,|\))[^\n]*display:none/);
+    assert.equal(get('output-panel').classList.contains('manga-book-view'), true);
+    const entry = get('manga-book-pages').children[0];
+    const [, copy, ...sections] = entry.children;
+    const raw = sections.pop();
+    assert.equal(raw.className, 'manga-book-raw hidden');
+    assert.equal(sections.length, 5);
+    assert.doesNotMatch(sections.map(node => node.children[1].textContent).join('\n'), /PageComposition|BalloonLayout|\[Camera/);
+    await copy.click();
+    assert.equal(copied, scenario);
+    get('manga-book-return').click();
+    assert.equal(get('output-panel').classList.contains('manga-book-view'), false);
+    assert.equal(get('output').textContent, 'はじめ方');
+  } finally {
+    if (savedDocument) Object.defineProperty(globalThis, 'document', savedDocument); else delete globalThis.document;
+    if (savedNavigator) Object.defineProperty(globalThis, 'navigator', savedNavigator); else delete globalThis.navigator;
+    await server.close();
+  }
 });
 
 test('a fixed book sends the shared cast and preceding script to page two', async () => {

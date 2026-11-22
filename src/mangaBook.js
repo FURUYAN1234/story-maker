@@ -17,12 +17,8 @@ export function mangaPagePreview(scenario) {
   return headers.map((header, index) => {
     const body = source.slice(header.index + header[0].length, headers[index + 1]?.index)
       .split('\n')
-      .filter(line => !/^(?:BalloonLayout\s*[:：]|\[EMOTION:)/.test(line.trimStart()))
-      .map(line => line.replace(/^\[Camera:\s*(.*?)\]\s*$/, 'カメラ：$1'))
-      .map(line => line.replace(/^状況\s*[:：]\s*/, '状況: '))
-      .filter(line => line.trim());
-    const camera = body.findIndex(line => line.startsWith('カメラ：'));
-    if (camera >= 0) body.push(...body.splice(camera, 1));
+      .filter(line => line.trim() && !/^(?:(?:PageComposition|BalloonLayout)\s*[:：]|\[(?:EMOTION|Camera)\s*[:：])/i.test(line.trimStart()))
+      .map(line => line.replace(/^状況\s*[:：]\s*/, '状況：'));
     return { title: header[1], body: body.join('\n') };
   });
 }

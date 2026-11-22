@@ -90,7 +90,9 @@ connectFuruMcp({
   readiness: () => Boolean(byId('banner')?.classList.contains('ok')),
   async execute(action, input) {
     if (action !== 'generate_manga_script') throw mcpAppError('OUTPUT_INVALID');
-    return input.book && panel ? panel.run(input) : executeStory(input);
+    if (input.book && panel) return panel.run(input);
+    if (!input.book) panel?.showStandard();
+    return executeStory(input);
   },
   stop: stopStory,
 });

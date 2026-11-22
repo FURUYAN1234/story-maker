@@ -6,6 +6,9 @@ export function installMangaBookPanel({ generate, stop }) {
   const form = byId('form');
   if (!form) return null;
   const modes = document.getElementById('mode-chips');
+  const outputPanel = document.getElementById('output-panel');
+  const standardOutput = document.getElementById('output');
+  const standardGenerate = document.getElementById('btn-generate');
   const mode = byId('count-mode');
   const status = byId('status');
   const output = byId('output');
@@ -15,7 +18,18 @@ export function installMangaBookPanel({ generate, stop }) {
   const summary = byId('summary');
   const cast = byId('cast');
   const title = byId('result-title');
+  const returnToStandard = byId('return');
   let running = false;
+  let standardTextAtStart;
+
+  function showStandard() {
+    if (running || !outputPanel.classList.contains('manga-book-view')) return;
+    if (standardOutput.textContent !== standardTextAtStart) {
+      document.getElementById('btn-output-clear').click();
+    }
+    output.classList.add('hidden');
+    outputPanel.classList.remove('manga-book-view');
+  }
 
   function appendPage(page) {
     const entry = document.createElement('details');
@@ -26,7 +40,7 @@ export function installMangaBookPanel({ generate, stop }) {
     const rawScript = document.createElement('pre');
     entry.open = page.pageNumber === 1;
     label.textContent = `本文${page.pageNumber}P（${page.panelCount}コマ）`;
-    raw.className = 'manga-book-raw';
+    raw.className = 'manga-book-raw hidden';
     rawLabel.textContent = '漫画アプリ連携用の台本を表示';
     rawScript.className = 'nano-character-text';
     rawScript.textContent = page.scenario;
@@ -39,6 +53,7 @@ export function installMangaBookPanel({ generate, stop }) {
         await navigator.clipboard.writeText(page.scenario);
         status.textContent = `本文${page.pageNumber}Pの台本をコピーしました。`;
       } catch {
+        raw.classList.remove('hidden');
         raw.open = true;
         rawLabel.focus();
         status.textContent = 'コピーできませんでした。開いた連携用台本を選択してコピーしてください。';
@@ -67,9 +82,14 @@ export function installMangaBookPanel({ generate, stop }) {
 
   async function run(input) {
     if (running) throw mcpAppError('APP_BUSY');
+    if (!outputPanel.classList.contains('manga-book-view')) {
+      standardTextAtStart = standardOutput.textContent;
+    }
+    outputPanel.classList.add('manga-book-view');
     running = true;
     start.disabled = true;
     cancel.disabled = false;
+    returnToStandard.disabled = true;
     pages.replaceChildren();
     title.textContent = '複数ページ漫画の台本';
     summary.textContent = '';
@@ -93,6 +113,7 @@ export function installMangaBookPanel({ generate, stop }) {
     } finally {
       start.disabled = false;
       cancel.disabled = true;
+      returnToStandard.disabled = false;
       running = false;
     }
   }
@@ -105,7 +126,19 @@ export function installMangaBookPanel({ generate, stop }) {
 
   modes.addEventListener('click', event => {
     if (event.target.closest('#manga-book-open')) displayForm(form.classList.contains('hidden'));
-    if (event.isTrusted && event.target.closest('.chip[data-v="4koma_scenario"]') && !running) displayForm(false);
+    if (event.isTrusted && event.target.closest('.chip[data-v]') && !running) {
+      showStandard();
+      displayForm(false);
+    }
+  });
+  standardGenerate.addEventListener('click', event => {
+    if (!event.isTrusted) return;
+    if (running) event.stopImmediatePropagation();
+    else showStandard();
+  }, { capture: true });
+  returnToStandard.addEventListener('click', () => {
+    showStandard();
+    standardGenerate.focus();
   });
   mode.addEventListener('change', () => byId('counts-label').classList.toggle('hidden', mode.value !== 'fixed'));
   form.addEventListener('submit', async event => {
@@ -120,5 +153,5 @@ export function installMangaBookPanel({ generate, stop }) {
     }
   });
   cancel.addEventListener('click', stop);
-  return { run };
+  return { run, showStandard };
 }

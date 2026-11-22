@@ -29,7 +29,7 @@ function showMcpResources(appId) {
   links.append(skill, guide, ...manualLinks);
   nav.append(links);
   const stopBar = document.getElementById('ai-disconnect-bar');
-  if (stopBar) stopBar.after(nav);
+  if (stopBar) stopBar.before(nav);
   else document.body.prepend(nav);
   return nav;
 }

@@ -9,8 +9,10 @@
   <link rel="stylesheet" crossorigin href="./src/style.css">
 </head>
 <body>
-  <div id="ai-disconnect-bar" class="ai-disconnect-bar" hidden>
-    <button id="btn-ai-disconnect" type="button" disabled aria-describedby="ai-disconnect-status" title="ブラウザーのAI通信と後続処理を中断します。API提供元での処理・課金停止は保証しません。">⏹ 緊急停止</button>
+  <div class="story-top-toolbar">
+    <div id="ai-disconnect-bar" class="ai-disconnect-bar" hidden>
+      <button id="btn-ai-disconnect" type="button" disabled aria-describedby="ai-disconnect-status" title="ブラウザーのAI通信と後続処理を中断します。API提供元での処理・課金停止は保証しません。">⏹ 緊急停止</button>
+    </div>
   </div>
 
   <!-- 🚀 Sticky Header Wrapper (タイトルバーと進捗窓をセットで上部固定) -->
@@ -453,6 +455,7 @@
       <section id="manga-book-output" class="nano-handoff manga-book-output hidden" aria-labelledby="manga-book-result-title">
         <h3 id="manga-book-result-title">複数ページ漫画の台本</h3>
         <p id="manga-book-status" role="status"></p>
+        <button type="button" id="manga-book-return" class="btn-secondary">通常の出力へ戻る</button>
         <p id="manga-book-summary"></p>
         <div id="manga-book-pages"></div>
         <details id="manga-book-cast" class="hidden">
