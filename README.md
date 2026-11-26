@@ -983,3 +983,9 @@ The output modes have two manga script buttons: **1ページ漫画（4〜8コマ
 MCP `story_generate_manga_script` accepts `input.brief` plus optional `input.book`. Use `{ "mode": "fixed", "pagePanelCounts": [4, 4] }` for two four-panel pages or `{ "mode": "auto" }` to let Story Maker choose. Omit `book` for a single page. Read `book.pages` in `pageNumber` order and use the shared `characters`. / MCPでは `input.brief` に加えて `input.book` で指定します。省略時は従来の1ページです。`book.pages` を `pageNumber` 順に読み、作品共通の `characters` を使います。
 
 The result includes separate scenario and character text plus the combined manga application input. Use the corresponding STEP 1 and STEP 2 state of the intended manga project. / 結果の人物設定と台本を、対象漫画のSTEP1・STEP2へ渡せます。
+
+## CLIP Drop / 習作・ベータ版
+
+クリスタの .clip を SVG・PSD・PNG に変換するWindows用の習作です。 / An experimental Windows converter for Clip Studio Paint files.
+
+- [GitHub](https://github.com/FURUYAN1234/clip-drop) · [note](https://note.com/happy_duck780/n/n8a38199a75db)
