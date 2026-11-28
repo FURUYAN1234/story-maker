@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { isNanoScenarioComplete } from '../src/nanoScenarioContract.js';
+import { readPageComposition as readStoryComposition } from '../src/vendor/nanoMangaPageComposition.js';
 import { scenarioFixture } from './fixtures/nanoScenarioFixture.mjs';
 
 // Test data only. This is never imported into the browser application.
-export async function checkParserCompatibility(server) {
+export async function checkParserCompatibility(server, { legacy = false } = {}) {
   const { validateMangaScenario, getScenarioPanelBlocks } = await server.ssrLoadModule('/src/lib/scenario-validation.js');
   const { extractDialogueOnly, collectCastNameEntries } = await server.ssrLoadModule('/src/lib/panel-utils.js');
   const { editReferenceCast, hasCharacterReferenceImages } = await server.ssrLoadModule('/src/lib/reference-assets.js');
@@ -57,7 +58,7 @@ export async function checkParserCompatibility(server) {
     assert.equal(validateMangaScenario(scenarioFixture({ count, composition: false }), cast, { scenarioMode: 'experimental-manga' }).ok, false);
   }
   const {createBookPageMode}=await server.ssrLoadModule('/src/lib/page-production-contract.js');
-  const {readPageComposition,scenarioPageCompositionInstruction,SCENARIO_PAGE_COMPOSITION:ordinaryGuidance}=await server.ssrLoadModule('/src/lib/manga-page-composition.js');
+  const {readPageComposition,pageCompositionRendering,scenarioPageCompositionInstruction,SCENARIO_PAGE_COMPOSITION:ordinaryGuidance}=await server.ssrLoadModule('/src/lib/manga-page-composition.js');
   assert.equal(scenarioPageCompositionInstruction('experimental-manga'),ordinaryGuidance,'ordinary 4–8 generation guidance must stay unchanged');
   for(const count of [1,2,3]){
     const composition={layout:'vertical_page',reason:'指定された動作と読順に必要な固定ページ。',heroPanels:[1],foregrounds:[],breakouts:[],bleed:[]};
@@ -91,5 +92,53 @@ export async function checkParserCompatibility(server) {
   }
   assert.deepEqual(validateMangaScenario(editable,cast,options),originalValidation,'restoring the exact original text restores validity');
   assert.equal(isNanoScenarioComplete(editable),true);
-  return cases.length + invalid.length + 4 + 9 + drafts.length + 2;
+
+  const angled = [
+    { x: .5, y: 0, w: .5, h: .5, corners: [[.2, 0], [1, 0], [1, 1], [0, 1]] },
+    { x: 0, y: 0, w: .6, h: .5, corners: [[0, 0], [1, 0], [5 / 6, 1], [0, 1]] },
+    { x: .5, y: .5, w: .5, h: .5 },
+    { x: 0, y: .5, w: .5, h: .5 },
+  ];
+  const inset = [
+    { x: 0, y: 0, w: 1, h: .5 },
+    { x: .1, y: .1, w: .3, h: .25, insetOf: 1 },
+    { x: .5, y: .5, w: .5, h: .5 },
+    { x: 0, y: .5, w: .5, h: .5 },
+  ];
+  const structuredCases = [
+    ['diagonal shared edge', angled, 2, 'SLANTED FRAME P1'],
+    ['inset directly after its parent', inset, 3, 'INSET P2 within P1'],
+  ];
+  const withFrames = (frames, into) => editable.replace(/^PageComposition:.*$/m, 'PageComposition: ' + JSON.stringify({
+    ...freeComposition, frames, foregrounds: [], breakouts: [{ panel: 1, part: '係員の肩と腕', into }],
+  }));
+  for (const [name, frames, into, renderMarker] of structuredCases) {
+    const source = withFrames(frames, into);
+    assert.equal(isNanoScenarioComplete(source), true, 'Story rejected ' + name);
+    const validation = validateMangaScenario(source, cast, options);
+    assert.equal(validation.ok, !legacy, 'Manga contract differs for ' + name);
+    if (legacy) {
+      assert.match(validation.compositionError, /PageComposition/);
+      continue;
+    }
+    const parsed = readPageComposition(source, 4);
+    assert.deepEqual(parsed, readStoryComposition(source, 4), name);
+    assert.deepEqual(parsed.frames, frames, 'frame metadata changed for ' + name);
+    assert.deepEqual(getScenarioPanelBlocks(source).map(panel => panel.num), [1, 2, 3, 4], name);
+    assert.ok(pageCompositionRendering({ composition: parsed }).includes(renderMarker), name);
+  }
+
+  const invalidFrames = [
+    ['crossed polygon', [{ ...angled[0], corners: [[.2, 0], [1, 1], [1, 0], [0, 1]] }, ...angled.slice(1)], 2],
+    ['inset outside parent', [inset[0], { ...inset[1], y: .4 }, ...inset.slice(2)], 3],
+    ['inset after a later main panel', [inset[0], inset[2], inset[1], inset[3]], 2],
+  ];
+  for (const [name, frames, into] of invalidFrames) {
+    const source = withFrames(frames, into);
+    assert.equal(isNanoScenarioComplete(source), false, 'Story accepted ' + name);
+    const validation = validateMangaScenario(source, cast, options);
+    assert.equal(validation.ok, false, 'Manga accepted ' + name);
+    assert.match(validation.compositionError, /PageComposition/);
+  }
+  return cases.length + invalid.length + 4 + 9 + drafts.length + 2 + structuredCases.length + invalidFrames.length;
 }

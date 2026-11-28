@@ -17,6 +17,11 @@ const nanoPromptFile = path.join(nanoRoot, 'src', 'lib', 'prompts.js');
 // Updated after reviewing the current adjacent Nano Banana Pro STEP2 contract.
 const expectedNanoStep2Hash = '7488550e38d8009de1156f9232fad02df1261ddd1b3fca35acadd356420524b1';
 const baseline = JSON.parse(fs.readFileSync(new URL('./nano-contract-baseline.json', import.meta.url), 'utf8'));
+const legacy = process.argv.includes('--legacy-8.2.4');
+const layoutSource = 'src/lib/manga-page-composition.js';
+const contractBaseline = legacy
+  ? { ...baseline.legacy, files: { ...baseline.files, ...baseline.legacy.files } }
+  : baseline;
 
 function fail(message) {
   console.error(`[nano-4koma-contract] ${message}`);
@@ -42,9 +47,12 @@ if (!fs.existsSync(nanoPromptFile)) {
   fail(`Manga prompt source not found at ${nanoPromptFile}. Restore the adjacent checkout or set NANO_BANANA_PRO_ROOT.`);
   process.exit(1);
 }
-for (const error of checkContractSources(nanoRoot)) fail(error);
+if (legacy && JSON.parse(fs.readFileSync(path.join(nanoRoot, 'package.json'), 'utf8')).version !== baseline.legacy.mangaVersion) {
+  fail('Legacy compatibility requires the reviewed manga v8.2.4 source.');
+}
+for (const error of checkContractSources(nanoRoot, contractBaseline)) fail(error);
 if (process.exitCode) process.exit(process.exitCode);
-if (sourceHash(fs.readFileSync(path.join(nanoRoot, 'src/lib/manga-page-composition.js'), 'utf8')) !== sourceHash(fs.readFileSync(new URL('../src/vendor/nanoMangaPageComposition.js', import.meta.url), 'utf8'))) fail('The bundled PageComposition validator differs from the current manga source. Review and synchronize it.');
+if (baseline.files[layoutSource] !== sourceHash(fs.readFileSync(new URL('../src/vendor/nanoMangaPageComposition.js', import.meta.url), 'utf8'))) fail('The bundled PageComposition validator differs from the reviewed current manga source. Review and synchronize it.');
 if (sourceHash(fs.readFileSync(path.join(nanoRoot, 'src/lib/page-production-contract.js'), 'utf8')) !== sourceHash(fs.readFileSync(new URL('../src/vendor/page-production-contract.js', import.meta.url), 'utf8'))) fail('The bundled internal book-mode dependency differs from the reviewed manga source.');
 if (process.exitCode) process.exit(process.exitCode);
 
@@ -71,21 +79,24 @@ try {
   // PageComposition is attached at Nano's provider boundary; Story embeds the
   // identical instruction in generation and the identical validator at output.
   if (!freeLayoutPrompt.includes('4〜8')) fail('Manga free-layout panel-count contract changed.');
-  if (hash(freeLayoutPrompt.replace(/\r\n?/g, '\n')) !== baseline.freeLayoutPromptSha256) fail('Manga emitted free-layout contract changed. Review Story Maker generation and parser compatibility before updating the baseline.');
+  if (hash(freeLayoutPrompt.replace(/\r\n?/g, '\n')) !== contractBaseline.freeLayoutPromptSha256) fail('Manga emitted free-layout contract changed. Review Story Maker generation and parser compatibility before updating the baseline.');
   if (!NANO_SCENARIO_CONTRACT.includes(SCENARIO_PAGE_COMPOSITION)) fail('Story generation is missing current page composition guidance.');
-  const cases = await checkParserCompatibility(server);
-  console.log(`[nano-4koma-contract] Actual manga parser: ${cases} compatibility cases passed.`);
+  const cases = await checkParserCompatibility(server, { legacy });
+  const version = legacy ? baseline.legacy.mangaVersion : baseline.mangaVersion;
+  console.log(`[nano-4koma-contract] Actual manga v${version} parser: ${cases} compatibility cases passed.`);
 } catch (error) {
   fail(error.message);
 } finally { await server.close(); }
 
 const settings = { mode: '4koma_scenario' };
 for (const prompt of [Jo(settings).prompt, buildPrompt(settings), buildQualityContract(settings.mode), buildOutputModeStrictContract(settings), buildFinalOutputFormatCheck(settings)]) {
-  for (const marker of ['4〜8', 'PanelCountReason:', 'PageComposition:', 'VisualEvidence:', 'BalloonLayout:', 'セリフなし', '無言なら[]', 'anchor', 'route']) {
+  for (const marker of ['4〜8', 'PanelCountReason:', 'PageComposition:', 'VisualEvidence:', 'BalloonLayout:', 'セリフなし', '無言なら[]', 'anchor', 'route', 'corners', 'insetOf']) {
     if (!prompt.includes(marker)) fail('An emitted Story prompt is missing '+marker);
   }
   if (/無言.*だけのコマは禁止|重複禁止|全コマで吹き出し用セリフ/.test(prompt)) fail('An emitted Story prompt retains contradictory obsolete rules.');
 }
 if (!Jo(settings).prompt.includes(NANO_SCENARIO_CONTRACT)) fail('The ordinary generation entry point must include the shared Nano rules.');
 
-if (!process.exitCode) console.log('[nano-4koma-contract] Current manga source baseline, rules, styles, page composition and Story generation/revision contracts match (4–8 panels, free layout).');
+if (!process.exitCode) console.log(legacy
+  ? '[nano-4koma-contract] Legacy rectangular scenarios, unchanged dialogue and parser limits verified against v8.2.4.'
+  : '[nano-4koma-contract] Current manga source, page composition and Story generation/revision contracts match (4–8 panels, including diagonal and inset frames).');

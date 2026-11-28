@@ -1,21 +1,29 @@
 {
   "schemaVersion": 1,
-  "mangaVersion": "8.2.0",
-  "mangaCommit": "8b8ad5a8c2623cbddba9919a33c35fe361613091",
-  "scope": "Reviewed Super FURU AI 4-koma System v8.2.0 for Story Maker handoff. Explicit same-line camera requests are scoped to their numbered panel. Breakout rendering and review require frame and gutter occlusion behind the character. The PageComposition input schema and ordinary generated authoring contract are unchanged.",
+  "mangaVersion": "8.2.5",
+  "mangaCommit": "c093f1a3ee801165cf86c50f95aa75a03773800d",
+  "scope": "Reviewed manga v8.2.5: diagonal frames, inset panels, shared polygon edges and explicit reading order. Legacy rectangular scenarios remain valid in both parsers.",
   "files": {
     "docs/scenario_spec.md": "54ad618a7f093f397508767e13ab8dd98d7ef9ac6062d3f30781ebaeee21e89c",
     "src/lib/scenario-provider.js": "3015887d967cd352aaa2b6ea1991f19fcb960e44c8a4d8a795276383304d75e5",
     "src/lib/scenario-validation.js": "50de5649e56aeddf16e37fc1aad1a1fea170c923b8d2b3b94129d0389f693c62",
     "src/lib/panel-utils.js": "cb2ba374b69a7e18af88ab20e501722b97a2ab7d4cc70cd32fbb4560270e941d",
     "src/lib/bubble-text.js": "28006a79f28f7d05718f47cfbb187e0fe620da7d3f743548de26e9163a654e40",
-    "src/lib/manga-page-composition.js": "24009509a3bfc8cba2eb01cface86f269c79e41d10970c094f294d8e1878e372",
+    "src/lib/manga-page-composition.js": "010af948a8ae5fcb31e32dd88e87892a74c0385021c96eea017516df11a26905",
     "src/lib/story-structure.js": "aa4830a5986817fa177fec7308bb84182ee29539cfb33b1950e06e9292cc77c5",
     "src/lib/ending-mode-policy.js": "0a46d176163ab0b876067df0c198e98766b66e0110214a4c9d6c47f1250f2b5a",
     "src/lib/reference-assets.js": "80a19b09ecd53108eb703493afdc65b71884c79add3fccc0b3c70a9338ebac2e",
     "src/lib/page-production-contract.js": "acb021b9e2c04835ba39d2182c31ebe9872302a7419916b94b1a30ec8f0c1b8c"
   },
-  "freeLayoutPromptSha256": "b7a0b9518687d7462e78ea5faf69086b94793d30d873f6a53dc072202afa4100",
+  "freeLayoutPromptSha256": "4ef89a62cd50b16020860cf6ff04cc4a5c966f70f5ad43d96bd235fa51b8f523",
   "reviewedWorkingTree": false,
-  "mangaTag": "v8.2.0"
+  "legacy": {
+    "mangaVersion": "8.2.4",
+    "mangaCommit": "fbec9c40e90b0f23c3099d139a0699207cd95cbf",
+    "mangaTag": "v8.2.4",
+    "files": {
+      "src/lib/manga-page-composition.js": "24009509a3bfc8cba2eb01cface86f269c79e41d10970c094f294d8e1878e372"
+    },
+    "freeLayoutPromptSha256": "b7a0b9518687d7462e78ea5faf69086b94793d30d873f6a53dc072202afa4100"
+  }
 }

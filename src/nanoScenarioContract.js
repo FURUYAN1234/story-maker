@@ -75,7 +75,7 @@ export const NANO_SCENARIO_MARKER = '[SMK_NANO_STEP2_CONTRACT]';
 
 export const NANO_SCENARIO_OUTPUT_CHECK = `最新の漫画アプリSTEP2・自由配置4〜8コマ互換。
 物語の準備・行動・反応・帰結に必要なコマ数Nを4〜8から内容に応じて選び、PanelCountReason: に具体的な理由を書く。乱数や4コマ固定、数合わせで決めない。範囲内の明示コマ数は守る。改稿では確定済みコマ数・順序・ページ設計を保持する。
-Scenario:直後にPageComposition:の1行JSONを置く。layout、frames、reason、heroPanels、foregrounds、breakouts、bleedを現行仕様どおり記述する。
+Scenario:直後にPageComposition:の1行JSONを置く。layout、frames、reason、heroPanels、foregrounds、breakouts、bleedを現行仕様どおり記述する。斜め枠のcorners、差し込み小コマのinsetOfを採用した場合は改稿でも保持し、小コマは親コマ直後に置く。
 Topic: / Logline: / Location: / VisualEvidence: / Outfit: / Punchline: / Scenario: を具体的に書く。
 単独行の[1コマ目]〜[Nコマ目]（Nは選択した4〜8の整数）に「[EMOTION:]」「[Camera:]」「BalloonLayout:」「状況:」と独立した発話行（無言ならセリフなし）をこの順で置く。
 BalloonLayout: は1発話1件のJSON配列。{"speaker":"台詞と同じ話者名","x":0.7,"anchor":"画面位置と見える頭","route":"非交差の余白経路"}。0<x<1で台詞順に厳密に減少、数・話者・順番を台詞に一致させる。

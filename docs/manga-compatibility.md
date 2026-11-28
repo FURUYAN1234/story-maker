@@ -38,9 +38,11 @@ Source drift means **review required**, not proven incompatibility. Line-ending 
 
 These are checks at explicit development/release events. No resident watcher, periodic job, automatic code rewrite, deployment or paid generation is installed. / 開発・公開操作時の検査です。常駐監視、定期実行、ソースの自動書換え、デプロイ、有料生成は追加していません。
 
-## Reviewed public manga source / 公開版漫画ソースとの互換性
+## Reviewed manga versions / 確認済み漫画アプリ版
 
-The reviewed source and its hashes are recorded in scripts/nano-contract-baseline.json. Story Maker v5.5.8 passed all 29 compatibility cases against the published manga v8.2.4 source. To verify against a separate copy of the published source, set NANO_BANANA_PRO_ROOT to that copy. / 確認済みソースとハッシュを scripts/nano-contract-baseline.json に記録しています。Story Maker v5.5.8では公開版漫画v8.2.4のソースに対して互換性検査29件が通過しました。公開版ソースの別コピーで照合する場合は、NANO_BANANA_PRO_ROOT にそのパスを指定します。
+- **v8.2.5** supports diagonal frames (`corners`) and inset panels (`insetOf`). Keep insets immediately after their parent in the reading order. Use v8.2.5 or later when handing off a scenario that uses these fields. / **v8.2.5** は斜め枠（`corners`）と差し込み小コマ（`insetOf`）に対応します。読順では差し込みを親コマの直後に置きます。これらの指定を使う台本はv8.2.5以降へ渡してください。
+- **v8.2.4** accepts the existing rectangular scenarios with their original dialogue and order. Use the original file when continuing an older work. / **v8.2.4** の矩形台本は台詞・読順を保ったまま使えます。旧作品を続ける場合は元のファイルを使ってください。
+- The main check compares the exact vendored module against the reviewed v8.2.5 source. To verify v8.2.4, set `NANO_BANANA_PRO_ROOT` to a separate checkout of that release and run `npm run check:nano-4koma-contract -- --legacy-8.2.4`. Both checks exercise the actual parser for each version. / 通常の検査はv8.2.5の確認済みソースと取り込んだコードを照合します。v8.2.4を確認するときは、その版のソースを `NANO_BANANA_PRO_ROOT` に指定し、`npm run check:nano-4koma-contract -- --legacy-8.2.4` を実行します。各版の実パーサーで動作を確認します。
 
 ## Reviewed manga 8.0.0 boundary / 漫画8.0.0の確認範囲
 

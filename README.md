@@ -2,6 +2,8 @@
 
 [Release notes / 更新内容](docs/releases/v5.5.8.md)
 
+Manga scenarios with diagonal frames or inset panels use the manga v8.2.5 layout contract. Existing rectangular scenarios retain their dialogue and reading order. / 斜め枠と差し込み小コマを使う台本は漫画アプリv8.2.5の仕様です。既存の矩形台本は台詞と読順を保持します。[Compatibility / 互換性](docs/manga-compatibility.md)
+
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
 Standard input / output per million tokens: GPT-6 Luna $0.10 / $0.50, GPT-6.2 Sol $2 / $10, GPT-6.2 Astra $8 / $40 (November 18, 2026). / 100万トークン当たりの通常入力／出力単価はGPT-6 Luna $0.10／$0.50、GPT-6.2 Sol $2／$10、GPT-6.2 Astra $8／$40です（2026年11月18日確認）。
