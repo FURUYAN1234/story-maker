@@ -19,7 +19,9 @@ With no character-reference images, usable STEP1 character text defines the cast
 
 ## Automatic checks / 自動検査
 
-`npm run dev`, `npm test`, and `npm run build` run `npm run check:nano-4koma-contract`. The historical command name is retained. The Antigravity official manga release's validation stage runs the same Story Maker command before publication. / ローカル起動・テスト・ビルド時に既存名の互換性検査を実行します。Antigravityの漫画アプリ正式公開でも、公開前の検証段階で同じ検査を実行します。
+For the distributed Windows ZIP, use the launch batch file or run npm run start:local. It checks the bundled contract against the reviewed hashes. Development and release checks below read the upstream source. / Windows配布ZIPは起動バッチまたは npm run start:local で起動します。配布ZIP内の契約ファイルを確認済みハッシュと照合します。開発・リリース時は下記のとおり取り込み元ソースを照合します。
+
+`npm run dev`, `npm test`, and `npm run build` run `npm run check:nano-4koma-contract`. The historical command name is retained. The Antigravity official manga release's validation stage runs the same Story Maker command before publication. / 開発起動・テスト・ビルド時に既存名の互換性検査を実行します。Antigravityの漫画アプリ正式公開でも、公開前の検証段階で同じ検査を実行します。
 
 The default source is the adjacent `../nano-banana-pro`. `NANO_BANANA_PRO_ROOT` may explicitly select another checkout. Missing source is an error. Story Maker CI checks out the public manga `main` branch alongside Story Maker. / 既定の参照先は同じAntigravity内の `../nano-banana-pro` です。別配置は環境変数で明示できます。ソース欠落はエラーにします。Story MakerのCIでは公開中の漫画アプリのmainを隣へ取得します。
 
@@ -36,9 +38,9 @@ Source drift means **review required**, not proven incompatibility. Line-ending 
 
 These are checks at explicit development/release events. No resident watcher, periodic job, automatic code rewrite, deployment or paid generation is installed. / 開発・公開操作時の検査です。常駐監視、定期実行、ソースの自動書換え、デプロイ、有料生成は追加していません。
 
-## Reviewed public manga 8.0.4 / 公開版漫画8.0.4との互換性
+## Reviewed public manga source / 公開版漫画ソースとの互換性
 
-The current baseline is pinned to the published manga v8.0.4 source (commit `577429c38ca0fffe8a7c18abfea0255f68262bb6`). The 29 compatibility cases pass against that source. The local manga checkout may contain changes in progress. Set `NANO_BANANA_PRO_ROOT` to a separate checkout of the published source when verifying Story Maker against the public version. / 現行基準は公開中の漫画v8.0.4ソースに固定しています。実パーサーの互換性29ケースが合格しました。手元の漫画アプリを編集中の場合は、公開版の別チェックアウトを `NANO_BANANA_PRO_ROOT` に指定してStory Makerとの互換性を確認できます。
+The reviewed source and its hashes are recorded in scripts/nano-contract-baseline.json. Story Maker v5.5.8 passed all 29 compatibility cases against the published manga v8.2.4 source. To verify against a separate copy of the published source, set NANO_BANANA_PRO_ROOT to that copy. / 確認済みソースとハッシュを scripts/nano-contract-baseline.json に記録しています。Story Maker v5.5.8では公開版漫画v8.2.4のソースに対して互換性検査29件が通過しました。公開版ソースの別コピーで照合する場合は、NANO_BANANA_PRO_ROOT にそのパスを指定します。
 
 ## Reviewed manga 8.0.0 boundary / 漫画8.0.0の確認範囲
 

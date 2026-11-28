@@ -29,7 +29,7 @@ const expectedModelIds = [
 assert.equal(DEFAULT_OPENAI_MODEL_ID, 'gpt-6-luna');
 assert.equal(resolveDefaultOpenAIModelId(true), 'gpt-6-luna');
 assert.equal(resolveDefaultOpenAIModelId(false), 'gpt-6-luna');
-assert.equal(OPENAI_MODEL_PRICE_SNAPSHOT_DATE, '2026-11-18');
+assert.equal(OPENAI_MODEL_PRICE_SNAPSHOT_DATE, '2026-11-28');
 assert.deepEqual(OPENAI_MODEL_OPTIONS.map(model => model.id), expectedModelIds);
 assert.ok(OPENAI_MODEL_OPTIONS.every(model => model.description.length >= 10));
 assert.ok(OPENAI_MODEL_OPTIONS.every(model => Number.isFinite(model.inputPriceUsdPerM)));

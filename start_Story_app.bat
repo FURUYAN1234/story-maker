@@ -21,8 +21,8 @@ if errorlevel 1 goto INSTALL_ERROR
 
 :LAUNCH
 
-echo [INFO] Launching development server...
-call npm run dev -- --open --base ./
+echo [INFO] Launching Story Maker...
+call npm run start:local -- --open --base ./
 
 if errorlevel 1 goto RUN_ERROR
 

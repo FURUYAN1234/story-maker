@@ -1,7 +1,7 @@
 {
   "app": "Story Maker",
-  "version": "5.5.7",
-  "editionDate": "2026年11月22日",
+  "version": "5.5.8",
+  "editionDate": "2026年11月28日",
   "stem": "story-maker",
   "manual": [
     {
@@ -39,7 +39,7 @@
         ],
         [
           "box",
-          "本書はStory Maker v5.5.7の操作説明です。お使いの版はアプリ画面と配布先で確認してください。"
+          "本書はStory Maker v5.5.8の操作説明です。お使いの版はアプリ画面と配布先で確認してください。"
         ],
         [
           "link",

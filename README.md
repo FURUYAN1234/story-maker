@@ -1,6 +1,6 @@
-# Story Maker v5.5.7 / AI物語メーカー
+# Story Maker v5.5.8 / AI物語メーカー
 
-[Release notes / 更新内容](docs/releases/v5.5.7.md)
+[Release notes / 更新内容](docs/releases/v5.5.8.md)
 
 OpenAI story drafting and editing now offers **GPT-6.2 Sol** and **GPT-6.2 Astra**. The initial selection is **GPT-6 Luna**. / OpenAIによる物語の生成・推敲に **GPT-6.2 Sol** と **GPT-6.2 Astra** を追加しました。初期選択は **GPT-6 Luna** です。
 
@@ -523,7 +523,7 @@ Export files are local user actions. The repository should not receive generated
 
 ```powershell
 npm ci
-npm run dev -- --host 0.0.0.0 --port 5179
+npm run start:local -- --host 0.0.0.0 --port 5179
 ```
 
 4. Open `http://localhost:5179/` in the browser. / ブラウザで `http://localhost:5179/` を開きます。

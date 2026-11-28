@@ -1,6 +1,6 @@
 const resolveDefaultOpenAIModelId = () => 'gpt-6-luna';
 const DEFAULT_OPENAI_MODEL_ID = resolveDefaultOpenAIModelId();
-const OPENAI_MODEL_PRICE_SNAPSHOT_DATE = '2026-11-18';
+const OPENAI_MODEL_PRICE_SNAPSHOT_DATE = '2026-11-28';
 
 const OPENAI_MODEL_OPTIONS = Object.freeze([
   { id: 'gpt-6.2-astra', label: 'GPT-6.2 Astra', description: '複雑な指示や多段の判断を重視', inputPriceUsdPerM: 8, outputPriceUsdPerM: 40 },
